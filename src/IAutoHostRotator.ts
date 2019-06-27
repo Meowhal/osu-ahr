@@ -1,4 +1,4 @@
-import {ILobby} from "./ILobby";
+import { ILobby } from "./ILobby";
 
 export default interface IAutoHostRotator {
   lobby: ILobby,
@@ -11,7 +11,7 @@ export default interface IAutoHostRotator {
   onLobbyOpend(lobbyid: string): void,
   onPlayerJoined(userid: string, slot: number): void,
   onPlayerLeft(userid: string): void,
-  onBeatmapSelected(mapid:string): void,
+  onBeatmapSelected(mapid: string): void,
   onHostChanged(userid: string): void,
 
   makeLobby(lobbyname: string): void,

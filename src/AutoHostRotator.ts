@@ -1,5 +1,5 @@
 import IAutoHostRotator from "./IAutoHostRotator";
-import {ILobby} from "./ILobby";
+import { ILobby } from "./ILobby";
 
 export default class AutoHostRotator implements IAutoHostRotator {
   lobby: ILobby;
@@ -47,5 +47,5 @@ export default class AutoHostRotator implements IAutoHostRotator {
     throw new Error("Method not implemented.");
   }
 
-  
+
 }

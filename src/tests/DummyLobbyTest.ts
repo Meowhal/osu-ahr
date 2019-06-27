@@ -1,8 +1,8 @@
-import {assert} from 'chai';
-import DummyLobby from './DummyLobby';
+import { assert } from 'chai';
+import { DummyLobby } from './DummyLobby';
 import { LobbyStatus } from '../ILobby';
 
-export default () => {
+export function DummyLobbyTest() {
   it("make lobby test", async () => {
     const lobby = new DummyLobby();
     const name = "test";
@@ -10,7 +10,7 @@ export default () => {
     assert.equal(lobby.id, id);
     assert.equal(lobby.name, name);
     assert.equal(lobby.status, LobbyStatus.Entered);
-  }); 
+  });
 
   it("make lobby network error test", async () => {
     const lobby = new DummyLobby();
@@ -18,9 +18,9 @@ export default () => {
     try {
       await lobby.MakeLobbyAsync("test");
       assert.fail();
-    } catch(e) {
+    } catch (e) {
       console.log(e);
-    } 
+    }
   });
 
   it("change host test", (done) => {
@@ -32,17 +32,17 @@ export default () => {
       done();
     });
 
-    lobby.MakeLobbyAsync("test").then(() => {  
+    lobby.MakeLobbyAsync("test").then(() => {
       lobby.SendMpHost(userid);
-    });    
+    });
   });
 
   it("change host serial test", (done) => {
-    const lobby = new DummyLobby();    
+    const lobby = new DummyLobby();
     const len = 10;
-    const users:string[] = [];
-    const users_check: {[index:string]:boolean} = {}; 
-    for(let i = 0; i < len; i++) {
+    const users: string[] = [];
+    const users_check: { [index: string]: boolean } = {};
+    for (let i = 0; i < len; i++) {
       users[i] = "user_" + i;
       users_check[users[i]] = false;
     }
@@ -51,7 +51,7 @@ export default () => {
     lobby.on("HostChanged", (uid: string) => {
       assert.isTrue(uid in users_check);
       users_check[uid] = true;
-      count ++;
+      count++;
       if (count < users.length) {
         lobby.SendMpHost(users[count]);
       } else {
@@ -59,8 +59,8 @@ export default () => {
         done();
       }
     });
-    
-    lobby.MakeLobbyAsync("test").then(()=>{
+
+    lobby.MakeLobbyAsync("test").then(() => {
       lobby.SendMpHost(users[0]);
     });
   });

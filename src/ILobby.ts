@@ -8,7 +8,7 @@ export interface ILobby {
   name: string | undefined;
   id: string | undefined;
   status: LobbyStatus;
-  
+
   SendMpHost(userid: string): void;
   SendMpAbort(): void;
   SendMpClose(): void;

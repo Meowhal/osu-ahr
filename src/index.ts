@@ -1,5 +1,3 @@
-import irctest from "./tests/IrcTest";
+import { MakeLobbyExperiment } from "./tests/BanchoIrcTest";
 
-console.log("hello world");
-
-irctest();
+MakeLobbyExperiment();

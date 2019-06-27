@@ -1,12 +1,12 @@
-import {ILobby, LobbyStatus} from "../ILobby"
-import {EventEmitter} from "events";
+import { ILobby, LobbyStatus } from "../ILobby"
+import { EventEmitter } from "events";
 
-export default class DummyLobby extends EventEmitter implements ILobby {
+export class DummyLobby extends EventEmitter implements ILobby {
   name: string | undefined;
   id: string | undefined;
   channel: string | undefined;
   status: LobbyStatus;
-  networkFailureFlag : boolean;
+  networkFailureFlag: boolean;
 
   constructor() {
     super();
@@ -22,7 +22,7 @@ export default class DummyLobby extends EventEmitter implements ILobby {
     setImmediate(() => this.RaiseHostChanged(userid));
   }
 
-  
+
   SendMpAbort(): void {
     if (this.status != LobbyStatus.Entered) {
       throw new Error("Invalid Operation. @SendMpAbort");
@@ -37,7 +37,7 @@ export default class DummyLobby extends EventEmitter implements ILobby {
     }
     console.log(`(gnsksz) !mp close`);
     this.status = LobbyStatus.Leaving;
-    setImmediate(()=> this.RaiseLobbyClosed(null));
+    setImmediate(() => this.RaiseLobbyClosed(null));
   }
 
   SendMessage(message: string): void {
@@ -53,7 +53,7 @@ export default class DummyLobby extends EventEmitter implements ILobby {
     }
     console.log(`(gnsksz) !mp make ${title}`);
     this.status = LobbyStatus.Making;
-    
+
     return new Promise<string>((resolve, reject) => {
       setImmediate(() => {
         if (this.networkFailureFlag) {
@@ -61,13 +61,13 @@ export default class DummyLobby extends EventEmitter implements ILobby {
         } else {
           this.RaiseLobbyMade("123", title);
           const channel = "mp_" + this.id as string;
-          this.EnterLobbyAsync(channel).then(() => resolve(this.id));          
+          this.EnterLobbyAsync(channel).then(() => resolve(this.id));
         }
       });
     });
   }
 
-  EnterLobbyAsync(channel: string) : Promise<void> {
+  EnterLobbyAsync(channel: string): Promise<void> {
     if (this.status != LobbyStatus.Standby && this.status != LobbyStatus.Made) {
       return Promise.reject(new Error("Invalid Operation. @EnterLobbyAsync"));
     }
@@ -84,25 +84,25 @@ export default class DummyLobby extends EventEmitter implements ILobby {
       });
     });
   }
-  
-  LeaveLobbyAsync() : Promise<void> {
+
+  LeaveLobbyAsync(): Promise<void> {
     if (this.status != LobbyStatus.Entered) {
       throw new Error("Invalid Operation. @LeaveLobbyAsync");
     }
     console.log("leaving " + this.channel);
-    return new Promise(resolve =>{
+    return new Promise(resolve => {
       this.status = LobbyStatus.Left;
       this.channel = undefined;
       resolve();
-    });    
+    });
   }
 
-  RaiseLobbyMade(lobbyid : string, title: string) : void {
+  RaiseLobbyMade(lobbyid: string, title: string): void {
     this.name = title;
     this.id = lobbyid;
     this.status = LobbyStatus.Made;
     console.log(`(BanchoBot) Created the tournament match https://osu.ppy.sh/mp/${this.id} ${this.name}`)
-    this.emit("LobbyMade", this.id);    
+    this.emit("LobbyMade", this.id);
   }
 
   RaiseLobbyEntered() {
@@ -116,7 +116,7 @@ export default class DummyLobby extends EventEmitter implements ILobby {
     this.emit("PlayerJoined", userid, slotid);
   }
 
-  RaisePlayerLeft(userid: string){
+  RaisePlayerLeft(userid: string) {
     console.log(`(BanchoBot) ${userid} left the game.`);
     this.emit("PlayerLeft", userid);
   }
@@ -145,8 +145,8 @@ export default class DummyLobby extends EventEmitter implements ILobby {
     console.log(`(BanchoBot) The match has finished!`);
     this.emit("MatchFinished");
   }
-  
-  RaiseLobbyClosed(err : Error | null) {
+
+  RaiseLobbyClosed(err: Error | null) {
     console.log("(BanchoBot) Closed the match");
     this.emit("LobbyClosed", err);
   }
