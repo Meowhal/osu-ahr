@@ -3,37 +3,37 @@ export class CommandParser {
   ParseBanchoResponse(message: string): BanchoResponse {
     const m_joined = message.match(/(.+) joined in slot (\d+)\./);
     if (m_joined) {
-      return new BanchoResponse(BanchoActionType.PlayerJoined, m_joined[1]).setSlot(parseInt(m_joined[2]));
+      return new BanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1]).setSlot(parseInt(m_joined[2]));
     }
 
     const m_left = message.match(/(.+) left the game\./);
     if (m_left) {
-      return new BanchoResponse(BanchoActionType.PlayerLeft, m_left[1]);
+      return new BanchoResponse(BanchoResponseType.PlayerLeft, m_left[1]);
     }
 
     const m_map = message.match(/Beatmap changed to\: .+ \[.+\] \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
     if (m_map) {
-      return new BanchoResponse(BanchoActionType.BeatmapSelected, m_map[1]);
+      return new BanchoResponse(BanchoResponseType.BeatmapSelected, m_map[1]);
     }
 
     const m_host = message.match(/(.+) became the host\./);
     if (m_host) {
-      return new BanchoResponse(BanchoActionType.HostChanged, m_host[1]);
+      return new BanchoResponse(BanchoResponseType.HostChanged, m_host[1]);
     }
 
     if (message == "The match has started!") {
-      return new BanchoResponse(BanchoActionType.MatchStarted);
+      return new BanchoResponse(BanchoResponseType.MatchStarted);
     }
 
     const m_finish = message.match(/(.+) finished playing \(Score: (\d+), (PASSED|FAILED)\)\./);
     if (m_finish) {
-      return new BanchoResponse(BanchoActionType.PlayerFinished, m_finish[1]).setScore(parseInt(m_finish[2]));
+      return new BanchoResponse(BanchoResponseType.PlayerFinished, m_finish[1]).setScore(parseInt(m_finish[2]));
     }
 
     if (message == "The match has finished!") {
-      return new BanchoResponse(BanchoActionType.MatchFinished);
+      return new BanchoResponse(BanchoResponseType.MatchFinished);
     }
-    return new BanchoResponse(BanchoActionType.None);
+    return new BanchoResponse(BanchoResponseType.None);
   }
 
   ParseMpMakeResponse(nick: string, message: string): { id: string, title: string } | null {
@@ -62,12 +62,9 @@ export class CommandParser {
         default:
           return { command: command, args: args };
       }
-
     }
     return null;
   }
-
-
 }
 
 export interface MpCommand {
@@ -75,7 +72,7 @@ export interface MpCommand {
   args: string[];
 }
 
-export enum BanchoActionType {
+export enum BanchoResponseType {
   None,
   PlayerJoined,
   PlayerLeft,
@@ -87,11 +84,11 @@ export enum BanchoActionType {
 }
 
 export class BanchoResponse {
-  type: BanchoActionType;
+  type: BanchoResponseType;
   id: string;
   slot: number;
   score: number;
-  constructor(type: BanchoActionType, id?: string) {
+  constructor(type: BanchoResponseType, id?: string) {
     this.type = type;
     this.id = id || "";
     this.slot = 0;
