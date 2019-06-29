@@ -1,6 +1,7 @@
 import * as irc from 'irc';
 import ircConfig from "../password";
 import { CommandParser } from "../CommandParser";
+import {logIrcEvent} from "../IIrcClient";
 
 export function MakeLobbyExperiment() {
   const parser = new CommandParser();
@@ -53,5 +54,27 @@ export function MakeLobbyExperiment() {
   bot.addListener('registered', function (message) {
     console.log('registered %s', message);
     bot.say("BanchoBot", "!mp make irc test lobby4");
+  });
+}
+
+export function ConnectionServerExperiment() {
+  const parser = new CommandParser();
+
+  const bot = new irc.Client(ircConfig.server, ircConfig.nick, {
+    debug: false,
+    port: ircConfig.port,
+    password: ircConfig.password,
+    autoConnect: false
+  });
+
+  logIrcEvent(bot);
+
+  console.log("hostmask => " + bot.hostMask);
+
+  bot.connect();
+
+  bot.addListener('registered', function (message) {
+    console.log("hostmask => " + bot.hostMask);
+    bot.disconnect("goodby", () => { console.log("disconnected"); });
   });
 }

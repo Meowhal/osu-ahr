@@ -5,6 +5,7 @@ import { EventEmitter } from "events";
 // typescriptのインターフェースはダックタイピング可能なので、
 // このインターフェースで宣言しておけばダミーと本物どちらも取り扱える（はず
 export interface IIrcClient extends EventEmitter {
+  hostMask: string;
   join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void;
   part(channel: string, message: string, callback: irc.handlers.IPartChannel): void;
   say(target: string, message: string): void;

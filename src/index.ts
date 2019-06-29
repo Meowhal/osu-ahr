@@ -1,3 +1,4 @@
-import { MakeLobbyExperiment } from "./tests/BanchoIrcTest";
+import { MakeLobbyExperiment, ConnectionServerExperiment } from "./tests/BanchoIrcTest";
 
-MakeLobbyExperiment();
+// MakeLobbyExperiment();
+ConnectionServerExperiment();

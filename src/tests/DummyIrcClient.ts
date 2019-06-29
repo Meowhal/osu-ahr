@@ -11,6 +11,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   msg: irc.IMessage;
   connected: boolean;
   players: Set<string>;
+  public hostMask: string = "";
 
   constructor(
     server: string,
@@ -38,6 +39,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   // サーバーとの接続イベントを発行する
   public raiseRegistered(): void {
     this.connected = true;
+    this.hostMask = "osu!Bancho.";
     this.emit('registered', this.msg);
   }
 
