@@ -1,3 +1,4 @@
+import { Player } from "./Player";
 
 // BanchoBotとの対話を抽象化する
 // channelへの接続管理と、トーナメントコマンドの実行
@@ -8,6 +9,8 @@ export interface ILobby {
   name: string | undefined;
   id: string | undefined;
   status: LobbyStatus;
+  players: Player[];
+  host: Player | null;
 
   SendMpHost(userid: string): void;
   SendMpAbort(): void;
@@ -16,7 +19,7 @@ export interface ILobby {
 
   MakeLobbyAsync(title: string): Promise<string>;
   EnterLobbyAsync(channel: string): Promise<void>; // TODO:ロビーのチャンネルが存在しないときの処理
-  LeaveLobbyAsync(): Promise<void>;
+  CloseLobbyAsync(): Promise<void>;
 
   // events
   // LobbyMade(lobbyid), 

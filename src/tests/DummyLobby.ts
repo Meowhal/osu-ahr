@@ -1,7 +1,10 @@
-import { ILobby, LobbyStatus } from "../ILobby"
+import { ILobby, LobbyStatus } from "../ILobby";
 import { EventEmitter } from "events";
+import {Player} from "../Player";
 
 export class DummyLobby extends EventEmitter implements ILobby {
+  players: Player[];
+  host: Player | null;
   name: string | undefined;
   id: string | undefined;
   channel: string | undefined;
@@ -12,6 +15,8 @@ export class DummyLobby extends EventEmitter implements ILobby {
     super();
     this.status = LobbyStatus.Standby;
     this.networkFailureFlag = false;
+    this.players = [];
+    this.host = null;
   }
 
   SendMpHost(userid: string): void {
@@ -85,7 +90,7 @@ export class DummyLobby extends EventEmitter implements ILobby {
     });
   }
 
-  LeaveLobbyAsync(): Promise<void> {
+  CloseLobbyAsync(): Promise<void> {
     if (this.status != LobbyStatus.Entered) {
       throw new Error("Invalid Operation. @LeaveLobbyAsync");
     }
