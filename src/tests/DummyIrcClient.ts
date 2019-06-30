@@ -2,6 +2,7 @@ import * as irc from "irc";
 import { EventEmitter } from "events";
 import { CommandParser, MpCommand } from "../CommandParser";
 import { IIrcClient } from "../IIrcClient";
+import { Socket } from "net";
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
 export class DummyIrcClient extends EventEmitter implements IIrcClient {
@@ -11,6 +12,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   msg: irc.IMessage;
   connected: boolean;
   players: Set<string>;
+  conn: boolean | null;
   public hostMask: string = "";
 
   constructor(
@@ -24,6 +26,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     this.channel = "";
     this.connected = false;
     this.players = new Set<string>();
+    this.conn = null;
     this.msg = {
       command: "dummy command",
       rawCommand: "dummy command",
@@ -32,7 +35,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     };
 
     if (opts == null || !opts.autoConnect) {
-      setImmediate(() => this.raiseRegistered());
+      this.connect();
     }
   }
 
@@ -183,7 +186,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   public connect(retryCount?: number | irc.handlers.IRaw | undefined, callback?: irc.handlers.IRaw | undefined): void {
-    throw new Error("Method not implemented.");
+    this.conn = true;
+    setImmediate(() => this.raiseRegistered());
   }
   public disconnect(message: string, callback: () => void): void {
     throw new Error("Method not implemented.");
