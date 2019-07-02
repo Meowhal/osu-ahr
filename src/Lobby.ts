@@ -2,7 +2,6 @@ import { ILobby, LobbyStatus } from "./ILobby";
 import { Player } from "./Player";
 import { CommandParser } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
-
 const BanchoHostMask: string = "osu!Bancho.";
 
 export class Lobby implements ILobby {
@@ -14,19 +13,17 @@ export class Lobby implements ILobby {
   players: Player[];
   parser: CommandParser;
   ircClient: IIrcClient;
-
   constructor(ircClient: IIrcClient) {
     if (ircClient.conn == null) {
       throw new Error("clientが未接続です");
     }
-
     this.status = LobbyStatus.Standby;
     this.players = [];
     this.parser = new CommandParser();
     this.ircClient = ircClient;
     this.host = null;
     this.ircClient.on("message", (from, to, message) => {
-
+    
     });
   }
 
@@ -48,10 +45,8 @@ export class Lobby implements ILobby {
   MakeLobbyAsync(title: string): Promise<string> {
     return new Promise<string>(resolve => {
       if (this.ircClient.hostMask == BanchoHostMask) {
-        console.log("already registered");
         this.MakeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
-        console.log("wait register");
         this.ircClient.once("registered", () => {
           this.MakeLobbyAsyncCore(title).then(v => resolve(v));
         })
@@ -61,37 +56,17 @@ export class Lobby implements ILobby {
 
   private MakeLobbyAsyncCore(title: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      const isResolved = () => {
-        console.log("is resolved");
-        if (this.name != undefined && this.id != undefined && this.channel != undefined) {
-          console.log(" resolved");
-          this.status = LobbyStatus.Entered;
-          resolve(this.id);
-        }
-      }
       const onJoin = (channel: string, who: string) => {
-        console.log("on join");
         if (who == this.ircClient.nick) {
           this.channel = channel;
+          this.name = title;
+          this.id = channel.replace("#mp_", "");
           this.ircClient.off("join", onJoin);
-          isResolved();
+          this.status = LobbyStatus.Entered;
+          resolve();
         }
       };
-      const onPm = (from: string, message: string) => {
-        console.log(`onPm from=${from}, msg=${message}`);
-        if (from == "BanchoBot" && this.id == null) {
-          const v = this.parser.ParseMpMakeResponse(from, message);
-          if (v != null) {
-            this.name = v.title;
-            this.id = v.id;
-            this.ircClient.off("pm", onPm);
-            this.status = LobbyStatus.Made;
-            isResolved();
-          }
-        }
-      };
-      this.ircClient.once("join", onJoin);
-      this.ircClient.once("pm", onPm);
+      this.ircClient.on("join", onJoin);
       this.ircClient.say("BanchoBot", "!mp make " + title);
     });
   }
