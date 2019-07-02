@@ -117,11 +117,18 @@ export function CommandParserTest() {
     }
   });
 
-  it("map selected test", () => {
+  it("map changing test", () => {
+    const parser = new CommandParser();
+    let message = "Host is changing map...";
+    let v = parser.ParseBanchoResponse(message);
+    assert.equal(v.type, BanchoResponseType.BeatmapChanging);
+  });
+
+  it("map changed test", () => {
     const parser = new CommandParser();
     let message = "Beatmap changed to: Noah - Celestial stinger [apl's EXHAUST] (https://osu.ppy.sh/b/1454083)";
     let v = parser.ParseBanchoResponse(message);
-    if (v.type == BanchoResponseType.BeatmapSelected) {
+    if (v.type == BanchoResponseType.BeatmapChanged) {
       assert.equal(v.id, "1454083");
     } else {
       assert.fail();
@@ -129,7 +136,7 @@ export function CommandParserTest() {
 
     message = "Beatmap changed to: Paul Bazooka - DrunkenSteiN [bor's Insane] (https://osu.ppy.sh/b/1913126)";
     v = parser.ParseBanchoResponse(message);
-    if (v.type == BanchoResponseType.BeatmapSelected) {
+    if (v.type == BanchoResponseType.BeatmapChanged) {
       assert.equal(v.id, "1913126");
     } else {
       assert.fail();
@@ -137,7 +144,7 @@ export function CommandParserTest() {
 
     message = "Beatmap changed to: supercell - Hoshi ga Matataku Konna Yoru ni [Sharlo's Insane] (https://osu.ppy.sh/b/670743)";
     v = parser.ParseBanchoResponse(message);
-    if (v.type == BanchoResponseType.BeatmapSelected) {
+    if (v.type == BanchoResponseType.BeatmapChanged) {
       assert.equal(v.id, "670743");
     } else {
       assert.fail();
@@ -181,6 +188,7 @@ export function CommandParserTest() {
     if (v.type == BanchoResponseType.PlayerFinished) {
       assert.equal(v.id, "Swgciai");
       assert.equal(v.score, 18048202);
+      assert.equal(v.isPassed, true);
     } else {
       assert.fail();
     }
@@ -190,6 +198,7 @@ export function CommandParserTest() {
     if (v.type == BanchoResponseType.PlayerFinished) {
       assert.equal(v.id, "Foet_Mnagyo");
       assert.equal(v.score, 290043);
+      assert.equal(v.isPassed, false);
     } else {
       assert.fail();
     }
@@ -199,6 +208,7 @@ export function CommandParserTest() {
     if (v.type == BanchoResponseType.PlayerFinished) {
       assert.equal(v.id, "- Cylcl");
       assert.equal(v.score, 2095838);
+      assert.equal(v.isPassed, true);
     } else {
       assert.fail();
     }

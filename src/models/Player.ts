@@ -3,6 +3,10 @@ export class Player {
   escaped_id: string;
   constructor(id: string) {
     this.id = id;
-    this.escaped_id = id.replace(' ', "_");
+    this.escaped_id = escapeUserId(id);
   }
+}
+
+export function escapeUserId(id: string) : string {
+  return id.replace(' ', '_');
 }

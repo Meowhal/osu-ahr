@@ -9,12 +9,12 @@ export interface ILobby {
   name: string | undefined;
   id: string | undefined;
   status: LobbyStatus;
-  players: Player[];
+  players: Set<Player>;
   host: Player | null;
+  hostPending: Player | null;
 
-  SendMpHost(userid: string): void;
+  SendMpHost(user: Player): void;
   SendMpAbort(): void;
-  SendMpClose(): void;
   SendMessage(message: string): void;
 
   MakeLobbyAsync(title: string): Promise<string>;
@@ -22,16 +22,15 @@ export interface ILobby {
   CloseLobbyAsync(): Promise<void>;
 
   // events
-  // LobbyMade(lobbyid), 
-  // LobbyEntered(),
-  // PlayerJoined(userid, slotid), 
-  // PlayerLeft(userid), 
-  // BeatmapSelected(mapid), 
-  // HostChanged(userid), 
+  // PlayerJoined(player, slotid), 
+  // PlayerLeft(player), 
+  // BeatmapChanging(),
+  // BeatmapChanged(mapid), 
+  // HostChanged(player), 
   // MatchStarted()
-  // PlayerFinished(userid, score)
+  // PlayerFinished(player, score, isPassed)
   // MatchFinished()
-  // LobbyClosed(err) 
+  // NetError(err) 
 }
 
 export enum LobbyStatus {

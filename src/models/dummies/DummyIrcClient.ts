@@ -187,7 +187,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     this.conn = true;
     setImmediate(() => this.raiseRegistered());
   }
+
   public disconnect(message: string, callback: () => void): void {
-    throw new Error("Method not implemented.");
+    setImmediate(() => callback());
   }
 }

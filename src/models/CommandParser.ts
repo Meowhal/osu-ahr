@@ -11,9 +11,13 @@ export class CommandParser {
       return new BanchoResponse(BanchoResponseType.PlayerLeft, m_left[1]);
     }
 
+    if (message == "Host is changing map...") {
+      return new BanchoResponse(BanchoResponseType.BeatmapChanging);
+    }
+
     const m_map = message.match(/Beatmap changed to\: .+ \[.+\] \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
     if (m_map) {
-      return new BanchoResponse(BanchoResponseType.BeatmapSelected, m_map[1]);
+      return new BanchoResponse(BanchoResponseType.BeatmapChanged, m_map[1]);
     }
 
     const m_host = message.match(/(.+) became the host\./);
@@ -27,7 +31,7 @@ export class CommandParser {
 
     const m_finish = message.match(/(.+) finished playing \(Score: (\d+), (PASSED|FAILED)\)\./);
     if (m_finish) {
-      return new BanchoResponse(BanchoResponseType.PlayerFinished, m_finish[1]).setScore(parseInt(m_finish[2]));
+      return new BanchoResponse(BanchoResponseType.PlayerFinished, m_finish[1]).setScore(parseInt(m_finish[2]), m_finish[3] == "PASSED");
     }
 
     if (message == "The match has finished!") {
@@ -76,7 +80,8 @@ export enum BanchoResponseType {
   None,
   PlayerJoined,
   PlayerLeft,
-  BeatmapSelected,
+  BeatmapChanging,
+  BeatmapChanged,
   HostChanged,
   MatchStarted,
   PlayerFinished,
@@ -88,19 +93,22 @@ export class BanchoResponse {
   id: string;
   slot: number;
   score: number;
+  isPassed: boolean;
   constructor(type: BanchoResponseType, id?: string) {
     this.type = type;
     this.id = id || "";
     this.slot = 0;
     this.score = 0;
+    this.isPassed = false;
   }
   
   setSlot(slot: number): BanchoResponse {
     this.slot = slot;
     return this;
   }
-  setScore(score: number): BanchoResponse {
+  setScore(score: number, passed: boolean): BanchoResponse {
     this.score = score;
+    this.isPassed = passed;
     return this;
   }
 }

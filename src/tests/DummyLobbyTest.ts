@@ -1,3 +1,4 @@
+/*
 import { assert } from 'chai';
 import { LobbyStatus } from '../models';
 import { DummyLobby } from '../models/dummies';
@@ -64,4 +65,4 @@ export function DummyLobbyTest() {
       lobby.SendMpHost(users[0]);
     });
   });
-}; 
+}; */

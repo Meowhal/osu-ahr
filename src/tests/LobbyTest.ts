@@ -1,12 +1,12 @@
 import * as irc from 'irc';
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, logIrcEvent } from '../models';
+import { Lobby, LobbyStatus, logIrcEvent, Player } from '../models';
 import { DummyIrcClient } from '../models/dummies';
 import { getIrcConfig } from "../config";
 const test_on_irc = false;
 
 export function LobbyTest() {
-  it("make lobby test on dummy", async () => {
+  it("make lobby test", async () => {
     const ircClient = new DummyIrcClient("osu_irc_server", "creator");
     logIrcEvent(ircClient);
     const lobby = new Lobby(ircClient);
@@ -18,6 +18,35 @@ export function LobbyTest() {
     assert.equal(lobby.status, LobbyStatus.Entered);
     lobby.SendMessage("!mp password");
     lobby.SendMessage("!mp invite gnsksz");
+  });
+
+  it("player join test", async () => {
+    const ircClient = new DummyIrcClient("osu_irc_server", "creator");
+    logIrcEvent(ircClient);
+    const lobby = new Lobby(ircClient);
+    await lobby.MakeLobbyAsync("test");
+
+    const players = ["user1", "user 2", "user_3"];
+    const joiningPlayers: Set<string> = new Set<string>(players);
+    const jp = new Promise<void>(resolve => {
+      lobby.on("PlayerJoined", (player: Player, slot: number) => {
+        assert.isTrue(joiningPlayers.has(player.id));
+        joiningPlayers.delete(player.id);
+        if (joiningPlayers.size == 0) {
+          resolve();
+        }
+      });
+    });
+
+    for(let p of players) {
+      await ircClient.emulateAddPlayerAsync(p);
+    }
+
+    await jp;
+    assert.equal(players.length, lobby.players.size);
+    for(let p of lobby.players) {
+      assert.isTrue(players.includes(p.id));
+    }
   });
 
   if (test_on_irc) {
