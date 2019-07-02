@@ -63,7 +63,7 @@ export class Lobby implements ILobby {
           this.id = channel.replace("#mp_", "");
           this.ircClient.off("join", onJoin);
           this.status = LobbyStatus.Entered;
-          resolve();
+          resolve(this.id);
         }
       };
       this.ircClient.on("join", onJoin);
