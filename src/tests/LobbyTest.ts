@@ -1,7 +1,7 @@
 import * as irc from 'irc';
 import { assert } from 'chai';
 import { Lobby, LobbyStatus, logIrcEvent } from '../models';
-import { DummyIrcClient } from '../models/dummys';
+import { DummyIrcClient } from '../models/dummies';
 import { getIrcConfig } from "../config";
 const test_on_irc = false;
 

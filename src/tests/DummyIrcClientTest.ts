@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../models/dummys';
+import { DummyIrcClient } from '../models/dummies';
 import { CommandParser, logIrcEvent } from "../models";
 
 export function DummyIrcClientTest() {
