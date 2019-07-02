@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { DummyLobby } from './DummyLobby';
-import { LobbyStatus } from '../ILobby';
+import { LobbyStatus } from '../models';
+import { DummyLobby } from '../models/dummys';
 
 export function DummyLobbyTest() {
   it("make lobby test", async () => {

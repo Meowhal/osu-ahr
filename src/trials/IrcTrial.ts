@@ -1,5 +1,10 @@
 import * as irc from 'irc';
-import { IrcTestSettings } from "../IrcSettings";
+
+const IrcTestSettings = {
+  server: "irc.dollyfish.net.nz",
+  nick: "ohr",
+  channel: "#test"
+};
 
 export default () => {
   const bot = new irc.Client(IrcTestSettings.server, IrcTestSettings.nick, {

@@ -1,7 +1,6 @@
-import IAutoHostRotator from "./IAutoHostRotator";
-import { ILobby } from "./ILobby";
+import { IAutoHostRotator, ILobby, Player } from "./IAutoHostRotator";
 
-export default class AutoHostRotator implements IAutoHostRotator {
+export class AutoHostRotator implements IAutoHostRotator {
   lobby: ILobby;
   hostQueue: Player[];
   currentHost: Player | null;

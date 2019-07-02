@@ -1,5 +1,4 @@
 import * as irc from "irc";
-import { Socket } from "net";
 import { EventEmitter } from "events";
 
 // テスト用に使用する部分をインターフェースとして定義する

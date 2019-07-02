@@ -1,10 +1,10 @@
 import { Player } from "./Player";
+export { Player }
 
 // BanchoBotとの対話を抽象化する
 // channelへの接続管理と、トーナメントコマンドの実行
 // Make/Enter/LLeaveはEvent形式ではなくasync/wait形式のほうがいい？
 // Eventは文字列指定のため、一覧をインターフェースに含めることができない！
-
 export interface ILobby {
   name: string | undefined;
   id: string | undefined;

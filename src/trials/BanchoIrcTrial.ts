@@ -1,7 +1,6 @@
 import * as irc from 'irc';
-import { CommandParser } from "../CommandParser";
-import { logIrcEvent } from "../IIrcClient";
-import { getIrcConfig } from "../config/IAhrConfig";
+import { CommandParser, logIrcEvent } from "../models";
+import { getIrcConfig } from "../config";
 
 export function MakeLobbyTrial() {
   const parser = new CommandParser();

@@ -1,6 +1,5 @@
-import { ILobby, LobbyStatus } from "../ILobby";
+import { ILobby, LobbyStatus, Player } from "../";
 import { EventEmitter } from "events";
-import {Player} from "../Player";
 
 export class DummyLobby extends EventEmitter implements ILobby {
   players: Player[];

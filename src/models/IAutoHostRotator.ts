@@ -1,6 +1,8 @@
 import { ILobby } from "./ILobby";
+import { Player } from "./Player";
+export { ILobby, Player }
 
-export default interface IAutoHostRotator {
+export interface IAutoHostRotator {
   lobby: ILobby,
   hostQueue: Player[],
   currentHost: Player | null,

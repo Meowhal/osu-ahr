@@ -1,10 +1,8 @@
 import * as irc from 'irc';
 import { assert } from 'chai';
-import { Lobby } from '../Lobby';
-import { LobbyStatus } from '../ILobby';
-import { DummyIrcClient } from './DummyIrcClient';
-import { logIrcEvent } from "../IIrcClient";
-import { getIrcConfig } from "../config/IAhrConfig";
+import { Lobby, LobbyStatus, logIrcEvent } from '../models';
+import { DummyIrcClient } from '../models/dummys';
+import { getIrcConfig } from "../config";
 const test_on_irc = false;
 
 export function LobbyTest() {

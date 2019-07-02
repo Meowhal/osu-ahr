@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { CommandParser, BanchoResponseType } from "../CommandParser";
+import { CommandParser, BanchoResponseType } from "../models";
 
 export function CommandParserTest() {
   it("make lobby message parse test", () => {

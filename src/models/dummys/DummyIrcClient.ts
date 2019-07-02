@@ -1,8 +1,6 @@
 import * as irc from "irc";
 import { EventEmitter } from "events";
-import { CommandParser, MpCommand } from "../CommandParser";
-import { IIrcClient } from "../IIrcClient";
-import { Socket } from "net";
+import { CommandParser, MpCommand, IIrcClient } from "../";
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
 export class DummyIrcClient extends EventEmitter implements IIrcClient {

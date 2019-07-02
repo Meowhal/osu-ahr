@@ -1,5 +1,4 @@
-import { ILobby, LobbyStatus } from "./ILobby";
-import { Player } from "./Player";
+import { ILobby, LobbyStatus, Player } from "./ILobby";
 import { CommandParser } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
 const BanchoHostMask: string = "osu!Bancho.";

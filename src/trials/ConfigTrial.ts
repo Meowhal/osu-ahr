@@ -1,5 +1,5 @@
 import config from 'config';
-import { ITrialConfg } from "../config/IAhrConfig";
+import { ITrialConfg } from "../config";
 
 // node_envの値によりコンフィグが切り替わる動作のデモ
 // 実行
