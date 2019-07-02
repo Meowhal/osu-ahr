@@ -1,16 +1,12 @@
 import * as irc from 'irc';
-import ircConfig from "../password";
 import { CommandParser } from "../CommandParser";
-import {logIrcEvent} from "../IIrcClient";
+import { logIrcEvent } from "../IIrcClient";
+import { getIrcConfig } from "../config/IAhrConfig";
 
-export function MakeLobbyExperiment() {
+export function MakeLobbyTrial() {
   const parser = new CommandParser();
-
-  const bot = new irc.Client(ircConfig.server, ircConfig.nick, {
-    debug: false,
-    port: ircConfig.port,
-    password: ircConfig.password,
-  });
+  const c = getIrcConfig();
+  const bot = new irc.Client(c.server, c.nick, c.opt);
 
   bot.on('error', function (message) {
     console.error('ERROR: %s: %s', message.command, message.args.join(' '));
@@ -57,15 +53,11 @@ export function MakeLobbyExperiment() {
   });
 }
 
-export function ConnectionServerExperiment() {
+export function ConnectionServerTrial() {
   const parser = new CommandParser();
 
-  const bot = new irc.Client(ircConfig.server, ircConfig.nick, {
-    debug: false,
-    port: ircConfig.port,
-    password: ircConfig.password,
-    autoConnect: false
-  });
+  const c = getIrcConfig();
+  const bot = new irc.Client(c.server, c.nick, c.opt);
 
   logIrcEvent(bot);
 

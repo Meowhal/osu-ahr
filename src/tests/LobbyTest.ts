@@ -1,11 +1,10 @@
 import * as irc from 'irc';
-import ircConfig from "../password";
 import { assert } from 'chai';
 import { Lobby } from '../Lobby';
 import { LobbyStatus } from '../ILobby';
 import { DummyIrcClient } from './DummyIrcClient';
 import { logIrcEvent } from "../IIrcClient";
-
+import { getIrcConfig } from "../config/IAhrConfig";
 const test_on_irc = false;
 
 export function LobbyTest() {
@@ -16,6 +15,7 @@ export function LobbyTest() {
     const name = "test";
     const id = await lobby.MakeLobbyAsync(name);
     assert.equal(lobby.id, id);
+    assert.equal(lobby.channel, ircClient.channel);
     assert.equal(lobby.name, name);
     assert.equal(lobby.status, LobbyStatus.Entered);
     lobby.SendMessage("!mp password");
@@ -24,11 +24,8 @@ export function LobbyTest() {
 
   if (test_on_irc) {
     it("make lobby test on irc", async () => {
-      const ircClient = new irc.Client(ircConfig.server, ircConfig.nick, {
-        debug: false,
-        port: ircConfig.port,
-        password: ircConfig.password,
-      });
+      const c = getIrcConfig();
+      const ircClient = new irc.Client(c.server, c.nick, c.opt);
       logIrcEvent(ircClient);
       const lobby = new Lobby(ircClient);
       const name = "test";

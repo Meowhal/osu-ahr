@@ -4,21 +4,29 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build-dev": "cross-env NODE_ENV=development npm run build",
     "build": "rimraf dist && tsc",
     "start": "ts-node src/index.ts",
+    "test-production": "cross-env Node_ENV=production npm run test",
+    "test-dev": "cross-env Node_ENV=development npm run test",
     "test": "mocha -r ts-node/register src/tests/index.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/config": "0.0.34",
     "@types/irc": "^0.3.33",
+    "@types/log4js": "^2.3.5",
     "@types/node": "^12.0.8",
-    "irc": "^0.5.2"
+    "config": "^3.1.0",
+    "irc": "^0.5.2",
+    "log4js": "^4.4.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
+    "cross-env": "^5.2.0",
     "mocha": "^6.1.4",
     "rimraf": "^2.6.3",
     "ts-node": "^8.3.0",

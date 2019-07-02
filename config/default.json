@@ -1,0 +1,34 @@
+{
+  "log4js": {
+    "configure": {
+      "appenders": {
+        "console": {
+          "type": "console"
+        }
+      },
+      "categories": {
+        "default": {
+          "appenders": [
+            "console"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  },
+
+  "trial": {
+    "env": "default",
+    "default_value": "default"
+  },
+
+  "irc": {
+    "server" : "irc.ppy.sh",
+    "nick" : "your account name",
+    "opt": {
+      "port" : 6667,
+      "password" : "your Server Password",
+      "_what is server password?": "access to https://osu.ppy.sh/p/irc"
+    }
+  }
+}
