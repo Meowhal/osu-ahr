@@ -37,6 +37,10 @@ export class CommandParser {
     if (message == "The match has finished!") {
       return new BanchoResponse(BanchoResponseType.MatchFinished);
     }
+
+    if (message == "Aborted the match") {
+      return new BanchoResponse(BanchoResponseType.AbortedMatch);
+    }
     return new BanchoResponse(BanchoResponseType.None);
   }
 
@@ -86,6 +90,7 @@ export enum BanchoResponseType {
   MatchStarted,
   PlayerFinished,
   MatchFinished,
+  AbortedMatch
 }
 
 export class BanchoResponse {

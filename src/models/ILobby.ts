@@ -3,7 +3,7 @@ export { Player }
 
 // BanchoBotとの対話を抽象化する
 // channelへの接続管理と、トーナメントコマンドの実行
-// Make/Enter/LLeaveはEvent形式ではなくasync/wait形式のほうがいい？
+// Make/Enter/LeaveはEvent形式ではなくasync/wait形式のほうがいい？
 // Eventは文字列指定のため、一覧をインターフェースに含めることができない！
 export interface ILobby {
   name: string | undefined;
@@ -13,8 +13,8 @@ export interface ILobby {
   host: Player | null;
   hostPending: Player | null;
 
-  SendMpHost(user: Player): void;
-  SendMpAbort(): void;
+  TransferHost(user: Player): void;
+  AbortMatch(): void;
   SendMessage(message: string): void;
 
   MakeLobbyAsync(title: string): Promise<string>;
@@ -22,14 +22,16 @@ export interface ILobby {
   CloseLobbyAsync(): Promise<void>;
 
   // events
-  // PlayerJoined(player, slotid), 
-  // PlayerLeft(player), 
-  // BeatmapChanging(),
-  // BeatmapChanged(mapid), 
-  // HostChanged(player), 
+  // PlayerJoined(player, slotid)
+  // PlayerLeft(player)
+  // BeatmapChanging()
+  // BeatmapChanged(mapid)
+  // HostChanged(player)
   // MatchStarted()
   // PlayerFinished(player, score, isPassed)
   // MatchFinished()
+  // AbortedMatch()
+  // UnexpectedAction(error)
   // NetError(err) 
 }
 

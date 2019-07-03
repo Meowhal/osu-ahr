@@ -11,6 +11,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   connected: boolean;
   players: Set<string>;
   conn: boolean | null;
+  isMatching: boolean;
   public hostMask: string = "";
 
   constructor(
@@ -25,6 +26,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     this.connected = false;
     this.players = new Set<string>();
     this.conn = null;
+    this.isMatching = false;
     this.msg = {
       command: "dummy command",
       rawCommand: "dummy command",
@@ -84,21 +86,17 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // ロビーにプレイヤーが参加した際の動作をエミュレートする
   public async emulateAddPlayerAsync(name: string): Promise<void> {
-    if (this.players.has(name)) {
-      throw new Error("@addPlayer player already exists");
+    if (!this.players.has(name)) {
+      this.players.add(name);
     }
-
-    this.players.add(name);
     await this.raiseMessageAsync("BanchoBot", this.channel, `${name} joined in slot ${this.players.size}.`);
   }
 
   // ロビーからプレイヤーが退出した際の動作をエミュレートする
   public async emulateRemovePlayerAsync(name: string): Promise<void> {
-    if (!this.players.has(name)) {
-      throw new Error("@removePlayer palyer dosen't exist");
+    if (this.players.has(name)) {
+      this.players.delete(name);
     }
-
-    this.players.delete(name);
     await this.raiseMessageAsync("BanchoBot", this.channel, `${name} left the game.`);
   }
 
@@ -122,13 +120,17 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // 試合をエミュレートする
   public async emulateMatchAsync(delay: number): Promise<void> {
+    this.isMatching = true;
     await this.raiseMessageAsync("BanchoBot", this.channel, "The match has started!");
     await this.delay(delay);
     const tasks: Promise<void>[] = [];
     for (let u of this.players) {
+      if (!this.isMatching) return;
       tasks.push(this.raiseMessageAsync("BanchoBot", this.channel, `${u} finished playing (Score: 100000, PASSED).`));
     }
     await Promise.all(tasks);
+    if (!this.isMatching) return;
+    this.isMatching = false;
     await this.raiseMessageAsync("BanchoBot", this.channel, "The match has finished!");
   }
 
@@ -150,9 +152,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     }
   }
 
-  private processMpCommand(target: string, message: string, mp: MpCommand) {
+  private processMpCommand(target: string, message: string, mp: MpCommand): void {
     if (target == "BanchoBot" && mp.command == "make") {
-      const title = mp.args.join(' ');
+      const title = mp.args.join(' ').trim();
+      if (title === "") {
+        this.raiseMessage("BanchoBot", this.nick, "No name provided");
+        return;
+      }
       setImmediate(() => {
         let id = "12345";
         this.raiseJoin("#mp_" + id, this.nick);
@@ -179,6 +185,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             this.raisePart(this.channel, this.nick);
           });
           break;
+        case "abort":
+          if (this.isMatching) {
+            this.isMatching = false;
+            this.raiseMessageAsync("BanchoBot", this.channel, "Aborted the match");
+          } else {
+            this.raiseMessageAsync("BanchoBot", this.channel, "The match is not in progress");
+          }
       }
     }
   }
