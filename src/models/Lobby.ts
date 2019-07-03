@@ -35,7 +35,7 @@ export class Lobby extends EventEmitter implements ILobby {
     this.ircClient.on("message", (from, to, message) => {
       this.HandleBanchoResponse(from, to, message);
     });
-    this.ircClient.on("netError", (err: any) =>{
+    this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
     });
   }
@@ -43,7 +43,7 @@ export class Lobby extends EventEmitter implements ILobby {
   // useridからプレイヤーオブジェクトを取得する
   // IDに対してPlayerは一意のインスタンス
   // 再入室してきたユーザーの情報を参照したい場合に備えてプレイヤーをマップで保持しておく
-  private getOrMakePlayer(userid: string): Player {
+  GetOrMakePlayer(userid: string): Player {
     const eid = escapeUserId(userid);
     if (this.playersMap.has(eid)) {
       return this.playersMap.get(eid) as Player;
@@ -52,6 +52,14 @@ export class Lobby extends EventEmitter implements ILobby {
       this.playersMap.set(eid, nu);
       return nu;
     }
+  }
+
+  // userid のプレイヤーがゲームに参加しているか調べる
+  Includes(userid: string): boolean {
+    const eid = escapeUserId(userid);
+    let p = this.playersMap.get(eid);
+    if (p === undefined) return false;
+    return this.players.has(p);
   }
 
   HandleBanchoResponse(from: string, to: string, message: string) {
@@ -82,6 +90,9 @@ export class Lobby extends EventEmitter implements ILobby {
         case BanchoResponseType.PlayerLeft:
           this.RaisePlayerLeft(c.id);
           break;
+        case BanchoResponseType.AbortedMatch:
+          this.RaiseAbortedMatch();
+          break;
         case BanchoResponseType.None:
         default:
           // log
@@ -90,21 +101,20 @@ export class Lobby extends EventEmitter implements ILobby {
     } else {
       // log
     }
-
   }
 
   RaisePlayerJoined(userid: string, slot: number): void {
-    const player = this.getOrMakePlayer(userid);
+    const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
       this.players.add(player);
       this.emit("PlayerJoined", player, slot);
     } else {
-      // TODO:log すでに参加しているはずのプレイヤーがjoinした
+      this.emit("UnexpectedAction", new Error("すでに参加しているはずのプレイヤーが参加しました。"));
     }
   }
 
   RaisePlayerLeft(userid: string): void {
-    const player = this.getOrMakePlayer(userid);
+    const player = this.GetOrMakePlayer(userid);
     if (this.players.has(player)) {
       this.players.delete(player);
       if (this.host == player) {
@@ -115,7 +125,7 @@ export class Lobby extends EventEmitter implements ILobby {
       }
       this.emit("PlayerLeft", player);
     } else {
-      // TODO:log 未参加のプレイヤーがleft
+      this.emit("UnexpectedAction", new Error("未参加のプレイヤーが退出しました。"));
     }
   }
 
@@ -128,7 +138,7 @@ export class Lobby extends EventEmitter implements ILobby {
   }
 
   RaiseHostChanged(userid: string): void {
-    const player = this.getOrMakePlayer(userid);
+    const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
       // TODO:log 未参加のプレイヤーがホストになった
       this.players.add(player);
@@ -149,10 +159,10 @@ export class Lobby extends EventEmitter implements ILobby {
   }
 
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean) {
-    const player = this.getOrMakePlayer(userid);
+    const player = this.GetOrMakePlayer(userid);
     this.emit("PlayerFinished", player, score, isPassed);
     if (!this.players.has(player)) {
-      // TODO:log 未参加のプレイヤーがフィニッシュ。初回イベント補足前にユーザーがいた場合起こり得る
+      this.emit("UnexpectedAction", new Error("未参加のプレイヤーがゲームを終えました。"));
       this.players.add(player);
       this.RaisePlayerJoined(userid, 0);
     }
@@ -163,18 +173,23 @@ export class Lobby extends EventEmitter implements ILobby {
     this.emit("MatchFinished");
   }
 
+  RaiseAbortedMatch() {
+    this.emit("AbortedMatch");
+  }
+
   RaiseNetError(err: any) {
     this.emit("netError", err);
   }
 
-
-  SendMpHost(user: Player): void {
-    this.hostPending = user; // TODO:失敗時の動作、ホスト対象者が同時に抜けた場合
+  TransferHost(user: Player): void {
+    this.hostPending = user; // TODO:失敗時の動作、ホスト対象者が応答待ちの間に抜けた場合
     this.SendMessage("!mp host " + user.id);
   }
 
-  SendMpAbort(): void {
-    throw new Error("Method not implemented.");
+  AbortMatch(): void {
+    if (this.isMatching) {
+      this.SendMessage("!mp abort");
+    }    
   }
 
   SendMessage(message: string): void {
@@ -184,13 +199,20 @@ export class Lobby extends EventEmitter implements ILobby {
   }
 
   MakeLobbyAsync(title: string): Promise<string> {
+    if (title === "") {
+      throw new Error("title が空です。");
+    }
+    if (this.status != LobbyStatus.Standby) {
+      throw new Error("すでに部屋を作成済みです.");
+    }
+    this.status = LobbyStatus.Making;
     return new Promise<string>(resolve => {
       if (this.ircClient.hostMask == BanchoHostMask) {
         this.MakeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
         this.ircClient.once("registered", () => {
           this.MakeLobbyAsyncCore(title).then(v => resolve(v));
-        })
+        });
       }
     });
   }
@@ -204,6 +226,7 @@ export class Lobby extends EventEmitter implements ILobby {
           this.id = channel.replace("#mp_", "");
           this.ircClient.off("join", onJoin);
           this.status = LobbyStatus.Entered;
+          this.players.clear();
           resolve(this.id);
         }
       };
@@ -217,6 +240,9 @@ export class Lobby extends EventEmitter implements ILobby {
   }
 
   CloseLobbyAsync(): Promise<void> {
+    if (this.status != LobbyStatus.Entered) {
+      throw new Error("閉じるロビーがありません。");
+    }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once("part", (channel: string, nick: string) => {
         this.ircClient.disconnect("goodby", () => {
