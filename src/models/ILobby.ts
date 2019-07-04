@@ -22,17 +22,17 @@ export interface ILobby {
   EnterLobbyAsync(channel: string): Promise<void>; // TODO:ロビーのチャンネルが存在しないときの処理
   CloseLobbyAsync(): Promise<void>;
 
-  PlayerJoined: TypedEvent<{player:Player, slot:number}>;
+  PlayerJoined: TypedEvent<{ player: Player, slot: number }>;
   PlayerLeft: TypedEvent<Player>;
   BeatmapChanging: TypedEvent<void>;
   BeatmapChanged: TypedEvent<string>;
   HostChanged: TypedEvent<Player>;
   MatchStarted: TypedEvent<void>;
-  PlayerFinished: TypedEvent<{player:Player, score:number, isPassed:boolean}>;
+  PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean }>;
   MatchFinished: TypedEvent<void>;
   AbortedMatch: TypedEvent<void>;
   UnexpectedAction: TypedEvent<Error>;
-  NetError: TypedEvent<Error>; 
+  NetError: TypedEvent<Error>;
 
 }
 

@@ -6,18 +6,7 @@ import { TypedEvent } from "../libs/events";
 const BanchoHostMask: string = "osu!Bancho.";
 
 export class Lobby implements ILobby {
-  PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
-  PlayerLeft = new TypedEvent<Player>();
-  BeatmapChanging = new TypedEvent<void>();
-  BeatmapChanged = new TypedEvent<string>();
-  HostChanged = new TypedEvent<Player>();
-  MatchStarted = new TypedEvent<void>();
-  PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
-  MatchFinished = new TypedEvent<void>();
-  AbortedMatch = new TypedEvent<void>();
-  UnexpectedAction = new TypedEvent<Error>();
-  NetError = new TypedEvent<Error>();
-
+  // Members
   host: Player | null;
   hostPending: Player | null;
   name: string | undefined;
@@ -29,6 +18,19 @@ export class Lobby implements ILobby {
   ircClient: IIrcClient;
   playersMap: Map<string, Player>;
   isMatching: boolean;
+
+  // Events
+  PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
+  PlayerLeft = new TypedEvent<Player>();
+  BeatmapChanging = new TypedEvent<void>();
+  BeatmapChanged = new TypedEvent<string>();
+  HostChanged = new TypedEvent<Player>();
+  MatchStarted = new TypedEvent<void>();
+  PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
+  MatchFinished = new TypedEvent<void>();
+  AbortedMatch = new TypedEvent<void>();
+  UnexpectedAction = new TypedEvent<Error>();
+  NetError = new TypedEvent<Error>();
 
   constructor(ircClient: IIrcClient) {
     if (ircClient.conn == null) {
@@ -118,9 +120,9 @@ export class Lobby implements ILobby {
     const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
       this.players.add(player);
-      this.PlayerJoined.emit({player, slot});
+      this.PlayerJoined.emit({ player, slot });
     } else {
-      this.UnexpectedAction.emit(new Error("すでに参加しているはずのプレイヤーが参加しました。"));      
+      this.UnexpectedAction.emit(new Error("すでに参加しているはずのプレイヤーが参加しました。"));
     }
   }
 
@@ -140,7 +142,7 @@ export class Lobby implements ILobby {
     }
   }
 
-  RaiseBeatmapChanging(): void  {   
+  RaiseBeatmapChanging(): void {
     this.BeatmapChanging.emit();
   }
 
@@ -171,7 +173,7 @@ export class Lobby implements ILobby {
 
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean) {
     const player = this.GetOrMakePlayer(userid);
-    this.PlayerFinished.emit({player, score, isPassed});
+    this.PlayerFinished.emit({ player, score, isPassed });
     if (!this.players.has(player)) {
       this.UnexpectedAction.emit(new Error("未参加のプレイヤーがゲームを終えました。"));
       this.players.add(player);
