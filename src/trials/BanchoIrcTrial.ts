@@ -31,7 +31,7 @@ export function MakeLobbyTrial() {
       bot.say(channel, "!mp password");
       bot.say(channel, "!mp invite gnsksz");
       setTimeout(() => {
-        bot.say(channel, "!mp close");
+        //bot.say(channel, "!mp close");
       }, 30000);
     }
 
