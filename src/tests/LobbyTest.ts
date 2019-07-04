@@ -91,7 +91,7 @@ export function LobbyTest() {
     const players = ["user1", "user 2", "user_3"];
     const joiningPlayers: Set<string> = new Set<string>(players);
     const jp = new Promise<void>(resolve => {
-      lobby.on("PlayerJoined", (player: Player, slot: number) => {
+      lobby.PlayerJoined.on(({player, slot}) => {
         assert.isTrue(joiningPlayers.has(player.id));
         joiningPlayers.delete(player.id);
         if (joiningPlayers.size == 0) {
@@ -120,7 +120,7 @@ export function LobbyTest() {
     // 一人だけ退出
     const leftindex = 1;
     const lp = new Promise<void>(resolve => {
-      lobby.on("PlayerLeft", player => {
+      lobby.PlayerLeft.on(player => {
         assert.equal(player, players[leftindex]);
         resolve();
       });
@@ -163,7 +163,7 @@ export function LobbyTest() {
     await lobby.MakeLobbyAsync("test");
 
     let f = 0;
-    lobby.on("UnexpectedAction", (err) => {
+    lobby.UnexpectedAction.on(err => {
       f = f + 1;
     });
     await ircClient.emulateRemovePlayerAsync("unknown player");
@@ -180,7 +180,7 @@ export function LobbyTest() {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const getNewHostAsync = async () => {
       return new Promise<Player>(resolve => {
-        lobby.once("HostChanged", player => {
+        lobby.HostChanged.once(player => {
           resolve(player);
         });
       });
@@ -197,6 +197,7 @@ export function LobbyTest() {
     assert.equal(host, nexthost);
   });
 
+  // 試合テスト
   it("match start test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     //logIrcEvent(ircClient);
@@ -204,25 +205,86 @@ export function LobbyTest() {
     let mf = false;
     const finishedplayers = new Set<Player>();
 
-    lobby.on("MatchStarted", () => {
+    lobby.MatchStarted.on(() => {
       ms = true;
       assert.isFalse(mf);
     });
-    lobby.on("PlayerFinished", (player: Player, score: number, isPassed: boolean) => {
+    lobby.PlayerFinished.on(({player, score, isPassed}) => {
       assert.isFalse(finishedplayers.has(player));
       finishedplayers.add(player);
       assert.isTrue(ms);
       assert.isFalse(mf);
     });
-    lobby.on("MatchFinished", () => {
+    lobby.MatchFinished.on(() => {
       mf = true;
       assert.isTrue(ms);
       assert.equal(finishedplayers.size, players.length);
-      for(let p of players) {
+      for (let p of players) {
         assert.isTrue(finishedplayers.has(p));
       }
     });
     await ircClient.emulateMatchAsync(0);
+  });
+
+  // 試合中の退出テスト
+  it("match and left test", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    logIrcEvent(ircClient);
+    let ms = false;
+    let mf = false;
+    const finishedplayers = new Set<Player>();
+    const leftplayerindex = 1;
+
+    lobby.MatchStarted.on(() => {
+      ms = true;
+      assert.isFalse(mf);
+    });
+    lobby.PlayerFinished.on(({player, score, isPassed}) => {
+      assert.isFalse(finishedplayers.has(player));
+      finishedplayers.add(player);
+      assert.isTrue(ms);
+      assert.isFalse(mf);
+    });
+    lobby.MatchFinished.on(() => {
+      mf = true;
+      assert.isTrue(ms);
+      assert.equal(finishedplayers.size, players.length - 1);
+      assert.isFalse(finishedplayers.has(players[leftplayerindex]));
+    });
+    const p = ircClient.emulateMatchAsync(10);
+    await ircClient.emulateRemovePlayerAsync(players[leftplayerindex].id);
+    await p;
+  });
+
+  // 試合中断テスト
+  it("match and abort test", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    logIrcEvent(ircClient);
+    let ms = false;
+    let ma = false;
+    const finishedplayers = new Set<Player>();
+    const leftplayerindex = 1;
+
+    lobby.MatchStarted.on(() => {
+      ms = true;
+      assert.isFalse(ma);
+    });
+    lobby.PlayerFinished.on(({player, score, isPassed}) => {
+      assert.fail();
+    });
+    lobby.MatchFinished.on(() => {
+      assert.fail();
+    });
+    lobby.AbortedMatch.on(() => {
+      ma = true;
+      assert.isTrue(ms);
+    });
+
+    const p = ircClient.emulateMatchAsync(10);
+    await lobby.AbortMatch();
+    await p;
+    assert.isTrue(ms);
+    assert.isTrue(ma);
   });
 
   if (test_on_irc) {

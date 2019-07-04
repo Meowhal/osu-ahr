@@ -1,11 +1,23 @@
-import { EventEmitter } from "events";
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
 import { CommandParser, BanchoResponse, BanchoResponseType } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
+import { TypedEvent } from "../libs/events";
 const BanchoHostMask: string = "osu!Bancho.";
 
-export class Lobby extends EventEmitter implements ILobby {
+export class Lobby implements ILobby {
+  PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
+  PlayerLeft = new TypedEvent<Player>();
+  BeatmapChanging = new TypedEvent<void>();
+  BeatmapChanged = new TypedEvent<string>();
+  HostChanged = new TypedEvent<Player>();
+  MatchStarted = new TypedEvent<void>();
+  PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
+  MatchFinished = new TypedEvent<void>();
+  AbortedMatch = new TypedEvent<void>();
+  UnexpectedAction = new TypedEvent<Error>();
+  NetError = new TypedEvent<Error>();
+
   host: Player | null;
   hostPending: Player | null;
   name: string | undefined;
@@ -19,7 +31,6 @@ export class Lobby extends EventEmitter implements ILobby {
   isMatching: boolean;
 
   constructor(ircClient: IIrcClient) {
-    super();
     if (ircClient.conn == null) {
       throw new Error("clientが未接続です");
     }
@@ -107,9 +118,9 @@ export class Lobby extends EventEmitter implements ILobby {
     const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
       this.players.add(player);
-      this.emit("PlayerJoined", player, slot);
+      this.PlayerJoined.emit({player, slot});
     } else {
-      this.emit("UnexpectedAction", new Error("すでに参加しているはずのプレイヤーが参加しました。"));
+      this.UnexpectedAction.emit(new Error("すでに参加しているはずのプレイヤーが参加しました。"));      
     }
   }
 
@@ -123,18 +134,18 @@ export class Lobby extends EventEmitter implements ILobby {
       if (this.hostPending == player) {
         this.hostPending = null;
       }
-      this.emit("PlayerLeft", player);
+      this.PlayerLeft.emit(player);
     } else {
-      this.emit("UnexpectedAction", new Error("未参加のプレイヤーが退出しました。"));
+      this.UnexpectedAction.emit(new Error("未参加のプレイヤーが退出しました。"));
     }
   }
 
-  RaiseBeatmapChanging(): void {
-    this.emit("BeatmapChanging");
+  RaiseBeatmapChanging(): void  {   
+    this.BeatmapChanging.emit();
   }
 
   RaiseBeatmapChanged(mapid: string): void {
-    this.emit("BeatmapChanged", mapid);
+    this.BeatmapChanged.emit(mapid);
   }
 
   RaiseHostChanged(userid: string): void {
@@ -150,19 +161,19 @@ export class Lobby extends EventEmitter implements ILobby {
       // TODO:log pending中に別のユーザーがホストになった
     } // pending == null は有効
     this.host = player;
-    this.emit("HostChanged", player);
+    this.HostChanged.emit(player);
   }
 
   RaiseMatchStarted(): void {
     this.isMatching = true;
-    this.emit("MatchStarted");
+    this.MatchStarted.emit();
   }
 
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean) {
     const player = this.GetOrMakePlayer(userid);
-    this.emit("PlayerFinished", player, score, isPassed);
+    this.PlayerFinished.emit({player, score, isPassed});
     if (!this.players.has(player)) {
-      this.emit("UnexpectedAction", new Error("未参加のプレイヤーがゲームを終えました。"));
+      this.UnexpectedAction.emit(new Error("未参加のプレイヤーがゲームを終えました。"));
       this.players.add(player);
       this.RaisePlayerJoined(userid, 0);
     }
@@ -170,15 +181,15 @@ export class Lobby extends EventEmitter implements ILobby {
 
   RaiseMatchFinished() {
     this.isMatching = false;
-    this.emit("MatchFinished");
+    this.MatchFinished.emit();
   }
 
   RaiseAbortedMatch() {
-    this.emit("AbortedMatch");
+    this.AbortedMatch.emit();
   }
 
-  RaiseNetError(err: any) {
-    this.emit("netError", err);
+  RaiseNetError(err: Error) {
+    this.NetError.emit(err);
   }
 
   TransferHost(user: Player): void {
@@ -189,7 +200,7 @@ export class Lobby extends EventEmitter implements ILobby {
   AbortMatch(): void {
     if (this.isMatching) {
       this.SendMessage("!mp abort");
-    }    
+    }
   }
 
   SendMessage(message: string): void {

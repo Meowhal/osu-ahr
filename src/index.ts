@@ -1,5 +1,8 @@
-console.log("hello tes");
-console.log("env=" + process.env.NODE_ENV);
+//console.log("hello tes");
+//console.log("env=" + process.env.NODE_ENV);
 
-import {ConnectionServerTrial} from "./trials/BanchoIrcTrial";
-ConnectionServerTrial();
+//import {ConnectionServerTrial, MakeLobbyTrial} from "./trials/BanchoIrcTrial";
+//MakeLobbyTrial();
+
+import {TypedEventTrials} from "./trials/TypedEventTrials";
+TypedEventTrials();

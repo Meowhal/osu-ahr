@@ -1,4 +1,5 @@
 import { Player } from "./Player";
+import { TypedEvent } from "../libs/events";
 export { Player }
 
 // BanchoBotとの対話を抽象化する
@@ -21,18 +22,18 @@ export interface ILobby {
   EnterLobbyAsync(channel: string): Promise<void>; // TODO:ロビーのチャンネルが存在しないときの処理
   CloseLobbyAsync(): Promise<void>;
 
-  // events
-  // PlayerJoined(player, slotid)
-  // PlayerLeft(player)
-  // BeatmapChanging()
-  // BeatmapChanged(mapid)
-  // HostChanged(player)
-  // MatchStarted()
-  // PlayerFinished(player, score, isPassed)
-  // MatchFinished()
-  // AbortedMatch()
-  // UnexpectedAction(error)
-  // NetError(err) 
+  PlayerJoined: TypedEvent<{player:Player, slot:number}>;
+  PlayerLeft: TypedEvent<Player>;
+  BeatmapChanging: TypedEvent<void>;
+  BeatmapChanged: TypedEvent<string>;
+  HostChanged: TypedEvent<Player>;
+  MatchStarted: TypedEvent<void>;
+  PlayerFinished: TypedEvent<{player:Player, score:number, isPassed:boolean}>;
+  MatchFinished: TypedEvent<void>;
+  AbortedMatch: TypedEvent<void>;
+  UnexpectedAction: TypedEvent<Error>;
+  NetError: TypedEvent<Error>; 
+
 }
 
 export enum LobbyStatus {
