@@ -82,7 +82,7 @@ export function DummyIrcClientTest() {
     const lobbyTitle = "testlobby";
     const players = ["p1", "p2", "p3"];
 
-    logIrcEvent(client);
+    //logIrcEvent(client);
     client.on('registered', function (message) {
       client.say("BanchoBot", "!mp make " + lobbyTitle);
     });

@@ -197,6 +197,27 @@ export function LobbyTest() {
     assert.equal(host, nexthost);
   });
 
+  // ホスト任命後に離脱した場合
+  it("host change & left test", async() =>{
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    const getNewHostAsync = async () => {
+      return new Promise<Player>(resolve => {
+        lobby.HostChanged.once(({succeeded, player}) => {
+          assert.isFalse(succeeded);
+          resolve(player);
+        });
+      });
+    }
+    //logIrcEvent(ircClient);
+    let nexthost = players[0];
+    let taskHost = getNewHostAsync();
+    let taskLeft = ircClient.emulateRemovePlayerAsync(nexthost.id);
+    lobby.TransferHost(nexthost);
+    let host = await taskHost;
+    await taskLeft;
+    assert.equal(host, nexthost);
+  });
+
   // 試合テスト
   it("match start test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
@@ -229,7 +250,7 @@ export function LobbyTest() {
   // 試合中の退出テスト
   it("match and left test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-    logIrcEvent(ircClient);
+    //logIrcEvent(ircClient);
     let ms = false;
     let mf = false;
     const finishedplayers = new Set<Player>();
@@ -259,7 +280,7 @@ export function LobbyTest() {
   // 試合中断テスト
   it("match and abort test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-    logIrcEvent(ircClient);
+    //logIrcEvent(ircClient);
     let ms = false;
     let ma = false;
 
