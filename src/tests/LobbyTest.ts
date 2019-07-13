@@ -180,7 +180,7 @@ export function LobbyTest() {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const getNewHostAsync = async () => {
       return new Promise<Player>(resolve => {
-        lobby.HostChanged.once(player => {
+        lobby.HostChanged.once(({succeeded, player}) => {
           resolve(player);
         });
       });

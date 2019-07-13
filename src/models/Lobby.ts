@@ -24,7 +24,8 @@ export class Lobby implements ILobby {
   PlayerLeft = new TypedEvent<Player>();
   BeatmapChanging = new TypedEvent<void>();
   BeatmapChanged = new TypedEvent<string>();
-  HostChanged = new TypedEvent<Player>();
+  HostChanged = new TypedEvent<{succeeded:boolean, player:Player}>();
+  UserNotFound = new TypedEvent<void>();
   MatchStarted = new TypedEvent<void>();
   PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
   MatchFinished = new TypedEvent<void>();
@@ -67,6 +68,15 @@ export class Lobby implements ILobby {
     }
   }
 
+  GetPlayer(userid: string): Player | null {
+    const eid = escapeUserId(userid);
+    if (this.playersMap.has(eid)) {
+      return this.playersMap.get(eid) as Player;
+    } else {
+      return null;
+    }
+  }
+
   // userid のプレイヤーがゲームに参加しているか調べる
   Includes(userid: string): boolean {
     const eid = escapeUserId(userid);
@@ -87,6 +97,9 @@ export class Lobby implements ILobby {
           break;
         case BanchoResponseType.HostChanged:
           this.RaiseHostChanged(c.id);
+          break;
+        case BanchoResponseType.UserNotFound:
+          this.OnUserNotFound();
           break;
         case BanchoResponseType.MatchFinished:
           this.RaiseMatchFinished();
@@ -163,7 +176,7 @@ export class Lobby implements ILobby {
       // TODO:log pending中に別のユーザーがホストになった
     } // pending == null は有効
     this.host = player;
-    this.HostChanged.emit(player);
+    this.HostChanged.emit({succeeded : true, player});
   }
 
   RaiseMatchStarted(): void {
@@ -171,7 +184,7 @@ export class Lobby implements ILobby {
     this.MatchStarted.emit();
   }
 
-  RaisePlayerFinished(userid: string, score: number, isPassed: boolean) {
+  RaisePlayerFinished(userid: string, score: number, isPassed: boolean) :void{
     const player = this.GetOrMakePlayer(userid);
     this.PlayerFinished.emit({ player, score, isPassed });
     if (!this.players.has(player)) {
@@ -181,17 +194,25 @@ export class Lobby implements ILobby {
     }
   }
 
-  RaiseMatchFinished() {
+  RaiseMatchFinished():void {
     this.isMatching = false;
     this.MatchFinished.emit();
   }
 
-  RaiseAbortedMatch() {
+  RaiseAbortedMatch():void {
     this.AbortedMatch.emit();
   }
 
-  RaiseNetError(err: Error) {
+  RaiseNetError(err: Error):void {
     this.NetError.emit(err);
+  }
+
+  OnUserNotFound():void {
+    if (this.hostPending != null) {
+      const p = this.hostPending;
+      this.hostPending = null;
+      this.HostChanged.emit({succeeded : false, player: p});
+    }
   }
 
   TransferHost(user: Player): void {

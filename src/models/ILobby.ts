@@ -13,7 +13,12 @@ export interface ILobby {
   players: Set<Player>;
   host: Player | null;
   hostPending: Player | null;
-
+  playersMap: Map<string, Player>;
+  isMatching: boolean;
+  
+  GetPlayer(userid: string): Player | null;
+  Includes(userid: string): boolean;
+  
   TransferHost(user: Player): void;
   AbortMatch(): void;
   SendMessage(message: string): void;
@@ -26,7 +31,7 @@ export interface ILobby {
   PlayerLeft: TypedEvent<Player>;
   BeatmapChanging: TypedEvent<void>;
   BeatmapChanged: TypedEvent<string>;
-  HostChanged: TypedEvent<Player>;
+  HostChanged: TypedEvent<{succeeded:boolean, player:Player}>;
   MatchStarted: TypedEvent<void>;
   PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean }>;
   MatchFinished: TypedEvent<void>;

@@ -41,6 +41,10 @@ export class CommandParser {
     if (message == "Aborted the match") {
       return new BanchoResponse(BanchoResponseType.AbortedMatch);
     }
+
+    if (message == "User not found") {
+      return new BanchoResponse(BanchoResponseType.UserNotFound);
+    }
     return new BanchoResponse(BanchoResponseType.None);
   }
 
@@ -90,7 +94,8 @@ export enum BanchoResponseType {
   MatchStarted,
   PlayerFinished,
   MatchFinished,
-  AbortedMatch
+  AbortedMatch,
+  UserNotFound
 }
 
 export class BanchoResponse {

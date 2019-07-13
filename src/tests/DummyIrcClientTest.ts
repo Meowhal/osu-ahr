@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../models/dummies';
-import { CommandParser, logIrcEvent } from "../models";
+import { CommandParser, logIrcEvent, BanchoResponseType } from "../models";
 
 export function DummyIrcClientTest() {
 
@@ -56,7 +56,6 @@ export function DummyIrcClientTest() {
       setTimeout(() => {
         client.say(channel, "!mp close");
       }, 10);
-
     });
     client.on('part', function (channel, who, reason) {
       done();
@@ -74,6 +73,31 @@ export function DummyIrcClientTest() {
     client.on('pm', function (nick, message) {
       assert.equal(message, "No name provided");
       done();
+    });
+  });
+
+  it("mphost user not found test", (done) => {
+    const client = new DummyIrcClient("osu_irc_server", "owner");
+    const parser = new CommandParser();
+    const lobbyTitle = "testlobby";
+    const players = ["p1", "p2", "p3"];
+
+    logIrcEvent(client);
+    client.on('registered', function (message) {
+      client.say("BanchoBot", "!mp make " + lobbyTitle);
+    });
+    client.on('join', function (channel, who) {
+      players.forEach((v, i, a) => client.emulateAddPlayerAsync(v));
+      setTimeout(() => {
+        client.say(channel, "!mp host p4");
+      }, 10);
+    });
+    client.on('message', function (from, to, msg) {
+      console.log(msg);
+      let r = parser.ParseBanchoResponse(msg);
+      if (r.type == BanchoResponseType.UserNotFound) {
+        done();
+      }
     });
   });
 

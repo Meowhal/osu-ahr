@@ -167,7 +167,11 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     } else if (target == this.channel) {
       switch (mp.command) {
         case "host":
-          this.raiseMessageAsync("BanchoBot", this.channel, `${mp.args[0]} became the host.`);
+          if (this.players.has(mp.args[0])) {
+            this.raiseMessageAsync("BanchoBot", this.channel, `${mp.args[0]} became the host.`);
+          } else {
+            this.raiseMessageAsync("BanchoBot", this.channel, "User not found");
+          }          
           break;
         case "password":
           if (mp.args.length == 0) {
