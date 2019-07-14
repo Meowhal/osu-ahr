@@ -111,7 +111,7 @@ export class BanchoResponse {
     this.score = 0;
     this.isPassed = false;
   }
-  
+
   setSlot(slot: number): BanchoResponse {
     this.slot = slot;
     return this;

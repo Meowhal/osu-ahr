@@ -7,6 +7,6 @@ export class Player {
   }
 }
 
-export function escapeUserId(id: string) : string {
+export function escapeUserId(id: string): string {
   return id.replace(' ', '_');
 }

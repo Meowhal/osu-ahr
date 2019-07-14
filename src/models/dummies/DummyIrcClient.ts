@@ -171,7 +171,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             this.raiseMessageAsync("BanchoBot", this.channel, `${mp.args[0]} became the host.`);
           } else {
             this.raiseMessageAsync("BanchoBot", this.channel, "User not found");
-          }          
+          }
           break;
         case "password":
           if (mp.args.length == 0) {

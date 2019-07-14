@@ -180,7 +180,7 @@ export function LobbyTest() {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const getNewHostAsync = async () => {
       return new Promise<Player>(resolve => {
-        lobby.HostChanged.once(({succeeded, player}) => {
+        lobby.HostChanged.once(({ succeeded, player }) => {
           resolve(player);
         });
       });
@@ -198,11 +198,11 @@ export function LobbyTest() {
   });
 
   // ホスト任命後に離脱した場合
-  it("host change & left test", async() =>{
+  it("host change & left test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const getNewHostAsync = async () => {
       return new Promise<Player>(resolve => {
-        lobby.HostChanged.once(({succeeded, player}) => {
+        lobby.HostChanged.once(({ succeeded, player }) => {
           assert.isFalse(succeeded);
           resolve(player);
         });

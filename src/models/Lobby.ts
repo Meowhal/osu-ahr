@@ -24,7 +24,7 @@ export class Lobby implements ILobby {
   PlayerLeft = new TypedEvent<Player>();
   BeatmapChanging = new TypedEvent<void>();
   BeatmapChanged = new TypedEvent<string>();
-  HostChanged = new TypedEvent<{succeeded:boolean, player:Player}>();
+  HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
   UserNotFound = new TypedEvent<void>();
   MatchStarted = new TypedEvent<void>();
   PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
@@ -176,7 +176,7 @@ export class Lobby implements ILobby {
       // TODO:log pending中に別のユーザーがホストになった
     } // pending == null は有効
     this.host = player;
-    this.HostChanged.emit({succeeded : true, player});
+    this.HostChanged.emit({ succeeded: true, player });
   }
 
   RaiseMatchStarted(): void {
@@ -184,7 +184,7 @@ export class Lobby implements ILobby {
     this.MatchStarted.emit();
   }
 
-  RaisePlayerFinished(userid: string, score: number, isPassed: boolean) :void{
+  RaisePlayerFinished(userid: string, score: number, isPassed: boolean): void {
     const player = this.GetOrMakePlayer(userid);
     this.PlayerFinished.emit({ player, score, isPassed });
     if (!this.players.has(player)) {
@@ -194,24 +194,24 @@ export class Lobby implements ILobby {
     }
   }
 
-  RaiseMatchFinished():void {
+  RaiseMatchFinished(): void {
     this.isMatching = false;
     this.MatchFinished.emit();
   }
 
-  RaiseAbortedMatch():void {
+  RaiseAbortedMatch(): void {
     this.AbortedMatch.emit();
   }
 
-  RaiseNetError(err: Error):void {
+  RaiseNetError(err: Error): void {
     this.NetError.emit(err);
   }
 
-  OnUserNotFound():void {
+  OnUserNotFound(): void {
     if (this.hostPending != null) {
       const p = this.hostPending;
       this.hostPending = null;
-      this.HostChanged.emit({succeeded : false, player: p});
+      this.HostChanged.emit({ succeeded: false, player: p });
     }
   }
 

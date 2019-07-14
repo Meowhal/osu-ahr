@@ -4,5 +4,5 @@
 //import {ConnectionServerTrial, MakeLobbyTrial} from "./trials/BanchoIrcTrial";
 //MakeLobbyTrial();
 
-import {TypedEventTrials} from "./trials/TypedEventTrials";
+import { TypedEventTrials } from "./trials/TypedEventTrials";
 TypedEventTrials();

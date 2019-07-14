@@ -6,7 +6,7 @@ const IrcTestSettings = {
   channel: "#test"
 };
 
-export function IrcTrial () {
+export function IrcTrial() {
   const bot = new irc.Client(IrcTestSettings.server, IrcTestSettings.nick, {
     autoConnect: true,
     debug: true

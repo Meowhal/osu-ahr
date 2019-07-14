@@ -151,7 +151,7 @@ export function CommandParserTest() {
     }
   });
 
-  it("host change test", ()=> {
+  it("host change test", () => {
     const parser = new CommandParser();
     let message = "Swgciai became the host.";
     let v = parser.ParseBanchoResponse(message);
