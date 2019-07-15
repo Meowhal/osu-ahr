@@ -3,7 +3,8 @@ export class CommandParser {
   ParseBanchoResponse(message: string): BanchoResponse {
     const m_joined = message.match(/(.+) joined in slot (\d+)\./);
     if (m_joined) {
-      return new BanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1]).setSlot(parseInt(m_joined[2]));
+      const p = { id: m_joined[1], slot: parseInt(m_joined[2]) };
+      return new BanchoResponse(BanchoResponseType.PlayerJoined, p);
     }
 
     const m_left = message.match(/(.+) left the game\./);
@@ -12,7 +13,7 @@ export class CommandParser {
     }
 
     if (message == "Host is changing map...") {
-      return new BanchoResponse(BanchoResponseType.BeatmapChanging);
+      return new BanchoResponse(BanchoResponseType.BeatmapChanging, undefined);
     }
 
     const m_map = message.match(/Beatmap changed to\: .+ \[.+\] \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
@@ -25,27 +26,41 @@ export class CommandParser {
       return new BanchoResponse(BanchoResponseType.HostChanged, m_host[1]);
     }
 
+    if (message == "User not found") {
+      return new BanchoResponse(BanchoResponseType.UserNotFound, undefined);
+    }
+
     if (message == "The match has started!") {
-      return new BanchoResponse(BanchoResponseType.MatchStarted);
+      return new BanchoResponse(BanchoResponseType.MatchStarted, undefined);
     }
 
     const m_finish = message.match(/(.+) finished playing \(Score: (\d+), (PASSED|FAILED)\)\./);
     if (m_finish) {
-      return new BanchoResponse(BanchoResponseType.PlayerFinished, m_finish[1]).setScore(parseInt(m_finish[2]), m_finish[3] == "PASSED");
+      const p = {
+        id: m_finish[1],
+        score: parseInt(m_finish[2]),
+        isPassed: m_finish[3] == "PASSED"
+      }
+      return new BanchoResponse(BanchoResponseType.PlayerFinished, p);
     }
 
     if (message == "The match has finished!") {
-      return new BanchoResponse(BanchoResponseType.MatchFinished);
+      return new BanchoResponse(BanchoResponseType.MatchFinished, undefined);
     }
 
     if (message == "Aborted the match") {
-      return new BanchoResponse(BanchoResponseType.AbortedMatch);
+      return new BanchoResponse(BanchoResponseType.AbortedMatch, undefined);
     }
 
-    if (message == "User not found") {
-      return new BanchoResponse(BanchoResponseType.UserNotFound);
+    if (message == "The match is not in progress") {
+      return new BanchoResponse(BanchoResponseType.AbortMatchFailed, undefined);
     }
-    return new BanchoResponse(BanchoResponseType.None);
+
+    if (message == "Closed the match") {
+      return new BanchoResponse(BanchoResponseType.ClosedLobby, undefined);
+    }
+
+    return new BanchoResponse(BanchoResponseType.None, undefined);
   }
 
   ParseMpMakeResponse(nick: string, message: string): { id: string, title: string } | null {
@@ -91,34 +106,38 @@ export enum BanchoResponseType {
   BeatmapChanging,
   BeatmapChanged,
   HostChanged,
+  UserNotFound,
   MatchStarted,
   PlayerFinished,
   MatchFinished,
   AbortedMatch,
-  UserNotFound
+  AbortMatchFailed,
+  ClosedLobby,
 }
 
 export class BanchoResponse {
   type: BanchoResponseType;
-  id: string;
-  slot: number;
-  score: number;
-  isPassed: boolean;
-  constructor(type: BanchoResponseType, id?: string) {
+  param: BanchoResponseParameter;
+  constructor(type: BanchoResponseType, param: BanchoResponseParameter) {
     this.type = type;
-    this.id = id || "";
-    this.slot = 0;
-    this.score = 0;
-    this.isPassed = false;
-  }
-
-  setSlot(slot: number): BanchoResponse {
-    this.slot = slot;
-    return this;
-  }
-  setScore(score: number, passed: boolean): BanchoResponse {
-    this.score = score;
-    this.isPassed = passed;
-    return this;
+    this.param = param;
   }
 }
+
+export interface PlayerJoinedParameter {
+  id: string;
+  slot: number;
+}
+
+export interface PlayerFinishedParameter {
+  id: string;
+  score: number;
+  isPassed: boolean;
+}
+
+export type BanchoResponseParameter
+  = string
+  | boolean
+  | PlayerJoinedParameter
+  | PlayerFinishedParameter
+  | undefined;

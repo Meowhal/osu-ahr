@@ -1,6 +1,6 @@
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
-import { CommandParser, BanchoResponse, BanchoResponseType } from "./CommandParser";
+import { CommandParser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
 const BanchoHostMask: string = "osu!Bancho.";
@@ -90,13 +90,13 @@ export class Lobby implements ILobby {
       const c = this.parser.ParseBanchoResponse(message);
       switch (c.type) {
         case BanchoResponseType.BeatmapChanged:
-          this.RaiseBeatmapChanged(c.id);
+          this.RaiseBeatmapChanged(c.param as string);
           break;
         case BanchoResponseType.BeatmapChanging:
           this.RaiseBeatmapChanging();
           break;
         case BanchoResponseType.HostChanged:
-          this.RaiseHostChanged(c.id);
+          this.RaiseHostChanged(c.param as string);
           break;
         case BanchoResponseType.UserNotFound:
           this.OnUserNotFound();
@@ -108,13 +108,15 @@ export class Lobby implements ILobby {
           this.RaiseMatchStarted();
           break;
         case BanchoResponseType.PlayerFinished:
-          this.RaisePlayerFinished(c.id, c.score, c.isPassed);
+          let p = c.param as PlayerFinishedParameter;
+          this.RaisePlayerFinished(p.id, p.score, p.isPassed);
           break;
         case BanchoResponseType.PlayerJoined:
-          this.RaisePlayerJoined(c.id, c.slot);
+          let q = c.param as PlayerJoinedParameter;
+          this.RaisePlayerJoined(q.id, q.slot);
           break;
         case BanchoResponseType.PlayerLeft:
-          this.RaisePlayerLeft(c.id);
+          this.RaisePlayerLeft(c.param as string);
           break;
         case BanchoResponseType.AbortedMatch:
           this.RaiseAbortedMatch();
