@@ -146,10 +146,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // IRCClientのsay
   public say(target: string, message: string): void {
-    let mp = this.parser.ParseMPCommand(message);
-    if (mp != null) {
-      this.processMpCommand(target, message, mp);
-    }
+    new Promise(()=>{
+      this.raiseMessageAsync(this.nick, target, message);
+      let mp = this.parser.ParseMPCommand(message);
+      if (mp != null) {
+        this.processMpCommand(target, message, mp);
+      }
+    });    
   }
 
   private processMpCommand(target: string, message: string, mp: MpCommand): void {
