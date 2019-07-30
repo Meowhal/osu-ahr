@@ -11,13 +11,24 @@ export class AutoHostSelector implements IHostSelector {
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
 
-  constructor(lobby: ILobby, option: AutoHostSelectorOption) {
+  get currentHost() {
+    return this.lobby.host;
+  }
+
+  get pendingHost() {
+    return this.lobby.hostPending;
+  }
+
+  constructor(lobby: ILobby, option: AutoHostSelectorOption | null = null) {
     this.lobby = lobby;
+    if(option == null) {
+      option = {};
+    }
     this.option = option;
     this.registerEvents();
   }
 
-  registerEvents(): void {
+  private registerEvents(): void {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
@@ -43,6 +54,7 @@ export class AutoHostSelector implements IHostSelector {
   private onPlayerLeft(player: Player): void {
     this.removeFromQueue(player);
     if (this.lobby.isMatching) return;
+    if (this.hostQueue.length == 0) return;
     if (this.lobby.host == player // ホストが抜けた場合 
       || (this.lobby.host == null && this.lobby.hostPending == null)) { // ホストがいない、かつ承認待ちのホストがいない
       this.selectNextHost();
@@ -57,14 +69,10 @@ export class AutoHostSelector implements IHostSelector {
   private onHostChanged(succeeded: boolean, player: Player): void {
     if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する
     if (this.lobby.isMatching) return; // 試合中は何もしない
-
-    if (this.hostQueue[0] == player) {
-      // キューの順番通りに次のホストが選択された場合
-      //this.hostPending = null;
-      this.hostQueue.shift();
-      this.hostQueue.push(player);
-    } else {
-      this.selectNextHost();
+    
+    // ホストが自分で変更した場合
+    if (this.hostQueue[0] == this.lobby.host && this.hostQueue[0] != player && 1 < this.hostQueue.length) {
+      this.selectNextHost();      
     }
   }
   
@@ -78,10 +86,18 @@ export class AutoHostSelector implements IHostSelector {
   }
 
   // !mp host コマンドの発行
-  // hostPendingに変更中のユーザーを保存する
   // 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
+  // キューの先頭を末尾に
   private selectNextHost() {
-    this.lobby.TransferHost(this.hostQueue[0]);
+    if (this.hostQueue.length == 0) {
+      throw new Error();
+    }
+
+    const current = this.hostQueue.shift() as Player;
+    this.hostQueue.push(current);
+    if (this.hostQueue[0] != this.lobby.host) {
+      this.lobby.TransferHost(this.hostQueue[0]);
+    }   
   }
 
   // 指定されたプレイヤーキューから削除する
