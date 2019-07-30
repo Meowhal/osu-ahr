@@ -6,33 +6,10 @@ export interface AutoHostSelectorOption {
 
 }
 
-/*
-  ホストキューの先頭は実際に次のホストが確定したときに一番うしろに移動する
-  遷移
-
-  current host => ch
-  next host => nh
-  host pending => ph
-
-  !mp hostコマンド発行
-    ph = p;
-  bancho response
-    check ph == p
-    ch = queue.pop()
-    check ch == p == ph
-    nh = queue.peek()
-    ph = null
-
-*/
-
 export class AutoHostSelector implements IHostSelector {
-  currentHost: Player | null = null;
-  isMatching: boolean = false;
   lobby: ILobby;
   option: AutoHostSelectorOption;
-
   hostQueue: Player[] = [];
-  hostPending: Player | null = null;
 
   constructor(lobby: ILobby, option: AutoHostSelectorOption) {
     this.lobby = lobby;
@@ -44,6 +21,7 @@ export class AutoHostSelector implements IHostSelector {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
+    this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
   }
 
@@ -61,9 +39,12 @@ export class AutoHostSelector implements IHostSelector {
   // キューから削除
   // 現在のホストなら次のホストを任命
   // ホスト任命中に退出した場合も次のホストを任命
+  // 試合中なら次のホストは任命しない
   private onPlayerLeft(player: Player): void {
     this.removeFromQueue(player);
-    if (this.currentHost == player || this.hostPending == player) {
+    if (this.lobby.isMatching) return;
+    if (this.lobby.host == player // ホストが抜けた場合 
+      || (this.lobby.host == null && this.lobby.hostPending == null)) { // ホストがいない、かつ承認待ちのホストがいない
       this.selectNextHost();
     }
   }
@@ -75,16 +56,19 @@ export class AutoHostSelector implements IHostSelector {
   //  順番を無視していたら任命し直す
   private onHostChanged(succeeded: boolean, player: Player): void {
     if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する
-    
-    if (this.hostQueue[0] == player) {      
+    if (this.lobby.isMatching) return; // 試合中は何もしない
+
+    if (this.hostQueue[0] == player) {
       // キューの順番通りに次のホストが選択された場合
-      this.hostPending = null;
+      //this.hostPending = null;
       this.hostQueue.shift();
       this.hostQueue.push(player);
-      this.currentHost = player;
     } else {
       this.selectNextHost();
     }
+  }
+  
+  private onMatchStarted(): void {
   }
 
   // 試合が終了した際に実行される
@@ -97,8 +81,7 @@ export class AutoHostSelector implements IHostSelector {
   // hostPendingに変更中のユーザーを保存する
   // 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
   private selectNextHost() {
-    this.hostPending = this.hostQueue[0];
-    this.lobby.TransferHost(this.hostPending);
+    this.lobby.TransferHost(this.hostQueue[0]);
   }
 
   // 指定されたプレイヤーキューから削除する

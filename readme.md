@@ -44,32 +44,80 @@ Osu-Auto-Host-Rotation
   - 開始時に設定を保存、再開時にそのlobbyにアクセスを試みる。正常終了時に設定を削除
   - もしくは単純にユーザーにlobbyidを入力してもらう
 
-## ahrbot class 設計
+## 全体像
+IIrcClient : IRCクライアント通信の抽象化
+ILobby : BanchoBotとのテキストのやり取りを抽象化
+AutoHostSelector : ILobbyを介してホスト選択を行う
+
+## AutoHostSelector class 設計 
 ### 概要
-オートホストローテーション機能を表現するclass
-Lobbyclassのイベントに反応して、アクションを起こす
+オートホストローテーション機能を行うためclass
+ILobbyのイベントに対して処理を行う
 ### プロパティ
 - lobby
-- ホストキュー
-- 現在のホスト
-- 申請中ホスト
-- 次のホスト
-- 試合中フラグ
-- 選曲済みフラグ
-- 部屋削除タイマー
-- 試合終了タイマー
-### イベントハンドリング
-- LobbyOpend(lobbyid)
-- Joined(userid, slotid)
-- left(userid)
-- BeatmapSelected(mapid)
-- HostChanged(userid)
-### アクション
-- makeLobby(title)
-- rotateHost(userid)
-- addQueue(userid)
-- removeQueue(userid)
+- hostQueue : ホストキュー
+- currentHost : 現在のホスト
+- isMatching : 試合中フラグ
+### 扱うイベント
+- PlayerJoined
+- PlayerLeft
+- HostChanged
+- MatchStarted
+- MatchFinished
+### 状態
+<dl>
+  <dt>S0</dt>
+  <dd>初期状態。hostQueueが空</dd>
+  <dt>S1</dt>
+  <dd>ホスト未選択状態。hostQueueが空ではない。currentHostがnull</dd>
+  <dt>H</dt>
+  <dd>試合開始待ち状態。currentHostがnullでない</dd>
+  <dt>M</dt>
+  <dd>試合中。isMatchingがtrue</dd>
+</dl>
 
+### 各状態でのイベントに対する反応
+s0
+- PlayerJoined
+  - キューに追加して、!mp hostを発行。s1へ遷移
+
+s1
+- PlayerJoined
+  - キューに追加
+- PlayerLeft
+  - キューから削除
+  - キューが０人ならs0へ遷移
+  - 先頭が変わったら!mp hostを再発行
+- HostChanged (起こりうる？)
+  - 先頭が対象ならHへ遷移
+  - それ以外なら!mp hostを再発行
+- MatchStarted
+  - !mp abortを発行
+
+H
+- PlayerJoined
+  - キューに追加
+- PlayerLeft
+  - キューから削除
+  - キューが０人ならs0へ遷移
+  - 先頭が変わったら!mp hostを再発行しS1へ遷移
+- HostChanged
+  - 前のホストを末尾に移動
+  - 先頭が対象ならそのまま
+  - それ以外なら!mp hostを再発行しS1へ遷移
+- MatchStarted
+  - Mへ遷移 
+
+M 
+- PlayerJoined
+  - キューに追加
+- PlayerLeft
+  - キューから削除
+  - 0人にはならないはず。
+- MatchFinished
+  - 現在のhostをキューの末尾へ
+  - 次のホストを任命してS1へ遷移
+ 
 ## lobby class 設計
 ### 概要
 Banchobotとのirc通信を抽象化するためのクラス。
@@ -146,3 +194,5 @@ Banchobot機能
 ## コンフィグ
 サーバーパスワードなどをgitに公開するのはまずいのでconfigモジュールで管理する。
 configモジュールは現在のNODE_ENV環境変数により適切なjsonコンフィグファイルを選択してロードしてくれる。NODE_ENVが指定されていない場合はDevelopmentが使用され、Developmentが存在しない場合はdefaultが使用される。共通項目はdefault.jsonに記述。production.jsonとdevelopment.jsonに非公開情報を記述し、この2つをgitignoreに追加。
+
+# 
