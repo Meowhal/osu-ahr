@@ -1,0 +1,25 @@
+{
+  // IntelliSense を使用して利用可能な属性を学べます。
+  // 既存の属性の説明をホバーして表示します。
+  // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test with mocha",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+          "-r",
+          "ts-node/register",
+          "--timeout",
+          "999999",
+          "--colors",
+          "${workspaceFolder}/src/tests/index.ts",
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
+    }
+  ]
+}
