@@ -21,7 +21,7 @@ export class AutoHostSelector implements IHostSelector {
 
   constructor(lobby: ILobby, option: AutoHostSelectorOption | null = null) {
     this.lobby = lobby;
-    if(option == null) {
+    if (option == null) {
       option = {};
     }
     this.option = option;
@@ -66,16 +66,16 @@ export class AutoHostSelector implements IHostSelector {
   // ユーザーが自分でホストを変更した場合
   //  queueの次のホストならそのまま
   //  順番を無視していたら任命し直す
-  private onHostChanged(succeeded: boolean, player: Player): void {
+  private onHostChanged(succeeded: boolean, newhost: Player): void {
     if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する
     if (this.lobby.isMatching) return; // 試合中は何もしない
-    
+
     // ホストが自分で変更した場合
-    if (this.hostQueue[0] == this.lobby.host && this.hostQueue[0] != player && 1 < this.hostQueue.length) {
-      this.selectNextHost();      
+    if (this.hostQueue[0] != newhost) {
+      this.selectNextHost();
     }
   }
-  
+
   private onMatchStarted(): void {
   }
 
@@ -93,11 +93,15 @@ export class AutoHostSelector implements IHostSelector {
       throw new Error();
     }
 
-    const current = this.hostQueue.shift() as Player;
-    this.hostQueue.push(current);
+    this.rotateQueue();
     if (this.hostQueue[0] != this.lobby.host) {
       this.lobby.TransferHost(this.hostQueue[0]);
-    }   
+    }
+  }
+
+  private rotateQueue() {
+    const current = this.hostQueue.shift() as Player;
+    this.hostQueue.push(current);
   }
 
   // 指定されたプレイヤーキューから削除する

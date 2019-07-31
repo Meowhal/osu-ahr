@@ -3,6 +3,7 @@ import { ILobby, LobbyStatus } from "./ILobby";
 import { parser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
+import { MpSettingsParser, PlayerSettings } from "./MpSettingsParser";
 const BanchoHostMask: string = "osu!Bancho.";
 
 export class Lobby implements ILobby {
@@ -17,6 +18,7 @@ export class Lobby implements ILobby {
   ircClient: IIrcClient;
   playersMap: Map<string, Player>;
   isMatching: boolean;
+  mpSettingParser: MpSettingsParser | undefined;
 
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
@@ -188,7 +190,7 @@ export class Lobby implements ILobby {
     const player = this.GetOrMakePlayer(userid);
     this.PlayerFinished.emit({ player, score, isPassed });
     if (!this.players.has(player)) {
-      this.UnexpectedAction.emit(new Error("未参加のプレイヤーがゲームを終えました。"));
+      //this.UnexpectedAction.emit(new Error("未参加のプレイヤーがゲームを終えました。"));
       this.players.add(player);
       this.RaisePlayerJoined(userid, 0);
     }
@@ -312,9 +314,54 @@ export class Lobby implements ILobby {
     });
   }
 
-  logLobbyStatus():void {
+  LoadLobbySettingsAsync(): Promise<void> {
+    if (this.status != LobbyStatus.Entered || this.mpSettingParser != undefined) {
+      return Promise.reject();
+    }
+    this.mpSettingParser = new MpSettingsParser();
+    let completed: (() => void) | null = null;
+    const feed = (from: string, to: string, message: string): void => {
+      if (from == "BanchoBot" && to == this.channel && this.mpSettingParser != undefined) {
+        const r = this.mpSettingParser.feedLine(message);
+        if (r && completed != null) {
+          completed();
+        }
+      }
+    }
+
+    this.ircClient.on("message", feed);
+
+    const task = new Promise<void>(resolve => {
+      completed = () => {
+        this.ircClient.off("message", feed);
+        if (this.mpSettingParser != null && this.mpSettingParser.parsed) {
+          this.name = this.mpSettingParser.name as string;
+          console.log("@ms update lobby name");
+          for(let ps of this.mpSettingParser.players as PlayerSettings[]) {
+            if (!this.Includes(ps.id)) {
+              console.log("@ms update player");
+              this.RaisePlayerJoined(ps.id, ps.slot);
+            }
+            if (ps.isHost) {
+              if (this.host == null || (this.host.id != ps.id)) {
+                console.log("@ms update host");
+                this.RaiseHostChanged(ps.id);
+              }
+            }
+          }
+        }
+        this.mpSettingParser = undefined;
+        resolve();
+      }
+    });
+
+    this.SendMessage("!mp settings");
+    return task;
+  }
+
+  logLobbyStatus(): void {
     console.log("lobby id :" + this.id);
-    console.log("status :" + this.status );
+    console.log("status :" + this.status);
     console.log("players :");
     for (let p of this.players) {
       console.log("  " + p.id);

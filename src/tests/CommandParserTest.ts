@@ -235,4 +235,19 @@ export function CommandParserTest() {
     v = parser.EnsureMpChannelId("https://osu.ppy.sh/mp/123");
     assert.equal(v, "#mp_123");
   });
+
+  it("SplitCliCommand test", () => {
+    let v = parser.SplitCliCommand("a abcdefg");
+    assert.equal(v.command, "a");
+    assert.equal(v.arg, "abcdefg");
+
+    v = parser.SplitCliCommand("a b c");
+    assert.equal(v.command, "a");
+    assert.equal(v.arg, "b c");
+
+    v = parser.SplitCliCommand("a");
+    assert.equal(v.command, "a");
+    assert.equal(v.arg, "");
+
+  });
 }

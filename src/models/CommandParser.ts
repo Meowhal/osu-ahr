@@ -93,6 +93,18 @@ export class CommandParser {
     return null;
   }
 
+  SplitCliCommand(line: string): { command: string, arg: string } {
+    const l = line.match(/(\w+) (.*)/);
+    if (l == null) {
+      return { command: line, arg: "" };
+    } else {
+      return {
+        command: l[1],
+        arg: l[2],
+      }
+    }
+  }
+
   EnsureMpChannelId(id: string): string {
     if (id == null || id == "") return "";
     if (id.match(/^#mp_\d+$/)) return id;

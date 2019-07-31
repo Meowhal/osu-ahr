@@ -26,7 +26,8 @@ export interface ILobby {
   MakeLobbyAsync(title: string): Promise<string>;
   EnterLobbyAsync(channel: string): Promise<string>; // TODO:ロビーのチャンネルが存在しないときの処理
   CloseLobbyAsync(): Promise<void>;
-
+  LoadLobbySettingsAsync(): Promise<void>;
+  
   PlayerJoined: TypedEvent<{ player: Player, slot: number }>;
   PlayerLeft: TypedEvent<Player>;
   BeatmapChanging: TypedEvent<void>;

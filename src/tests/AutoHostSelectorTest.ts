@@ -168,7 +168,7 @@ export function AutoHostSelectorTest() {
   }); 
 
   it("m left", async () => {
-    const { selector, lobby, ircClient } = await prepareSelector(true);
+    const { selector, lobby, ircClient } = await prepareSelector();
     await AddPlayers(["player1", "player2", "player3"], ircClient);
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
@@ -189,5 +189,25 @@ export function AutoHostSelectorTest() {
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
   }); 
+
+  it("host skip test", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector(true);
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+
+    lobby.RaiseHostChanged("player2");
+    assertHostIs("player2", lobby);
+
+    lobby.RaiseHostChanged("player1");
+    assertHostIs("player3", lobby);
+
+    lobby.RaiseHostChanged("player3");
+    assertHostIs("player3", lobby);
+
+    lobby.RaiseHostChanged("player2");
+    assertHostIs("player1", lobby);
+  }); 
+
 
 }
