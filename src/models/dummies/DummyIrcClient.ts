@@ -1,11 +1,10 @@
 import * as irc from "irc";
 import { EventEmitter } from "events";
-import { CommandParser, MpCommand, IIrcClient } from "..";
+import { parser, MpCommand, IIrcClient } from "..";
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
 export class DummyIrcClient extends EventEmitter implements IIrcClient {
   nick: string;
-  parser: CommandParser;
   channel: string;
   msg: irc.IMessage;
   connected: boolean;
@@ -22,7 +21,6 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   ) {
     super();
     this.nick = nick;
-    this.parser = new CommandParser();
     this.channel = "";
     this.connected = false;
     this.players = new Set<string>();
@@ -159,7 +157,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   public say(target: string, message: string): void {
     new Promise(()=>{
       this.raiseMessageAsync(this.nick, target, message);
-      let mp = this.parser.ParseMPCommand(message);
+      let mp = parser.ParseMPCommand(message);
       if (mp != null) {
         this.processMpCommand(target, message, mp);
       }

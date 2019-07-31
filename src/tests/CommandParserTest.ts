@@ -1,10 +1,8 @@
 import { assert } from 'chai';
-import { CommandParser, BanchoResponseType, PlayerJoinedParameter, PlayerFinishedParameter } from "../models";
+import { parser, BanchoResponseType, PlayerJoinedParameter, PlayerFinishedParameter } from "../models";
 
 export function CommandParserTest() {
   it("make lobby message parse test", () => {
-    const parser = new CommandParser();
-
     let message = "Created the tournament match https://osu.ppy.sh/mp/52612489 irctestroom";
     let v = parser.ParseMpMakeResponse("BanchoBot", message);
     if (v == null) {
@@ -34,7 +32,6 @@ export function CommandParserTest() {
   });
 
   it("ParseMPCommandTest", () => {
-    const parser = new CommandParser();
     let message = "!mp host xxx";
     let v = parser.ParseMPCommand(message);
     if (v == null) {
@@ -61,7 +58,6 @@ export function CommandParserTest() {
   });
 
   it("player joined parse test", () => {
-    const parser = new CommandParser();
     let message = "Swgciai joined in slot 4.";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerJoined) {
@@ -94,7 +90,6 @@ export function CommandParserTest() {
   });
 
   it("player left parse test", () => {
-    const parser = new CommandParser();
     let message = "Swgciai left the game.";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerLeft) {
@@ -121,14 +116,12 @@ export function CommandParserTest() {
   });
 
   it("map changing test", () => {
-    const parser = new CommandParser();
     let message = "Host is changing map...";
     let v = parser.ParseBanchoResponse(message);
     assert.equal(v.type, BanchoResponseType.BeatmapChanging);
   });
 
   it("map changed test", () => {
-    const parser = new CommandParser();
     let message = "Beatmap changed to: Noah - Celestial stinger [apl's EXHAUST] (https://osu.ppy.sh/b/1454083)";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.BeatmapChanged) {
@@ -155,7 +148,6 @@ export function CommandParserTest() {
   });
 
   it("host change test", () => {
-    const parser = new CommandParser();
     let message = "Swgciai became the host.";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.HostChanged) {
@@ -182,7 +174,6 @@ export function CommandParserTest() {
   });
 
   it("match test", () => {
-    const parser = new CommandParser();
     let v = parser.ParseBanchoResponse("The match has started!");
     assert.equal(v.type, BanchoResponseType.MatchStarted);
 
@@ -227,7 +218,6 @@ export function CommandParserTest() {
   });
 
   it("match abort test", () => {
-    const parser = new CommandParser();
     let v = parser.ParseBanchoResponse("Aborted the match");
     assert.equal(v.type, BanchoResponseType.AbortedMatch);
 
@@ -235,5 +225,14 @@ export function CommandParserTest() {
     assert.equal(v.type, BanchoResponseType.AbortMatchFailed);
   });
 
+  it("ensure channel test", () => {
+    let v = parser.EnsureMpChannelId("123");
+    assert.equal(v, "#mp_123");
 
+    v = parser.EnsureMpChannelId("#mp_123");
+    assert.equal(v, "#mp_123");
+
+    v = parser.EnsureMpChannelId("https://osu.ppy.sh/mp/123");
+    assert.equal(v, "#mp_123");
+  });
 }

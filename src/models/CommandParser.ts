@@ -92,6 +92,16 @@ export class CommandParser {
     }
     return null;
   }
+
+  EnsureMpChannelId(id: string): string {
+    if (id == null || id == "") return "";
+    if (id.match(/^#mp_\d+$/)) return id;
+    if (id.match(/^\d+$/)) return "#mp_" + id;
+    let m = id.match(/^https:\/\/osu\.ppy\.sh\/mp\/(\d+)$/);
+
+    if (m) return "#mp_" + m[1];
+    else return "";
+  }
 }
 
 export interface MpCommand {
@@ -141,3 +151,5 @@ export type BanchoResponseParameter
   | PlayerJoinedParameter
   | PlayerFinishedParameter
   | undefined;
+
+export const parser = new CommandParser();

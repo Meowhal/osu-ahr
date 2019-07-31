@@ -1,13 +1,12 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../models/dummies';
-import { CommandParser, logIrcEvent, BanchoResponseType } from "../models";
+import { parser, logIrcEvent, BanchoResponseType } from "../models";
 
 export function DummyIrcClientTest() {
 
   // ロビー作成テスト
   it("make lobby test", (done) => {
     const client = new DummyIrcClient("osu_irc_server", "owner");
-    const parser = new CommandParser();
     const lobbyTitle = "testlobby";
     let f_joined = 0;
     let f_make_res = 0;
@@ -43,7 +42,6 @@ export function DummyIrcClientTest() {
 
   it("match test", (done) => {
     const client = new DummyIrcClient("osu_irc_server", "owner");
-    const parser = new CommandParser();
     const lobbyTitle = "testlobby";
     const players = ["p1", "p2", "p3"];
 
@@ -64,7 +62,6 @@ export function DummyIrcClientTest() {
 
   it("make noname lobby test", (done) => {
     const client = new DummyIrcClient("osu_irc_server", "owner");
-    const parser = new CommandParser();
     //logIrcEvent(client);
     const lobbyTitle = "";
     client.on('registered', function (message) {
@@ -78,7 +75,6 @@ export function DummyIrcClientTest() {
 
   it("mphost user not found test", (done) => {
     const client = new DummyIrcClient("osu_irc_server", "owner");
-    const parser = new CommandParser();
     const lobbyTitle = "testlobby";
     const players = ["p1", "p2", "p3"];
 

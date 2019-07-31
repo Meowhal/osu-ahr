@@ -1,6 +1,6 @@
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
-import { CommandParser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
+import { parser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
 const BanchoHostMask: string = "osu!Bancho.";
@@ -14,7 +14,6 @@ export class Lobby implements ILobby {
   channel: string | undefined;
   status: LobbyStatus;
   players: Set<Player>;
-  parser: CommandParser;
   ircClient: IIrcClient;
   playersMap: Map<string, Player>;
   isMatching: boolean;
@@ -40,7 +39,6 @@ export class Lobby implements ILobby {
     this.status = LobbyStatus.Standby;
     this.players = new Set();
     this.playersMap = new Map();
-    this.parser = new CommandParser();
     this.ircClient = ircClient;
     this.host = null;
     this.hostPending = null;
@@ -87,7 +85,7 @@ export class Lobby implements ILobby {
 
   HandleBanchoResponse(from: string, to: string, message: string) {
     if (from == "BanchoBot" && to == this.channel) {
-      const c = this.parser.ParseBanchoResponse(message);
+      const c = parser.ParseBanchoResponse(message);
       switch (c.type) {
         case BanchoResponseType.BeatmapChanged:
           this.RaiseBeatmapChanged(c.param as string);
@@ -263,6 +261,8 @@ export class Lobby implements ILobby {
           this.ircClient.off("join", onJoin);
           this.status = LobbyStatus.Entered;
           this.players.clear();
+          this.SendMessage("!mp password");
+          this.SendMessage("!mp invite gnsksz");
           resolve(this.id);
         }
       };
@@ -271,8 +271,27 @@ export class Lobby implements ILobby {
     });
   }
 
-  EnterLobbyAsync(channel: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  EnterLobbyAsync(channel: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const onJoin = (channel: string, who: string) => {
+        if (who == this.ircClient.nick) {
+          this.channel = channel;
+          this.name = "__";
+          this.id = channel.replace("#mp_", "");
+          this.ircClient.off("join", onJoin);
+          this.status = LobbyStatus.Entered;
+          this.players.clear();
+          resolve(this.id);
+        }
+      };
+      channel = parser.EnsureMpChannelId(channel);
+      if (channel == "") {
+        reject();
+        return;
+      }
+      this.ircClient.on("join", onJoin);
+      this.ircClient.join(channel);
+    });
   }
 
   CloseLobbyAsync(): Promise<void> {
@@ -291,5 +310,14 @@ export class Lobby implements ILobby {
         reject();
       }
     });
+  }
+
+  logLobbyStatus():void {
+    console.log("lobby id :" + this.id);
+    console.log("status :" + this.status );
+    console.log("players :");
+    for (let p of this.players) {
+      console.log("  " + p.id);
+    }
   }
 }

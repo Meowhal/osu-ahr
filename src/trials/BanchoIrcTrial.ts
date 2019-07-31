@@ -1,9 +1,8 @@
 import * as irc from 'irc';
-import { CommandParser, logIrcEvent } from "../models";
+import { parser, logIrcEvent } from "../models";
 import { getIrcConfig } from "../config";
 
 export function MakeLobbyTrial() {
-  const parser = new CommandParser();
   const c = getIrcConfig();
   const bot = new irc.Client(c.server, c.nick, c.opt);
 
@@ -53,8 +52,6 @@ export function MakeLobbyTrial() {
 }
 
 export function ConnectionServerTrial() {
-  const parser = new CommandParser();
-
   const c = getIrcConfig();
   const bot = new irc.Client(c.server, c.nick, c.opt);
 
