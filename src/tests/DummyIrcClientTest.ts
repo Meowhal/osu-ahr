@@ -93,7 +93,6 @@ export function DummyIrcClientTest() {
       }, 10);
     });
     client.on('message', function (from, to, msg) {
-      console.log(msg);
       let r = parser.ParseBanchoResponse(msg);
       if (r.type == BanchoResponseType.UserNotFound) {
         done();
