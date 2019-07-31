@@ -12,7 +12,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   players: Set<string>;
   conn: boolean | null;
   isMatching: boolean;
-  public hostMask: string = "";
+  hostMask: string = "";
+  latency: number = 0;
 
   constructor(
     server: string,
@@ -79,8 +80,16 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   // メッセージイベントを非同期で発生させる
   public raiseMessageAsync(from: string, to: string, message: string): Promise<void> {
     return new Promise(resolve => {
-      this.raiseMessage(from, to, message);
-      resolve();
+      const body = () => {
+        this.raiseMessage(from, to, message);
+        resolve();
+      }
+
+      if (this.latency != 0) {
+        setTimeout(body, this.latency);
+      } else {
+        body();
+      }
     });
   }
 
@@ -119,10 +128,12 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   // 試合をエミュレートする
-  public async emulateMatchAsync(delay: number): Promise<void> {
+  public async emulateMatchAsync(delay: number = 0): Promise<void> {
     this.isMatching = true;
     await this.raiseMessageAsync("BanchoBot", this.channel, "The match has started!");
-    await this.delay(delay);
+    if (delay) {
+      await this.delay(delay);
+    }    
     const tasks: Promise<void>[] = [];
     for (let u of this.players) {
       if (!this.isMatching) return;
