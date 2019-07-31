@@ -5,3 +5,4 @@ export * from "./Player";
 export * from "./Lobby";
 export * from "./AutoHostSelector";
 export * from "./CommandParser";
+export * from "./MpSettingsParser";
