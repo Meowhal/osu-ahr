@@ -1,8 +1,15 @@
-//console.log("hello tes");
-//console.log("env=" + process.env.NODE_ENV);
+import { OahrCli } from './OahrCli';
+import * as irc from 'irc';
+import { logIrcEvent } from "./models";
+import { DummyIrcClient } from './models/dummies';
+import { getIrcConfig, getTrialConfig } from "./config";
 
-//import {ConnectionServerTrial, MakeLobbyTrial} from "./trials/BanchoIrcTrial";
-//MakeLobbyTrial();
+const c = getIrcConfig();
+let client = new irc.Client(c.server, c.nick, c.opt);
+//let client = new DummyIrcClient(c.server, c.nick, c.opt);
 
-import { TypedEventTrials } from "./trials/TypedEventTrials";
-TypedEventTrials();
+logIrcEvent(client);
+let cli = new OahrCli(client);
+cli.startApp(null);
+
+//startApp();

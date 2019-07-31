@@ -195,4 +195,5 @@ Banchobot機能
 サーバーパスワードなどをgitに公開するのはまずいのでconfigモジュールで管理する。
 configモジュールは現在のNODE_ENV環境変数により適切なjsonコンフィグファイルを選択してロードしてくれる。NODE_ENVが指定されていない場合はDevelopmentが使用され、Developmentが存在しない場合はdefaultが使用される。共通項目はdefault.jsonに記述。production.jsonとdevelopment.jsonに非公開情報を記述し、この2つをgitignoreに追加。
 
-# 
+# 問題点
+スキップ後に自動で変更されないことがあった
