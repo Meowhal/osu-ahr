@@ -196,4 +196,14 @@ Banchobot機能
 configモジュールは現在のNODE_ENV環境変数により適切なjsonコンフィグファイルを選択してロードしてくれる。NODE_ENVが指定されていない場合はDevelopmentが使用され、Developmentが存在しない場合はdefaultが使用される。共通項目はdefault.jsonに記述。production.jsonとdevelopment.jsonに非公開情報を記述し、この2つをgitignoreに追加。
 
 # 問題点
-スキップ後に自動で変更されないことがあった
+スキップ後に自動で変更されないことがあった　修正済み
+
+abort後に ismatching フラグを折り忘れていた　修正済み
+
+mp settings で名前に[] が入るプレイヤーを正しく認識できない
+
+/skip機能の追加 hostなら即変更、それ以外なら投票で変更
+
+timer機能
+
+キューの先頭にゴミが付く
