@@ -4,7 +4,6 @@ import { parser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, Pl
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
 import { MpSettingsParser, PlayerSettings } from "./MpSettingsParser";
-const BanchoHostMask: string = "osu!Bancho.";
 
 export class Lobby implements ILobby {
   // Members
@@ -34,7 +33,7 @@ export class Lobby implements ILobby {
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
   BanchoChated = new TypedEvent<{ message: string }>();
-  PlayerChated = new TypedEvent<{ userid: string, message: string }>();
+  PlayerChated = new TypedEvent<{ player: Player, message: string }>();
 
   constructor(ircClient: IIrcClient) {
     if (ircClient.conn == null) {
@@ -130,7 +129,11 @@ export class Lobby implements ILobby {
       }
       this.BanchoChated.emit({ message });
     } else {
-      this.PlayerChated.emit({ userid: from, message });
+      const p = this.GetPlayer(from);
+      if (p != null) {
+        this.PlayerChated.emit({ player: p, message });
+      }
+      
     }
   }
 
@@ -205,6 +208,7 @@ export class Lobby implements ILobby {
   }
 
   RaiseAbortedMatch(): void {
+    this.isMatching = false;
     this.AbortedMatch.emit();
   }
 
@@ -246,7 +250,7 @@ export class Lobby implements ILobby {
     }
     this.status = LobbyStatus.Making;
     return new Promise<string>(resolve => {
-      if (this.ircClient.hostMask == BanchoHostMask) {
+      if (this.ircClient.hostMask != "") {
         this.MakeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
         this.ircClient.once("registered", () => {
@@ -259,6 +263,7 @@ export class Lobby implements ILobby {
   private MakeLobbyAsyncCore(title: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const onJoin = (channel: string, who: string) => {
+        console.log("on join");
         if (who == this.ircClient.nick) {
           this.channel = channel;
           this.name = title;
@@ -269,10 +274,13 @@ export class Lobby implements ILobby {
           this.SendMessage("!mp password");
           this.SendMessage("!mp invite gnsksz");
           resolve(this.id);
+        } else {
+          reject("unexpected argument who : " + who);
         }
       };
       this.ircClient.on("join", onJoin);
       this.ircClient.say("BanchoBot", "!mp make " + title);
+      console.log("sent mp message");
     });
   }
 

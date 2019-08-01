@@ -40,7 +40,7 @@ export interface ILobby {
   UnexpectedAction: TypedEvent<Error>;
   NetError: TypedEvent<Error>;
   BanchoChated: TypedEvent<{ message: string }>;
-  PlayerChated: TypedEvent<{ userid: string, message: string }>;
+  PlayerChated: TypedEvent<{ player: Player, message: string }>;
 }
 
 export enum LobbyStatus {
