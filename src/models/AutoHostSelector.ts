@@ -1,6 +1,7 @@
 import { ILobby } from "./ILobby";
 import { Player } from "./Player";
 import { IHostSelector } from "./IHostSelector";
+import { IIrcConfig, getIrcConfig } from "../config";
 
 export interface AutoHostSelectorOption {
 
@@ -10,13 +11,10 @@ export class AutoHostSelector implements IHostSelector {
   lobby: ILobby;
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
+  hostPending: Player | undefined;
 
   get currentHost() {
     return this.lobby.host;
-  }
-
-  get pendingHost() {
-    return this.lobby.hostPending;
   }
 
   constructor(lobby: ILobby, option: AutoHostSelectorOption | null = null) {
@@ -34,6 +32,7 @@ export class AutoHostSelector implements IHostSelector {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
+    this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player, a.message));
   }
 
   // プレイヤーが参加した際に実行される
@@ -71,7 +70,7 @@ export class AutoHostSelector implements IHostSelector {
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
     // ホストが自分で変更した場合
-    if (this.hostQueue[0] != newhost) {
+    if (this.hostQueue[0] != newhost && this.hostPending != newhost) {
       this.selectNextHost();
     }
   }
@@ -85,6 +84,44 @@ export class AutoHostSelector implements IHostSelector {
     this.selectNextHost();
   }
 
+  private onPlayerChated(player: Player, message: string) {
+    const auth = this.getPlayerAuthority(player);
+    if (message == "!info" || message == "!help") {
+      this.lobby.SendMessage("--  Osu Auto Host Rotation Bot  --");
+      this.lobby.SendMessage("!queue => show host queue.");
+      this.lobby.SendMessage("!skip => skip host. only host can use.");
+      this.lobby.SendMessage("!abort => abort match. use when the game stucked.");
+      this.lobby.SendMessage("!info => show this message.");
+      return;
+    }
+
+    if (message == "!queue") {
+      const m = this.hostQueue.reduce((p, c) => `${p}, ${this.escapeUserId(c.id)}`, "host queue > ");
+      this.lobby.SendMessage(m);
+      return;
+    }
+
+  }
+
+  // ユーザーIDを表示するときhighlightされないように名前を変更する
+  private escapeUserId(userid : string) : string {
+    return userid[0] + "\u{200B}" + userid.substring(1);
+  }
+
+  private botOwnerCache: string | undefined;
+  private getPlayerAuthority(player: Player): number {
+    if (this.botOwnerCache == undefined) {
+      this.botOwnerCache = getIrcConfig().nick;
+    }
+    if (player.id == this.botOwnerCache) {
+      return 2;
+    } else if (player == this.lobby.host) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
   // !mp host コマンドの発行
   // 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
   // キューの先頭を末尾に
@@ -95,6 +132,7 @@ export class AutoHostSelector implements IHostSelector {
 
     this.rotateQueue();
     if (this.hostQueue[0] != this.lobby.host) {
+      this.hostPending = this.hostQueue[0];
       this.lobby.TransferHost(this.hostQueue[0]);
     }
   }
