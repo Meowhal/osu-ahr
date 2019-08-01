@@ -33,6 +33,8 @@ export class Lobby implements ILobby {
   AbortedMatch = new TypedEvent<void>();
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
+  BanchoChated = new TypedEvent<{ message: string }>();
+  PlayerChated = new TypedEvent<{ userid: string, message: string }>();
 
   constructor(ircClient: IIrcClient) {
     if (ircClient.conn == null) {
@@ -126,8 +128,9 @@ export class Lobby implements ILobby {
           // log
           break;
       }
+      this.BanchoChated.emit({ message });
     } else {
-      // log
+      this.PlayerChated.emit({ userid: from, message });
     }
   }
 
@@ -337,7 +340,7 @@ export class Lobby implements ILobby {
         if (this.mpSettingParser != null && this.mpSettingParser.parsed) {
           this.name = this.mpSettingParser.name as string;
           console.log("@ms update lobby name");
-          for(let ps of this.mpSettingParser.players as PlayerSettings[]) {
+          for (let ps of this.mpSettingParser.players as PlayerSettings[]) {
             if (!this.Includes(ps.id)) {
               console.log("@ms update player");
               this.RaisePlayerJoined(ps.id, ps.slot);

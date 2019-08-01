@@ -27,7 +27,7 @@ export interface ILobby {
   EnterLobbyAsync(channel: string): Promise<string>; // TODO:ロビーのチャンネルが存在しないときの処理
   CloseLobbyAsync(): Promise<void>;
   LoadLobbySettingsAsync(): Promise<void>;
-  
+
   PlayerJoined: TypedEvent<{ player: Player, slot: number }>;
   PlayerLeft: TypedEvent<Player>;
   BeatmapChanging: TypedEvent<void>;
@@ -39,7 +39,8 @@ export interface ILobby {
   AbortedMatch: TypedEvent<void>;
   UnexpectedAction: TypedEvent<Error>;
   NetError: TypedEvent<Error>;
-
+  BanchoChated: TypedEvent<{ message: string }>;
+  PlayerChated: TypedEvent<{ userid: string, message: string }>;
 }
 
 export enum LobbyStatus {
