@@ -20,7 +20,8 @@ export function logIrcEvent(client: IIrcClient) {
     console.error('ERROR: %s: %s', message.command, message.args.join(' '));
   });
   client.on('registered', function (message) {
-    console.log('@reg %s', message);
+    const args = message.args as string[];
+    console.log('@reg %s', args.join(", "));
   });
   client.on('message', function (from, to, message) {
     console.log('@msg %s => %s: %s', from, to, message);
