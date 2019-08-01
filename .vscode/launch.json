@@ -4,6 +4,7 @@
   // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+
     {
       "type": "node",
       "request": "launch",
@@ -17,6 +18,23 @@
           "--colors",
           "${workspaceFolder}/src/tests/index.ts",
       ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "cli debug",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "args": [
+          "${workspaceFolder}/src/index.ts",
+      ],
+      "sourceMaps": true,
+      "env": {
+        "NODE_ENV": "development",
+      },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"
