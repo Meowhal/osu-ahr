@@ -1,6 +1,5 @@
 import { AutoHostSelector, Lobby, logIrcEvent, IIrcClient, parser } from "./models";
 import * as readline from 'readline';
-import { IrcTrial } from "./trials/IrcTrial";
 
 interface Scene {
   prompt: string;
@@ -22,12 +21,12 @@ export class OahrCli {
   private scene: Scene;
   private scenes = {
     mainMenu: decScene("[m]ake lobby, [e]nter lobby, [q]uit > ", async line => {
-      console.log("red:" + line);
       let l = parser.SplitCliCommand(line);
       switch (l.command) {
         case "m":
           if (l.arg == "") return;
           try {
+            console.log("make lobby, name : " + l.arg);
             await this.lobby.MakeLobbyAsync(l.arg);
             this.scene = this.scenes.lobbyMenu;
           } catch (e) {
@@ -39,6 +38,7 @@ export class OahrCli {
           try {
             if (l.arg == "") return;
             const channel = parser.EnsureMpChannelId(l.arg);
+            console.log("enter lobby, channel : " + channel);
             await this.lobby.EnterLobbyAsync(channel);
             await this.lobby.LoadLobbySettingsAsync();
             this.scene = this.scenes.lobbyMenu;
@@ -72,8 +72,8 @@ export class OahrCli {
           break;
         case "e":
           console.log("exit");
-          
-          
+
+
           this.scene = this.scenes.exited;
           break;
         default:
@@ -87,7 +87,7 @@ export class OahrCli {
 
   displayStatus(): void {
     console.log("queue:");
-    for(let p of this.selector.hostQueue) {
+    for (let p of this.selector.hostQueue) {
       console.log("  " + p.id);
     }
     console.log("");
@@ -117,8 +117,10 @@ export class OahrCli {
     }
     let r = rl as readline.Interface;
 
-    r.setPrompt(this.prompt);
-    r.prompt();
+    this.client.once("registered", () => {
+      r.setPrompt(this.prompt);
+      r.prompt();
+    });
 
     r.on("line", line => {
       this.scene.reaction(line).then(() => {
@@ -131,9 +133,9 @@ export class OahrCli {
         }
       });
     });
-    r.on("close", () =>{ 
+    r.on("close", () => {
       if (this.client != null) {
-        this.client.disconnect("goodby", () => {});
+        this.client.disconnect("goodby", () => { });
       }
     });
   }
