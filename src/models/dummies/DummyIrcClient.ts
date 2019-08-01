@@ -208,6 +208,20 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           } else {
             this.raiseMessageAsync("BanchoBot", this.channel, "The match is not in progress");
           }
+          break;
+        case "settings":
+          const m = (msg:string) => this.raiseMessageAsync("BanchoBot", this.channel, msg);
+          m('Room name: lobby name, History: https://osu.ppy.sh/mp/123');
+          m("Beatmap: https://osu.ppy.sh/b/1562893 Feryquitous feat. Aitsuki Nakuru - Kairikou [Miura's Extra]");
+          m("Team mode: HeadToHead, Win condition: Score");
+          m("Active mods: Freemod");
+          m(`Players: ${this.players.size}`);
+
+          let i = 1;
+          for(let p of this.players) {
+            m(`Slot ${i}  Not Ready https://osu.ppy.sh/u/123 ${p}       `);
+            i++;
+          }
       }
     }
   }
