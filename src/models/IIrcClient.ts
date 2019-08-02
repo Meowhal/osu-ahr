@@ -1,5 +1,6 @@
 import * as irc from "irc";
 import { EventEmitter } from "events";
+import { DummyIrcClient } from "./dummies/DummyIrcClient";
 
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、
@@ -24,10 +25,10 @@ export function logIrcEvent(client: IIrcClient) {
     console.log('@reg %s', args.join(", "));
   });
   client.on('message', function (from, to, message) {
-    console.log('@msg %s => %s: %s', from, to, message);
+    console.log('@msg  %s => %s: %s', from, to, message);
   });
   client.on('pm', function (nick, message) {
-    console.log('@pm %s: %s', nick, message);
+    console.log('@pm   %s: %s', nick, message);
   });
   client.on('join', function (channel, who) {
     console.log('@join %s has joined %s', who, channel);
@@ -39,6 +40,11 @@ export function logIrcEvent(client: IIrcClient) {
     console.log('@kick %s was kicked from %s by %s: %s', who, channel, by, reason);
   });
   client.on('invite', (channel, from) => {
-    console.log(`@invite ${from} invite you to ${channel}`);
+    console.log(`@invt ${from} invite you to ${channel}`);
   });
+  if (!(client instanceof DummyIrcClient)) {
+    client.on('sentMessage', function (to, message) {
+      console.log('@sent bot => %s: %s', to, message);
+    });
+  }
 }
