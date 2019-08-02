@@ -4,6 +4,8 @@ import { parser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, Pl
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
 import { MpSettingsParser, PlayerSettings } from "./MpSettingsParser";
+import { getIrcConfig } from "../config";
+import { LobbyPlugin } from "./LobbyPlugin";
 
 export class Lobby implements ILobby {
   // Members
@@ -18,6 +20,7 @@ export class Lobby implements ILobby {
   playersMap: Map<string, Player>;
   isMatching: boolean;
   mpSettingParser: MpSettingsParser | undefined;
+  plugins: LobbyPlugin[] = [];
 
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
@@ -33,7 +36,8 @@ export class Lobby implements ILobby {
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
   BanchoChated = new TypedEvent<{ message: string }>();
-  PlayerChated = new TypedEvent<{ player: Player, message: string }>();
+  PlayerChated = new TypedEvent<{ player: Player, authority: number, message: string }>();
+  PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
 
   constructor(ircClient: IIrcClient) {
     if (ircClient.conn == null) {
@@ -48,7 +52,7 @@ export class Lobby implements ILobby {
     this.isMatching = false;
 
     this.ircClient.on("message", (from, to, message) => {
-      this.HandleBanchoResponse(from, to, message);
+      this.handleMessage(from, to, message);
     });
     this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
@@ -86,54 +90,79 @@ export class Lobby implements ILobby {
     return this.players.has(p);
   }
 
-  HandleBanchoResponse(from: string, to: string, message: string) {
+  private handleMessage(from: string, to: string, message: string) {
     if (from == "BanchoBot" && to == this.channel) {
-      const c = parser.ParseBanchoResponse(message);
-      switch (c.type) {
-        case BanchoResponseType.BeatmapChanged:
-          this.RaiseBeatmapChanged(c.param as string);
-          break;
-        case BanchoResponseType.BeatmapChanging:
-          this.RaiseBeatmapChanging();
-          break;
-        case BanchoResponseType.HostChanged:
-          this.RaiseHostChanged(c.param as string);
-          break;
-        case BanchoResponseType.UserNotFound:
-          this.OnUserNotFound();
-          break;
-        case BanchoResponseType.MatchFinished:
-          this.RaiseMatchFinished();
-          break;
-        case BanchoResponseType.MatchStarted:
-          this.RaiseMatchStarted();
-          break;
-        case BanchoResponseType.PlayerFinished:
-          let p = c.param as PlayerFinishedParameter;
-          this.RaisePlayerFinished(p.id, p.score, p.isPassed);
-          break;
-        case BanchoResponseType.PlayerJoined:
-          let q = c.param as PlayerJoinedParameter;
-          this.RaisePlayerJoined(q.id, q.slot);
-          break;
-        case BanchoResponseType.PlayerLeft:
-          this.RaisePlayerLeft(c.param as string);
-          break;
-        case BanchoResponseType.AbortedMatch:
-          this.RaiseAbortedMatch();
-          break;
-        case BanchoResponseType.None:
-        default:
-          // log
-          break;
-      }
+      this.handleBanchoResponse(message);
       this.BanchoChated.emit({ message });
     } else {
       const p = this.GetPlayer(from);
       if (p != null) {
-        this.PlayerChated.emit({ player: p, message });
+        this.handlePlayerChat(p, message);
+        this.PlayerChated.emit({ player: p, authority: this.getPlayerAuthority(p), message });
       }
-      
+    }
+  }
+
+  private handleBanchoResponse(message: string) {
+    const c = parser.ParseBanchoResponse(message);
+    switch (c.type) {
+      case BanchoResponseType.BeatmapChanged:
+        this.RaiseBeatmapChanged(c.param as string);
+        break;
+      case BanchoResponseType.BeatmapChanging:
+        this.RaiseBeatmapChanging();
+        break;
+      case BanchoResponseType.HostChanged:
+        this.RaiseHostChanged(c.param as string);
+        break;
+      case BanchoResponseType.UserNotFound:
+        this.OnUserNotFound();
+        break;
+      case BanchoResponseType.MatchFinished:
+        this.RaiseMatchFinished();
+        break;
+      case BanchoResponseType.MatchStarted:
+        this.RaiseMatchStarted();
+        break;
+      case BanchoResponseType.PlayerFinished:
+        let p = c.param as PlayerFinishedParameter;
+        this.RaisePlayerFinished(p.id, p.score, p.isPassed);
+        break;
+      case BanchoResponseType.PlayerJoined:
+        let q = c.param as PlayerJoinedParameter;
+        this.RaisePlayerJoined(q.id, q.slot);
+        break;
+      case BanchoResponseType.PlayerLeft:
+        this.RaisePlayerLeft(c.param as string);
+        break;
+      case BanchoResponseType.AbortedMatch:
+        this.RaiseAbortedMatch();
+        break;
+      case BanchoResponseType.None:
+      default:
+        // log
+        break;
+    }
+  }
+
+  private handlePlayerChat(player: Player, message: string): void {
+    if (message == "!info" || message == "!help") {
+      this.SendMessage("--  Osu Auto Host Rotation Bot  --");
+      this.SendMessage("!info => show this message.");
+    }
+  }
+
+  private botOwnerCache: string | undefined;
+  private getPlayerAuthority(player: Player): number {
+    if (this.botOwnerCache == undefined) {
+      this.botOwnerCache = getIrcConfig().nick;
+    }
+    if (player.id == this.botOwnerCache) {
+      return 2;
+    } else if (player == this.host) {
+      return 1;
+    } else {
+      return 0;
     }
   }
 
@@ -238,6 +267,7 @@ export class Lobby implements ILobby {
   SendMessage(message: string): void {
     if (this.channel != undefined) {
       this.ircClient.say(this.channel, message);
+      this.ircClient.emit("sentMessage", this.channel, message);
     }
   }
 
@@ -251,19 +281,18 @@ export class Lobby implements ILobby {
     this.status = LobbyStatus.Making;
     return new Promise<string>(resolve => {
       if (this.ircClient.hostMask != "") {
-        this.MakeLobbyAsyncCore(title).then(v => resolve(v));
+        this.makeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
         this.ircClient.once("registered", () => {
-          this.MakeLobbyAsyncCore(title).then(v => resolve(v));
+          this.makeLobbyAsyncCore(title).then(v => resolve(v));
         });
       }
     });
   }
 
-  private MakeLobbyAsyncCore(title: string): Promise<string> {
+  private makeLobbyAsyncCore(title: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const onJoin = (channel: string, who: string) => {
-        console.log("on join");
         if (who == this.ircClient.nick) {
           this.channel = channel;
           this.name = title;
@@ -279,8 +308,10 @@ export class Lobby implements ILobby {
         }
       };
       this.ircClient.on("join", onJoin);
-      this.ircClient.say("BanchoBot", "!mp make " + title);
-      console.log("sent mp message");
+      const trg = "BanchoBot";
+      const msg = "!mp make " + title;
+      this.ircClient.say(trg, msg);
+      this.ircClient.emit("sentMessage", trg, msg);
     });
   }
 
@@ -371,11 +402,15 @@ export class Lobby implements ILobby {
   }
 
   logLobbyStatus(): void {
-    console.log("lobby id :" + this.id);
-    console.log("status :" + this.status);
-    console.log("players :");
-    for (let p of this.players) {
-      console.log("  " + p.id);
+    console.log(`=== lobby status ===
+  lobby id : ${this.id}
+  status : ${this.status}
+  players : ${[...this.players].map(p => p.id).join(", ")};
+`
+    );
+
+    for (let p of this.plugins) {
+      console.log(p.getPluginStatus());
     }
   }
 }

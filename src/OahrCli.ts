@@ -86,11 +86,7 @@ export class OahrCli {
   };
 
   displayStatus(): void {
-    console.log("queue:");
-    for (let p of this.selector.hostQueue) {
-      console.log("  " + p.id);
-    }
-    console.log("");
+    this.lobby.logLobbyStatus();
   }
 
   get prompt(): string {

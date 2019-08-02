@@ -1,5 +1,6 @@
 import { Player } from "./Player";
 import { TypedEvent } from "../libs/events";
+import { LobbyPlugin } from "./LobbyPlugin";
 export { Player }
 
 // BanchoBotとの対話を抽象化する
@@ -15,6 +16,7 @@ export interface ILobby {
   hostPending: Player | null;
   playersMap: Map<string, Player>;
   isMatching: boolean;
+  plugins: LobbyPlugin[];
 
   GetPlayer(userid: string): Player | null;
   Includes(userid: string): boolean;
@@ -40,7 +42,8 @@ export interface ILobby {
   UnexpectedAction: TypedEvent<Error>;
   NetError: TypedEvent<Error>;
   BanchoChated: TypedEvent<{ message: string }>;
-  PlayerChated: TypedEvent<{ player: Player, message: string }>;
+  PlayerChated: TypedEvent<{ player: Player, authority: number, message: string }>;
+  PluginMessage: TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>;
 }
 
 export enum LobbyStatus {

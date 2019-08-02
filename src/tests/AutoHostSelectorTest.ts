@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../models/dummies';
-import { AutoHostSelector, Lobby, LobbyStatus, logIrcEvent, Player, ILobby, IHostSelector, IIrcClient } from "../models";
+import { AutoHostSelector, Lobby, logIrcEvent } from "../models";
 
 export function AutoHostSelectorTest() {
   async function prepareSelector(logIrc = false): Promise<{ selector: AutoHostSelector, lobby: Lobby, ircClient: DummyIrcClient }> {
@@ -40,14 +40,14 @@ export function AutoHostSelectorTest() {
         assert.equal(s.hostQueue.length, 0);
         break;
       case "s1":
-        assert.isTrue(s.hostQueue.length > 0 );
+        assert.isTrue(s.hostQueue.length > 0);
         assert.isTrue(!l.isMatching);
         assert.isTrue(l.host == null);
         break;
       case "h":
-        assert.isTrue(s.hostQueue.length > 0 );
+        assert.isTrue(s.hostQueue.length > 0);
         assert.isTrue(!l.isMatching);
-        assert.isTrue( l.host != null);
+        assert.isTrue(l.host != null);
         break;
       case "m":
         assert.isTrue(s.hostQueue.length > 0);
@@ -75,13 +75,13 @@ export function AutoHostSelectorTest() {
     const { selector, lobby, ircClient } = await prepareSelector();
     ircClient.latency = 1;
     let s1checked = false;
-    lobby.PlayerJoined.once(({player, slot}) => {
+    lobby.PlayerJoined.once(({ player, slot }) => {
       assert.equal(player.id, "player1");
       assertStateIs("s1", selector);
       s1checked = true;
     });
     assertStateIs("s0", selector);
-    
+
     await ircClient.emulateAddPlayerAsync("player1");
     await delay(5);
     assertStateIs("h", selector);
@@ -127,7 +127,7 @@ export function AutoHostSelectorTest() {
     await ircClient.emulateMatchAsync(0);
     assertStateIs("h", selector);
     assertHostIs("player2", lobby);
-  }); 
+  });
 
   it("h[3] -> m -> h[3] repeat", async () => {
     const { selector, lobby, ircClient } = await prepareSelector();
@@ -146,7 +146,7 @@ export function AutoHostSelectorTest() {
     await ircClient.emulateMatchAsync(0);
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
-  }); 
+  });
 
   it("m join", async () => {
     const { selector, lobby, ircClient } = await prepareSelector();
@@ -165,7 +165,7 @@ export function AutoHostSelectorTest() {
     await ircClient.emulateMatchAsync();
     assertStateIs("h", selector);
     assertHostIs("player3", lobby);
-  }); 
+  });
 
   it("m left", async () => {
     const { selector, lobby, ircClient } = await prepareSelector();
@@ -188,7 +188,7 @@ export function AutoHostSelectorTest() {
     await task;
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
-  }); 
+  });
 
   it("host skip test", async () => {
     const { selector, lobby, ircClient } = await prepareSelector(true);
@@ -197,17 +197,26 @@ export function AutoHostSelectorTest() {
     assertHostIs("player1", lobby);
 
     lobby.RaiseHostChanged("player2");
+    await delay(1);
     assertHostIs("player2", lobby);
 
     lobby.RaiseHostChanged("player1");
+    await delay(1);
     assertHostIs("player3", lobby);
 
     lobby.RaiseHostChanged("player3");
+    await delay(1);
     assertHostIs("player3", lobby);
 
     lobby.RaiseHostChanged("player2");
+    await delay(1);
     assertHostIs("player1", lobby);
-  }); 
+  });
 
+  it("logLobbyStatus test", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector(true);
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    lobby.logLobbyStatus();
+  })
 
 }

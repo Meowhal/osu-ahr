@@ -1,9 +1,7 @@
-import * as irc from 'irc';
+
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, logIrcEvent, Player, ILobby } from '../models';
-import { DummyIrcClient } from '../models/dummies';
-import { getIrcConfig } from "../config";
-const test_on_irc = false;
+import { Lobby, LobbyStatus, logIrcEvent, Player} from '../models';
+import { DummyIrcClient, DummyLobbyPlugin } from '../models/dummies';
 
 export function LobbyTest() {
 
@@ -304,5 +302,11 @@ export function LobbyTest() {
     await p;
     assert.isTrue(ms);
     assert.isTrue(ma);
+  });
+
+  it("plugin test", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    const lp = new DummyLobbyPlugin(lobby);
+    lobby.logLobbyStatus();
   });
 }; 
