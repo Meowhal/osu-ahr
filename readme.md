@@ -195,17 +195,27 @@ Banchobot機能
 サーバーパスワードなどをgitに公開するのはまずいのでconfigモジュールで管理する。
 configモジュールは現在のNODE_ENV環境変数により適切なjsonコンフィグファイルを選択してロードしてくれる。NODE_ENVが指定されていない場合はDevelopmentが使用され、Developmentが存在しない場合はdefaultが使用される。共通項目はdefault.jsonに記述。production.jsonとdevelopment.jsonに非公開情報を記述し、この2つをgitignoreに追加。
 
-# 問題点
-スキップ後に自動で変更されないことがあった　修正済み
+# usernameルール
+banchobotのメッセージからユーザー名を抜き出すための正規表現を作る際に、
+公式のusername要件が必要になったので調べた。
+[github](https://github.com/ppy/osu-web/blob/master/app/Libraries/UsernameValidation.php)
+### ルール
+- ^[A-Za-z0-9-\[\]_ ]+$#u
+- 名前の前後のスペースはだめ
+- 3文字以上、15文字以下
+- スペースを2つ以上続けてはだめ
+- _ か スペースは混ぜて使えない
+- 
 
-abort後に ismatching フラグを折り忘れていた　修正済み
+# TASK
+## done
+- スキップ後に自動で変更されないことがあった　修正済み
+- abort後に ismatching フラグを折り忘れていた　修正済み
+- キューの先頭にゴミが付く 修正
+- mp settings で名前に[] が入るプレイヤーを正しく認識できない 修正済み
+## working
+- /skip機能の追加 hostなら即変更、それ以外なら投票で変更　実装・未テスト
+- timer機能　実装・未テスト
 
-mp settings で名前に[] が入るプレイヤーを正しく認識できない
-
-/skip機能の追加 hostなら即変更、それ以外なら投票で変更　実装・未テスト
-
-timer機能　実装・未テスト
-
-キューの先頭にゴミが付く 修正
-
-試合がスタックした場合のabort投票。abort時のホスト切り替え（始まる前にスタックしたか、終了時にスタックしたか） => 一人でもmatch finishedなら切り替え。
+## stack
+- 試合がスタックした場合のabort投票。abort時のホスト切り替え（始まる前にスタックしたか、終了時にスタックしたか） => 一人でもmatch finishedなら切り替え。

@@ -53,7 +53,7 @@ export class MpSettingsParser {
       this.players = new Array(len);
       return false;
     }
-    m = line.match(/Slot (\d+)\s+(.+) (https\S+) ([^\[]+\w)\s+(\[(.+)\])?/);
+    m = line.match(/^Slot (\d+)\s+(.+) (https\S+) ([A-Za-z0-9-\[\]_ ]+)\s{2,}(\[(.+)\])?$/);
     if (m) {
       if (this.players == null) {
         throw new Error("unexpected mpsetting response order");
