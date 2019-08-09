@@ -71,6 +71,8 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.hostQueue[0] != newhost && this.hostPending != newhost) {
       this.selectNextHost();
       return;
+    } else {
+      this.hostPending = undefined;
     }
   }
 

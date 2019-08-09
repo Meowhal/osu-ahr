@@ -214,7 +214,7 @@ export function AutoHostSelectorTest() {
   });
 
   it("logLobbyStatus test", async () => {
-    const { selector, lobby, ircClient } = await prepareSelector(true);
+    const { selector, lobby, ircClient } = await prepareSelector(false);
     await AddPlayers(["player1", "player2", "player3"], ircClient);
     lobby.logLobbyStatus();
   })
