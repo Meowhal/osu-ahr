@@ -8,7 +8,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "test with mocha",
+      "name": "mocha",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [
           "-r",
