@@ -28,6 +28,11 @@ export function LobbyTest() {
       players: players
     };
   }
+  
+  function delay(ms: number): Promise<void> {
+    if (ms == 0) return Promise.resolve();
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   // ロビー作成、ロビー終了テスト
   it("make&close lobby test", async () => {
@@ -188,11 +193,13 @@ export function LobbyTest() {
     lobby.TransferHost(nexthost);
     let host = await task;
     assert.equal(host, nexthost);
+    assert.equal(lobby.hostPending, null);
     nexthost = players[1];
     task = getNewHostAsync();
     lobby.TransferHost(nexthost);
     host = await task;
     assert.equal(host, nexthost);
+    assert.equal(lobby.hostPending, null);
   });
 
   // ホスト任命後に離脱した場合

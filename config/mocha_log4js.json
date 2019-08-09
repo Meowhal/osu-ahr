@@ -37,19 +37,19 @@
       "appenders" :[
         "console"
       ],
-      "level": "all"
+      "level": "debug"
     },
     "lobby": {
       "appenders" :[
         "console"
       ],
-      "level": "all"
+      "level": "debug"
     },
     "plugins": {
       "appenders" :[
         "console"
       ],
-      "level": "all"
+      "level": "debug"
     }
   }
 }

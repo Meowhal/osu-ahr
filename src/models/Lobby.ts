@@ -212,7 +212,7 @@ export class Lobby implements ILobby {
       this.players.add(player);
     }
 
-    if (this.hostPending == this.host) {
+    if (this.hostPending == player) {
       this.hostPending = null;
     } else if (this.hostPending != null) {
       this.logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.id, userid);
