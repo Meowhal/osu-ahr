@@ -184,7 +184,6 @@ export function AutoHostSelectorTest() {
     task = ircClient.emulateMatchAsync(4);
     await delay(1);
     await ircClient.emulateRemovePlayerAsync("player2");
-    await ircClient.emulateRemovePlayerAsync("player3");
     await task;
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
