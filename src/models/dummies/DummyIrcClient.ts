@@ -1,6 +1,8 @@
 import * as irc from "irc";
 import { EventEmitter } from "events";
 import { parser, MpCommand, IIrcClient } from "..";
+import log4js from "log4js";
+const logger = log4js.getLogger("irc");
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
 export class DummyIrcClient extends EventEmitter implements IIrcClient {
@@ -222,6 +224,10 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             m(`Slot ${i}  Not Ready https://osu.ppy.sh/u/123 ${p}       `);
             i++;
           }
+          break;
+        default:
+          logger.warn("unhandled command", mp.command, mp.args);
+          break;
       }
     }
   }

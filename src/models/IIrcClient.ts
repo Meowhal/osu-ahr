@@ -1,7 +1,7 @@
 import * as irc from "irc";
 import { EventEmitter } from "events";
 import { DummyIrcClient } from "./dummies/DummyIrcClient";
-
+import log4js from "log4js";
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、
 // このインターフェースで宣言しておけばダミーと本物どちらも取り扱える（はず
@@ -17,34 +17,35 @@ export interface IIrcClient extends EventEmitter {
 }
 
 export function logIrcEvent(client: IIrcClient) {
+  const logger = log4js.getLogger("irc");
   client.on('error', function (message) {
-    console.error('ERROR: %s: %s', message.command, message.args.join(' '));
+    logger.error('ERROR: %s: %s', message.command, message.args.join(' '));
   });
   client.on('registered', function (message) {
     const args = message.args as string[];
-    console.log('@reg %s', args.join(", "));
+    logger.debug('@reg %s', args.join(", "));
   });
   client.on('message', function (from, to, message) {
-    console.log('@msg  %s => %s: %s', from, to, message);
+    logger.debug('@msg  %s => %s: %s', from, to, message);
   });
   client.on('pm', function (nick, message) {
-    console.log('@pm   %s: %s', nick, message);
+    logger.debug('@pm   %s: %s', nick, message);
   });
   client.on('join', function (channel, who) {
-    console.log('@join %s has joined %s', who, channel);
+    logger.debug('@join %s has joined %s', who, channel);
   });
   client.on('part', function (channel, who, reason) {
-    console.log('@part %s has left %s: %s', who, channel, reason);
+    logger.debug('@part %s has left %s: %s', who, channel, reason);
   });
   client.on('kick', function (channel, who, by, reason) {
-    console.log('@kick %s was kicked from %s by %s: %s', who, channel, by, reason);
+    logger.debug('@kick %s was kicked from %s by %s: %s', who, channel, by, reason);
   });
   client.on('invite', (channel, from) => {
-    console.log(`@invt ${from} invite you to ${channel}`);
+    logger.debug(`@invt ${from} invite you to ${channel}`);
   });
   if (!(client instanceof DummyIrcClient)) {
     client.on('sentMessage', function (to, message) {
-      console.log('@sent bot => %s: %s', to, message);
+      logger.debug(`@sent bot => ${to}: ${message}`);
     });
   }
 }

@@ -6,6 +6,7 @@ import { TypedEvent } from "../libs/events";
 import { MpSettingsParser, PlayerSettings } from "./MpSettingsParser";
 import { getIrcConfig } from "../config";
 import { LobbyPlugin } from "./LobbyPlugin";
+import log4js from "log4js";
 
 export class Lobby implements ILobby {
   // Members
@@ -38,6 +39,7 @@ export class Lobby implements ILobby {
   BanchoChated = new TypedEvent<{ message: string }>();
   PlayerChated = new TypedEvent<{ player: Player, authority: number, message: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
+  logger = log4js.getLogger("lobby");
 
   constructor(ircClient: IIrcClient) {
     if (ircClient.conn == null) {
@@ -104,6 +106,7 @@ export class Lobby implements ILobby {
   }
 
   private handleBanchoResponse(message: string) {
+    this.logger.trace("bancho: %s", message);
     const c = parser.ParseBanchoResponse(message);
     switch (c.type) {
       case BanchoResponseType.BeatmapChanged:
@@ -140,7 +143,7 @@ export class Lobby implements ILobby {
         break;
       case BanchoResponseType.None:
       default:
-        // log
+        this.logger.info("unhandled bancho response : %s", message);
         break;
     }
   }
@@ -172,7 +175,8 @@ export class Lobby implements ILobby {
       this.players.add(player);
       this.PlayerJoined.emit({ player, slot });
     } else {
-      this.UnexpectedAction.emit(new Error("すでに参加しているはずのプレイヤーが参加しました。"));
+      this.logger.warn("参加済みのプレイヤーが再度参加した: %s", userid);
+      this.UnexpectedAction.emit(new Error("unexpected join"));
     }
   }
 
@@ -188,7 +192,8 @@ export class Lobby implements ILobby {
       }
       this.PlayerLeft.emit(player);
     } else {
-      this.UnexpectedAction.emit(new Error("未参加のプレイヤーが退出しました。"));
+      this.logger.warn("未参加のプレイヤーが退出した: %s", userid);
+      this.UnexpectedAction.emit(new Error("unexpected left"));
     }
   }
 
@@ -203,14 +208,14 @@ export class Lobby implements ILobby {
   RaiseHostChanged(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
-      // TODO:log 未参加のプレイヤーがホストになった
+      this.logger.warn("未参加のプレイヤーがホストになった: %s", userid);
       this.players.add(player);
     }
 
     if (this.hostPending == this.host) {
       this.hostPending = null;
     } else if (this.hostPending != null) {
-      // TODO:log pending中に別のユーザーがホストになった
+      this.logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.id, userid);
     } // pending == null は有効
     this.host = player;
     this.HostChanged.emit({ succeeded: true, player });
@@ -225,7 +230,7 @@ export class Lobby implements ILobby {
     const player = this.GetOrMakePlayer(userid);
     this.PlayerFinished.emit({ player, score, isPassed });
     if (!this.players.has(player)) {
-      //this.UnexpectedAction.emit(new Error("未参加のプレイヤーがゲームを終えました。"));
+      this.logger.info("未参加のプレイヤーがゲームを終えた: %s", userid);
       this.players.add(player);
       this.RaisePlayerJoined(userid, 0);
     }
@@ -254,7 +259,7 @@ export class Lobby implements ILobby {
   }
 
   TransferHost(user: Player): void {
-    this.hostPending = user; // TODO:失敗時の動作、ホスト対象者が応答待ちの間に抜けた場合
+    this.hostPending = user;
     this.SendMessage("!mp host " + user.id);
   }
 
@@ -279,10 +284,12 @@ export class Lobby implements ILobby {
       throw new Error("すでに部屋を作成済みです.");
     }
     this.status = LobbyStatus.Making;
+    this.logger.trace("start makeLobby");
     return new Promise<string>(resolve => {
       if (this.ircClient.hostMask != "") {
         this.makeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
+        this.logger.trace("waiting registered");
         this.ircClient.once("registered", () => {
           this.makeLobbyAsyncCore(title).then(v => resolve(v));
         });
@@ -303,7 +310,9 @@ export class Lobby implements ILobby {
           this.SendMessage("!mp password");
           this.SendMessage("!mp invite gnsksz");
           resolve(this.id);
+          this.logger.trace("completed makeLobby");
         } else {
+          this.logger.error("unexpected argument who : %s", who);
           reject("unexpected argument who : " + who);
         }
       };
@@ -316,6 +325,7 @@ export class Lobby implements ILobby {
   }
 
   EnterLobbyAsync(channel: string): Promise<string> {
+    this.logger.trace("start EnterLobby");
     return new Promise<string>((resolve, reject) => {
       const onJoin = (channel: string, who: string) => {
         if (who == this.ircClient.nick) {
@@ -326,25 +336,31 @@ export class Lobby implements ILobby {
           this.status = LobbyStatus.Entered;
           this.players.clear();
           resolve(this.id);
+          this.logger.trace("completed EnterLobby");
         }
       };
-      channel = parser.EnsureMpChannelId(channel);
-      if (channel == "") {
+      
+      let ch = parser.EnsureMpChannelId(channel);
+      if (ch == "") {
+        this.logger.error("invalid channel: %s", channel);
         reject();
         return;
       }
       this.ircClient.on("join", onJoin);
-      this.ircClient.join(channel);
+      this.ircClient.join(ch);
     });
   }
 
   CloseLobbyAsync(): Promise<void> {
+    this.logger.trace("start CloseLobby");
     if (this.status != LobbyStatus.Entered) {
+      this.logger.error("無効な呼び出し:CloseLobbyAsync");
       throw new Error("閉じるロビーがありません。");
     }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once("part", (channel: string, nick: string) => {
         this.ircClient.disconnect("goodby", () => {
+          this.logger.trace("completed CloseLobby");
           resolve();
         });
       });
@@ -360,6 +376,7 @@ export class Lobby implements ILobby {
     if (this.status != LobbyStatus.Entered || this.mpSettingParser != undefined) {
       return Promise.reject();
     }
+    this.logger.trace("start loadLobbySettings");
     this.mpSettingParser = new MpSettingsParser();
     let completed: (() => void) | null = null;
     const feed = (from: string, to: string, message: string): void => {
@@ -378,20 +395,20 @@ export class Lobby implements ILobby {
         this.ircClient.off("message", feed);
         if (this.mpSettingParser != null && this.mpSettingParser.parsed) {
           this.name = this.mpSettingParser.name as string;
-          console.log("@ms update lobby name");
           for (let ps of this.mpSettingParser.players as PlayerSettings[]) {
             if (!this.Includes(ps.id)) {
-              console.log("@ms update player");
+              this.logger.info("mpsettings find new player: %s", ps.id);
               this.RaisePlayerJoined(ps.id, ps.slot);
             }
             if (ps.isHost) {
               if (this.host == null || (this.host.id != ps.id)) {
-                console.log("@ms update host");
+                this.logger.info("mpsettings update host: %s", ps.id);
                 this.RaiseHostChanged(ps.id);
               }
             }
           }
         }
+        this.logger.trace("completed loadLobbySettings");
         this.mpSettingParser = undefined;
         resolve();
       }

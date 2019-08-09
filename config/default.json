@@ -3,13 +3,39 @@
     "configure": {
       "appenders": {
         "console": {
-          "type": "console"
+          "type": "logLevelFilter",
+          "level": "INFO",
+          "appender": {
+            "type": "console"
+          }      
+        },
+        "file": {
+          "type": "dateFile",
+          "filename": "logs/test.log"
         }
       },
       "categories": {
         "default": {
           "appenders": [
             "console"
+          ],
+          "level": "debug"
+        },
+        "irc": {
+          "appenders" :[
+            "console", "file"
+          ],
+          "level": "all"
+        },
+        "lobby": {
+          "appenders" :[
+            "console", "file"
+          ],
+          "level": "all"
+        },
+        "plugins": {
+          "appenders" :[
+            "console", "file"
           ],
           "level": "all"
         }
