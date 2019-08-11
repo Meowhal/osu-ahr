@@ -60,6 +60,7 @@ export class HostSkipper extends LobbyPlugin {
   private onHostChanged(succeeded: boolean, newhost: Player): void {
     if (!succeeded || this.lobby.isMatching) return;
     this.clearAll();
+    this.startTimer();
   }
 
   private onMatchStarted(): void {
