@@ -216,6 +216,16 @@ export function AutoHostSelectorTest() {
     const { selector, lobby, ircClient } = await prepareSelector(false);
     await AddPlayers(["player1", "player2", "player3"], ircClient);
     lobby.logLobbyStatus();
-  })
+  });
+
+  it("plugin message skip test", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector(true);
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+    selector.sendPluginMessage("skip");
+    await delay(1);
+    assertHostIs("player2", lobby);
+  });
 
 }
