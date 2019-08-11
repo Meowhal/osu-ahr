@@ -1,5 +1,13 @@
 import { AutoHostSelector, Lobby, logIrcEvent, IIrcClient, parser } from "./models";
 import * as readline from 'readline';
+import config from "config";
+
+export interface OahrCliOption {
+  invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
+  password: string;　// デフォルトのパスワード, 空文字でパスワードなし。
+}
+
+const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
 
 interface Scene {
   prompt: string;
@@ -17,6 +25,7 @@ export class OahrCli {
   client: IIrcClient;
   lobby: Lobby;
   selector: AutoHostSelector;
+  option: OahrCliOption = OahrCliDefaultOption;
 
   private scene: Scene;
   private scenes = {
@@ -28,6 +37,10 @@ export class OahrCli {
           try {
             console.log("make lobby, name : " + l.arg);
             await this.lobby.MakeLobbyAsync(l.arg);
+            this.lobby.SendMessage("!mp password " + this.option.password);
+            for (let p of this.option.invite_users) {
+              this.lobby.SendMessage("!mp invite " + p);
+            }
             this.scene = this.scenes.lobbyMenu;
           } catch (e) {
             console.log("faiiled to make lobby " + e);

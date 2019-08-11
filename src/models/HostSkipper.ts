@@ -1,6 +1,7 @@
 import { ILobby } from "./ILobby";
 import { Player } from "./Player";
 import { LobbyPlugin } from "./LobbyPlugin";
+import config from "config";
 import { IIrcConfig, getIrcConfig } from "../config";
 
 
@@ -10,11 +11,7 @@ export interface HostSkipperOption {
   skip_timer_delay_ms: number; // ホスト変更後に与えられるスキップ猶予時間
 }
 
-export const HostSkipperDefaultOption: HostSkipperOption = {
-  skip_request_rate: 0.5,
-  skip_request_min: 2,
-  skip_timer_delay_ms: 20 * 1000
-};
+const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
 
 /**
  * スキップ処理の受付部分を担当
@@ -34,7 +31,7 @@ export class HostSkipper extends LobbyPlugin {
   skipTimer: NodeJS.Timer | undefined;
   skipRequesters: Set<Player> = new Set<Player>();
 
-  constructor(lobby: ILobby, option: HostSkipperOption | any | null = null) {
+  constructor(lobby: ILobby, option: any | null = null) {
     super(lobby);
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
     this.registerEvents();
