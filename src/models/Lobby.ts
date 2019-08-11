@@ -307,8 +307,6 @@ export class Lobby implements ILobby {
           this.ircClient.off("join", onJoin);
           this.status = LobbyStatus.Entered;
           this.players.clear();
-          this.SendMessage("!mp password");
-          this.SendMessage("!mp invite gnsksz");
           resolve(this.id);
           this.logger.trace("completed makeLobby");
         } else {
@@ -339,7 +337,7 @@ export class Lobby implements ILobby {
           this.logger.trace("completed EnterLobby");
         }
       };
-      
+
       let ch = parser.EnsureMpChannelId(channel);
       if (ch == "") {
         this.logger.error("invalid channel: %s", channel);
