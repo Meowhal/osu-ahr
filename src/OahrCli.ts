@@ -26,8 +26,15 @@ export class OahrCli {
   lobby: Lobby;
   selector: AutoHostSelector;
   option: OahrCliOption = OahrCliDefaultOption;
-
   private scene: Scene;
+
+  constructor(client: IIrcClient) {
+    this.client = client;
+    this.lobby = new Lobby(this.client);
+    this.selector = new AutoHostSelector(this.lobby);
+    this.scene = this.scenes.mainMenu;
+  }
+  
   private scenes = {
     mainMenu: decScene("[m]ake lobby, [e]nter lobby, [q]uit > ", async line => {
       let l = parser.SplitCliCommand(line);
@@ -110,13 +117,7 @@ export class OahrCli {
     return this.scene === this.scenes.exited;
   }
 
-  constructor(client: IIrcClient) {
-    this.client = client;
-    this.lobby = new Lobby(this.client);
-    this.selector = new AutoHostSelector(this.lobby);
-    this.scene = this.scenes.mainMenu;
-  }
-
+  
   startApp(rl: readline.Interface | null) {
     if (rl == null) {
       rl = readline.createInterface({
