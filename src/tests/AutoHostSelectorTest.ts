@@ -24,7 +24,6 @@ export function AutoHostSelectorTest() {
     } else {
       assert.equal(host.id, userid);
     }
-
   }
 
   // async呼び出し用のディレイ関数
@@ -190,7 +189,7 @@ export function AutoHostSelectorTest() {
   });
 
   it("host skip test", async () => {
-    const { selector, lobby, ircClient } = await prepareSelector(true);
+    const { selector, lobby, ircClient } = await prepareSelector();
     await AddPlayers(["player1", "player2", "player3"], ircClient);
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
@@ -213,13 +212,13 @@ export function AutoHostSelectorTest() {
   });
 
   it("logLobbyStatus test", async () => {
-    const { selector, lobby, ircClient } = await prepareSelector(false);
+    const { selector, lobby, ircClient } = await prepareSelector();
     await AddPlayers(["player1", "player2", "player3"], ircClient);
     lobby.logLobbyStatus();
   });
 
   it("plugin message skip test", async () => {
-    const { selector, lobby, ircClient } = await prepareSelector(true);
+    const { selector, lobby, ircClient } = await prepareSelector();
     await AddPlayers(["player1", "player2", "player3"], ircClient);
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
