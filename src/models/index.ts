@@ -9,4 +9,5 @@ export * from "./Lobby";
 
 export * from "./LobbyPlugin";
 export * from "./AutoHostSelector";
+export * from "./AutoStarter";
 export * from "./HostSkipper";
