@@ -34,6 +34,7 @@ export class Lobby implements ILobby {
   PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
   MatchFinished = new TypedEvent<void>();
   AbortedMatch = new TypedEvent<void>();
+  AllPlayerReady = new TypedEvent<void>();
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
   BanchoChated = new TypedEvent<{ message: string }>();
@@ -141,6 +142,9 @@ export class Lobby implements ILobby {
       case BanchoResponseType.AbortedMatch:
         this.RaiseAbortedMatch();
         break;
+      case BanchoResponseType.AllPlayerReady:
+        this.RaiseAllPlayerReady();
+        break;
       case BanchoResponseType.None:
       default:
         this.logger.info("unhandled bancho response : %s", message);
@@ -244,6 +248,10 @@ export class Lobby implements ILobby {
   RaiseAbortedMatch(): void {
     this.isMatching = false;
     this.AbortedMatch.emit();
+  }
+
+  RaiseAllPlayerReady(): void {
+    this.AllPlayerReady.emit();
   }
 
   RaiseNetError(err: Error): void {

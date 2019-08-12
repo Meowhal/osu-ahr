@@ -60,6 +60,10 @@ export class CommandParser {
       return new BanchoResponse(BanchoResponseType.ClosedLobby, undefined);
     }
 
+    if (message == "All players are ready") {
+      return new BanchoResponse(BanchoResponseType.AllPlayerReady, undefined);
+    }
+
     return new BanchoResponse(BanchoResponseType.None, undefined);
   }
 
@@ -135,6 +139,7 @@ export enum BanchoResponseType {
   AbortedMatch,
   AbortMatchFailed,
   ClosedLobby,
+  AllPlayerReady,
 }
 
 export class BanchoResponse {

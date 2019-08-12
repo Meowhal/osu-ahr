@@ -39,6 +39,7 @@ export interface ILobby {
   PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean }>;
   MatchFinished: TypedEvent<void>;
   AbortedMatch: TypedEvent<void>;
+  AllPlayerReady: TypedEvent<void>;
   UnexpectedAction: TypedEvent<Error>;
   NetError: TypedEvent<Error>;
   BanchoChated: TypedEvent<{ message: string }>;
