@@ -2,6 +2,8 @@ import * as irc from "irc";
 import { EventEmitter } from "events";
 import { DummyIrcClient } from "./dummies/DummyIrcClient";
 import log4js from "log4js";
+const logger = log4js.getLogger("irc");
+
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、
 // このインターフェースで宣言しておけばダミーと本物どちらも取り扱える（はず
@@ -17,7 +19,7 @@ export interface IIrcClient extends EventEmitter {
 }
 
 export function logIrcEvent(client: IIrcClient) {
-  const logger = log4js.getLogger("irc");
+
   client.on('error', function (message) {
     logger.error('ERROR: %s: %s', message.command, message.args.join(' '));
   });

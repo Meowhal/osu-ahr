@@ -22,6 +22,6 @@ export class LobbyPlugin {
   }
 
   getPluginStatus(): string {
-    throw new Error("getPluginStatus not Implemented.");
+    return "";
   }
 }

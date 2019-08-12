@@ -1,6 +1,8 @@
 import { ILobby } from "./ILobby";
 import { Player } from "./Player";
 import { LobbyPlugin } from "./LobbyPlugin";
+import log4js from "log4js";
+const logger = log4js.getLogger("autoHostSelector");
 
 export interface AutoHostSelectorOption {
 
@@ -39,6 +41,7 @@ export class AutoHostSelector extends LobbyPlugin {
   private onPlayerJoined(player: Player, slot: number): void {
     this.hostQueue.push(player);
     if (this.lobby.players.size == 1) {
+      logger.trace("appoint first player to host");
       this.selectNextHost();
     }
   }
@@ -54,6 +57,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.hostQueue.length == 0) return;
     if (this.lobby.host == player // ホストが抜けた場合 
       || (this.lobby.host == null && this.lobby.hostPending == null)) { // ホストがいない、かつ承認待ちのホストがいない
+      logger.trace("host has gone");
       this.selectNextHost();
     }
   }
@@ -69,9 +73,11 @@ export class AutoHostSelector extends LobbyPlugin {
 
     // ホストが自分で変更した場合
     if (this.hostQueue[0] != newhost && this.hostPending != newhost) {
+      logger.trace("host appointed new host");
       this.selectNextHost();
       return;
     } else {
+      logger.trace("host appointment accomplished");
       this.hostPending = undefined;
     }
   }
@@ -97,6 +103,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
     if (type == "skip") {
+      logger.trace("plugin message skip recieved");
       this.selectNextHost();
     }
   }
@@ -111,6 +118,7 @@ export class AutoHostSelector extends LobbyPlugin {
   // キューの先頭を末尾に
   private selectNextHost(): void {
     if (this.hostQueue.length == 0) {
+      logger.error("selectNextHost is called when host queue is empty");
       throw new Error();
     }
 
@@ -118,6 +126,9 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.hostQueue[0] != this.lobby.host) {
       this.hostPending = this.hostQueue[0];
       this.lobby.TransferHost(this.hostQueue[0]);
+      logger.trace("appointing %s to new host", this.hostPending.id);
+    } else {
+      logger.trace("bext host is current host");
     }
   }
 
@@ -134,6 +145,7 @@ export class AutoHostSelector extends LobbyPlugin {
       this.hostQueue.splice(i, 1);
       return true;
     } else {
+      logger.error("removed ghost player");
       return false;
     }
   }

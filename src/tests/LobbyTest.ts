@@ -1,6 +1,6 @@
 
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, logIrcEvent, Player} from '../models';
+import { Lobby, LobbyStatus, logIrcEvent, Player } from '../models';
 import { DummyIrcClient, DummyLobbyPlugin } from '../models/dummies';
 
 export function LobbyTest() {
@@ -28,7 +28,7 @@ export function LobbyTest() {
       players: players
     };
   }
-  
+
   function delay(ms: number): Promise<void> {
     if (ms == 0) return Promise.resolve();
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -314,6 +314,6 @@ export function LobbyTest() {
   it("plugin test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const lp = new DummyLobbyPlugin(lobby);
-    lobby.logLobbyStatus();
+    console.log(lobby.getLobbyStatus());
   });
 }; 

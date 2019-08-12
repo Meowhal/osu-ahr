@@ -1,12 +1,12 @@
 {
   "appenders": {
     "console": {
-      "type":"console"
+      "type": "console"
     },
     "console_f": {
       "type": "logLevelFilter",
-      "level":"info",
-      "appender":"console"
+      "level": "info",
+      "appender": "console"
     },
     "file_all": {
       "type": "dateFile",
@@ -14,8 +14,8 @@
     },
     "file_all_f": {
       "type": "logLevelFilter",
-      "level":"info",
-      "appender":"file_all"
+      "level": "info",
+      "appender": "file_all"
     },
     "file_irc": {
       "type": "dateFile",
@@ -34,19 +34,37 @@
       "level": "info"
     },
     "irc": {
-      "appenders" :[
+      "appenders": [
         "console"
       ],
       "level": "debug"
     },
     "lobby": {
-      "appenders" :[
+      "appenders": [
         "console"
       ],
       "level": "debug"
     },
-    "plugins": {
-      "appenders" :[
+    "plugin": {
+      "appenders": [
+        "console"
+      ],
+      "level": "debug"
+    },
+    "autoHostSelector": {
+      "appenders": [
+        "console"
+      ],
+      "level": "debug"
+    },
+    "hostSkipper": {
+      "appenders": [
+        "console"
+      ],
+      "level": "debug"
+    },
+    "chat": {
+      "appenders": [
         "console"
       ],
       "level": "debug"

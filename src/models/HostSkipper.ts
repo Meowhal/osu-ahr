@@ -2,8 +2,8 @@ import { ILobby } from "./ILobby";
 import { Player } from "./Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import { IIrcConfig, getIrcConfig } from "../config";
-
+import log4js from "log4js";
+const logger = log4js.getLogger("hostSkipper");
 
 export interface HostSkipperOption {
   skip_request_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
@@ -108,7 +108,9 @@ export class HostSkipper extends LobbyPlugin {
   private checkSkipCount(): void {
     const r = this.requiredSkip;
     const c = this.countSkip;
-    this.lobby.SendMessage(`Host skip progress: ${c} / ${r}`)
+    if (c != 0) {
+      this.lobby.SendMessage(`Host skip progress: ${c} / ${r}`)
+    }
     if (r <= c) {
       this.doSkip();
     }
@@ -127,17 +129,20 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private doSkip(): void {
+    logger.trace("do skip");
     this.clearAll();
     this.sendPluginMessage("skip");
   }
 
   clearAll(): void {
+    logger.trace("clear all");
     this.stopTimer();
     this.skipRequesters.clear();
   }
 
   startTimer(): void {
     this.stopTimer();
+    logger.trace("start timer");
     this.skipTimer = setTimeout(() => {
       if (this.skipTimer != undefined) {
         this.lobby.SendMessage("AFK skip function has been activated.");
@@ -147,6 +152,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   stopTimer(): void {
+    logger.trace("stop timer");
     if (this.skipTimer != undefined) {
       clearTimeout(this.skipTimer);
       this.skipTimer = undefined;

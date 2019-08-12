@@ -1,0 +1,89 @@
+{
+  "appenders": {
+    "console": {
+      "type": "console"
+    },
+    "console_f": {
+      "type": "logLevelFilter",
+      "level": "info",
+      "appender": "console"
+    },
+    "file_all": {
+      "type": "dateFile",
+      "filename": "logs/all.log"
+    },
+    "file_all_f": {
+      "type": "logLevelFilter",
+      "level": "info",
+      "appender": "file_all"
+    },
+    "file_irc": {
+      "type": "dateFile",
+      "filename": "logs/irc.log"
+    },
+    "file_app": {
+      "type": "dateFile",
+      "filename": "logs/app.log"
+    },
+    "file_chat": {
+      "type": "dateFile",
+      "filename": "logs/chat.log"
+    }
+  },
+  "categories": {
+    "default": {
+      "appenders": [
+        "console_f",
+        "file_all_f"
+      ],
+      "level": "debug"
+    },
+    "irc": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_irc"
+      ],
+      "level": "all"
+    },
+    "lobby": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_app"
+      ],
+      "level": "all"
+    },
+    "plugin": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_app"
+      ],
+      "level": "all"
+    },
+    "autoHostSelector": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_app"
+      ],
+      "level": "all"
+    },
+    "hostSkipper": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_app"
+      ],
+      "level": "all"
+    },
+    "chat": {
+      "appenders": [
+        "console",
+        "file_chat"
+      ],
+      "level": "all"
+    }
+  }
+}

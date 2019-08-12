@@ -7,7 +7,7 @@ import { MpSettingsParserTest } from "./MpSettingsParserTest";
 import { HostSkipperTest } from "./HostSkipperTest";
 import log4js from "log4js";
 
-log4js.configure("config/mocha_log4js.json");
+log4js.configure("config/log_mocha.json");
 
 describe("ahr tests", () => {
   describe("BanchoBot Parser Tests", CommandParserTest);
