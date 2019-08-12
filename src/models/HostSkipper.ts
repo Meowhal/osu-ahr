@@ -76,11 +76,10 @@ export class HostSkipper extends LobbyPlugin {
   // スキップメッセージを処理
   private onPlayerChated(player: Player, auth: number, message: string): void {
     if (this.lobby.isMatching) return;
-    const isSkipMessage = message == "!skip" || message == "!s";
 
     if (message == "!info" || message == "!help") {
       this.lobby.SendMessage("!skip => skip current host.");
-    } else if (isSkipMessage) {
+    } else if (message == "!skip" || message == "!s") {
       if (auth == 1) {
         this.doSkip();
       } else if (this.skipRequesters.has(player)) {
