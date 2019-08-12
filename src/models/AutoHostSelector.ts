@@ -125,8 +125,8 @@ export class AutoHostSelector extends LobbyPlugin {
     this.rotateQueue();
     if (this.hostQueue[0] != this.lobby.host) {
       this.hostPending = this.hostQueue[0];
-      this.lobby.TransferHost(this.hostQueue[0]);
       logger.trace("appointing %s to new host", this.hostPending.id);
+      this.lobby.TransferHost(this.hostQueue[0]);
     } else {
       logger.trace("bext host is current host");
     }
