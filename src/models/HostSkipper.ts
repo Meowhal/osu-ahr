@@ -55,6 +55,11 @@ export class HostSkipper extends LobbyPlugin {
 
     // スキップ判定の母数が減るので再評価する
     this.checkSkipCount();
+
+    // 誰もいなくなったらタイマーを止める
+    if(this.lobby.players.size == 0){
+      this.clearAll();
+    }
   }
 
   private onHostChanged(succeeded: boolean, newhost: Player): void {
@@ -80,7 +85,7 @@ export class HostSkipper extends LobbyPlugin {
     if (message == "!info" || message == "!help") {
       this.lobby.SendMessage("!skip => skip current host.");
     } else if (message == "!skip" || message == "!s") {
-      if (auth == 1) {
+      if (auth >= 1) {
         this.doSkip();
       } else if (this.skipRequesters.has(player)) {
         this.lobby.SendMessage(`${player.id} has already requested skip.`);
@@ -129,7 +134,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private doSkip(): void {
-    logger.trace("do skip");
+    logger.info("do skip");
     this.clearAll();
     this.sendPluginMessage("skip");
   }
@@ -145,6 +150,7 @@ export class HostSkipper extends LobbyPlugin {
     logger.trace("start timer");
     this.skipTimer = setTimeout(() => {
       if (this.skipTimer != undefined) {
+        logger.trace("AFK skip function has been activated.");
         this.lobby.SendMessage("AFK skip function has been activated.");
         this.doSkip();
       }

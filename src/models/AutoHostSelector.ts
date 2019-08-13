@@ -94,9 +94,9 @@ export class AutoHostSelector extends LobbyPlugin {
       return;
     }
 
-    if (message == "!queue" || message == "!que" || message == "!queu") {
-      const m = this.hostQueue.reduce((p, c) => `${p}, ${this.escapeUserId(c.id)}`, "");
-      this.lobby.SendMessage("queue " + m);
+    if (message.startsWith("!q")) {
+      const m = this.hostQueue.map(c => c.id).join(", ");
+      this.lobby.SendMessage("host queue : " + m);
       return;
     }
   }
@@ -118,8 +118,8 @@ export class AutoHostSelector extends LobbyPlugin {
   // キューの先頭を末尾に
   private selectNextHost(): void {
     if (this.hostQueue.length == 0) {
-      logger.error("selectNextHost is called when host queue is empty");
-      throw new Error();
+      logger.warn("selectNextHost is called when host queue is empty");
+      return;
     }
 
     this.rotateQueue();
