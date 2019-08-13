@@ -147,8 +147,9 @@ export function AutoHostSelectorTest() {
     assertHostIs("player1", lobby);
   });
 
+  // 試合中にプレイヤーが入ってきた場合、現在のホストの後ろに配置される
   it("m join", async () => {
-    const { selector, lobby, ircClient } = await prepareSelector();
+    const { selector, lobby, ircClient } = await prepareSelector(false);
     await AddPlayers(["player1", "player2"], ircClient);
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
@@ -163,7 +164,7 @@ export function AutoHostSelectorTest() {
 
     await ircClient.emulateMatchAsync();
     assertStateIs("h", selector);
-    assertHostIs("player3", lobby);
+    assertHostIs("player1", lobby);
   });
 
   it("m left", async () => {
@@ -186,6 +187,17 @@ export function AutoHostSelectorTest() {
     await task;
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
+
+    await ircClient.emulateAddPlayerAsync("player4");
+    await ircClient.emulateAddPlayerAsync("player5");
+    await ircClient.emulateAddPlayerAsync("player6");
+
+    task = ircClient.emulateMatchAsync(4);
+    await delay(1);
+    await ircClient.emulateRemovePlayerAsync("player1");
+    await task;
+    assertStateIs("h", selector);
+    assertHostIs("player4", lobby);
   });
 
   it("host skip test", async () => {
@@ -211,6 +223,17 @@ export function AutoHostSelectorTest() {
     assertHostIs("player1", lobby);
   });
 
+  it("h left test", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector();
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+
+    await ircClient.emulateRemovePlayerAsync("player1");
+    await delay(1);
+    assertHostIs("player2", lobby);
+  });
+
   it("logLobbyStatus test", async () => {
     const { selector, lobby, ircClient } = await prepareSelector();
     await AddPlayers(["player1", "player2", "player3"], ircClient);
@@ -226,5 +249,4 @@ export function AutoHostSelectorTest() {
     await delay(1);
     assertHostIs("player2", lobby);
   });
-
 }
