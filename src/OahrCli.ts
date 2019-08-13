@@ -158,11 +158,11 @@ export class OahrCli {
     r.on("close", () => {
       if (this.client != null) {
         logger.info("readline closed");
-        this.client.disconnect("goodby", () => { });
+        this.client.disconnect("goodby", () =>  {
+          logger.info("ircClient disconnected");
+          process.exit(0);
+        });
       }
     });
   }
 }
-
-
-
