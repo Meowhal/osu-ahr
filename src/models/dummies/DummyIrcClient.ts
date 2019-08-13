@@ -133,7 +133,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     await this.raiseMessageAsync("BanchoBot", this.channel, "The match has started!");
     if (delay) {
       await this.delay(delay);
-    }    
+    }
     const tasks: Promise<void>[] = [];
     for (let u of this.players) {
       if (!this.isMatching) return;
@@ -157,13 +157,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // IRCClientのsay
   public say(target: string, message: string): void {
-    new Promise(()=>{
+    new Promise(() => {
       this.raiseMessageAsync(this.nick, target, message);
       let mp = parser.ParseMPCommand(message);
       if (mp != null) {
         this.processMpCommand(target, message, mp);
       }
-    });    
+    });
   }
 
   private processMpCommand(target: string, message: string, mp: MpCommand): void {
@@ -212,7 +212,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           }
           break;
         case "settings":
-          const m = (msg:string) => this.raiseMessageAsync("BanchoBot", this.channel, msg);
+          const m = (msg: string) => this.raiseMessageAsync("BanchoBot", this.channel, msg);
           m('Room name: lobby name, History: https://osu.ppy.sh/mp/123');
           m("Beatmap: https://osu.ppy.sh/b/1562893 Feryquitous feat. Aitsuki Nakuru - Kairikou [Miura's Extra]");
           m("Team mode: HeadToHead, Win condition: Score");
@@ -220,7 +220,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           m(`Players: ${this.players.size}`);
 
           let i = 1;
-          for(let p of this.players) {
+          for (let p of this.players) {
             m(`Slot ${i}  Not Ready https://osu.ppy.sh/u/123 ${p}       `);
             i++;
           }
