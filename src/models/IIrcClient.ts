@@ -19,7 +19,6 @@ export interface IIrcClient extends EventEmitter {
 }
 
 export function logIrcEvent(client: IIrcClient) {
-
   client.on('error', function (message) {
     logger.error('ERROR: %s: %s', message.command, message.args.join(' '));
   });
