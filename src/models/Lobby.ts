@@ -320,9 +320,6 @@ export class Lobby implements ILobby {
           this.players.clear();
           resolve(this.id);
           logger.trace("completed makeLobby");
-        } else {
-          logger.error("unexpected argument who : %s", who);
-          reject("unexpected argument who : " + who);
         }
       };
       this.ircClient.on("join", onJoin);
@@ -336,27 +333,21 @@ export class Lobby implements ILobby {
   EnterLobbyAsync(channel: string): Promise<string> {
     logger.trace("start EnterLobby");
     return new Promise<string>((resolve, reject) => {
-      const onJoin = (channel: string, who: string) => {
-        if (who == this.ircClient.nick) {
-          this.channel = channel;
-          this.name = "__";
-          this.id = channel.replace("#mp_", "");
-          this.ircClient.off("join", onJoin);
-          this.status = LobbyStatus.Entered;
-          this.players.clear();
-          resolve(this.id);
-          logger.trace("completed EnterLobby");
-        }
-      };
-
       let ch = parser.EnsureMpChannelId(channel);
       if (ch == "") {
         logger.error("invalid channel: %s", channel);
         reject();
         return;
       }
-      this.ircClient.on("join", onJoin);
-      this.ircClient.join(ch);
+      this.ircClient.join(ch, ()=>{
+        this.channel = channel;
+          this.name = "__";
+          this.id = channel.replace("#mp_", "");
+          this.status = LobbyStatus.Entered;
+          this.players.clear();
+          resolve(this.id);
+          logger.trace("completed EnterLobby");
+      });
     });
   }
 
