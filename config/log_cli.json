@@ -10,24 +10,28 @@
     },
     "file_all": {
       "type": "dateFile",
-      "filename": "logs/all.log"
+      "filename": "logs/all.log",
+      "pattern":  ".yyyy-MM-dd-hh"
     },
     "file_all_f": {
       "type": "logLevelFilter",
-      "level": "info",
+      "level": "trace",
       "appender": "file_all"
     },
     "file_irc": {
       "type": "dateFile",
-      "filename": "logs/irc.log"
+      "filename": "logs/irc.log",
+      "pattern":  ".yyyy-MM-dd-hh"
     },
     "file_app": {
       "type": "dateFile",
-      "filename": "logs/app.log"
+      "filename": "logs/app.log",
+      "pattern":  ".yyyy-MM-dd-hh"
     },
     "file_chat": {
       "type": "dateFile",
-      "filename": "logs/chat.log"
+      "filename": "logs/chat.log",
+      "pattern":  ".yyyy-MM-dd-hh"
     }
   },
   "categories": {
