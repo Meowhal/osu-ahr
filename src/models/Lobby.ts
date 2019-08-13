@@ -176,10 +176,13 @@ export class Lobby implements ILobby {
     }
   }
 
-  RaisePlayerJoined(userid: string, slot: number): void {
+  RaisePlayerJoined(userid: string, slot: number, asHost: boolean = false): void {
     const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
       this.players.add(player);
+      if (asHost) {
+        this.host = player;
+      }
       this.PlayerJoined.emit({ player, slot });
     } else {
       logger.warn("参加済みのプレイヤーが再度参加した: %s", userid);
@@ -339,14 +342,14 @@ export class Lobby implements ILobby {
         reject();
         return;
       }
-      this.ircClient.join(ch, ()=>{
+      this.ircClient.join(ch, () => {
         this.channel = channel;
-          this.name = "__";
-          this.id = channel.replace("#mp_", "");
-          this.status = LobbyStatus.Entered;
-          this.players.clear();
-          resolve(this.id);
-          logger.trace("completed EnterLobby");
+        this.name = "__";
+        this.id = channel.replace("#mp_", "");
+        this.status = LobbyStatus.Entered;
+        this.players.clear();
+        resolve(this.id);
+        logger.trace("completed EnterLobby");
       });
     });
   }
@@ -398,7 +401,7 @@ export class Lobby implements ILobby {
           for (let ps of this.mpSettingParser.players as PlayerSettings[]) {
             if (!this.Includes(ps.id)) {
               logger.info("mpsettings find new player: %s", ps.id);
-              this.RaisePlayerJoined(ps.id, ps.slot);
+              this.RaisePlayerJoined(ps.id, ps.slot, ps.isHost);
             }
             if (ps.isHost) {
               if (this.host == null || (this.host.id != ps.id)) {
@@ -422,7 +425,8 @@ export class Lobby implements ILobby {
     let s = `=== lobby status ===
   lobby id : ${this.id}
   status : ${this.status}
-  players : ${[...this.players].map(p => p.id).join(", ")};
+  players : ${[...this.players].map(p => p.id).join(", ")}
+  host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}
 `
       ;
 
