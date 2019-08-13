@@ -14,7 +14,6 @@ export const AutoHostSelectorDefaultOption = {
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
-  hostPending: Player | undefined;
 
   get currentHost() {
     return this.lobby.host;
@@ -30,6 +29,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
+    this.lobby.MatchStarted.on(a => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player, a.authority, a.message));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
@@ -40,9 +40,10 @@ export class AutoHostSelector extends LobbyPlugin {
   // 現在部屋に誰もいない場合はホストに任命
   private onPlayerJoined(player: Player, slot: number): void {
     this.hostQueue.push(player);
+    logger.trace("added %s to hostqueue", player.id);
     if (this.lobby.players.size == 1) {
       logger.trace("appoint first player to host");
-      this.selectNextHost();
+      this.changeHost();
     }
   }
 
@@ -57,8 +58,8 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.hostQueue.length == 0) return;
     if (this.lobby.host == player // ホストが抜けた場合 
       || (this.lobby.host == null && this.lobby.hostPending == null)) { // ホストがいない、かつ承認待ちのホストがいない
-      logger.trace("host has gone");
-      this.selectNextHost();
+      logger.info("host has left");
+      this.changeHost();
     }
   }
 
@@ -71,21 +72,23 @@ export class AutoHostSelector extends LobbyPlugin {
     if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
-    // ホストが自分で変更した場合
-    if (this.hostQueue[0] != newhost && this.hostPending != newhost) {
-      logger.trace("host appointed new host");
-      this.selectNextHost();
-      return;
+    if (this.hostQueue[0] == newhost) {
+      logger.trace("A new host has been appointed:%s", newhost.id);
     } else {
-      logger.trace("host appointment accomplished");
-      this.hostPending = undefined;
+      // ホストがキューの先頭以外に変更された場合
+      this.rotateQueue();
+      this.changeHost();
     }
   }
 
-  // 試合が終了した際に実行される
-  // 次のホストの任命
+  // 試合が始まったらキューを回す
+  private onMatchStarted(): void {
+    this.rotateQueue();
+  }
+
+  // 試合が終了したら現在のキューの先頭をホストに任命
   private onMatchFinished(): void {
-    this.selectNextHost();
+    this.changeHost();
   }
 
   private onPlayerChated(player: Player, auth: number, message: string): void {
@@ -101,10 +104,12 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  // 別のプラグインからskipの要請があった場合に実行する
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
     if (type == "skip") {
       logger.trace("plugin message skip recieved");
-      this.selectNextHost();
+      this.rotateQueue();
+      this.changeHost();
     }
   }
 
@@ -114,27 +119,30 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   // !mp host コマンドの発行
+  // 現在のキューの先頭をホストに任命
+  // すでに先頭がホストの場合は何もしない
   // 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
   // キューの先頭を末尾に
-  private selectNextHost(): void {
+  private changeHost(): void {
     if (this.hostQueue.length == 0) {
       logger.warn("selectNextHost is called when host queue is empty");
       return;
     }
-
-    this.rotateQueue();
     if (this.hostQueue[0] != this.lobby.host) {
-      this.hostPending = this.hostQueue[0];
-      logger.trace("appointing %s to new host", this.hostPending.id);
       this.lobby.TransferHost(this.hostQueue[0]);
+      logger.trace("sent !mp host %s", this.hostQueue[0].id);
     } else {
-      logger.trace("bext host is current host");
+      logger.trace("%s is already host", this.hostQueue[0].id);
     }
   }
 
+  // ホストキューの先頭を末尾に付け替える
   private rotateQueue(): void {
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
+    if (logger.isTraceEnabled) {
+      logger.trace("rotated host queue: %s", this.hostQueue.map(p => p.id).join(", "));
+    }    
   }
 
   // 指定されたプレイヤーキューから削除する
@@ -143,6 +151,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const i = this.hostQueue.indexOf(player);
     if (i != -1) {
       this.hostQueue.splice(i, 1);
+      logger.trace("removed %s from host queue", player.id);
       return true;
     } else {
       logger.error("removed ghost player");
