@@ -107,10 +107,38 @@ export class AutoHostSelector extends LobbyPlugin {
   // 別のプラグインからskipの要請があった場合に実行する
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
     if (type == "skip") {
-      logger.trace("plugin message skip recieved");
-      this.rotateQueue();
-      this.changeHost();
+      this.doSkip();
+    } else if (type == "skipto") {
+      this.doSkipTo(args);
     }
+  }
+
+  private doSkip(): void {
+    logger.trace("recieved plugin message skip");
+    this.rotateQueue();
+    this.changeHost();
+  }
+
+  private doSkipTo(args: string[]): void {
+    logger.trace("recieved plugin message skipto");
+    if (args.length != 1) {
+      logger.error("skipto invalid arguments length");
+      return;
+    }
+    const to = args[0];
+    if (!this.lobby.Includes(to)) {
+      logger.error("skipto target dosent exist");
+      return;
+    }
+    let c = 0;
+    while (this.hostQueue[0].id != to) {
+      this.rotateQueue();
+      if (c++ > 16) {
+        logger.error("infinity loop detected");
+        return;
+      }
+    }
+    this.changeHost();
   }
 
   // ユーザーIDを表示するときhighlightされないように名前を変更する
@@ -142,7 +170,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.hostQueue.push(current);
     if (logger.isTraceEnabled) {
       logger.trace("rotated host queue: %s", this.hostQueue.map(p => p.id).join(", "));
-    }    
+    }
   }
 
   // 指定されたプレイヤーキューから削除する
