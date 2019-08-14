@@ -9,9 +9,8 @@
       "appender": "console"
     },
     "file_all": {
-      "type": "dateFile",
-      "filename": "logs/all.log",
-      "pattern":  ".yyyy-MM-dd-hh"
+      "type": "file",
+      "filename": "logs/all.log"
     },
     "file_all_f": {
       "type": "logLevelFilter",
@@ -19,19 +18,16 @@
       "appender": "file_all"
     },
     "file_irc": {
-      "type": "dateFile",
-      "filename": "logs/irc.log",
-      "pattern":  ".yyyy-MM-dd-hh"
+      "type": "file",
+      "filename": "logs/irc.log"
     },
     "file_app": {
-      "type": "dateFile",
-      "filename": "logs/app.log",
-      "pattern":  ".yyyy-MM-dd-hh"
+      "type": "file",
+      "filename": "logs/app.log"
     },
     "file_chat": {
-      "type": "dateFile",
-      "filename": "logs/chat.log",
-      "pattern":  ".yyyy-MM-dd-hh"
+      "type": "file",
+      "filename": "logs/chat.log"
     }
   },
   "categories": {
