@@ -13,7 +13,7 @@ export class MpSettingsParser {
   beatmapUrl: string = "";
   beatmapTitle: string = "";
   teamMode: string = "";
-  winCondition: string= "";
+  winCondition: string = "";
   activeMods: string = "";
   players: PlayerSettings[] = [];
   private loaded_players = 0;
@@ -51,7 +51,8 @@ export class MpSettingsParser {
     if (m) {
       const len = parseInt(m[1]);
       this.players = new Array(len);
-      return false;
+      this.parsed = len == 0;
+      return this.parsed;
     }
     m = line.match(/^Slot (\d+)\s+(.+) (https\S+) ([A-Za-z0-9-\[\]_ ]+)\s{2,}(\[(.+)\])?$/);
     if (m) {

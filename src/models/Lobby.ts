@@ -109,7 +109,6 @@ export class Lobby implements ILobby {
   }
 
   private handleBanchoResponse(message: string) {
-    logger.trace("bancho: %s", message);
     const c = parser.ParseBanchoResponse(message);
     switch (c.type) {
       case BanchoResponseType.BeatmapChanged:
@@ -393,24 +392,16 @@ export class Lobby implements ILobby {
 
     this.ircClient.on("message", feed);
 
-    const task = new Promise<void>(resolve => {
+    const task = new Promise<void>((resolve, reject) => {
       completed = () => {
         this.ircClient.off("message", feed);
-        if (this.mpSettingParser != null && this.mpSettingParser.parsed) {
-          this.name = this.mpSettingParser.name as string;
-          for (let ps of this.mpSettingParser.players as PlayerSettings[]) {
-            if (!this.Includes(ps.id)) {
-              logger.info("mpsettings find new player: %s", ps.id);
-              this.RaisePlayerJoined(ps.id, ps.slot, ps.isHost);
-            }
-            if (ps.isHost) {
-              if (this.host == null || (this.host.id != ps.id)) {
-                logger.info("mpsettings update host: %s", ps.id);
-                this.RaiseHostChanged(ps.id);
-              }
-            }
-          }
+        if (this.mpSettingParser == undefined) {
+          logger.error("mpSettingParser is undefined");
+          reject();
+          return;
         }
+        logger.debug("parsed mp settings");
+        this.margeMpSettingsResult(this.mpSettingParser);
         logger.trace("completed loadLobbySettings");
         this.mpSettingParser = undefined;
         resolve();
@@ -419,6 +410,26 @@ export class Lobby implements ILobby {
 
     this.SendMessage("!mp settings");
     return task;
+  }
+
+  // 一旦ロビーから全員退出させ、現在のホストからスロット順に追加していく
+  margeMpSettingsResult(parser: MpSettingsParser): void {
+    this.name = parser.name;
+    this.host = null;
+    this.hostPending = null;
+    Array.from(this.players).forEach(p => this.RaisePlayerLeft(p.id));
+
+    if (parser.players.length == 0) return;
+
+    let hostidx = parser.players.findIndex(p => p.isHost);
+    if (hostidx == -1) hostidx = 0;
+
+    // ホストを配列の先頭にする。
+    const temp = Array.from(parser.players);
+    const players = temp.splice(hostidx).concat(temp);
+    players.forEach((v, i) => {
+      this.RaisePlayerJoined(v.id, v.slot, i == hostidx);
+    });
   }
 
   getLobbyStatus(): string {
