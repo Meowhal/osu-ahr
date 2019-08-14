@@ -14,7 +14,8 @@
   "HostSkipper": {
     "skip_request_rate": 0.5,
     "skip_request_min": 2,
-    "skip_timer_delay_ms": 30000
+    "skip_timer_delay_ms": 30000,
+    "skip_vote_delay_ms": 5000
   },
   "OahrCli": {
     "invite_users": [],

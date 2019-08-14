@@ -4,7 +4,7 @@ import { HostSkipper, HostSkipperOption, Lobby, logIrcEvent, Player } from "../m
 import config from "config";
 
 export function HostSkipperTest() {
-  async function prepare(skip_timer_ms: number, logIrc: boolean = false):
+  async function prepare(timer_delay: number = 0, vote_delay: number = 0, logIrc: boolean = false):
     Promise<{ skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
     const ircClient = new DummyIrcClient("osu_irc_server", "creator");
     if (logIrc) {
@@ -12,7 +12,13 @@ export function HostSkipperTest() {
     }
     const lobby = new Lobby(ircClient);
     await lobby.MakeLobbyAsync("test");
-    const skipper = new HostSkipper(lobby, { skip_timer_delay_ms: skip_timer_ms })
+    const option: HostSkipperOption = {
+      skip_request_min: 2,
+      skip_request_rate: 0.5,
+      skip_timer_delay_ms: timer_delay,
+      skip_vote_delay_ms: vote_delay
+    }
+    const skipper = new HostSkipper(lobby, option)
     return { skipper, lobby, ircClient };
   }
 
@@ -45,7 +51,7 @@ export function HostSkipperTest() {
   async function changeHostAsync(id: string, lobby: Lobby): Promise<number> {
     const p = new Promise<number>(resolve => {
       lobby.HostChanged.once(async () => {
-        resolve(new Date().getTime());
+        resolve(Date.now());
       });
     });
     lobby.TransferHost(lobby.GetPlayer(id) as Player);
@@ -57,7 +63,7 @@ export function HostSkipperTest() {
       lobby.PluginMessage.once(a => {
         assert.equal(a.type, "skip");
         if (callback) callback();
-        resolve(new Date().getTime());
+        resolve(Date.now());
       });
     });
   }
@@ -65,7 +71,7 @@ export function HostSkipperTest() {
   async function rejectSkipAsync(lobby: Lobby, timeout: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       setTimeout(() => {
-        resolve(new Date().getTime());
+        resolve(Date.now());
       }, timeout);
       lobby.PluginMessage.once(a => {
         assert.fail();
@@ -90,7 +96,8 @@ export function HostSkipperTest() {
       const option: HostSkipperOption = {
         skip_request_min: 1,
         skip_request_rate: 2,
-        skip_timer_delay_ms: 3
+        skip_timer_delay_ms: 3,
+        skip_vote_delay_ms: 0,
       }
       const skipper = new HostSkipper(lobby, option);
       assert.deepEqual(skipper.option, option);
@@ -137,7 +144,7 @@ export function HostSkipperTest() {
       await AddPlayers(["p1", "p2", "p3"], ircClient);
       let test = async (waitTime: number) => {
         skipper.option.skip_timer_delay_ms = waitTime;
-        skipper.clearAll();
+        skipper.restart();
         const startTime = await changeHostAsync("p1", lobby);
         const endTime = await recieveSkipAsync(lobby);
         const elapsed = endTime - startTime;
@@ -171,14 +178,22 @@ export function HostSkipperTest() {
       assert.isUndefined(skipper.skipTimer);
       await rejectSkipAsync(lobby, 10);
     });
+    it("if delay time is 0, timer dosent work", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0);
+      await AddPlayers(["p1", "p2", "p3"], ircClient);
+      await changeHostAsync("p1", lobby);
+      assert.isUndefined(skipper.skipTimer);
+      await delay(10);
+      assert.isUndefined(skipper.skipTimer);
+      await rejectSkipAsync(lobby, 100);
+    });
     this.slow(dslow);
+
   });
 
   describe("skip vote test", function () {
     it("vote required check", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare();
       assert.equal(skipper.requiredSkip, 2);
       await AddPlayers(1, ircClient);
       assert.equal(skipper.requiredSkip, 2);
@@ -198,57 +213,74 @@ export function HostSkipperTest() {
       assert.isAtMost(skipper.requiredSkip, 4);
     });
     it("host skip", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
       await AddPlayers(3, ircClient);
       await changeHostAsync("p0", lobby);
       const rt = recieveSkipAsync(lobby);
       ircClient.raiseMessage("p0", ircClient.channel, "!skip");
       await rt;
     });
+    it("host skip should be ignored at cool time", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0, 10);
+      await AddPlayers(3, ircClient);
+      await changeHostAsync("p0", lobby);
+      const rt = rejectSkipAsync(lobby, 20);
+      ircClient.raiseMessage("p0", ircClient.channel, "!skip");
+      await rt;
+    });
     it("host invalid skip", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
-      skipper.stopTimer();
       ircClient.raiseMessage("p0", ircClient.channel, "!skipaaaaa");
       await rejectSkipAsync(lobby, 10);
     });
     it("skip by players", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
-      skipper.stopTimer();
-      let skiped = false;
-      const task = recieveSkipAsync(lobby, () => skiped = true);
+      let skipped = false;
+      const task = recieveSkipAsync(lobby, () => skipped = true);
       ircClient.raiseMessage("p1", ircClient.channel, "!skip");
       await delay(10);
       assert.equal(skipper.countSkip, 1);
-      assert.isFalse(skiped);
+      assert.isFalse(skipped);
       ircClient.raiseMessage("p2", ircClient.channel, "!skip");
       await delay(10);
       assert.equal(skipper.countSkip, 2);
-      assert.isFalse(skiped);
+      assert.isFalse(skipped);
+
+      ircClient.raiseMessage("p3", ircClient.channel, "!skip");
+      await delay(10);
+      await task;
+      assert.equal(skipper.countSkip, 3);
+      assert.isTrue(skipped);
+    });
+    it("is player skip ignored at cooltime", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0, 100);
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      let skipped = false;
+      const task = rejectSkipAsync(lobby, 50);
+      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
+      await delay(10);
+      assert.equal(skipper.countSkip, 0);
+      assert.isFalse(skipped);
+      ircClient.raiseMessage("p2", ircClient.channel, "!skip");
+      await delay(10);
+      assert.equal(skipper.countSkip, 0);
+      assert.isFalse(skipped);
 
       ircClient.raiseMessage("p3", ircClient.channel, "!skip");
       await delay(10);
       await task;
       assert.equal(skipper.countSkip, 0);
-      assert.isTrue(skiped);
+      assert.isFalse(skipped);
     });
     it("duplicate vote", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
-      skipper.stopTimer();
-
       ircClient.raiseMessage("p1", ircClient.channel, "!skip");
       ircClient.raiseMessage("p2", ircClient.channel, "!skip");
       await delay(10);
@@ -258,33 +290,27 @@ export function HostSkipperTest() {
       assert.equal(skipper.countSkip, 2);
     });
     it("vote can valid after mapchanging", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
-      skipper.stopTimer();
-      let skiped = false;
-      const task = recieveSkipAsync(lobby, () => skiped = true);
+      let skipped = false;
+      const task = recieveSkipAsync(lobby, () => skipped = true);
       ircClient.raiseMessage("p1", ircClient.channel, "!skip");
       ircClient.raiseMessage("p2", ircClient.channel, "!skip");
       await delay(10);
-      assert.isFalse(skiped);
+      assert.isFalse(skipped);
       ircClient.emulateChangeMapAsync(0);
       await delay(10);
       ircClient.raiseMessage("p3", ircClient.channel, "!skip");
       await delay(10);
       await task;
-      assert.equal(skipper.countSkip, 0);
-      assert.isTrue(skiped);
+      assert.equal(skipper.countSkip, 3);
+      assert.isTrue(skipped);
     });
     it("vote reject when match", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.skip_request_rate = 0.5;
-      skipper.option.skip_request_min = 2;
+      const { skipper, lobby, ircClient } = await prepare(0);
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
-      skipper.stopTimer();
       ircClient.raiseMessage("p1", ircClient.channel, "!skip");
       ircClient.raiseMessage("p2", ircClient.channel, "!skip");
       await delay(10);
@@ -296,6 +322,20 @@ export function HostSkipperTest() {
       assert.equal(skipper.countSkip, 0);
       await delay(10);
       assert.equal(skipper.countSkip, 0);
+    });
+    it("is lots of vote ignored", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0);
+      const numplayers = 16;
+      await AddPlayers(numplayers, ircClient);
+      await changeHostAsync("p0", lobby);
+      let skipped = false;
+      const task = recieveSkipAsync(lobby, () => skipped = true);
+      for (let i = 1; i < numplayers; i++) {
+        ircClient.raiseMessage("p" + i, ircClient.channel, "!skip");
+        await delay(1);
+        assert.equal(skipper.countSkip, Math.min(i, skipper.requiredSkip));
+        assert.equal(skipped, skipper.requiredSkip <= i);
+      }
     });
   });
 
