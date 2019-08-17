@@ -62,6 +62,9 @@ export class Lobby implements ILobby {
     this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
     });
+    this.ircClient.once("part", (channel: string, nick: string) => {
+      this.status = LobbyStatus.Left;
+    });
   }
 
   // useridからプレイヤーオブジェクトを取得する
@@ -289,6 +292,13 @@ export class Lobby implements ILobby {
     }
   }
 
+  SendMessageToBancho(message: string): void {
+    if (this.channel != undefined) {
+      this.ircClient.say("BanchoBot", message);
+      this.ircClient.emit("sentMessage", "BanchoBot", message);
+    }
+  }
+
   MakeLobbyAsync(title: string): Promise<string> {
     if (title === "") {
       throw new Error("title が空です。");
@@ -368,6 +378,7 @@ export class Lobby implements ILobby {
       });
       if (this.channel != undefined) {
         this.SendMessage("!mp close");
+        this.status = LobbyStatus.Leaving;
       } else {
         reject();
       }
