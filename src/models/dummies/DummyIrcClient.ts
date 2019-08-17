@@ -1,4 +1,4 @@
-import * as irc from "irc";
+import * as irc from "../../libs/irc";
 import { EventEmitter } from "events";
 import { parser, MpCommand, IIrcClient } from "..";
 import log4js from "log4js";

@@ -1,5 +1,5 @@
 import config from "config";
-import { IClientOpts } from "irc";
+import { IClientOpts } from "../libs/irc";
 
 export interface IAhrConfig {
   trial: ITrialConfg;

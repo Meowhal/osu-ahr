@@ -1,5 +1,5 @@
 import { OahrCli } from './OahrCli';
-import * as irc from 'irc';
+import * as irc from './libs/irc';
 import { logIrcEvent } from "./models";
 import { getIrcConfig } from "./config";
 import log4js from "log4js";
