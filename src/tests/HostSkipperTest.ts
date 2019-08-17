@@ -15,8 +15,10 @@ export function HostSkipperTest() {
     const option: HostSkipperOption = {
       skip_request_min: 2,
       skip_request_rate: 0.5,
-      skip_timer_delay_ms: timer_delay,
-      skip_vote_delay_ms: vote_delay
+      skip_vote_delay_ms: vote_delay,
+      afk_timer_delay_ms: timer_delay,
+      afk_timer_message: "",
+      afk_timer_do_skip: true
     }
     const skipper = new HostSkipper(lobby, option)
     return { skipper, lobby, ircClient };
@@ -96,8 +98,10 @@ export function HostSkipperTest() {
       const option: HostSkipperOption = {
         skip_request_min: 1,
         skip_request_rate: 2,
-        skip_timer_delay_ms: 3,
         skip_vote_delay_ms: 0,
+        afk_timer_delay_ms: 3,
+        afk_timer_message: "hello",
+        afk_timer_do_skip: true
       }
       const skipper = new HostSkipper(lobby, option);
       assert.deepEqual(skipper.option, option);
@@ -114,7 +118,7 @@ export function HostSkipperTest() {
       assert.equal(skipper.option.skip_request_min, defaultOption.skip_request_min);
       assert.notEqual(skipper.option.skip_request_rate, defaultOption.skip_request_rate);
       assert.equal(skipper.option.skip_request_rate, option.skip_request_rate);
-      assert.equal(skipper.option.skip_timer_delay_ms, defaultOption.skip_timer_delay_ms);
+      assert.equal(skipper.option.afk_timer_delay_ms, defaultOption.afk_timer_delay_ms);
     });
     it("prepare function", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
@@ -128,12 +132,12 @@ export function HostSkipperTest() {
     it("skip 10ms", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
       await AddPlayers(["p1", "p2", "p3"], ircClient);
-      assert.isUndefined(skipper.skipTimer);
+      assert.isUndefined(skipper.afkTimer);
       await changeHostAsync("p1", lobby);
-      assert.isDefined(skipper.skipTimer);
+      assert.isDefined(skipper.afkTimer);
       assert.isEmpty(skipper.skipRequesters);
       await recieveSkipAsync(lobby);
-      assert.isUndefined(skipper.skipTimer);
+      assert.isUndefined(skipper.afkTimer);
     });
 
     const dslow = this.slow();
@@ -143,7 +147,7 @@ export function HostSkipperTest() {
       const { skipper, lobby, ircClient } = await prepare(10);
       await AddPlayers(["p1", "p2", "p3"], ircClient);
       let test = async (waitTime: number) => {
-        skipper.option.skip_timer_delay_ms = waitTime;
+        skipper.option.afk_timer_delay_ms = waitTime;
         skipper.restart();
         const startTime = await changeHostAsync("p1", lobby);
         const endTime = await recieveSkipAsync(lobby);
@@ -172,19 +176,26 @@ export function HostSkipperTest() {
       await AddPlayers(["p1", "p2", "p3"], ircClient);
       const startTime = await changeHostAsync("p1", lobby);
       await delay(5);
-      assert.isDefined(skipper.skipTimer);
+      assert.isDefined(skipper.afkTimer);
       ircClient.emulateChangeMapAsync(0);
       await delay(10);
-      assert.isUndefined(skipper.skipTimer);
+      assert.isUndefined(skipper.afkTimer);
       await rejectSkipAsync(lobby, 10);
     });
     it("if delay time is 0, timer dosent work", async () => {
       const { skipper, lobby, ircClient } = await prepare(0);
       await AddPlayers(["p1", "p2", "p3"], ircClient);
       await changeHostAsync("p1", lobby);
-      assert.isUndefined(skipper.skipTimer);
+      assert.isUndefined(skipper.afkTimer);
       await delay(10);
-      assert.isUndefined(skipper.skipTimer);
+      assert.isUndefined(skipper.afkTimer);
+      await rejectSkipAsync(lobby, 100);
+    });
+    it("dosent skip if option is false", async () => {
+      const { skipper, lobby, ircClient } = await prepare(10);
+      skipper.option.afk_timer_do_skip = false;
+      await AddPlayers(["p1", "p2", "p3"], ircClient);
+      await changeHostAsync("p1", lobby);
       await rejectSkipAsync(lobby, 100);
     });
     this.slow(dslow);

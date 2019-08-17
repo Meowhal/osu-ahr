@@ -8,8 +8,10 @@ const logger = log4js.getLogger("hostSkipper");
 export interface HostSkipperOption {
   skip_request_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
   skip_request_min: number;　// 最低投票数
-  skip_timer_delay_ms: number; // ホスト変更後に与えられるスキップ猶予時間
   skip_vote_delay_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
+  afk_timer_delay_ms: number; // ホスト変更後に与えられるスキップ猶予時間
+  afk_timer_message: string; // タイマー時に表示されるメッセージ
+  afk_timer_do_skip: boolean; // スキップするか
 }
 
 const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
@@ -29,14 +31,14 @@ const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
  */
 export class HostSkipper extends LobbyPlugin {
   option: HostSkipperOption;
-  skipTimer: NodeJS.Timer | undefined;
+  afkTimer: NodeJS.Timer | undefined;
   skipRequesters: Set<Player> = new Set<Player>();
-  startTime: number = Date.now();
+  timeStart: number = Date.now();
   skipping: boolean = false; // 
 
   // skip受付からの経過時間
   get elapsed(): number {
-    return Date.now() - this.startTime;
+    return Date.now() - this.timeStart;
   }
 
   constructor(lobby: ILobby, option: any | null = null) {
@@ -114,6 +116,7 @@ export class HostSkipper extends LobbyPlugin {
       logger.debug("vote from %s was ignored, already skipped", player.id);
     } else if (this.elapsed < this.option.skip_vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
+      this.lobby.SendMessage("skip vote was ignored due to cool time. try again.");
     } else if (auth >= 1) {
       this.doSkip();
     } else if (this.skipRequesters.has(player)) {
@@ -165,7 +168,7 @@ export class HostSkipper extends LobbyPlugin {
     this.clearVote();
     this.startTimer();
     this.skipping = false;
-    this.startTime = Date.now();
+    this.timeStart = Date.now();
   }
 
   clearVote(): void {
@@ -174,30 +177,33 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   startTimer(): void {
-    if (this.option.skip_timer_delay_ms == 0) return;
+    if (this.option.afk_timer_delay_ms == 0) return;
     this.stopTimer();
     logger.trace("start timer");
-    this.skipTimer = setTimeout(() => {
-      if (this.skipTimer != undefined) {
-        //logger.trace("AFK skip function has been activated.");
-        //this.lobby.SendMessage("AFK skip function has been activated.");
-        this.lobby.SendMessage("you can skip afk host by !skip command.");
-        //this.doSkip();
+    this.afkTimer = setTimeout(() => {
+      logger.trace("afk timer action");
+      if (this.afkTimer != undefined) {
+        if (this.option.afk_timer_message != "") {
+          this.lobby.SendMessage(this.option.afk_timer_message);
+        }
+        if (this.option.afk_timer_do_skip) {
+          this.doSkip();
+        }
       }
-    }, this.option.skip_timer_delay_ms);
+    }, this.option.afk_timer_delay_ms);
   }
 
   stopTimer(): void {
-    if (this.skipTimer != undefined) {
+    if (this.afkTimer != undefined) {
       logger.trace("stop timer");
-      clearTimeout(this.skipTimer);
-      this.skipTimer = undefined;
+      clearTimeout(this.afkTimer);
+      this.afkTimer = undefined;
     }
   }
 
   getPluginStatus(): string {
     return `-- Host Skipper --
-      timer : ${this.skipTimer != undefined ? "active" : "---"}
+      timer : ${this.afkTimer != undefined ? "active" : "---"}
       skip_require : ${this.requiredSkip}
       skip_count : ${this.countSkip}
       skip_requesters : [${[...this.skipRequesters].map(v => v.id).join(", ")}]
