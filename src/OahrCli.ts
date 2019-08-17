@@ -1,4 +1,4 @@
-import { AutoHostSelector, AutoStarter, HostSkipper, Lobby, logIrcEvent, IIrcClient, parser } from "./models";
+import { AutoHostSelector, AutoStarter, HostSkipper, Lobby, logIrcEvent, IIrcClient, parser, LobbyTerminator, LobbyStatus } from "./models";
 import * as readline from 'readline';
 import config from "config";
 import log4js from "log4js";
@@ -24,6 +24,7 @@ export class OahrCli {
   selector: AutoHostSelector;
   starter: AutoStarter;
   skipper: HostSkipper;
+  terminator: LobbyTerminator;
   option: OahrCliOption = OahrCliDefaultOption;
   private scene: Scene;
 
@@ -33,6 +34,7 @@ export class OahrCli {
     this.selector = new AutoHostSelector(this.lobby);
     this.starter = new AutoStarter(this.lobby);
     this.skipper = new HostSkipper(this.lobby);
+    this.terminator = new LobbyTerminator(this.lobby);
     this.scene = this.scenes.mainMenu;
   }
 
@@ -83,12 +85,19 @@ export class OahrCli {
 
     lobbyMenu: {
       name: "lobbyMenu",
-      prompt: "[s]say, [i]nfo, [c]lose, [e]xit > ",
+      prompt: "[s]say, [b]ancho, [i]nfo, [c]lose, [q]uit > ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
+        if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
+          this.scene = this.scenes.exited;
+          return;
+        }
         switch (l.command) {
           case "s":
             this.lobby.SendMessage(l.arg);
+            break;
+          case "b":
+            this.lobby.SendMessageToBancho(l.arg);
             break;
           case "i":
             this.displayInfo();
@@ -98,8 +107,8 @@ export class OahrCli {
             await this.lobby.CloseLobbyAsync();
             this.scene = this.scenes.exited;
             break;
-          case "e":
-            logger.info("exit");
+          case "q":
+            logger.info("quit");
             this.scene = this.scenes.exited;
             break;
           default:
@@ -158,10 +167,15 @@ export class OahrCli {
     r.on("close", () => {
       if (this.client != null) {
         logger.info("readline closed");
-        this.client.disconnect("goodby", () =>  {
-          logger.info("ircClient disconnected");
+        if (this.client.conn != null && !this.client.conn.requestedDisconnect) {
+          this.client.disconnect("goodby", () =>  {
+            logger.info("ircClient disconnected");
+            process.exit(0);
+          });
+        } else {
+          logger.info("exit");
           process.exit(0);
-        });
+        }    
       }
     });
   }

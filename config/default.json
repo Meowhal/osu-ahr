@@ -15,7 +15,10 @@
     "skip_request_rate": 0.5,
     "skip_request_min": 2,
     "skip_timer_delay_ms": 30000,
-    "skip_vote_delay_ms": 5000
+    "skip_vote_delay_ms": 3000
+  },
+  "LobbyTerminator" :{
+    "terminate_time_ms" : 60000
   },
   "OahrCli": {
     "invite_users": [],

@@ -78,6 +78,14 @@
       ],
       "level": "all"
     },
+    "lobbyTerminator": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_app"
+      ],
+      "level": "all"
+    },    
     "chat": {
       "appenders": [
         "console",
