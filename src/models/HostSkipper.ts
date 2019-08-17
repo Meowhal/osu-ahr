@@ -67,6 +67,7 @@ export class HostSkipper extends LobbyPlugin {
     // 誰もいなくなったらタイマーを止める
     if (this.lobby.players.size == 0) {
       this.clearVote();
+      this.stopTimer();
     }
   }
 
@@ -102,6 +103,9 @@ export class HostSkipper extends LobbyPlugin {
       } else if (message == "*restartSkip") {
         this.restart();
       }
+    }
+    if (this.lobby.host == player) {
+      this.stopTimer();
     }
   }
 
@@ -175,9 +179,10 @@ export class HostSkipper extends LobbyPlugin {
     logger.trace("start timer");
     this.skipTimer = setTimeout(() => {
       if (this.skipTimer != undefined) {
-        logger.trace("AFK skip function has been activated.");
-        this.lobby.SendMessage("AFK skip function has been activated.");
-        this.doSkip();
+        //logger.trace("AFK skip function has been activated.");
+        //this.lobby.SendMessage("AFK skip function has been activated.");
+        this.lobby.SendMessage("you can skip afk host by !skip command.");
+        //this.doSkip();
       }
     }, this.option.skip_timer_delay_ms);
   }
