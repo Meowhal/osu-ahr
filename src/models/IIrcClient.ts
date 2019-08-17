@@ -44,6 +44,9 @@ export function logIrcEvent(client: IIrcClient) {
   client.on('invite', (channel, from) => {
     logger.debug(`@invt ${from} invite you to ${channel}`);
   });
+  client.on('notice', function (from, to, message) {
+    logger.debug('@notice  %s => %s: %s', from, to, message);
+  });
   if (!(client instanceof DummyIrcClient)) {
     client.on('sentMessage', function (to, message) {
       logger.debug(`@sent bot => ${to}: ${message}`);
