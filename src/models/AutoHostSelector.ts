@@ -98,7 +98,8 @@ export class AutoHostSelector extends LobbyPlugin {
     }
 
     if (message.startsWith("!q")) {
-      const m = this.hostQueue.map(c => c.id).join(", ");
+      const m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
+      logger.trace(m);
       this.lobby.SendMessage("host queue : " + m);
       return;
     }
@@ -188,7 +189,7 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   getPluginStatus(): string {
-    const m = this.hostQueue.map(p => this.escapeUserId(p.id)).join(", ");
+    const m = this.hostQueue.map(p => p.id).join(", ");
     return `-- AutoHostSelector --
   current host queue
     ${m}
