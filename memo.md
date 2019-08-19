@@ -4,7 +4,7 @@
 OSUのマルチゲームにて、ホストローテーションを自動化するためのボット
 Osu-Auto-Host-Rotation
 
-## やること書き出し
+## 処理の流れ初期案
 - BanchoBot宛に!mp make [roomname]を送る、その返信から部屋番号をユーザーに通知する
 - 作った部屋のchannel(#mp_[roomid]) に入る
 - ロビー監視モード
@@ -18,12 +18,12 @@ Osu-Auto-Host-Rotation
       - キューから削除
     - if 誰もいないなら
       - タイマーで部屋を削除 
-  - if ホストが選曲したら B(Beatmap changed to) /選曲済みフラグを立てる (いらないかも)
+  - if ホストが選曲したら B(Beatmap changed to) /AFK検知タイマー停止
   - if ホストが変更されたら B([userid] became the host.)
       - if ホストキューと違う人が任命されたら /正しい人に変更
   - if ホストが部屋サイズ変更したら -> 検出できないかも
   - if ホストがキックしたら -> どうしよう
-  - if B(All players are ready) -> 未準備の人が抜けると発生しないので使わない
+  - if B(All players are ready) -> 未準備の人が抜けると発生しないかもなので注意
   - if B(The match has started!) /ゲーム監視モード
 - ゲーム監視モード
   - if ユーザーが入ってきたら B([userid] joined in slot [slot].)
@@ -44,26 +44,15 @@ Osu-Auto-Host-Rotation
   - 開始時に設定を保存、再開時にそのlobbyにアクセスを試みる。正常終了時に設定を削除
   - もしくは単純にユーザーにlobbyidを入力してもらう
 
-## 全体像
-IIrcClient : IRCクライアント通信の抽象化
-ILobby : BanchoBotとのテキストのやり取りを抽象化
-AutoHostSelector : ILobbyを介してホスト選択を行う
+## 構成
+- IIrcClient : IRCクライアントのインターフェース、mockを作るため
+- ILobby : BanchoBotとのテキストのやり取りを抽象化
+- LobbyPlugin : ILobbyを介して、各種機能を実現する
 
 ## AutoHostSelector class 設計 
 ### 概要
-オートホストローテーション機能を行うためclass
+オートホストローテーション機能を行うためLobbyPlugin
 ILobbyのイベントに対して処理を行う
-### プロパティ
-- lobby
-- hostQueue : ホストキュー
-- currentHost : 現在のホスト
-- isMatching : 試合中フラグ
-### 扱うイベント
-- PlayerJoined
-- PlayerLeft
-- HostChanged
-- MatchStarted
-- MatchFinished
 ### 状態
 <dl>
   <dt>S0</dt>
@@ -76,11 +65,10 @@ ILobbyのイベントに対して処理を行う
   <dd>試合中。isMatchingがtrue</dd>
 </dl>
 
-### 各状態でのイベントに対する反応
+### 状態遷移と動作
 s0
 - PlayerJoined
   - キューに追加して、!mp hostを発行。s1へ遷移
-
 s1
 - PlayerJoined
   - キューに追加
@@ -106,6 +94,7 @@ H
   - 先頭が対象ならそのまま
   - それ以外なら!mp hostを再発行しS1へ遷移
 - MatchStarted
+  - 現在のhostをキューの末尾へ
   - Mへ遷移 
 
 M 
@@ -115,36 +104,8 @@ M
   - キューから削除
   - 0人にはならないはず。
 - MatchFinished
-  - 現在のhostをキューの末尾へ
   - 次のホストを任命してS1へ遷移
- 
-## lobby class 設計
-### 概要
-Banchobotとのirc通信を抽象化するためのクラス。
-!mpコマンドのメソッド化、IRC応答のイベント化
-### プロパティ
-- 部屋名
-- 部屋ID
-- ircクライアント
-### イベント
-- LobbyOpend(lobbyid)
-- PlayerJoined(userid, slotid)
-- PlayerLeft(userid)
-- BeatmapSelected(mapid)
-- HostChanged(userid)
-- MatchStarted()
-- PlayerFinished(userid, score)
-- MatchFinished()
-- EnteredLobby()
-- LobbyClosed(err) // コマンドによる正常終了のほかサーバー強制終了なども考慮する
-### アクション
-- SendMpHost(userid)
-- SendMpMake(title)
-- SendMpAbort()
-- SendMpClose()
-- SendMessage(message)
-- Enter(channel)
-- Leave(channel)
+
 ## npm スクリプト
 - build distフォルダを削除 -> srcをtscでコンパイル
 - start
@@ -156,19 +117,14 @@ Banchobotとのirc通信を抽象化するためのクラス。
 IRCでチャットを取得するには!mp make から部屋を作らないといけない。
 !mp makeで部屋を作るとホストが抜けた場合、ホストが別の人に映らず誰もホストでない状態になる。
 
-user名に入っているスペースは _に置換しないといけない。
-Banchobotのメッセージはスペースになっているので注意。
-コマンドを送る場合は_を使う
-
 ライブラリ irc をインストールする際にエラーが出るが、文字コード識別機能を使わなければ問題ないらしい。
 でも他のパッケージをインストールする際にエラーがでてインストール出来ない場合がある。
 一旦ircを削除して、入れ直す？
 
 ## Irc と osuマルチロビーについて
-Osuのゲーム内チャットとトーナメント用IRCは別モノ？
+IRCはOsuのゲーム内チャットのすべてに干渉できるわけではない。権限が異なるっぽい。
 IRCで接続できるのは!mp make で作成したトーナメントロビーだけ
 トーナメントロビーのIRCにはプレイヤーが参加していないがチャットメッセージは受信できる
-
 
 ## test用 dummy class
 テストのたびにマルチロビー作るのはまずいので、ダミーのIRCクライアントを作る。
@@ -204,8 +160,7 @@ banchobotのメッセージからユーザー名を抜き出すための正規�
 - 名前の前後のスペースはだめ
 - 3文字以上、15文字以下
 - スペースを2つ以上続けてはだめ
-- _ か スペースは混ぜて使えない
-- 
+- _ とスペースは同時に使えない
 
 ## logging
 ログからプレイヤーのチャットを抜き出す正規表現
@@ -213,19 +168,16 @@ banchobotのメッセージからユーザー名を抜き出すための正規�
 
 ## ロビーヒストリーWebApi
 下記url形式で時系列のイベントと関連したユーザーの情報が取得できる。
+必要ならこれらの情報も解析して利用したい。
 
 https://osu.ppy.sh/community/matches/54000487/history?after=1255711787&limit=100
 
 # TASK
-## stack
+## todo
 - 試合がスタックした場合のabort投票。abort時のホスト切り替え（始まる前にスタックしたか、終了時にスタックしたか） => 一人でもmatch finishedなら切り替え。
-- ロビーが空になった際の自動クローズ
-- ホストのスキップ時間が迫ったときに警告文を出すか、チャットしたときにタイマーが再設定されるようにする
 
-## working
-- 誰もいない状態で!mp settingsしたときにどうなるか？
-- スキップ時にたまりすぎる問題
-- ロビーに入って!mp settingsで情報を取得した際に、ホストからスロット順で並ぶようにする
+## wip
+
 ## done
 - スキップ後に自動で変更されないことがあった　修正済み
 - abort後に ismatching フラグを折り忘れていた　修正済み
@@ -240,3 +192,8 @@ https://osu.ppy.sh/community/matches/54000487/history?after=1255711787&limit=100
 - auth2のプレイヤーがホストのときに/skipしても即スキップにならない
 - ユーザーがいなくなったときにエラーが発生
 -  ホストが試合中に抜けると順番がおかしくなる.キューの並び替えタイミングを変更 
+- ロビーが空になった際の自動クローズ
+- ホストのスキップ時間が迫ったときに警告文を出すか、チャットしたときにタイマーが再設定されるようにする
+- 誰もいない状態で!mp settingsしたときにどうなるか？ -> players: 0で打ち切り
+- スキップ時にたまりすぎる問題 -> クールタイムを設けた
+- ロビーに入って!mp settingsで情報を取得した際に、ホストからスロット順で並ぶようにする
