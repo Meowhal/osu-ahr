@@ -147,9 +147,9 @@ export class HostSkipper extends LobbyPlugin {
 
   /** スキップ投票の必要数 */
   get requiredSkip(): number {
-    return Math.max(
+    return Math.ceil(Math.max(
       this.lobby.players.size * this.option.skip_request_rate,
-      this.option.skip_request_min);
+      this.option.skip_request_min));
   }
 
   /** スキップに投票した人数 */
