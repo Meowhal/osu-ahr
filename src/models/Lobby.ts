@@ -420,11 +420,11 @@ export class Lobby implements ILobby {
       }
     }
 
-    this.ircClient.on("message" + this.channel, feed);
+    this.ircClient.on("message", feed);
 
     const task = new Promise<void>((resolve, reject) => {
       completed = () => {
-        this.ircClient.off("message" + this.channel, feed);
+        this.ircClient.off("message", feed);
         if (this.mpSettingParser == undefined) {
           logger.error("mpSettingParser is undefined");
           reject();
@@ -452,13 +452,13 @@ export class Lobby implements ILobby {
     if (parser.players.length == 0) return;
 
     let hostidx = parser.players.findIndex(p => p.isHost);
-    if (hostidx == -1) hostidx = 0;
+    // if (hostidx == -1) hostidx = 0;
 
     // ホストを配列の先頭にする。
     const temp = Array.from(parser.players);
-    const players = temp.splice(hostidx).concat(temp);
+    const players = (hostidx == -1) ? temp : temp.splice(hostidx).concat(temp);
     players.forEach((v, i) => {
-      this.RaisePlayerJoined(v.id, v.slot, i == hostidx);
+      this.RaisePlayerJoined(v.id, v.slot, i == hostidx);      
     });
   }
 
