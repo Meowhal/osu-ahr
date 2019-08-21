@@ -116,16 +116,16 @@ export class HostSkipper extends LobbyPlugin {
       logger.debug("vote from %s was ignored, already skipped", player.id);
     } else if (this.elapsed < this.option.skip_vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
-      this.lobby.SendMessage("skip vote was ignored due to cool time. try again.");
+      this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
     } else if (auth >= 1) {
       this.doSkip();
     } else if (this.skipRequesters.has(player)) {
       logger.debug("vote from %s was ignored, double vote", player.id);
-      this.lobby.SendMessage(`${player.id} has already requested skip.`);
+      this.lobby.SendMessage(`bot : ${player.id} has already requested skip.`);
     } else {
       this.skipRequesters.add(player);
       logger.trace("accept skip request from %s", player.id);
-      this.checkSkipCount();
+      this.checkSkipCount(true);
     }
   }
 
@@ -134,11 +134,11 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   // スキップ状況を確認して、必要数に達している場合は
-  private checkSkipCount(): void {
+  private checkSkipCount(showMessage:boolean = false): void {
     const r = this.requiredSkip;
     const c = this.countSkip;
-    if (c != 0) {
-      this.lobby.SendMessage(`Host skip progress: ${c} / ${r}`)
+    if (c != 0 && showMessage) {
+      this.lobby.SendMessage(`bot : Host skip progress: ${c} / ${r}`)
     }
     if (r <= c) {
       this.doSkip();

@@ -16,7 +16,7 @@
     "skip_request_min": 2,
     "skip_vote_delay_ms": 3000,
     "afk_timer_delay_ms": 30000,
-    "afk_timer_message": "you can skip afk host by !skip command.",
+    "afk_timer_message": "bot : you can skip afk host by !skip command.",
     "afk_timer_do_skip": false
   },
   "LobbyTerminator": {
