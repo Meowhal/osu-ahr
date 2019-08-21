@@ -145,6 +145,10 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     await this.raiseMessageAsync("BanchoBot", this.channel, "The match has finished!");
   }
 
+  public async emulatePlayerFinishAsync(userid: string): Promise<void> {
+    await this.raiseMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
+  }
+
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
     setImmediate(this.raiseJoin, channel);

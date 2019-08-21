@@ -177,7 +177,7 @@ https://osu.ppy.sh/community/matches/54000487/history?after=1255711787&limit=100
 - 試合がスタックした場合のabort投票。abort時のホスト切り替え（始まる前にスタックしたか、終了時にスタックしたか） => 一人でもmatch finishedなら切り替え。
 
 ## wip
-
+- !mp abortで試合を終了した場合、ホストが変更されない
 ## done
 - スキップ後に自動で変更されないことがあった　修正済み
 - abort後に ismatching フラグを折り忘れていた　修正済み
@@ -197,3 +197,4 @@ https://osu.ppy.sh/community/matches/54000487/history?after=1255711787&limit=100
 - 誰もいない状態で!mp settingsしたときにどうなるか？ -> players: 0で打ち切り
 - スキップ時にたまりすぎる問題 -> クールタイムを設けた
 - ロビーに入って!mp settingsで情報を取得した際に、ホストからスロット順で並ぶようにする
+- skip voteの票が１つでも入っている場合、プレイヤーの入退出のたびにメッセージが出て鬱陶しいかもしれない。

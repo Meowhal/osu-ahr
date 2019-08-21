@@ -19,6 +19,8 @@ export class Lobby implements ILobby {
   channel: string | undefined;
   status: LobbyStatus;
   players: Set<Player>;
+  playersFinished: Set<Player>;
+  playersInGame: Set<Player>;
   ircClient: IIrcClient;
   playersMap: Map<string, Player>;
   isMatching: boolean;
@@ -35,7 +37,7 @@ export class Lobby implements ILobby {
   MatchStarted = new TypedEvent<void>();
   PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
   MatchFinished = new TypedEvent<void>();
-  AbortedMatch = new TypedEvent<void>();
+  AbortedMatch = new TypedEvent<{ playersFinished: number, playersInGame: number }>();
   AllPlayerReady = new TypedEvent<void>();
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
@@ -50,6 +52,8 @@ export class Lobby implements ILobby {
     }
     this.status = LobbyStatus.Standby;
     this.players = new Set();
+    this.playersFinished = new Set();
+    this.playersInGame = new Set();
     this.playersMap = new Map();
     this.ircClient = ircClient;
     this.host = null;
@@ -63,7 +67,9 @@ export class Lobby implements ILobby {
       this.RaiseNetError(err);
     });
     this.ircClient.once("part", (channel: string, nick: string) => {
-      this.status = LobbyStatus.Left;
+      if (channel == this.channel) {
+        this.status = LobbyStatus.Left;
+      }
     });
   }
 
@@ -102,7 +108,7 @@ export class Lobby implements ILobby {
     if (from == "BanchoBot" && to == this.channel) {
       this.handleBanchoResponse(message);
       this.BanchoChated.emit({ message });
-    } else {
+    } else if (to == this.channel) {
       const p = this.GetPlayer(from);
       if (p != null) {
         this.handlePlayerChat(p, message);
@@ -202,6 +208,9 @@ export class Lobby implements ILobby {
       if (this.hostPending == player) {
         this.hostPending = null;
       }
+      if (this.isMatching) {
+        this.playersInGame.delete(player);
+      }
       this.PlayerLeft.emit(player);
     } else {
       logger.warn("未参加のプレイヤーが退出した: %s", userid);
@@ -234,12 +243,17 @@ export class Lobby implements ILobby {
   }
 
   RaiseMatchStarted(): void {
+    logger.info("match started");
     this.isMatching = true;
+    this.playersInGame.clear();
+    this.players.forEach(p => this.playersInGame.add(p));
+    this.playersFinished.clear();
     this.MatchStarted.emit();
   }
 
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean): void {
     const player = this.GetOrMakePlayer(userid);
+    this.playersFinished.add(player);
     this.PlayerFinished.emit({ player, score, isPassed });
     if (!this.players.has(player)) {
       logger.info("未参加のプレイヤーがゲームを終えた: %s", userid);
@@ -249,13 +263,15 @@ export class Lobby implements ILobby {
   }
 
   RaiseMatchFinished(): void {
+    logger.info("match finished");
     this.isMatching = false;
     this.MatchFinished.emit();
   }
 
   RaiseAbortedMatch(): void {
+    logger.info("match aborted %d / %d", this.playersFinished.size, this.playersInGame.size);
     this.isMatching = false;
-    this.AbortedMatch.emit();
+    this.AbortedMatch.emit({ playersFinished: this.playersFinished.size, playersInGame: this.playersInGame.size });
   }
 
   RaiseAllPlayerReady(): void {
@@ -263,12 +279,15 @@ export class Lobby implements ILobby {
   }
 
   RaiseNetError(err: Error): void {
+    logger.error("error occured : " + err.message);
+    logger.error(err.stack);
     this.NetError.emit(err);
   }
 
   OnUserNotFound(): void {
     if (this.hostPending != null) {
       const p = this.hostPending;
+      logger.warn("occured OnUserNotFound : " + p.id);
       this.hostPending = null;
       this.HostChanged.emit({ succeeded: false, player: p });
     }
@@ -401,11 +420,11 @@ export class Lobby implements ILobby {
       }
     }
 
-    this.ircClient.on("message", feed);
+    this.ircClient.on("message" + this.channel, feed);
 
     const task = new Promise<void>((resolve, reject) => {
       completed = () => {
-        this.ircClient.off("message", feed);
+        this.ircClient.off("message" + this.channel, feed);
         if (this.mpSettingParser == undefined) {
           logger.error("mpSettingParser is undefined");
           reject();

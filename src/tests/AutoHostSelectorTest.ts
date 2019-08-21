@@ -249,4 +249,50 @@ export function AutoHostSelectorTest() {
     await delay(1);
     assertHostIs("player2", lobby);
   });
+
+  it("host wont change when match aborted before some player finished", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector();
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+
+    ircClient.emulateMatchAsync(10);
+    await delay(1);
+    await lobby.AbortMatch();
+    assert.isFalse(lobby.isMatching);
+    assert.isTrue(selector.isMatchAborted);
+
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+
+    await delay(10);
+
+    await ircClient.emulateMatchAsync(10);
+    assert.isFalse(lobby.isMatching);
+    assert.isFalse(selector.isMatchAborted);
+    assertStateIs("h", selector);
+    assertHostIs("player2", lobby);
+  });
+  it("host will when match aborted after some player finished", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector();
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+
+    ircClient.emulateMatchAsync(10);
+    await delay(1);
+    ircClient.emulatePlayerFinishAsync("player1");
+    await lobby.AbortMatch();
+    assert.isFalse(lobby.isMatching);
+    assert.isFalse(selector.isMatchAborted);
+    assertStateIs("h", selector);
+    assertHostIs("player2", lobby);
+
+    await delay(10);
+
+    await ircClient.emulateMatchAsync(10);
+    assertStateIs("h", selector);
+    assertHostIs("player3", lobby);
+  });
+
 }

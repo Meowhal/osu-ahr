@@ -310,10 +310,69 @@ export function LobbyTest() {
     assert.isTrue(ms);
     assert.isTrue(ma);
   });
+  it("match aborted before some players finished", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    let ma = false;
+    lobby.AbortedMatch.on((a) => {
+      ma = true;
+      assert.equal(a.playersFinished, 0);
+      assert.equal(a.playersInGame, 3);
+    });
+    const p = ircClient.emulateMatchAsync(10);
+    await lobby.AbortMatch();
+    await p;
+    assert.isTrue(ma);
+  });
+  it("match aborted after some players left", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    let ma = false;
+    lobby.AbortedMatch.on((a) => {
+      ma = true;
+      assert.equal(a.playersFinished, 0);
+      assert.equal(a.playersInGame, 2);
+    });
+    const p = ircClient.emulateMatchAsync(10);
+    await ircClient.emulateRemovePlayerAsync("user1");
+    await lobby.AbortMatch();
+    await p;
+    assert.isTrue(ma);
+  });
+  it("match aborted after some players finished", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    let ma = false;
+    lobby.AbortedMatch.on((a) => {
+      ma = true;
+      assert.equal(a.playersFinished, 1);
+      assert.equal(a.playersInGame, 3);
+    });
+    const p = ircClient.emulateMatchAsync(10);
+    await ircClient.emulatePlayerFinishAsync("user1");
+    await lobby.AbortMatch();
+    await p;
+    assert.isTrue(ma);
+  });
+  it("match aborted after some players left and remainders finished", async () => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    let ma = false;
+    lobby.AbortedMatch.on((a) => {
+      ma = true;
+      assert.equal(a.playersFinished, 2);
+      assert.equal(a.playersInGame, 2);
+    });
+    const p = ircClient.emulateMatchAsync(10);
+    await ircClient.emulatePlayerFinishAsync("user1");
+    await ircClient.emulateRemovePlayerAsync("user2");
+    await ircClient.emulatePlayerFinishAsync("user3");
+    await lobby.AbortMatch();
+    await p;
+    assert.isTrue(ma);
+  });
 
   it("plugin test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const lp = new DummyLobbyPlugin(lobby);
     console.log(lobby.getLobbyStatus());
   });
+
+
 }; 

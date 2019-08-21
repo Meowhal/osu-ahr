@@ -14,6 +14,7 @@ export const AutoHostSelectorDefaultOption = {
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
+  isMatchAborted: boolean = false; // abortによる中断でホストの入れ替えが必要ない場合にtrueになる
 
   get currentHost() {
     return this.lobby.host;
@@ -33,6 +34,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player, a.authority, a.message));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
+    this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
   }
 
   // プレイヤーが参加した際に実行される
@@ -56,8 +58,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.removeFromQueue(player);
     if (this.lobby.isMatching) return;
     if (this.hostQueue.length == 0) return;
-    if (this.lobby.host == player // ホストが抜けた場合 
-      || (this.lobby.host == null && this.lobby.hostPending == null)) { // ホストがいない、かつ承認待ちのホストがいない
+    if (this.lobby.host == null && this.lobby.hostPending == null) { // ホストがいない、かつ承認待ちのホストがいない
       logger.info("host has left");
       this.changeHost();
     }
@@ -69,7 +70,7 @@ export class AutoHostSelector extends LobbyPlugin {
   //  queueの次のホストならそのまま
   //  順番を無視していたら任命し直す
   private onHostChanged(succeeded: boolean, newhost: Player): void {
-    if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する
+    if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する(player left eventで対応)
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
     if (this.hostQueue[0] == newhost) {
@@ -83,11 +84,17 @@ export class AutoHostSelector extends LobbyPlugin {
 
   // 試合が始まったらキューを回す
   private onMatchStarted(): void {
-    this.rotateQueue();
+    if (this.isMatchAborted) {
+      logger.trace("on match rotation skipped. isMatchAborted flag was true");
+      this.isMatchAborted = false;
+    } else {
+      this.rotateQueue();
+    }
   }
 
   // 試合が終了したら現在のキューの先頭をホストに任命
   private onMatchFinished(): void {
+    this.isMatchAborted = false;
     this.changeHost();
   }
 
@@ -111,6 +118,17 @@ export class AutoHostSelector extends LobbyPlugin {
       this.doSkip();
     } else if (type == "skipto") {
       this.doSkipTo(args);
+    }
+  }
+
+  private onMatchAborted(playersFinished: number, playersInGame: number) {
+    if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
+      logger.info("match aborted after some Players Finished. call normal match finish process");
+      this.onMatchFinished();
+    } else { // 誰も終了していない場合はローテーションしないモードへ
+      this.isMatchAborted = true;
+      logger.info("match aborted before some Players Finished. this.isMatchAborted set true");
+      this.lobby.SendMessage("bot : Match Aborted. restart match or !skip current host.");
     }
   }
 
@@ -193,6 +211,7 @@ export class AutoHostSelector extends LobbyPlugin {
     return `-- AutoHostSelector --
   current host queue
     ${m}
-`;
+  is Match Aborted : ${this.isMatchAborted}
+  `;
   }
 }
