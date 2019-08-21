@@ -156,7 +156,6 @@ export class OahrCli {
         const v = process.argv.slice(2);
         logger.info("stdin > " + v.join(" "));
         r.emit("line", v.join(" "));
-        //process.stdin.write(`${process.argv[2]} ${process.argv[3]}`);
       }
     });
 
