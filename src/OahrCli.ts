@@ -150,13 +150,6 @@ export class OahrCli {
     this.client.once("registered", () => {
       r.setPrompt(this.prompt);
       r.prompt();
-
-      if (process.argv.length > 2) {
-        //logger.info(`${process.argv[2]} ${process.argv[3]}`);
-        const v = process.argv.slice(2);
-        logger.info("stdin > " + v.join(" "));
-        r.emit("line", v.join(" "));
-      }
     });
 
     r.on("line", line => {

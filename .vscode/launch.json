@@ -38,6 +38,25 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"
+    },
+    
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "nohup debug",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "args": [
+          "${workspaceFolder}/src/index.ts",
+          "e", 
+          "54243331"
+      ],
+      "sourceMaps": true,
+      "env": {
+        "NODE_ENV": "development",
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
     }
   ]
 }
