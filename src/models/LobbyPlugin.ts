@@ -24,4 +24,8 @@ export class LobbyPlugin {
   getPluginStatus(): string {
     return "";
   }
+
+  getInfoMessage(): string[] {
+    return [];
+  }
 }

@@ -100,9 +100,7 @@ export class HostSkipper extends LobbyPlugin {
   private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
-    if (command == "!info" || command == "!help") {
-      this.lobby.SendMessage("-  !skip => skip current host.");
-    } else if (command == "!skip" || command == "!s") {
+    if (command == "!skip" || command == "!s") {
       if (this.lobby.host == null) return; // ホストがいないなら何もしない
       if (param != "" && param != this.lobby.host.id) return; // 関係ないユーザーのスキップは無視
       this.vote(player, auth);
@@ -230,5 +228,9 @@ export class HostSkipper extends LobbyPlugin {
       skip_count : ${this.countSkip}
       skip_requesters : [${[...this.skipRequesters].map(v => v.id).join(", ")}]
     `;
+  }
+
+  getInfoMessage(): string[] {
+    return ["!skip => skip current host."];
   }
 }

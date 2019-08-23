@@ -200,11 +200,7 @@ export class Lobby implements ILobby {
     const { command, param } = parser.ParseCustomCommand(message);
     const authority = this.getPlayerAuthority(player);
     if (command == "!info" || command == "!help") {
-      this.SendMessage("- Osu Auto Host Rotation Bot -");
-      this.SendMessage("-  The host order is based on when you entered the lobby.");
-      this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882, source : https://github.com/Meowhal/osu-ahr");
-      this.SendMessage("- bot commands -");
-      this.SendMessage("-  !info => show this message.");
+      this.showInfoMessage();
     }
     this.ReceivedCustomCommand.emit({ player, authority, command, param });
   }
@@ -516,5 +512,26 @@ export class Lobby implements ILobby {
       s += p.getPluginStatus();
     }
     return s;
+  }
+
+  private dateLastInfoMessageShown = 0;
+
+  showInfoMessage(): void {
+    const now = Date.now();
+    if (30000 < now - this.dateLastInfoMessageShown){
+      this.dateLastInfoMessageShown = now;
+      this.SendMessage("- Osu Auto Host Rotation Bot -");
+      this.SendMessage("-  The host order is based on when you entered the lobby.");
+      this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882, source : https://github.com/Meowhal/osu-ahr");
+      this.SendMessage("- bot commands -");
+      this.SendMessage("-  !info => show this message.");
+
+      let msgs : string[] = [];
+      this.plugins.forEach(p => p.getInfoMessage().forEach(m => {
+        this.SendMessage("-  " + m);
+      }));
+    } else {
+      logger.trace("info cool time");
+    }
   }
 }
