@@ -115,11 +115,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+
+  mapidSeed: number = 0;
   // ホストがマップを変更する動作をエミュレートする
-  public async emulateChangeMapAsync(delay: number): Promise<void> {
+  public async emulateChangeMapAsync(delay: number = 0): Promise<void> {
     await this.raiseMessageAsync("BanchoBot", this.channel, "Host is changing map...");
     await this.delay(delay);
-    await this.raiseMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/123456)`);
+    await this.raiseMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${this.mapidSeed++})`);
   }
 
   // 全員が準備完了になった動作をエミュレートする
@@ -147,7 +149,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   public async emulatePlayerFinishAsync(userid: string): Promise<void> {
     await this.raiseMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
-  }
+  } 
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
