@@ -7,7 +7,7 @@
       "password": "you can get password from 'https://osu.ppy.sh/p/irc'"
     }
   },
-  "lobby": {
+  "Lobby": {
     "authorized_users": []
   },
   "HostSkipper": {
