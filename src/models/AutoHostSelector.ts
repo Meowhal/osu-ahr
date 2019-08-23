@@ -32,7 +32,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(a => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
-    this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player, a.authority, a.message));
+    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
   }
@@ -55,7 +55,7 @@ export class AutoHostSelector extends LobbyPlugin {
   // ホスト任命中に退出した場合も次のホストを任命
   // 試合中なら次のホストは任命しない
   private onPlayerLeft(player: Player): void {
-    this.removeFromQueue(player);
+    this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
     if (this.lobby.isMatching) return;
     if (this.hostQueue.length == 0) return;
     if (this.lobby.host == null && this.lobby.hostPending == null) { // ホストがいない、かつ承認待ちのホストがいない
@@ -98,13 +98,13 @@ export class AutoHostSelector extends LobbyPlugin {
     this.changeHost();
   }
 
-  private onPlayerChated(player: Player, auth: number, message: string): void {
-    if (message == "!info" || message == "!help") {
+  private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
+    if (command == "!info" || command == "!help") {
       this.lobby.SendMessage("!queue => show host queue.");
       return;
     }
 
-    if (message.startsWith("!q")) {
+    if (command.startsWith("!q")) {
       const m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
       logger.trace(m);
       this.lobby.SendMessage("host queue : " + m);

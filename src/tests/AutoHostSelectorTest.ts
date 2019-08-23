@@ -246,8 +246,21 @@ export function AutoHostSelectorTest() {
     assertStateIs("h", selector);
     assertHostIs("player1", lobby);
     selector.sendPluginMessage("skip");
-    await delay(1);
+    await delay(5);
     assertHostIs("player2", lobby);
+  });
+
+  it("plugin message skipto test", async () => {
+    const { selector, lobby, ircClient } = await prepareSelector();
+    await AddPlayers(["player1", "player2", "player3"], ircClient);
+    assertStateIs("h", selector);
+    assertHostIs("player1", lobby);
+    selector.sendPluginMessage("skipto", ["player3"]);
+    await delay(5);
+    assertHostIs("player3", lobby);
+    assert.equal(selector.hostQueue[0].id, "player3");
+    assert.equal(selector.hostQueue[1].id, "player1");
+    assert.equal(selector.hostQueue[2].id, "player2");
   });
 
   it("host wont change when match aborted before some player finished", async () => {

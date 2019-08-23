@@ -24,14 +24,18 @@ export function HostSkipperTest() {
     return { skipper, lobby, ircClient };
   }
 
-  async function AddPlayers(ids: string[] | number, client: DummyIrcClient): Promise<void> {
+  async function AddPlayers(ids: string[] | number, client: DummyIrcClient): Promise<string[]> {
     if (typeof ids == "number") {
       const start = client.players.size;
+      const p = [];
       for (let i = 0; i < ids; i++) {
-        await client.emulateAddPlayerAsync("p" + (i + start));
+        p[i] = "p" + (i + start)
+        await client.emulateAddPlayerAsync(p[i]);
       }
+      return p;
     } else {
       ids.forEach(async (id) => await client.emulateAddPlayerAsync(id));
+      return ids;
     }
   }
 
@@ -60,7 +64,7 @@ export function HostSkipperTest() {
     return p;
   }
 
-  async function recieveSkipAsync(lobby: Lobby, callback: (() => void) | null = null): Promise<number> {
+  async function resolveSkipAsync(lobby: Lobby, callback: (() => void) | null = null): Promise<number> {
     return new Promise<number>(resolve => {
       lobby.PluginMessage.once(a => {
         assert.equal(a.type, "skip");
@@ -76,8 +80,35 @@ export function HostSkipperTest() {
         resolve(Date.now());
       }, timeout);
       lobby.PluginMessage.once(a => {
-        assert.fail();
-        reject();
+        if (a.type == "skip") {
+          assert.fail();
+          reject();
+        }        
+      });
+    });
+  }
+
+  async function resolveSkiptoAsync(lobby: Lobby, userid:string, callback: (() => void) | null = null): Promise<number> {
+    return new Promise<number>(resolve => {
+      lobby.PluginMessage.once(a => {
+        assert.equal(a.type, "skipto");
+        assert.equal(a.args[0], userid);
+        if (callback) callback();
+        resolve(Date.now());
+      });
+    });
+  }
+
+  async function rejectSkiptoAsync(lobby: Lobby, timeout: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      setTimeout(() => {
+        resolve(Date.now());
+      }, timeout);
+      lobby.PluginMessage.once(a => {
+        if (a.type == "skipto") {
+          assert.fail();
+          reject();
+        }        
       });
     });
   }
@@ -136,7 +167,7 @@ export function HostSkipperTest() {
       await changeHostAsync("p1", lobby);
       assert.isDefined(skipper.afkTimer);
       assert.isEmpty(skipper.skipRequesters);
-      await recieveSkipAsync(lobby);
+      await resolveSkipAsync(lobby);
       assert.isUndefined(skipper.afkTimer);
     });
 
@@ -150,7 +181,7 @@ export function HostSkipperTest() {
         skipper.option.afk_timer_delay_ms = waitTime;
         skipper.restart();
         const startTime = await changeHostAsync("p1", lobby);
-        const endTime = await recieveSkipAsync(lobby);
+        const endTime = await resolveSkipAsync(lobby);
         const elapsed = endTime - startTime;
         assert.closeTo(elapsed, waitTime, 10);
       }
@@ -162,7 +193,7 @@ export function HostSkipperTest() {
       const { skipper, lobby, ircClient } = await prepare(30);
       await AddPlayers(["p1", "p2", "p3"], ircClient);
       const startTime = await changeHostAsync("p1", lobby);
-      const rt = recieveSkipAsync(lobby);
+      const rt = resolveSkipAsync(lobby);
       assertHostIs("p1", lobby);
       await delay(10);
       await changeHostAsync("p2", lobby);
@@ -198,6 +229,13 @@ export function HostSkipperTest() {
       await changeHostAsync("p1", lobby);
       await rejectSkipAsync(lobby, 100);
     });
+    it("timer stop when host chated", async () => {
+      const { skipper, lobby, ircClient } = await prepare(10);
+      await AddPlayers(["p1", "p2", "p3"], ircClient);
+      await changeHostAsync("p1", lobby);
+      await ircClient.raiseMessageAsync("p1", ircClient.channel, "hello");
+      await rejectSkipAsync(lobby, 100);
+    });
     this.slow(dslow);
 
   });
@@ -227,7 +265,7 @@ export function HostSkipperTest() {
       const { skipper, lobby, ircClient } = await prepare(0, 0);
       await AddPlayers(3, ircClient);
       await changeHostAsync("p0", lobby);
-      const rt = recieveSkipAsync(lobby);
+      const rt = resolveSkipAsync(lobby);
       ircClient.raiseMessage("p0", ircClient.channel, "!skip");
       await rt;
     });
@@ -251,7 +289,7 @@ export function HostSkipperTest() {
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
       let skipped = false;
-      const task = recieveSkipAsync(lobby, () => skipped = true);
+      const task = resolveSkipAsync(lobby, () => skipped = true);
       ircClient.raiseMessage("p1", ircClient.channel, "!skip");
       await delay(10);
       assert.equal(skipper.countSkip, 1);
@@ -305,7 +343,7 @@ export function HostSkipperTest() {
       await AddPlayers(5, ircClient);
       await changeHostAsync("p0", lobby);
       let skipped = false;
-      const task = recieveSkipAsync(lobby, () => skipped = true);
+      const task = resolveSkipAsync(lobby, () => skipped = true);
       ircClient.raiseMessage("p1", ircClient.channel, "!skip");
       ircClient.raiseMessage("p2", ircClient.channel, "!skip");
       await delay(10);
@@ -340,7 +378,7 @@ export function HostSkipperTest() {
       await AddPlayers(numplayers, ircClient);
       await changeHostAsync("p0", lobby);
       let skipped = false;
-      const task = recieveSkipAsync(lobby, () => skipped = true);
+      const task = resolveSkipAsync(lobby, () => skipped = true);
       for (let i = 1; i < numplayers; i++) {
         ircClient.raiseMessage("p" + i, ircClient.channel, "!skip");
         await delay(1);
@@ -348,6 +386,84 @@ export function HostSkipperTest() {
         assert.equal(skipped, skipper.requiredSkip <= i);
       }
     });
+    it("accept !skip with host id", async () => {
+      const { skipper, lobby, ircClient } = await prepare();
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p1", ircClient.channel, "!skip p0");
+      assert.equal(skipper.countSkip, 1);
+    });
+    it("accept !skip with host id with complex name", async () => {
+      const { skipper, lobby, ircClient } = await prepare();
+      const players = ["abc xxx[aaui]", "a", "b", "c"];
+      await AddPlayers(players, ircClient);
+      await changeHostAsync(players[0], lobby);
+      ircClient.raiseMessage(players[1], ircClient.channel, "!skip " + players[0]);
+      assert.equal(skipper.countSkip, 1);
+    });
+    it("accept !skip with space", async () => {
+      const { skipper, lobby, ircClient } = await prepare();
+      const players = await AddPlayers(5, ircClient);
+      await changeHostAsync(players[0], lobby);
+      ircClient.raiseMessage(players[1], ircClient.channel, "!skip ");
+      assert.equal(skipper.countSkip, 1);
+    });
+
+    it("ignore !skip if none host player targeted", async () => {
+      const { skipper, lobby, ircClient } = await prepare();
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p1", ircClient.channel, "!skip abc");
+      assert.equal(skipper.countSkip, 0);
+    });
+
   });
+  describe("custom command tests", function () {
+    it("*skip by authorized user test", async() => {
+      const { skipper, lobby, ircClient } = await prepare();
+      lobby.option.authorized_users.push("p1");
+      var t = resolveSkipAsync(lobby);
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p1", ircClient.channel, "*skip");
+      await t;
+    });
+    it("*skip by authorized user with param test", async() => {
+      const { skipper, lobby, ircClient } = await prepare();
+      lobby.option.authorized_users.push("p1");
+      var t = resolveSkipAsync(lobby);
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p1", ircClient.channel, "*skip aaa");
+      await t;
+    });
+    it("*skip by Unauthorized test", async() => {
+      const { skipper, lobby, ircClient } = await prepare();
+      lobby.option.authorized_users.push("p1");
+      var t = rejectSkipAsync(lobby, 25);
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p2", ircClient.channel, "*skip");
+      await t;
+    });
+    it("*skipto test", async() => {
+      const { skipper, lobby, ircClient } = await prepare();
+      lobby.option.authorized_users.push("p1");
+      var t = resolveSkiptoAsync(lobby, "p3");
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p1", ircClient.channel, "*skipto p3");
+      await t;
+    });
+    it("failed *skipto if param isn't userid", async () => {
+      const { skipper, lobby, ircClient } = await prepare();
+      lobby.option.authorized_users.push("p1");
+      var t = rejectSkiptoAsync(lobby, 25);
+      await AddPlayers(5, ircClient);
+      await changeHostAsync("p0", lobby);
+      ircClient.raiseMessage("p1", ircClient.channel, "*skipto pvv3 asdv");
+      await t;
+    });
+  })
 
 }

@@ -51,8 +51,9 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
-    this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player, a.authority, a.message));
+    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
     this.lobby.BeatmapChanging.on(() => this.onBeatmapChanging());
+    this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
   }
 
@@ -89,25 +90,32 @@ export class HostSkipper extends LobbyPlugin {
     this.stopTimer();
   }
 
-  // スキップメッセージを処理
-  private onPlayerChated(player: Player, auth: number, message: string): void {
-    if (this.lobby.isMatching) return;
-
-    if (message == "!info" || message == "!help") {
-      this.lobby.SendMessage("!skip => skip current host.");
-    } else if (message == "!skip" || message == "!s") {
-      this.vote(player, auth);
-    } else if (auth >= 2) {
-      if (message == "*skip") {
-        this.doSkip();
-      } else if (message == "*stopSkipCounter") {
-        this.stopTimer();
-      } else if (message == "*restartSkip") {
-        this.restart();
-      }
-    }
+  private onPlayerChated(player: Player) {
     if (this.lobby.host == player) {
       this.stopTimer();
+    }
+  }
+
+  // スキップメッセージを処理
+  private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
+    if (this.lobby.isMatching) return;
+
+    if (command == "!info" || command == "!help") {
+      this.lobby.SendMessage("!skip => skip current host.");
+    } else if (command == "!skip" || command == "!s") {
+      if (this.lobby.host == null) return; // ホストがいないなら何もしない
+      if (param != "" && param != this.lobby.host.id) return; // 関係ないユーザーのスキップは無視
+      this.vote(player, auth);
+    } else if (auth >= 2) {
+      if (command == "*skip") {
+        this.doSkip();
+      } else if (command == "*stopSkipCounter") {
+        this.stopTimer();
+      } else if (command == "*restartSkip") {
+        this.restart();
+      } else if (command == "*skipto" && param != "") {
+        this.doSkipTo(param);
+      }
     }
   }
 
@@ -134,7 +142,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   // スキップ状況を確認して、必要数に達している場合は
-  private checkSkipCount(showMessage:boolean = false): void {
+  private checkSkipCount(showMessage: boolean = false): void {
     const r = this.requiredSkip;
     const c = this.countSkip;
     if (c != 0 && showMessage) {
@@ -163,6 +171,18 @@ export class HostSkipper extends LobbyPlugin {
     this.stopTimer();
     this.sendPluginMessage("skip");
   }
+
+  private doSkipTo(userid: string): void {
+    if (!this.lobby.Includes(userid)) {
+      logger.info("invalid userid @skipto : %s", userid);
+      return;
+    }
+    logger.info("do skipTo : %s", userid);
+    this.skipping = true;
+    this.stopTimer();
+    this.sendPluginMessage("skipto", [userid]);
+  }
+
 
   restart(): void {
     this.clearVote();

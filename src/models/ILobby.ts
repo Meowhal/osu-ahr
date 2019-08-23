@@ -44,7 +44,8 @@ export interface ILobby {
   UnexpectedAction: TypedEvent<Error>;
   NetError: TypedEvent<Error>;
   BanchoChated: TypedEvent<{ message: string }>;
-  PlayerChated: TypedEvent<{ player: Player, authority: number, message: string }>;
+  PlayerChated: TypedEvent<{ player: Player, message: string }>;
+  ReceivedCustomCommand: TypedEvent<{ player: Player, authority: number, command: string, param: string }>;
   PluginMessage: TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>;
 }
 

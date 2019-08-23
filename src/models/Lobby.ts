@@ -52,7 +52,9 @@ export class Lobby implements ILobby {
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
   BanchoChated = new TypedEvent<{ message: string }>();
-  PlayerChated = new TypedEvent<{ player: Player, authority: number, message: string }>();
+  PlayerChated = new TypedEvent<{ player: Player, message: string }>();
+  ReceivedCustomCommand = new TypedEvent<{ player: Player, authority: number, command: string, param: string }>();
+
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
 
 
@@ -138,8 +140,10 @@ export class Lobby implements ILobby {
     } else if (to == this.channel) {
       const p = this.GetPlayer(from);
       if (p != null) {
-        this.handlePlayerChat(p, message);
-        this.PlayerChated.emit({ player: p, authority: this.getPlayerAuthority(p), message });
+        if (parser.IsCustomCommand(message)) {
+          this.raiseReceivedCustomCommand(p, message);
+        }
+        this.PlayerChated.emit({ player: p, message });
       }
     }
   }
@@ -180,19 +184,25 @@ export class Lobby implements ILobby {
       case BanchoResponseType.AllPlayerReady:
         this.RaiseAllPlayerReady();
         break;
-      case BanchoResponseType.None:
-      default:
+      case BanchoResponseType.Unhandled:
         logger.debug("unhandled bancho response : %s", message);
         break;
     }
   }
 
-  private handlePlayerChat(player: Player, message: string): void {
-    chatlogger.trace("%s:%s", player.id, message);
-    if (message == "!info" || message == "!help") {
+  private raiseReceivedCustomCommand(player: Player, message: string): void {
+    chatlogger.trace("custom command %s:%s", player.id, message);
+    const { command, param } = parser.ParseCustomCommand(message);
+    const authority = this.getPlayerAuthority(player);
+    if (command == "!info" || command == "!help") {
       this.SendMessage("--  Osu Auto Host Rotation Bot  --");
+      this.SendMessage("The host order is based on when you entered the lobby.");
+      this.SendMessage("author : gnsksz https://osu.ppy.sh/users/8286882");
+      this.SendMessage("source : https://github.com/Meowhal/osu-ahr");
+      this.SendMessage("- bot command -");
       this.SendMessage("!info => show this message.");
     }
+    this.ReceivedCustomCommand.emit({ player, authority, command, param });
   }
 
   private botOwnerCache: string | undefined;
@@ -458,6 +468,7 @@ export class Lobby implements ILobby {
         }
         logger.debug("parsed mp settings");
         this.margeMpSettingsResult(this.mpSettingParser);
+        this.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
         logger.trace("completed loadLobbySettings");
         this.mpSettingParser = undefined;
         resolve();
