@@ -200,7 +200,7 @@ export class Lobby implements ILobby {
     const { command, param } = parser.ParseCustomCommand(message);
     const authority = this.getPlayerAuthority(player);
     if (command == "!info" || command == "!help") {
-      
+      this.showInfoMessage();
     }
     this.ReceivedCustomCommand.emit({ player, authority, command, param });
   }
