@@ -99,16 +99,21 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
-    if (command == "!info" || command == "!help") {
-      this.lobby.SendMessage("-  !queue => show host queue.");
-      return;
-    }
-
     if (command.startsWith("!q")) {
+      this.showHostQueue();
+    }
+  }
+
+  private timeQueueDisplayed = 0;
+  private showHostQueue(): void {
+    const now = Date.now();
+    if (30000 < now - this.timeQueueDisplayed) {
+      this.timeQueueDisplayed = now;
       const m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
       logger.trace(m);
       this.lobby.SendMessage("host queue : " + m);
-      return;
+    } else {
+      logger.trace("q cool time");
     }
   }
 
@@ -213,5 +218,9 @@ export class AutoHostSelector extends LobbyPlugin {
     ${m}
   is Match Aborted : ${this.isMatchAborted}
   `;
+  }
+
+  getInfoMessage(): string[] {
+    return ["!queue => show host queue."]
   }
 }
