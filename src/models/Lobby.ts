@@ -1,6 +1,6 @@
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
-import { parser, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
+import { parser, BanchoResponseType } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
 import { MpSettingsParser } from "./MpSettingsParser";
@@ -60,7 +60,7 @@ export class Lobby implements ILobby {
     if (ircClient.conn == null) {
       throw new Error("clientが未接続です");
     }
-    this.option = {...LobbyDefaultOption, ...option} as LobbyOption;
+    this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
     this.status = LobbyStatus.Standby;
     this.players = new Set();
     this.playersFinished = new Set();
@@ -70,7 +70,7 @@ export class Lobby implements ILobby {
     this.host = null;
     this.hostPending = null;
     this.isMatching = false;
-    
+
     this.authorizeIrcUser();
 
     this.ircClient.on("message", (from, to, message) => {
@@ -84,7 +84,7 @@ export class Lobby implements ILobby {
         this.status = LobbyStatus.Left;
       }
     });
-    
+
   }
 
   // ircでログインしたユーザーに権限を与える
@@ -92,7 +92,7 @@ export class Lobby implements ILobby {
     if (!isArray(this.option.authorized_users)) {
       this.option.authorized_users = [];
     } else {
-      this.option.authorized_users = Array.from(this.option.authorized_users);      
+      this.option.authorized_users = Array.from(this.option.authorized_users);
     }
 
     if (!this.option.authorized_users.includes(this.ircClient.nick)) {
@@ -148,13 +148,13 @@ export class Lobby implements ILobby {
     const c = parser.ParseBanchoResponse(message);
     switch (c.type) {
       case BanchoResponseType.BeatmapChanged:
-        this.RaiseBeatmapChanged(c.param as string);
+        this.RaiseBeatmapChanged(c.params[0]);
         break;
       case BanchoResponseType.BeatmapChanging:
         this.RaiseBeatmapChanging();
         break;
       case BanchoResponseType.HostChanged:
-        this.RaiseHostChanged(c.param as string);
+        this.RaiseHostChanged(c.params[0]);
         break;
       case BanchoResponseType.UserNotFound:
         this.OnUserNotFound();
@@ -166,15 +166,13 @@ export class Lobby implements ILobby {
         this.RaiseMatchStarted();
         break;
       case BanchoResponseType.PlayerFinished:
-        let p = c.param as PlayerFinishedParameter;
-        this.RaisePlayerFinished(p.id, p.score, p.isPassed);
+        this.RaisePlayerFinished(c.params[0], c.params[1], c.params[2]);
         break;
       case BanchoResponseType.PlayerJoined:
-        let q = c.param as PlayerJoinedParameter;
-        this.RaisePlayerJoined(q.id, q.slot);
+        this.RaisePlayerJoined(c.params[0], c.params[1]);
         break;
       case BanchoResponseType.PlayerLeft:
-        this.RaisePlayerLeft(c.param as string);
+        this.RaisePlayerLeft(c.params[0] as string);
         break;
       case BanchoResponseType.AbortedMatch:
         this.RaiseAbortedMatch();

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { parser, BanchoResponseType, PlayerJoinedParameter, PlayerFinishedParameter } from "../models";
+import { parser, BanchoResponseType } from "../models";
 
 export function CommandParserTest() {
   it("make lobby message parse test", () => {
@@ -61,9 +61,8 @@ export function CommandParserTest() {
     let message = "Swgciai joined in slot 4.";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerJoined) {
-      let p = v.param as PlayerJoinedParameter;
-      assert.equal(p.id, "Swgciai");
-      assert.equal(p.slot, 4);
+      assert.equal(v.params[0], "Swgciai");
+      assert.equal(v.params[1], 4);
     } else {
       assert.fail();
     }
@@ -71,9 +70,8 @@ export function CommandParserTest() {
     message = "Foet_Mnagyo joined in slot 1.";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerJoined) {
-      let p = v.param as PlayerJoinedParameter;
-      assert.equal(p.id, "Foet_Mnagyo");
-      assert.equal(p.slot, 1);
+      assert.equal(v.params[0], "Foet_Mnagyo");
+      assert.equal(v.params[1], 1);
     } else {
       assert.fail();
     }
@@ -81,9 +79,8 @@ export function CommandParserTest() {
     message = "- Cylcl joined in slot 5.";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerJoined) {
-      let p = v.param as PlayerJoinedParameter;
-      assert.equal(p.id, "- Cylcl");
-      assert.equal(p.slot, 5);
+      assert.equal(v.params[0], "- Cylcl");
+      assert.equal(v.params[1], 5);
     } else {
       assert.fail();
     }
@@ -93,7 +90,7 @@ export function CommandParserTest() {
     let message = "Swgciai left the game.";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerLeft) {
-      assert.equal(v.param, "Swgciai");
+      assert.equal(v.params[0], "Swgciai");
     } else {
       assert.fail();
     }
@@ -101,7 +98,7 @@ export function CommandParserTest() {
     message = "Foet_Mnagyo left the game.";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerLeft) {
-      assert.equal(v.param, "Foet_Mnagyo");
+      assert.equal(v.params[0], "Foet_Mnagyo");
     } else {
       assert.fail();
     }
@@ -109,7 +106,7 @@ export function CommandParserTest() {
     message = "- Cylcl left the game.";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerLeft) {
-      assert.equal(v.param, "- Cylcl");
+      assert.equal(v.params[0], "- Cylcl");
     } else {
       assert.fail();
     }
@@ -125,7 +122,7 @@ export function CommandParserTest() {
     let message = "Beatmap changed to: Noah - Celestial stinger [apl's EXHAUST] (https://osu.ppy.sh/b/1454083)";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.BeatmapChanged) {
-      assert.equal(v.param, "1454083");
+      assert.equal(v.params[0], "1454083");
     } else {
       assert.fail();
     }
@@ -133,7 +130,7 @@ export function CommandParserTest() {
     message = "Beatmap changed to: Paul Bazooka - DrunkenSteiN [bor's Insane] (https://osu.ppy.sh/b/1913126)";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.BeatmapChanged) {
-      assert.equal(v.param, "1913126");
+      assert.equal(v.params[0], "1913126");
     } else {
       assert.fail();
     }
@@ -141,7 +138,7 @@ export function CommandParserTest() {
     message = "Beatmap changed to: supercell - Hoshi ga Matataku Konna Yoru ni [Sharlo's Insane] (https://osu.ppy.sh/b/670743)";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.BeatmapChanged) {
-      assert.equal(v.param, "670743");
+      assert.equal(v.params[0], "670743");
     } else {
       assert.fail();
     }
@@ -151,7 +148,7 @@ export function CommandParserTest() {
     let message = "Swgciai became the host.";
     let v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.HostChanged) {
-      assert.equal(v.param, "Swgciai");
+      assert.equal(v.params[0], "Swgciai");
     } else {
       assert.fail();
     }
@@ -159,7 +156,7 @@ export function CommandParserTest() {
     message = "Foet_Mnagyo became the host.";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.HostChanged) {
-      assert.equal(v.param, "Foet_Mnagyo");
+      assert.equal(v.params[0], "Foet_Mnagyo");
     } else {
       assert.fail();
     }
@@ -167,7 +164,7 @@ export function CommandParserTest() {
     message = "- Cylcl became the host.";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.HostChanged) {
-      assert.equal(v.param, "- Cylcl");
+      assert.equal(v.params[0], "- Cylcl");
     } else {
       assert.fail();
     }
@@ -180,10 +177,9 @@ export function CommandParserTest() {
     let message = "Swgciai finished playing (Score: 18048202, PASSED).";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerFinished) {
-      let p = v.param as PlayerFinishedParameter;
-      assert.equal(p.id, "Swgciai");
-      assert.equal(p.score, 18048202);
-      assert.equal(p.isPassed, true);
+      assert.equal(v.params[0], "Swgciai");
+      assert.equal(v.params[1], 18048202);
+      assert.equal(v.params[2], true);
     } else {
       assert.fail();
     }
@@ -191,10 +187,9 @@ export function CommandParserTest() {
     message = "Foet_Mnagyo finished playing (Score: 290043, FAILED).";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerFinished) {
-      let p = v.param as PlayerFinishedParameter;
-      assert.equal(p.id, "Foet_Mnagyo");
-      assert.equal(p.score, 290043);
-      assert.equal(p.isPassed, false);
+      assert.equal(v.params[0], "Foet_Mnagyo");
+      assert.equal(v.params[1], 290043);
+      assert.equal(v.params[2], false);
     } else {
       assert.fail();
     }
@@ -202,10 +197,9 @@ export function CommandParserTest() {
     message = "- Cylcl finished playing (Score: 2095838, PASSED).";
     v = parser.ParseBanchoResponse(message);
     if (v.type == BanchoResponseType.PlayerFinished) {
-      let p = v.param as PlayerFinishedParameter;
-      assert.equal(p.id, "- Cylcl");
-      assert.equal(p.score, 2095838);
-      assert.equal(p.isPassed, true);
+      assert.equal(v.params[0], "- Cylcl");
+      assert.equal(v.params[1], 2095838);
+      assert.equal(v.params[2], true);
     } else {
       assert.fail();
     }
