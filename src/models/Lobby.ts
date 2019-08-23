@@ -91,7 +91,10 @@ export class Lobby implements ILobby {
   private authorizeIrcUser() {
     if (!isArray(this.option.authorized_users)) {
       this.option.authorized_users = [];
+    } else {
+      this.option.authorized_users = Array.from(this.option.authorized_users);      
     }
+
     if (!this.option.authorized_users.includes(this.ircClient.nick)) {
       this.option.authorized_users.push(this.ircClient.nick);
     }
