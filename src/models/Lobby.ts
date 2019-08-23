@@ -74,7 +74,7 @@ export class Lobby implements ILobby {
     this.isMatching = false;
 
     this.authorizeIrcUser();
-
+    
     this.ircClient.on("message", (from, to, message) => {
       this.handleMessage(from, to, message);
     });
@@ -97,7 +97,11 @@ export class Lobby implements ILobby {
       this.option.authorized_users = Array.from(this.option.authorized_users);
     }
 
-    if (!this.option.authorized_users.includes(this.ircClient.nick)) {
+    if (!this.ircClient.nick) {
+      this.ircClient.once("registered", () =>{
+        this.authorizeIrcUser();
+      });  
+    } else if (!this.option.authorized_users.includes(this.ircClient.nick)) {
       this.option.authorized_users.push(this.ircClient.nick);
     }
   }
@@ -144,6 +148,7 @@ export class Lobby implements ILobby {
           this.raiseReceivedCustomCommand(p, message);
         }
         this.PlayerChated.emit({ player: p, message });
+        chatlogger.trace("%s:%s", p.id, message);
       }
     }
   }
@@ -191,16 +196,15 @@ export class Lobby implements ILobby {
   }
 
   private raiseReceivedCustomCommand(player: Player, message: string): void {
-    chatlogger.trace("custom command %s:%s", player.id, message);
+    logger.trace("custom command %s:%s", player.id, message);
     const { command, param } = parser.ParseCustomCommand(message);
     const authority = this.getPlayerAuthority(player);
     if (command == "!info" || command == "!help") {
-      this.SendMessage("--  Osu Auto Host Rotation Bot  --");
-      this.SendMessage("The host order is based on when you entered the lobby.");
-      this.SendMessage("author : gnsksz https://osu.ppy.sh/users/8286882");
-      this.SendMessage("source : https://github.com/Meowhal/osu-ahr");
-      this.SendMessage("- bot command -");
-      this.SendMessage("!info => show this message.");
+      this.SendMessage("- Osu Auto Host Rotation Bot -");
+      this.SendMessage("-  The host order is based on when you entered the lobby.");
+      this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882, source : https://github.com/Meowhal/osu-ahr");
+      this.SendMessage("- bot commands -");
+      this.SendMessage("-  !info => show this message.");
     }
     this.ReceivedCustomCommand.emit({ player, authority, command, param });
   }

@@ -101,7 +101,7 @@ export class HostSkipper extends LobbyPlugin {
     if (this.lobby.isMatching) return;
 
     if (command == "!info" || command == "!help") {
-      this.lobby.SendMessage("!skip => skip current host.");
+      this.lobby.SendMessage("-  !skip => skip current host.");
     } else if (command == "!skip" || command == "!s") {
       if (this.lobby.host == null) return; // ホストがいないなら何もしない
       if (param != "" && param != this.lobby.host.id) return; // 関係ないユーザーのスキップは無視
@@ -126,6 +126,8 @@ export class HostSkipper extends LobbyPlugin {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
       this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
     } else if (auth >= 1) {
+      logger.debug("host(%s) sent !skip command", player.id);
+      this.lobby.SendMessage("bot : Accepted !skip from current host.");
       this.doSkip();
     } else if (this.skipRequesters.has(player)) {
       logger.debug("vote from %s was ignored, double vote", player.id);

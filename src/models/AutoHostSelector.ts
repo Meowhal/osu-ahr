@@ -100,7 +100,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
     if (command == "!info" || command == "!help") {
-      this.lobby.SendMessage("!queue => show host queue.");
+      this.lobby.SendMessage("-  !queue => show host queue.");
       return;
     }
 
