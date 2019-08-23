@@ -1,17 +1,27 @@
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
-import { parser, BanchoResponse, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
+import { parser, BanchoResponseType, PlayerFinishedParameter, PlayerJoinedParameter } from "./CommandParser";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "../libs/events";
-import { MpSettingsParser, PlayerSettings } from "./MpSettingsParser";
+import { MpSettingsParser } from "./MpSettingsParser";
 import { getIrcConfig } from "../config";
 import { LobbyPlugin } from "./LobbyPlugin";
+import config from "config";
 import log4js from "log4js";
+import { isArray } from "util";
+
 const logger = log4js.getLogger("lobby");
 const chatlogger = log4js.getLogger("chat");
 
+export interface LobbyOption {
+  authorized_users: string[] // 特権ユーザー
+}
+
+const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
+
 export class Lobby implements ILobby {
   // Members
+  option: LobbyOption;
   host: Player | null;
   hostPending: Player | null;
   name: string | undefined;
@@ -46,10 +56,11 @@ export class Lobby implements ILobby {
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
 
 
-  constructor(ircClient: IIrcClient) {
+  constructor(ircClient: IIrcClient, option: any | null = null) {
     if (ircClient.conn == null) {
       throw new Error("clientが未接続です");
     }
+    this.option = {...LobbyDefaultOption, ...option} as LobbyOption;
     this.status = LobbyStatus.Standby;
     this.players = new Set();
     this.playersFinished = new Set();
@@ -59,6 +70,8 @@ export class Lobby implements ILobby {
     this.host = null;
     this.hostPending = null;
     this.isMatching = false;
+    
+    this.authorizeIrcUser();
 
     this.ircClient.on("message", (from, to, message) => {
       this.handleMessage(from, to, message);
@@ -71,6 +84,17 @@ export class Lobby implements ILobby {
         this.status = LobbyStatus.Left;
       }
     });
+    
+  }
+
+  // ircでログインしたユーザーに権限を与える
+  private authorizeIrcUser() {
+    if (!isArray(this.option.authorized_users)) {
+      this.option.authorized_users = [];
+    }
+    if (!this.option.authorized_users.includes(this.ircClient.nick)) {
+      this.option.authorized_users.push(this.ircClient.nick);
+    }
   }
 
   // useridからプレイヤーオブジェクトを取得する
@@ -171,11 +195,12 @@ export class Lobby implements ILobby {
   }
 
   private botOwnerCache: string | undefined;
+
   private getPlayerAuthority(player: Player): number {
     if (this.botOwnerCache == undefined) {
       this.botOwnerCache = getIrcConfig().nick;
     }
-    if (player.id == this.botOwnerCache) {
+    if (this.option.authorized_users.includes(player.id)) {
       return 2;
     } else if (player == this.host) {
       return 1;
@@ -458,7 +483,7 @@ export class Lobby implements ILobby {
     const temp = Array.from(parser.players);
     const players = (hostidx == -1) ? temp : temp.splice(hostidx).concat(temp);
     players.forEach((v, i) => {
-      this.RaisePlayerJoined(v.id, v.slot, i == hostidx);      
+      this.RaisePlayerJoined(v.id, v.slot, i == hostidx);
     });
   }
 
