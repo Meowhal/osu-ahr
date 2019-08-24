@@ -86,22 +86,20 @@ export class Lobby implements ILobby {
         this.status = LobbyStatus.Left;
       }
     });
-
   }
 
   // ircでログインしたユーザーに権限を与える
-  private authorizeIrcUser() {
-    if (!isArray(this.option.authorized_users)) {
-      this.option.authorized_users = [];
-    } else {
-      this.option.authorized_users = Array.from(this.option.authorized_users);
-    }
-
+  private authorizeIrcUser() {   
     if (!this.ircClient.nick) {
       this.ircClient.once("registered", () =>{
         this.authorizeIrcUser();
       });  
     } else if (!this.option.authorized_users.includes(this.ircClient.nick)) {
+      if (!isArray(this.option.authorized_users)) {
+        this.option.authorized_users = [];
+      } else {
+        this.option.authorized_users = Array.from(this.option.authorized_users);
+      }
       this.option.authorized_users.push(this.ircClient.nick);
     }
   }
