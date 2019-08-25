@@ -237,7 +237,7 @@ export function AutoHostSelectorTest() {
   it("logLobbyStatus test", async () => {
     const { selector, lobby, ircClient } = await prepareSelector();
     await AddPlayers(["player1", "player2", "player3"], ircClient);
-    console.log(lobby.getLobbyStatus());
+    console.log(lobby.GetLobbyStatus());
   });
 
   it("plugin message skip test", async () => {

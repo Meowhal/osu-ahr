@@ -85,7 +85,7 @@ export class OahrCli {
 
     lobbyMenu: {
       name: "lobbyMenu",
-      prompt: "[s]say, [b]ancho, [i]nfo, [c]lose, [q]uit > ",
+      prompt: "[s]say, [i]nfo, [c]lose, [q]uit > ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
@@ -95,9 +95,6 @@ export class OahrCli {
         switch (l.command) {
           case "s":
             this.lobby.SendMessage(l.arg);
-            break;
-          case "b":
-            this.lobby.SendMessageToBancho(l.arg);
             break;
           case "i":
             this.displayInfo();
@@ -126,7 +123,7 @@ export class OahrCli {
   };
 
   displayInfo(): void {
-    logger.info(this.lobby.getLobbyStatus());
+    logger.info(this.lobby.GetLobbyStatus());
   }
 
   get prompt(): string {
@@ -168,14 +165,14 @@ export class OahrCli {
       if (this.client != null) {
         logger.info("readline closed");
         if (this.client.conn != null && !this.client.conn.requestedDisconnect) {
-          this.client.disconnect("goodby", () =>  {
+          this.client.disconnect("goodby", () => {
             logger.info("ircClient disconnected");
             process.exit(0);
           });
         } else {
           logger.info("exit");
           process.exit(0);
-        }    
+        }
       }
     });
   }

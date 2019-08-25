@@ -104,17 +104,12 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  private timeQueueDisplayed = 0;
   private showHostQueue(): void {
-    const now = Date.now();
-    if (30000 < now - this.timeQueueDisplayed) {
-      this.timeQueueDisplayed = now;
+    this.lobby.SendMessageWithCoolTime(() => {
       const m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
       logger.trace(m);
-      this.lobby.SendMessage("host queue : " + m);
-    } else {
-      logger.trace("q cool time");
-    }
+      return "host queue : " + m;
+    }, "!queue", 30000);
   }
 
   // 別のプラグインからskipの要請があった場合に実行する

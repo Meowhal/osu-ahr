@@ -24,7 +24,7 @@ export interface ILobby {
   TransferHost(user: Player): void;
   AbortMatch(): void;
   SendMessage(message: string): void;
-  SendMessageToBancho(message: string): void;
+  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltime: number): boolean;
 
   MakeLobbyAsync(title: string): Promise<string>;
   EnterLobbyAsync(channel: string): Promise<string>; // TODO:ロビーのチャンネルが存在しないときの処理

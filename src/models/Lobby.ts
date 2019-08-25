@@ -54,9 +54,7 @@ export class Lobby implements ILobby {
   BanchoChated = new TypedEvent<{ message: string }>();
   PlayerChated = new TypedEvent<{ player: Player, message: string }>();
   ReceivedCustomCommand = new TypedEvent<{ player: Player, authority: number, command: string, param: string }>();
-
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
-
 
   constructor(ircClient: IIrcClient, option: any | null = null) {
     if (ircClient.conn == null) {
@@ -74,7 +72,7 @@ export class Lobby implements ILobby {
     this.isMatching = false;
 
     this.authorizeIrcUser();
-    
+
     this.ircClient.on("message", (from, to, message) => {
       this.handleMessage(from, to, message);
     });
@@ -86,22 +84,6 @@ export class Lobby implements ILobby {
         this.status = LobbyStatus.Left;
       }
     });
-  }
-
-  // ircでログインしたユーザーに権限を与える
-  private authorizeIrcUser() {   
-    if (!this.ircClient.nick) {
-      this.ircClient.once("registered", () =>{
-        this.authorizeIrcUser();
-      });  
-    } else if (!this.option.authorized_users.includes(this.ircClient.nick)) {
-      if (!isArray(this.option.authorized_users)) {
-        this.option.authorized_users = [];
-      } else {
-        this.option.authorized_users = Array.from(this.option.authorized_users);
-      }
-      this.option.authorized_users.push(this.ircClient.nick);
-    }
   }
 
   // useridからプレイヤーオブジェクトを取得する
@@ -134,6 +116,42 @@ export class Lobby implements ILobby {
     if (p === undefined) return false;
     return this.players.has(p);
   }
+
+  TransferHost(user: Player): void {
+    this.hostPending = user;
+    this.SendMessage("!mp host " + user.id);
+  }
+
+  AbortMatch(): void {
+    if (this.isMatching) {
+      this.SendMessage("!mp abort");
+    }
+  }
+
+  SendMessage(message: string): void {
+    if (this.channel != undefined) {
+      this.ircClient.say(this.channel, message);
+      this.ircClient.emit("sentMessage", this.channel, message);
+    }
+  }
+
+  private coolTimes: { [key: string]: number } = {};
+  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
+    const now = Date.now();
+    if (tag in this.coolTimes) {
+      if (now - this.coolTimes[tag] < cooltimeMs) {
+        return false;
+      }
+    }
+    this.coolTimes[tag] = now;
+    if (typeof message == "function") {
+      message = message();
+    }
+    this.SendMessage(message);
+    return true;
+  }
+
+  // #region message handling
 
   private handleMessage(from: string, to: string, message: string) {
     if (from == "BanchoBot" && to == this.channel) {
@@ -203,20 +221,9 @@ export class Lobby implements ILobby {
     this.ReceivedCustomCommand.emit({ player, authority, command, param });
   }
 
-  private botOwnerCache: string | undefined;
+  // #endregion
 
-  private getPlayerAuthority(player: Player): number {
-    if (this.botOwnerCache == undefined) {
-      this.botOwnerCache = getIrcConfig().nick;
-    }
-    if (this.option.authorized_users.includes(player.id)) {
-      return 2;
-    } else if (player == this.host) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
+  // #region event handling
 
   RaisePlayerJoined(userid: string, slot: number, asHost: boolean = false): void {
     const player = this.GetOrMakePlayer(userid);
@@ -327,30 +334,9 @@ export class Lobby implements ILobby {
     }
   }
 
-  TransferHost(user: Player): void {
-    this.hostPending = user;
-    this.SendMessage("!mp host " + user.id);
-  }
+  // #endregion
 
-  AbortMatch(): void {
-    if (this.isMatching) {
-      this.SendMessage("!mp abort");
-    }
-  }
-
-  SendMessage(message: string): void {
-    if (this.channel != undefined) {
-      this.ircClient.say(this.channel, message);
-      this.ircClient.emit("sentMessage", this.channel, message);
-    }
-  }
-
-  SendMessageToBancho(message: string): void {
-    if (this.channel != undefined) {
-      this.ircClient.say("BanchoBot", message);
-      this.ircClient.emit("sentMessage", "BanchoBot", message);
-    }
-  }
+  // #region lobby management
 
   MakeLobbyAsync(title: string): Promise<string> {
     if (title === "") {
@@ -478,7 +464,7 @@ export class Lobby implements ILobby {
   }
 
   // 一旦ロビーから全員退出させ、現在のホストからスロット順に追加していく
-  margeMpSettingsResult(parser: MpSettingsParser): void {
+  private margeMpSettingsResult(parser: MpSettingsParser): void {
     this.name = parser.name;
     this.host = null;
     this.hostPending = null;
@@ -497,7 +483,9 @@ export class Lobby implements ILobby {
     });
   }
 
-  getLobbyStatus(): string {
+  // #endregion
+
+  GetLobbyStatus(): string {
     let s = `=== lobby status ===
   lobby id : ${this.id}
   status : ${this.status}
@@ -512,19 +500,12 @@ export class Lobby implements ILobby {
     return s;
   }
 
-  private dateLastInfoMessageShown = 0;
-
-  showInfoMessage(): void {
-    const now = Date.now();
-    if (30000 < now - this.dateLastInfoMessageShown){
-      this.dateLastInfoMessageShown = now;
-      this.SendMessage("- Osu Auto Host Rotation Bot -");
+  private showInfoMessage(): void {
+    if (this.SendMessageWithCoolTime("- Osu Auto Host Rotation Bot -", "infomessage", 30000)) {
       this.SendMessage("-  The host order is based on when you entered the lobby.");
       this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882, source : https://github.com/Meowhal/osu-ahr");
       this.SendMessage("- bot commands -");
       this.SendMessage("-  !info => show this message.");
-
-      let msgs : string[] = [];
       this.plugins.forEach(p => p.getInfoMessage().forEach(m => {
         this.SendMessage("-  " + m);
       }));
@@ -532,4 +513,36 @@ export class Lobby implements ILobby {
       logger.trace("info cool time");
     }
   }
+
+  // ircでログインしたユーザーに権限を与える
+  private authorizeIrcUser() {
+    if (!this.ircClient.nick) {
+      this.ircClient.once("registered", () => {
+        this.authorizeIrcUser();
+      });
+    } else if (!this.option.authorized_users.includes(this.ircClient.nick)) {
+      if (!isArray(this.option.authorized_users)) {
+        this.option.authorized_users = [];
+      } else {
+        this.option.authorized_users = Array.from(this.option.authorized_users);
+      }
+      this.option.authorized_users.push(this.ircClient.nick);
+    }
+  }
+
+  private botOwnerCache: string | undefined;
+
+  private getPlayerAuthority(player: Player): number {
+    if (this.botOwnerCache == undefined) {
+      this.botOwnerCache = getIrcConfig().nick;
+    }
+    if (this.option.authorized_users.includes(player.id)) {
+      return 2;
+    } else if (player == this.host) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
 }

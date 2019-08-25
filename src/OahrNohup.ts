@@ -31,15 +31,15 @@ export class OahrNohup {
   }
 
   displayInfo(): void {
-    logger.info(this.lobby.getLobbyStatus());
+    logger.info(this.lobby.GetLobbyStatus());
   }
 
-  connectAsync() : Promise<void> {
+  connectAsync(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.client.once("registered", () => {
         resolve();
       });
-    });    
+    });
   }
 
   makeLobby(name: string) {
@@ -59,7 +59,7 @@ export class OahrNohup {
     });
   }
 
-  async enterLobbyAsync(id:string) :Promise<void> {
+  async enterLobbyAsync(id: string): Promise<void> {
     try {
       const channel = parser.EnsureMpChannelId(id);
       logger.info("enter lobby, channel : %s", channel);
