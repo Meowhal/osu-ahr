@@ -1,11 +1,12 @@
-
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, logIrcEvent, Player } from '../models';
+import { Lobby, LobbyStatus, Player } from '../models';
 import { DummyIrcClient, DummyLobbyPlugin } from '../models/dummies';
-import { AssertionError } from 'assert';
+import log4js from "log4js";
 
 export function LobbyTest() {
-
+  before(function(){
+    log4js.configure("config/log_mocha_silent.json");
+  });
   interface LobbyTestBasicSet {
     ircClient: DummyIrcClient;
     lobby: Lobby;

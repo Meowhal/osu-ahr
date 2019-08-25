@@ -1,7 +1,10 @@
 import { assert } from 'chai';
 import { parser, BanchoResponseType } from "../models";
-
+import log4js from "log4js";
 export function CommandParserTest() {
+  before(function(){
+    log4js.configure("config/log_mocha_silent.json");
+  });
   it("make lobby message parse test", () => {
     let message = "Created the tournament match https://osu.ppy.sh/mp/52612489 irctestroom";
     let v = parser.ParseMpMakeResponse("BanchoBot", message);

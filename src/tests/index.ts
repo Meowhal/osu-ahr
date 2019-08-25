@@ -7,9 +7,10 @@ import { MpSettingsParserTest } from "./MpSettingsParserTest";
 import { HostSkipperTest } from "./HostSkipperTest";
 import log4js from "log4js";
 
-log4js.configure("config/log_mocha.json");
-
 describe("ahr tests", () => {
+  before(function() {
+    log4js.configure("config/log_mocha_silent.json");
+  });
   describe("BanchoBot Parser Tests", CommandParserTest);
   describe("Dummy Irc Client Tests", DummyIrcClientTest);
   describe("lobby tests", LobbyTest);

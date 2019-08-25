@@ -2,8 +2,12 @@ import { assert } from 'chai';
 import { DummyIrcClient } from '../models/dummies';
 import { HostSkipper, HostSkipperOption, Lobby, logIrcEvent, Player } from "../models";
 import config from "config";
+import log4js from "log4js";
 
 export function HostSkipperTest() {
+  before(function(){
+    log4js.configure("config/log_mocha_silent.json");
+  });
   async function prepare(timer_delay: number = 0, vote_delay: number = 0, logIrc: boolean = false):
     Promise<{ skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
     const ircClient = new DummyIrcClient("osu_irc_server", "creator");

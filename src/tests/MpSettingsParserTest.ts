@@ -1,6 +1,11 @@
 import { assert } from 'chai';
 import { MpSettingsParser } from "../models";
+import log4js from "log4js";
+
 export function MpSettingsParserTest() {
+  before(function(){
+    log4js.configure("config/log_mocha_silent.json");
+  });
   it("mp settings parse test", () => {
     const p = new MpSettingsParser();
     let b : boolean = false;

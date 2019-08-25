@@ -1,9 +1,12 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../models/dummies';
-import { parser, logIrcEvent, BanchoResponseType } from "../models";
+import { parser, BanchoResponseType } from "../models";
+import log4js from "log4js";
 
 export function DummyIrcClientTest() {
-
+  before(function(){
+    log4js.configure("config/log_mocha_silent.json");
+  });
   // ロビー作成テスト
   it("make lobby test", (done) => {
     const client = new DummyIrcClient("osu_irc_server", "owner");
