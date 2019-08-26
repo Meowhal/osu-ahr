@@ -14,11 +14,8 @@ export const AutoHostSelectorDefaultOption = {
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
-  isMatchAborted: boolean = false; // abortによる中断でホストの入れ替えが必要ない場合にtrueになる
-
-  get currentHost() {
-    return this.lobby.host;
-  }
+  needsRotate: boolean = true;
+  mapChanger: Player | null = null;
 
   constructor(lobby: ILobby, option: AutoHostSelectorOption | any | null = null) {
     super(lobby);
@@ -30,7 +27,8 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
-    this.lobby.MatchStarted.on(a => this.onMatchStarted());
+    this.lobby.BeatmapChanging.on(a => this.onBeatmapChanging());
+    this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
@@ -75,6 +73,12 @@ export class AutoHostSelector extends LobbyPlugin {
 
     if (this.hostQueue[0] == newhost) {
       logger.trace("A new host has been appointed:%s", newhost.id);
+
+      if (this.mapChanger != null && this.mapChanger != newhost) { // 前任のホストがマップを変更している
+        this.needsRotate = false;
+        logger.info("host is appointed after map change");
+        this.lobby.SendMessageWithCoolTime("bot : If you start the match without changing the map, you remain the host.", "ahs_hostchange", 10000);
+      }
     } else {
       // ホストがキューの先頭以外に変更された場合
       this.rotateQueue();
@@ -82,20 +86,43 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  private onBeatmapChanging(): void {
+    if (this.hostQueue[0] != this.lobby.host) {
+      // アボートで中断後にマップ変更し用とした場合は次のホストに変更
+      this.changeHost();
+      this.needsRotate = false;
+    } else {
+      // マップを変更した
+      this.needsRotate = true;
+      this.mapChanger = this.lobby.host;
+    }
+  }
+
   // 試合が始まったらキューを回す
   private onMatchStarted(): void {
-    if (this.isMatchAborted) {
-      logger.trace("on match rotation skipped. isMatchAborted flag was true");
-      this.isMatchAborted = false;
-    } else {
+    if (this.needsRotate) {
       this.rotateQueue();
+    } else {
+      logger.info("@onMatchStarted rotation skipped.");
     }
   }
 
   // 試合が終了したら現在のキューの先頭をホストに任命
   private onMatchFinished(): void {
-    this.isMatchAborted = false;
+    this.needsRotate = true;
+    this.mapChanger = null;
     this.changeHost();
+  }
+
+  private onMatchAborted(playersFinished: number, playersInGame: number) {
+    if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
+      logger.info("The match was aborted after several players were Finished. call normal match finish process");
+      this.onMatchFinished();
+    } else { // 誰も終了していない場合は試合再開許可モードへ
+      this.needsRotate = false;
+      logger.info("The match was aborted before any Player Finished.");
+      this.lobby.SendMessage("bot : The match was Aborted. Restart the match.");
+    }
   }
 
   private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
@@ -109,7 +136,7 @@ export class AutoHostSelector extends LobbyPlugin {
       const m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
       logger.trace(m);
       return "host queue : " + m;
-    }, "!queue", 30000);
+    }, "!queue", 15000);
   }
 
   // 別のプラグインからskipの要請があった場合に実行する
@@ -118,17 +145,6 @@ export class AutoHostSelector extends LobbyPlugin {
       this.doSkip();
     } else if (type == "skipto") {
       this.doSkipTo(args);
-    }
-  }
-
-  private onMatchAborted(playersFinished: number, playersInGame: number) {
-    if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
-      logger.info("match aborted after some Players Finished. call normal match finish process");
-      this.onMatchFinished();
-    } else { // 誰も終了していない場合はローテーションしないモードへ
-      this.isMatchAborted = true;
-      logger.info("match aborted before some Players Finished. this.isMatchAborted set true");
-      this.lobby.SendMessage("bot : Match Aborted. restart match or !skip current host.");
     }
   }
 
@@ -211,7 +227,8 @@ export class AutoHostSelector extends LobbyPlugin {
     return `-- AutoHostSelector --
   current host queue
     ${m}
-  is Match Aborted : ${this.isMatchAborted}
+  map changer : ${this.mapChanger == null ? "null" : this.mapChanger.id}
+  needsRotate : ${this.needsRotate}
   `;
   }
 
