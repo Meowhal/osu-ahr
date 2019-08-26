@@ -31,49 +31,49 @@
       "appenders": [
         "console"
       ],
-      "level": "info"
+      "level": "trace"
     },
     "irc": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     },
     "lobby": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     },
     "plugin": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     },
     "autoHostSelector": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     },
     "hostSkipper": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     },
     "lobbyTerminator": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     },
     "chat": {
       "appenders": [
         "console"
       ],
-      "level": "debug"
+      "level": "trace"
     }
   }
 }
