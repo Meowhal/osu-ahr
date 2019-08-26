@@ -129,7 +129,7 @@ export class HostSkipper extends LobbyPlugin {
       this.doSkip();
     } else if (this.skipRequesters.has(player)) {
       logger.debug("vote from %s was ignored, double vote", player.id);
-      this.lobby.SendMessage(`bot : ${player.id} has already requested skip.`);
+      this.lobby.SendMessageWithCoolTime(`bot : ${player.id} has already requested skip.`, "skipDoubleVote", 5000);
     } else {
       this.skipRequesters.add(player);
       logger.trace("accept skip request from %s", player.id);
@@ -146,7 +146,7 @@ export class HostSkipper extends LobbyPlugin {
     const r = this.requiredSkip;
     const c = this.countSkip;
     if (c != 0 && showMessage) {
-      this.lobby.SendMessage(`bot : Host skip progress: ${c} / ${r}`)
+      this.lobby.SendMessageWithCoolTime(`bot : Host skip progress: ${c} / ${r}`, "checkSkipCount", 5000);
     }
     if (r <= c) {
       this.doSkip();
