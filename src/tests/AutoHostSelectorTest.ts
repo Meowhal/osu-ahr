@@ -3,7 +3,7 @@ import { DummyIrcClient } from '../models/dummies';
 import { AutoHostSelector, Lobby, logIrcEvent } from "../models";
 import log4js from "log4js";
 
-export function AutoHostSelectorTest() {
+describe("AutoHostSelectorTest", function () {
   before(function () {
     log4js.configure("config/log_mocha_silent.json");
   });
@@ -284,7 +284,7 @@ export function AutoHostSelectorTest() {
       assert.isFalse(selector.needsRotate);
 
       assertStateIs("h", selector);
-      assertHostIs("player1", lobby);     
+      assertHostIs("player1", lobby);
 
       await ircClient.emulateMatchAsync(0);
       assert.isFalse(lobby.isMatching);
@@ -383,5 +383,4 @@ export function AutoHostSelectorTest() {
       assert.isTrue(selector.needsRotate);
     });
   });
-
-}
+});

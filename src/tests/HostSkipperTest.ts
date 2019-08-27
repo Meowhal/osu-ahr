@@ -4,8 +4,8 @@ import { HostSkipper, HostSkipperOption, Lobby, logIrcEvent, Player } from "../m
 import config from "config";
 import log4js from "log4js";
 
-export function HostSkipperTest() {
-  before(function(){
+describe("ostSkipperTest", function () {
+  before(function () {
     log4js.configure("config/log_mocha_silent.json");
   });
   async function prepare(timer_delay: number = 0, vote_delay: number = 0, logIrc: boolean = false):
@@ -87,12 +87,12 @@ export function HostSkipperTest() {
         if (a.type == "skip") {
           assert.fail();
           reject();
-        }        
+        }
       });
     });
   }
 
-  async function resolveSkiptoAsync(lobby: Lobby, userid:string, callback: (() => void) | null = null): Promise<number> {
+  async function resolveSkiptoAsync(lobby: Lobby, userid: string, callback: (() => void) | null = null): Promise<number> {
     return new Promise<number>(resolve => {
       lobby.PluginMessage.once(a => {
         assert.equal(a.type, "skipto");
@@ -112,7 +112,7 @@ export function HostSkipperTest() {
         if (a.type == "skipto") {
           assert.fail();
           reject();
-        }        
+        }
       });
     });
   }
@@ -423,7 +423,7 @@ export function HostSkipperTest() {
 
   });
   describe("custom command tests", function () {
-    it("*skip by authorized user test", async() => {
+    it("*skip by authorized user test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       lobby.option.authorized_users.push("p1");
       var t = resolveSkipAsync(lobby);
@@ -432,7 +432,7 @@ export function HostSkipperTest() {
       ircClient.raiseMessage("p1", ircClient.channel, "*skip");
       await t;
     });
-    it("*skip by authorized user with param test", async() => {
+    it("*skip by authorized user with param test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       lobby.option.authorized_users.push("p1");
       var t = resolveSkipAsync(lobby);
@@ -441,7 +441,7 @@ export function HostSkipperTest() {
       ircClient.raiseMessage("p1", ircClient.channel, "*skip aaa");
       await t;
     });
-    it("*skip by Unauthorized test", async() => {
+    it("*skip by Unauthorized test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       lobby.option.authorized_users.push("p1");
       var t = rejectSkipAsync(lobby, 25);
@@ -450,7 +450,7 @@ export function HostSkipperTest() {
       ircClient.raiseMessage("p2", ircClient.channel, "*skip");
       await t;
     });
-    it("*skipto test", async() => {
+    it("*skipto test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       lobby.option.authorized_users.push("p1");
       var t = resolveSkiptoAsync(lobby, "p3");
@@ -469,5 +469,4 @@ export function HostSkipperTest() {
       await t;
     });
   })
-
-}
+});

@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import { parser, BanchoResponseType } from "../models";
 import log4js from "log4js";
-export function CommandParserTest() {
-  before(function(){
+describe("CommandParserTest", function () {
+  before(function () {
     log4js.configure("config/log_mocha_silent.json");
   });
   it("make lobby message parse test", () => {
@@ -351,4 +351,4 @@ export function CommandParserTest() {
       assert.equal(v.param, "aiueo AIUEO");
     });
   });
-}
+});

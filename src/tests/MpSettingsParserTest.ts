@@ -2,14 +2,14 @@ import { assert } from 'chai';
 import { MpSettingsParser } from "../models";
 import log4js from "log4js";
 
-export function MpSettingsParserTest() {
-  before(function(){
+describe("MpSettingsParserTest", function () {
+  before(function () {
     log4js.configure("config/log_mocha_silent.json");
   });
   it("mp settings parse test", () => {
     const p = new MpSettingsParser();
-    let b : boolean = false;
-    
+    let b: boolean = false;
+
     b = p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403");
     assert.isFalse(b);
     b = p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]");
@@ -59,8 +59,8 @@ export function MpSettingsParserTest() {
 
   it("mp settings parse with space test", () => {
     const p = new MpSettingsParser();
-    let b : boolean = false;
-    
+    let b: boolean = false;
+
     b = p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403");
     assert.isFalse(b);
     b = p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]");
@@ -110,8 +110,8 @@ export function MpSettingsParserTest() {
 
   it("mp settings parse with blackets test", () => {
     const p = new MpSettingsParser();
-    let b : boolean = false;
-    
+    let b: boolean = false;
+
     b = p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403");
     assert.isFalse(b);
     b = p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]");
@@ -162,8 +162,8 @@ export function MpSettingsParserTest() {
 
   it("mp settings none orderd slot test", () => {
     const p = new MpSettingsParser();
-    let b : boolean = false;
-    
+    let b: boolean = false;
+
     b = p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403");
     assert.isFalse(b);
     b = p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]");
@@ -210,4 +210,4 @@ export function MpSettingsParserTest() {
     assert.equal(p.players[1].options[0], "Hidden");
     assert.equal(p.players[1].options[1], "DoubleTime");
   });
-}
+});

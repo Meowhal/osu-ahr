@@ -3,8 +3,8 @@ import { DummyIrcClient } from '../models/dummies';
 import { parser, BanchoResponseType } from "../models";
 import log4js from "log4js";
 
-export function DummyIrcClientTest() {
-  before(function(){
+describe("DummyIrcClientTest", function () {
+  before(function () {
     log4js.configure("config/log_mocha_silent.json");
   });
   // ロビー作成テスト
@@ -98,5 +98,4 @@ export function DummyIrcClientTest() {
       }
     });
   });
-
-}
+});

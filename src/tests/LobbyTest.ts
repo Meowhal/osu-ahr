@@ -3,8 +3,8 @@ import { Lobby, LobbyStatus, Player } from '../models';
 import { DummyIrcClient, DummyLobbyPlugin } from '../models/dummies';
 import log4js from "log4js";
 
-export function LobbyTest() {
-  before(function(){
+describe("LobbyTest", function () {
+  before(function () {
     log4js.configure("config/log_mocha_silent.json");
   });
   interface LobbyTestBasicSet {
@@ -510,4 +510,4 @@ export function LobbyTest() {
     const lp = new DummyLobbyPlugin(lobby);
     console.log(lobby.GetLobbyStatus());
   });
-}; 
+});
