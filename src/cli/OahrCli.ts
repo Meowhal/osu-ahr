@@ -2,7 +2,7 @@ import { Lobby, IIrcClient, LobbyStatus } from "..";
 import * as readline from 'readline';
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, AutoStarter, HostSkipper, LobbyTerminator } from "../plugins";
+import { AutoHostSelector, AutoStarter, HostSkipper, LobbyTerminator, MatchAborter } from "../plugins";
 import { parser } from "../parsers";
 
 const logger = log4js.getLogger("cli");
@@ -27,6 +27,7 @@ export class OahrCli {
   starter: AutoStarter;
   skipper: HostSkipper;
   terminator: LobbyTerminator;
+  aborter: MatchAborter;
   option: OahrCliOption = OahrCliDefaultOption;
   private scene: Scene;
 
@@ -37,6 +38,7 @@ export class OahrCli {
     this.starter = new AutoStarter(this.lobby);
     this.skipper = new HostSkipper(this.lobby);
     this.terminator = new LobbyTerminator(this.lobby);
+    this.aborter = new MatchAborter(this.lobby);
     this.scene = this.scenes.mainMenu;
   }
 
