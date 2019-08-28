@@ -5,7 +5,7 @@ import tu from "./TestUtils";
 
 describe("Match Aboter Tests", function () {
   before(function () {
-    tu.configMochaNoisy();
+    tu.configMochaSilent();
   });
 
   async function setupAsync(timerDelay: number = 10):

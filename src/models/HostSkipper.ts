@@ -54,7 +54,6 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
     this.lobby.BeatmapChanging.on(() => this.onBeatmapChanging());
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
-    this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
   }
 
   private onPlayerLeft(player: Player): void {
@@ -123,7 +122,7 @@ export class HostSkipper extends LobbyPlugin {
     } else if (this.elapsed < this.option.skip_vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
       this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
-    } else if (auth >= 1) {
+    } else if (player == this.lobby.host) {
       logger.debug("host(%s) sent !skip command", player.id);
       this.lobby.SendMessage("bot : Accepted !skip from current host.");
       this.doSkip();
@@ -135,10 +134,6 @@ export class HostSkipper extends LobbyPlugin {
       logger.trace("accept skip request from %s", player.id);
       this.checkSkipCount(true);
     }
-  }
-
-  private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
-
   }
 
   // スキップ状況を確認して、必要数に達している場合は
@@ -192,8 +187,10 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   clearVote(): void {
-    logger.trace("clear vote");
-    this.skipRequesters.clear();
+    if (this.skipRequesters.size != 0) {
+      logger.trace("clear vote");
+      this.skipRequesters.clear();
+    }
   }
 
   startTimer(): void {

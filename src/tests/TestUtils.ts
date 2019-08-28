@@ -70,17 +70,20 @@ class TestUtils {
   /**
    * 時間内に指定したイベントが発生することを確認する
    * @param event 対象のイベント
-   * @param cb イベント発生時に引数をチェックするためのコールバック関数。trueを返すとき、promiseは解決される。
+   * @param cb イベント発生時に引数をチェックするためのコールバック関数。falseを返す監視は継続される
    * @param timeout リジェクトまでのミリ秒時間
    */
-  async assertEventFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number): Promise<number> {
+  async assertEventFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number = 0): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      const id = setTimeout(() => {
-        d.dispose();
-        reject();
-      }, timeout);
+      let id : NodeJS.Timeout;
+      if (timeout != 0) {
+        id = setTimeout(() => {
+          d.dispose();          
+          reject("The event was expected to fire, but it didn't fire");
+        }, timeout);
+      }
       const d = event.on(a => {
-        if (cb != null && !cb(a)) return;
+        if (cb != null && cb(a) === false) return;
         d.dispose();
         clearTimeout(id);
         resolve(Date.now());
@@ -91,7 +94,7 @@ class TestUtils {
   /**
    * 時間内に指定したイベントが発生"しない"ことを確認する
    * @param event 対象のイベント
-   * @param cb イベント発生時に引数をチェックするためのコールバック関数。trueを返すとき、promiseは拒否される。
+   * @param cb イベント発生時に引数をチェックするためのコールバック関数。falseを返す監視は継続される
    * @param timeout イベント発生までの待ち時間
    */
   async assertEventNeverFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number): Promise<number> {
@@ -101,10 +104,10 @@ class TestUtils {
         resolve(Date.now());
       }, timeout);
       const d = event.on(a => {
-        if (cb != null && !cb(a)) return;
+        if (cb != null && cb(a) === false) return;
         clearTimeout(id);
         d.dispose();
-        reject();
+        reject("The event was expected not to fire, but it fired");
       });
     });
   }
