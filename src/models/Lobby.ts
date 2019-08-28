@@ -45,7 +45,7 @@ export class Lobby implements ILobby {
   HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
   UserNotFound = new TypedEvent<void>();
   MatchStarted = new TypedEvent<void>();
-  PlayerFinished = new TypedEvent<{ player: Player; score: number; isPassed: boolean; }>();
+  PlayerFinished = new TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>();
   MatchFinished = new TypedEvent<void>();
   AbortedMatch = new TypedEvent<{ playersFinished: number, playersInGame: number }>();
   AllPlayerReady = new TypedEvent<void>();
@@ -74,7 +74,9 @@ export class Lobby implements ILobby {
     this.authorizeIrcUser();
 
     this.ircClient.on("message", (from, to, message) => {
-      this.handleMessage(from, to, message);
+      if (to == this.channel) {
+        this.handleMessage(from, to, message);
+      }
     });
     this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
@@ -154,10 +156,10 @@ export class Lobby implements ILobby {
   // #region message handling
 
   private handleMessage(from: string, to: string, message: string) {
-    if (from == "BanchoBot" && to == this.channel) {
+    if (from == "BanchoBot") {
       this.handleBanchoResponse(message);
       this.BanchoChated.emit({ message });
-    } else if (to == this.channel) {
+    } else {
       const p = this.GetPlayer(from);
       if (p != null) {
         if (parser.IsCustomCommand(message)) {
@@ -295,7 +297,7 @@ export class Lobby implements ILobby {
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean): void {
     const player = this.GetOrMakePlayer(userid);
     this.playersFinished.add(player);
-    this.PlayerFinished.emit({ player, score, isPassed });
+    this.PlayerFinished.emit({ player, score, isPassed, playersFinished: this.playersFinished.size, playersInGame: this.playersInGame.size });
     if (!this.players.has(player)) {
       logger.info("未参加のプレイヤーがゲームを終えた: %s", userid);
       this.players.add(player);
@@ -503,7 +505,7 @@ export class Lobby implements ILobby {
   private showInfoMessage(): void {
     if (this.SendMessageWithCoolTime("- Osu Auto Host Rotation Bot -", "infomessage", 30000)) {
       this.SendMessage("-  The host order is based on when you entered the lobby.");
-      this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882, source : https://github.com/Meowhal/osu-ahr");
+      this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882,\n source : https://github.com/Meowhal/osu-ahr");
       this.SendMessage("- bot commands -");
       this.SendMessage("-  !info => show this message.");
       this.plugins.forEach(p => p.getInfoMessage().forEach(m => {

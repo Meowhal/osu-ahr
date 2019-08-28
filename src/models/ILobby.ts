@@ -15,6 +15,8 @@ export interface ILobby {
   host: Player | null;
   hostPending: Player | null;
   playersMap: Map<string, Player>;
+  playersFinished: Set<Player>;
+  playersInGame: Set<Player>;
   isMatching: boolean;
   plugins: LobbyPlugin[];
 
@@ -37,7 +39,7 @@ export interface ILobby {
   BeatmapChanged: TypedEvent<string>;
   HostChanged: TypedEvent<{ succeeded: boolean, player: Player }>;
   MatchStarted: TypedEvent<void>;
-  PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean }>;
+  PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>;
   MatchFinished: TypedEvent<void>;
   AbortedMatch: TypedEvent<{ playersFinished: number, playersInGame: number }>;
   AllPlayerReady: TypedEvent<void>;
