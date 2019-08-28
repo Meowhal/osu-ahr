@@ -1,5 +1,5 @@
-import { ILobby } from "./ILobby";
-import { Player } from "./Player";
+import { ILobby } from "../ILobby";
+import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";

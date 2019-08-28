@@ -1,14 +1,8 @@
 import config from "config";
-import { IClientOpts } from "../libs/irc";
+import { IClientOpts } from "./libs/irc";
 
 export interface IAhrConfig {
-  trial: ITrialConfg;
   irc: IIrcConfig;
-}
-
-export interface ITrialConfg {
-  env: string;
-  default_value: string;
 }
 
 export interface IIrcConfig {
@@ -19,8 +13,4 @@ export interface IIrcConfig {
 
 export function getIrcConfig(): IIrcConfig {
   return config.get<IIrcConfig>("irc");
-}
-
-export function getTrialConfig(): ITrialConfg {
-  return config.get<ITrialConfg>("trial");
 }

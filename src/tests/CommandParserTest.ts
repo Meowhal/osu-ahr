@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { parser, BanchoResponseType } from "../models";
 import log4js from "log4js";
+import { parser, BanchoResponseType } from '../parsers';
 describe("CommandParserTest", function () {
   before(function () {
     log4js.configure("config/log_mocha_silent.json");

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { MpSettingsParser } from "../models";
+import { MpSettingsParser } from "../parsers";
 import log4js from "log4js";
 
 describe("MpSettingsParserTest", function () {

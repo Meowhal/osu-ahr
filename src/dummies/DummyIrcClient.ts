@@ -1,7 +1,8 @@
-import * as irc from "../../libs/irc";
+import * as irc from "../libs/irc";
 import { EventEmitter } from "events";
-import { parser, MpCommand, IIrcClient } from "..";
+import { IIrcClient } from "..";
 import log4js from "log4js";
+import { parser, MpCommand } from "../parsers";
 const logger = log4js.getLogger("irc");
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
@@ -149,7 +150,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   public async emulatePlayerFinishAsync(userid: string): Promise<void> {
     await this.raiseMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
-  } 
+  }
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {

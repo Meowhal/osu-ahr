@@ -1,6 +1,6 @@
 import * as irc from 'irc';
-import { parser, logIrcEvent } from "../models";
-import { getIrcConfig } from "../config";
+import { parser, logIrcEvent } from "..";
+import { getIrcConfig } from "../TypedConfig";
 
 export function MakeLobbyTrial() {
   const c = getIrcConfig();

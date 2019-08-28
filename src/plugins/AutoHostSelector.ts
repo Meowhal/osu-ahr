@@ -1,5 +1,5 @@
-import { ILobby } from "./ILobby";
-import { Player } from "./Player";
+import { ILobby } from "../ILobby";
+import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import log4js from "log4js";
 const logger = log4js.getLogger("autoHostSelector");

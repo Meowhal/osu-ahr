@@ -6,7 +6,7 @@
   "scripts": {
     "build-dev": "cross-env NODE_ENV=development npm run build",
     "build": "rimraf dist && tsc",
-    "start": "cross-env Node_ENV=development ts-node src/index.ts",
+    "start": "cross-env Node_ENV=development ts-node src/cli/index.ts",
     "test-production": "cross-env Node_ENV=production npm run test",
     "test-dev": "cross-env Node_ENV=development npm run test",
     "test": "mocha -r ts-node/register src/tests/*Test.ts"

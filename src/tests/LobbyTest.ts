@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, Player } from '../models';
-import { DummyIrcClient, DummyLobbyPlugin } from '../models/dummies';
+import { Lobby, LobbyStatus, Player } from '..';
+import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
 import log4js from "log4js";
 
 describe("LobbyTest", function () {

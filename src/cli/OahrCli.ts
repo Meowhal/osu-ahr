@@ -1,7 +1,9 @@
-import { AutoHostSelector, AutoStarter, HostSkipper, Lobby, logIrcEvent, IIrcClient, parser, LobbyTerminator, LobbyStatus } from "./models";
+import { Lobby, IIrcClient, LobbyStatus } from "..";
 import * as readline from 'readline';
 import config from "config";
 import log4js from "log4js";
+import { AutoHostSelector, AutoStarter, HostSkipper, LobbyTerminator } from "../plugins";
+import { parser } from "../parsers";
 
 const logger = log4js.getLogger("cli");
 

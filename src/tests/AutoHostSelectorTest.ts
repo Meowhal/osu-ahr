@@ -1,6 +1,7 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../models/dummies';
-import { AutoHostSelector, Lobby, logIrcEvent } from "../models";
+import { DummyIrcClient } from '../dummies';
+import { Lobby, logIrcEvent } from "..";
+import { AutoHostSelector } from "../plugins";
 import log4js from "log4js";
 
 describe("AutoHostSelectorTest", function () {

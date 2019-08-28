@@ -1,5 +1,5 @@
-import { ILobby } from "./ILobby";
-import { Player } from "./Player";
+import { ILobby } from "../ILobby";
+import { Player } from "../Player";
 import { TypedEvent } from "../libs/events";
 
 /**

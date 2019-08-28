@@ -1,11 +1,11 @@
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
-import { parser, BanchoResponseType } from "./CommandParser";
+import { parser, BanchoResponseType } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
-import { TypedEvent } from "../libs/events";
-import { MpSettingsParser } from "./MpSettingsParser";
-import { getIrcConfig } from "../config";
-import { LobbyPlugin } from "./LobbyPlugin";
+import { TypedEvent } from "./libs/events";
+import { MpSettingsParser } from "./parsers/MpSettingsParser";
+import { getIrcConfig } from "./TypedConfig";
+import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
 import { isArray } from "util";

@@ -1,6 +1,6 @@
 import { Player } from "./Player";
-import { TypedEvent } from "../libs/events";
-import { LobbyPlugin } from "./LobbyPlugin";
+import { TypedEvent } from "./libs/events";
+import { LobbyPlugin } from "./plugins/LobbyPlugin";
 export { Player }
 
 // BanchoBotとの対話を抽象化する

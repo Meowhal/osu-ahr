@@ -1,5 +1,5 @@
-import { Lobby, logIrcEvent, Player } from "../models";
-import { DummyIrcClient } from "../models/dummies";
+import { Lobby, logIrcEvent, Player } from "..";
+import { DummyIrcClient } from "../dummies";
 import { assert } from 'chai';
 import log4js from "log4js";
 import { TypedEvent } from "../libs/events";

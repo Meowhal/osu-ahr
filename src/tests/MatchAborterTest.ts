@@ -1,7 +1,8 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../models/dummies';
-import { MatchAborter, MatchAborterOption, Lobby, Player } from "../models";
+import { DummyIrcClient } from '../dummies';
+import { Lobby } from "..";
 import tu from "./TestUtils";
+import { MatchAborter, MatchAborterOption } from '../plugins';
 
 describe("Match Aboter Tests", function () {
   before(function () {
@@ -119,7 +120,7 @@ describe("Match Aboter Tests", function () {
       await ircClient.raiseMessageAsync(players[1], ircClient.channel, "*abort");
       await et;
     });
-    it("player leaving causes abort", async() => {
+    it("player leaving causes abort", async () => {
       const { aborter, lobby, ircClient } = await setupAsync();
       const players = await tu.AddPlayersAsync(7, ircClient);
       await tu.changeHostAsync(players[0], lobby);
@@ -134,7 +135,7 @@ describe("Match Aboter Tests", function () {
 
       await et;
     });
-    it("player joining during the match has no effect", async() => {
+    it("player joining during the match has no effect", async () => {
       const { aborter, lobby, ircClient } = await setupAsync();
       const players = await tu.AddPlayersAsync(6, ircClient);
       await tu.changeHostAsync(players[0], lobby);
@@ -183,7 +184,7 @@ describe("Match Aboter Tests", function () {
       tu.assertEventNeverFire(lobby.AbortedMatch, null, 10);
       await em2;
     });
-    it("player leaving causes abort", async() => {
+    it("player leaving causes abort", async () => {
       const { aborter, lobby, ircClient } = await setupAsync(10);
       const players = await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync(players[0], lobby);
@@ -199,7 +200,7 @@ describe("Match Aboter Tests", function () {
       assert.isNotNull(aborter.abortTimer);
       await et;
     });
-    it("player joining during the match has no effect", async() => {
+    it("player joining during the match has no effect", async () => {
       const { aborter, lobby, ircClient } = await setupAsync(10);
       const players = await tu.AddPlayersAsync(6, ircClient);
       await tu.changeHostAsync(players[0], lobby);

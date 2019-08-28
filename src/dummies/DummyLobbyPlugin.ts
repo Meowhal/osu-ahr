@@ -1,7 +1,5 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
-import { LobbyPlugin } from "../LobbyPlugin";
-
+import { LobbyPlugin } from "../plugins/LobbyPlugin";
 
 export class DummyLobbyPlugin extends LobbyPlugin {
 

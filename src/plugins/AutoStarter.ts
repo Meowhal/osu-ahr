@@ -1,4 +1,4 @@
-import { ILobby } from "./ILobby";
+import { ILobby } from "../ILobby";
 import { LobbyPlugin } from "./LobbyPlugin";
 
 export class AutoStarter extends LobbyPlugin {

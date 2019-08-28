@@ -29,7 +29,7 @@
       "name": "cli debug",
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
       "args": [
-          "${workspaceFolder}/src/index.ts",
+          "${workspaceFolder}/src/cli/index.ts",
       ],
       "sourceMaps": true,
       "env": {
@@ -46,7 +46,7 @@
       "name": "nohup debug",
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
       "args": [
-          "${workspaceFolder}/src/index.ts",
+          "${workspaceFolder}/src/cli/index.ts",
           "e", 
           "54243331"
       ],

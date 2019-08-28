@@ -1,11 +1,11 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../models/dummies';
-import { HostSkipper, HostSkipperOption, Lobby, logIrcEvent, Player } from "../models";
+import { DummyIrcClient } from '../dummies';
+import { Lobby, Player } from "..";
 import config from "config";
 import tu from "./TestUtils";
-import { createBrotliCompress } from 'zlib';
+import { HostSkipper, HostSkipperOption } from '../plugins';
 
-describe.only("ostSkipperTest", function () {
+describe("ostSkipperTest", function () {
   before(function () {
     tu.configMochaSilent();
   });

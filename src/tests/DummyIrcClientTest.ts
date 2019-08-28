@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../models/dummies';
-import { parser, BanchoResponseType } from "../models";
+import { DummyIrcClient } from '../dummies';
+import { parser, BanchoResponseType } from '../parsers';
 import log4js from "log4js";
 
 describe("DummyIrcClientTest", function () {
