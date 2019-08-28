@@ -505,7 +505,7 @@ export class Lobby implements ILobby {
   private showInfoMessage(): void {
     if (this.SendMessageWithCoolTime("- Osu Auto Host Rotation Bot -", "infomessage", 30000)) {
       this.SendMessage("-  The host order is based on when you entered the lobby.");
-      this.SendMessage("-  author : gnsksz https://osu.ppy.sh/users/8286882,\n source : https://github.com/Meowhal/osu-ahr");
+      this.SendMessage("-  github : https://github.com/Meowhal/osu-ahr");
       this.SendMessage("- bot commands -");
       this.SendMessage("-  !info => show this message.");
       this.plugins.forEach(p => p.getInfoMessage().forEach(m => {

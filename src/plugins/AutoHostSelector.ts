@@ -1,15 +1,16 @@
 import { ILobby } from "../ILobby";
 import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
+import config from "config";
 import log4js from "log4js";
 const logger = log4js.getLogger("autoHostSelector");
 
 export interface AutoHostSelectorOption {
-
+  show_queue_chars_limit : number;
+  show_queue_cooltime_ms:number;
 }
 
-export const AutoHostSelectorDefaultOption = {
-};
+const DefaultOption = config.get<AutoHostSelectorOption>("AutoHostSelector");
 
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
@@ -19,7 +20,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   constructor(lobby: ILobby, option: AutoHostSelectorOption | any | null = null) {
     super(lobby);
-    this.option = { ...AutoHostSelectorDefaultOption, ...option } as AutoHostSelectorOption;
+    this.option = { ...DefaultOption, ...option } as AutoHostSelectorOption;
     this.registerEvents();
   }
 
@@ -133,10 +134,13 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private showHostQueue(): void {
     this.lobby.SendMessageWithCoolTime(() => {
-      const m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
+      let m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
       logger.trace(m);
+      if (this.option.show_queue_chars_limit < m.length) {
+        m = m.substring(0, this.option.show_queue_chars_limit) + "...";
+      }    
       return "host queue : " + m;
-    }, "!queue", 15000);
+    }, "!queue", this.option.show_queue_cooltime_ms);
   }
 
   // 別のプラグインからskipの要請があった場合に実行する

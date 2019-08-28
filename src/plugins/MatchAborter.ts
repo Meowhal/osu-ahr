@@ -188,6 +188,6 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   getInfoMessage(): string[] {
-    return ["!abort => abort matcd. Use when the match is stuck."];
+    return ["!abort => abort the matcd. Use if the match stuck."];
   }
 }

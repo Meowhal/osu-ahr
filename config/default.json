@@ -10,6 +10,10 @@
   "Lobby": {
     "authorized_users": []
   },
+  "AutoHostSelector": {
+    "show_queue_chars_limit" : 90,
+    "show_queue_cooltime_ms":30000
+  },
   "HostSkipper": {
     "skip_request_rate": 0.5,
     "skip_request_min": 2,
