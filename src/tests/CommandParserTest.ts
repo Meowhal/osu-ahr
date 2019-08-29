@@ -302,11 +302,13 @@ describe("CommandParserTest", function () {
       const valids = ["!aioie", "!a", "!123", "!a ", "!v x", "!vv x y[v]", "*abc"];
       const invalids = ["!", "*", "  !asa", "!!ss", "*!v", "abc", "abc !abc"];
       const used = ["!help", "!Help", "!info", "!skip", "!SKIP", "!queue", "!q", "*skip", "*stipto"];
-      const reservedInvalid = ["!mp", "!mp start", "!roll", "!roll 100", "!where abc", "!faq", "!report", "!request"];
+      const reservedInvalid = ["!mp", "!roll", "!roll 100", "!where abc", "!faq", "!report", "!request"];
+      const mpredirect = ["!mp x", "!mp start", "!mp start 20"];
       valids.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
       invalids.forEach(c => assert.isFalse(parser.IsCustomCommand(c), c));
       used.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
       reservedInvalid.forEach(c => assert.isFalse(parser.IsCustomCommand(c), c));
+      mpredirect.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
     });
     it("ParseCustomCommand", () => {
       let v = parser.ParseCustomCommand("!abc");
@@ -349,6 +351,24 @@ describe("CommandParserTest", function () {
       v = parser.ParseCustomCommand("!AbC aiueo AIUEO");
       assert.equal(v.command, "!abc");
       assert.equal(v.param, "aiueo AIUEO");
+    });
+    it("!mp redirect", () => {
+      assert.isFalse(parser.IsCustomCommand("!mp"));
+      assert.isFalse(parser.IsCustomCommand("!mp "));
+      assert.isTrue(parser.IsCustomCommand("!mp start"));
+      let v = parser.ParseCustomCommand("!mp start");
+      assert.equal(v.command, "!start");
+      assert.equal(v.param, "");
+
+      assert.isTrue(parser.IsCustomCommand("!mp start 30"));
+      v = parser.ParseCustomCommand("!mp start 30");
+      assert.equal(v.command, "!start");
+      assert.equal(v.param, "30");
+
+      assert.isTrue(parser.IsCustomCommand("!mp start 30 xx "));
+      v = parser.ParseCustomCommand("!mp start 30 xx ");
+      assert.equal(v.command, "!start");
+      assert.equal(v.param, "30 xx");
     });
   });
 });

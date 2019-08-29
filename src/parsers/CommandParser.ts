@@ -148,18 +148,30 @@ export class CommandParser {
     else return "";
   }
 
+  /**
+   * CustomCommandかの判定
+   * !か*で始まる、既存のコマンドではない、!mp単独ではない
+   * !mp xxx は !xxx と解釈する
+   * @param message 
+   */
   IsCustomCommand(message: string) {
+    message = message.trimRight().toLowerCase();
     if (message[0] != "!" && message[0] != "*") return false;
-    return message.match(/^[\!\*](?!mp|roll|stats|where|faq|report|request)\w+/i) != null;
+    if (message == "!mp") return false;
+    return message.match(/^[\!\*](?!roll|stats|where|faq|report|request)\w+/) != null;
   }
 
   ParseCustomCommand(message: string): { command: string, param: string } {
     message = message.trimRight();
-    const idx = message.indexOf(" ");
-    if (idx == -1) {
-      return { command: message.toLowerCase(), param: "" };
+    let m = message.match(/\!mp (\w+)\s*(.*)\s*/);
+    if (m) {
+      return { command: "!" + m[1].toLowerCase(), param: m[2] };
+    }
+    m = message.match(/([\!\*]\w+)\s*(.*)\s*/);
+    if (m) {
+      return { command: m[1].toLowerCase(), param: m[2] };
     } else {
-      return { command: message.slice(0, idx).toLowerCase(), param: message.slice(idx).trim() };
+      throw new Error();
     }
   }
 }
