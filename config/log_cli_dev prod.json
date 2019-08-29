@@ -28,6 +28,10 @@
     "file_chat": {
       "type": "file",
       "filename": "logs/chat.log"
+    },
+    "file_pm": {
+      "type": "file",
+      "filename": "logs/pm.log"
     }
   },
   "categories": {
@@ -100,6 +104,13 @@
         "file_chat"
       ],
       "level": "debug"
+    },
+    "PMLogger": {
+      "appenders": [
+        "console",
+        "file_pm"
+      ],
+      "level": "all"
     }
   }
 }

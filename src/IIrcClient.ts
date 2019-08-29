@@ -2,7 +2,8 @@ import * as irc from "./libs/irc";
 import { EventEmitter } from "events";
 import { DummyIrcClient } from "./dummies/DummyIrcClient";
 import log4js from "log4js";
-const logger = log4js.getLogger("irc");
+const ircLogger = log4js.getLogger("irc");
+const pmLogger = log4js.getLogger("PMLogger");
 
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、
@@ -20,36 +21,44 @@ export interface IIrcClient extends EventEmitter {
 
 export function logIrcEvent(client: IIrcClient) {
   client.on('error', function (message) {
-    logger.error('ERROR: %s: %s', message.command, message.args.join(' '));
+    ircLogger.error('ERROR: %s: %s', message.command, message.args.join(' '));
   });
   client.on('registered', function (message) {
     const args = message.args as string[];
-    logger.debug('@reg %s', args.join(", "));
+    ircLogger.debug('@reg %s', args.join(", "));
   });
   client.on('message', function (from, to, message) {
-    logger.debug('@msg  %s => %s: %s', from, to, message);
+    ircLogger.debug('@msg  %s => %s: %s', from, to, message);
   });
   client.on('pm', function (nick, message) {
-    logger.debug('@pm   %s: %s', nick, message);
+    ircLogger.debug('@pm   %s: %s', nick, message);
   });
   client.on('join', function (channel, who) {
-    logger.debug('@join %s has joined %s', who, channel);
+    ircLogger.debug('@join %s has joined %s', who, channel);
   });
   client.on('part', function (channel, who, reason) {
-    logger.debug('@part %s has left %s: %s', who, channel, reason);
+    ircLogger.debug('@part %s has left %s: %s', who, channel, reason);
   });
   client.on('kick', function (channel, who, by, reason) {
-    logger.debug('@kick %s was kicked from %s by %s: %s', who, channel, by, reason);
+    ircLogger.debug('@kick %s was kicked from %s by %s: %s', who, channel, by, reason);
   });
   client.on('invite', (channel, from) => {
-    logger.debug(`@invt ${from} invite you to ${channel}`);
+    ircLogger.debug(`@invt ${from} invite you to ${channel}`);
   });
   client.on('notice', function (from, to, message) {
-    logger.debug('@notice  %s => %s: %s', from, to, message);
+    ircLogger.debug('@notice  %s => %s: %s', from, to, message);
   });
   if (!(client instanceof DummyIrcClient)) {
     client.on('sentMessage', function (to, message) {
-      logger.debug(`@sent bot => ${to}: ${message}`);
+      ircLogger.debug(`@sent bot => ${to}: ${message}`);
     });
   }
+}
+
+export function logPrivateMessage(client:IIrcClient) {
+  client.on("message", (from, to, message) => {
+    if (to == client.nick) {
+      pmLogger.info(`pm ${from} -> ${message}`);
+    }
+  });
 }
