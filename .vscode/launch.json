@@ -48,7 +48,7 @@
       "args": [
           "${workspaceFolder}/src/cli/index.ts",
           "e", 
-          "54243331"
+          "54450418"
       ],
       "sourceMaps": true,
       "env": {

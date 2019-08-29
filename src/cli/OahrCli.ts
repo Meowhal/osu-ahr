@@ -4,15 +4,9 @@ import config from "config";
 import log4js from "log4js";
 import { AutoHostSelector, AutoStarter, HostSkipper, LobbyTerminator, MatchAborter } from "../plugins";
 import { parser } from "../parsers";
+import { OahrBase } from "./OahrBase";
 
 const logger = log4js.getLogger("cli");
-
-export interface OahrCliOption {
-  invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
-  password: string;　// デフォルトのパスワード, 空文字でパスワードなし。
-}
-
-const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
 
 interface Scene {
   name: string;
@@ -20,25 +14,11 @@ interface Scene {
   reaction: (line: string) => Promise<void>;
 }
 
-export class OahrCli {
-  client: IIrcClient;
-  lobby: Lobby;
-  selector: AutoHostSelector;
-  starter: AutoStarter;
-  skipper: HostSkipper;
-  terminator: LobbyTerminator;
-  aborter: MatchAborter;
-  option: OahrCliOption = OahrCliDefaultOption;
+export class OahrCli extends OahrBase {
   private scene: Scene;
 
   constructor(client: IIrcClient) {
-    this.client = client;
-    this.lobby = new Lobby(this.client);
-    this.selector = new AutoHostSelector(this.lobby);
-    this.starter = new AutoStarter(this.lobby);
-    this.skipper = new HostSkipper(this.lobby);
-    this.terminator = new LobbyTerminator(this.lobby);
-    this.aborter = new MatchAborter(this.lobby);
+    super(client);
     this.scene = this.scenes.mainMenu;
   }
 
@@ -50,14 +30,12 @@ export class OahrCli {
         let l = parser.SplitCliCommand(line);
         switch (l.command) {
           case "m":
-            if (l.arg == "") return;
+            if (l.arg == "") {
+              logger.info("m command needs lobby name. ex:m testlobby");
+              return;
+            }
             try {
-              logger.info("make lobby, name : " + l.arg);
-              await this.lobby.MakeLobbyAsync(l.arg);
-              this.lobby.SendMessage("!mp password " + this.option.password);
-              for (let p of this.option.invite_users) {
-                this.lobby.SendMessage("!mp invite " + p);
-              }
+              this.makeLobbyAsync(l.arg);
               this.scene = this.scenes.lobbyMenu;
             } catch (e) {
               logger.info("faiiled to make lobby : %s", e);
@@ -66,11 +44,11 @@ export class OahrCli {
             break;
           case "e":
             try {
-              if (l.arg == "") return;
-              const channel = parser.EnsureMpChannelId(l.arg);
-              logger.info("enter lobby, channel : %s", channel);
-              await this.lobby.EnterLobbyAsync(channel);
-              await this.lobby.LoadLobbySettingsAsync();
+              if (l.arg == "") {
+                logger.info("e command needs lobby id. ex:e 123456");
+                return;
+              }
+              this.enterLobbyAsync(l.arg);
               this.scene = this.scenes.lobbyMenu;
             } catch (e) {
               logger.info("invalid channel : %s", e);
@@ -125,10 +103,6 @@ export class OahrCli {
       reaction: async (line: string) => { }
     }
   };
-
-  displayInfo(): void {
-    logger.info(this.lobby.GetLobbyStatus());
-  }
 
   get prompt(): string {
     return this.scene.prompt;
