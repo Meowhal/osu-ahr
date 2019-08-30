@@ -55,6 +55,7 @@ export class Lobby implements ILobby {
   PlayerChated = new TypedEvent<{ player: Player, message: string }>();
   ReceivedCustomCommand = new TypedEvent<{ player: Player, authority: number, command: string, param: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
+  SentMessage = new TypedEvent<{ message: string }>();
 
   constructor(ircClient: IIrcClient, option: any | null = null) {
     if (ircClient.conn == null) {
@@ -134,6 +135,7 @@ export class Lobby implements ILobby {
     if (this.channel != undefined) {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
+      this.SentMessage.emit({ message });
     }
   }
 
