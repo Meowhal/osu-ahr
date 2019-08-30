@@ -31,8 +31,21 @@
     "auto_abort_rate": 0.5,
     "auto_abort_delay_ms": 15000
   },
+  "WordCounter":{
+    "periods":[
+      {
+        "symbol":"s",
+        "duration_ms":1000
+      },
+      {
+        "symbol":"m",
+        "duration_ms":60000
+      }
+    ],
+    "log_interval_ms": 30000
+  },
   "OahrCli": {
     "invite_users": [],
     "password": ""
-  }
+  }  
 }
