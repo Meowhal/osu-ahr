@@ -1,7 +1,7 @@
 import { Lobby, IIrcClient } from "..";
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, AutoStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter } from "../plugins";
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter } from "../plugins";
 import { parser } from "../parsers";
 
 const logger = log4js.getLogger("cli");
@@ -17,7 +17,7 @@ export class OahrBase {
   client: IIrcClient;
   lobby: Lobby;
   selector: AutoHostSelector;
-  starter: AutoStarter;
+  starter: MatchStarter;
   skipper: HostSkipper;
   terminator: LobbyTerminator;
   aborter: MatchAborter;
@@ -28,7 +28,7 @@ export class OahrBase {
     this.client = client;
     this.lobby = new Lobby(this.client);
     this.selector = new AutoHostSelector(this.lobby);
-    this.starter = new AutoStarter(this.lobby);
+    this.starter = new MatchStarter(this.lobby);
     this.skipper = new HostSkipper(this.lobby);
     this.terminator = new LobbyTerminator(this.lobby);
     this.aborter = new MatchAborter(this.lobby);

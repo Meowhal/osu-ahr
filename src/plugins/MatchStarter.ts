@@ -1,7 +1,7 @@
 import { ILobby } from "../ILobby";
 import { LobbyPlugin } from "./LobbyPlugin";
 
-export class AutoStarter extends LobbyPlugin {
+export class MatchStarter extends LobbyPlugin {
   constructor(lobby: ILobby) {
     super(lobby);
     lobby.AllPlayerReady.on(() => {
@@ -9,7 +9,7 @@ export class AutoStarter extends LobbyPlugin {
     })
   }
   getPluginStatus(): string {
-    return `-- AutoStarter --
+    return `-- MatchStarter --
     waiting all players get ready 
   `;
   }

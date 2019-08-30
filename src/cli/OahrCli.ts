@@ -2,7 +2,7 @@ import { Lobby, IIrcClient, LobbyStatus } from "..";
 import * as readline from 'readline';
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, AutoStarter, HostSkipper, LobbyTerminator, MatchAborter } from "../plugins";
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter } from "../plugins";
 import { parser } from "../parsers";
 import { OahrBase } from "./OahrBase";
 
