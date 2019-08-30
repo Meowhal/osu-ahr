@@ -67,7 +67,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   // メッセージイベントを発行する
-  public raiseMessage(from: string, to: string, message: string): void {
+  public emulateMessage(from: string, to: string, message: string): void {
     this.emit('message', from, to, message, this.msg);
     if (to == this.channel) {
       this.emit('message#', from, to, message, this.msg);
@@ -79,10 +79,10 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   // メッセージイベントを非同期で発生させる
-  public raiseMessageAsync(from: string, to: string, message: string): Promise<void> {
+  public emulateMessageAsync(from: string, to: string, message: string): Promise<void> {
     return new Promise(resolve => {
       const body = () => {
-        this.raiseMessage(from, to, message);
+        this.emulateMessage(from, to, message);
         resolve();
       }
 
@@ -99,7 +99,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     if (!this.players.has(name)) {
       this.players.add(name);
     }
-    await this.raiseMessageAsync("BanchoBot", this.channel, `${name} joined in slot ${this.players.size}.`);
+    await this.emulateMessageAsync("BanchoBot", this.channel, `${name} joined in slot ${this.players.size}.`);
   }
 
   // ロビーからプレイヤーが退出した際の動作をエミュレートする
@@ -107,7 +107,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     if (this.players.has(name)) {
       this.players.delete(name);
     }
-    await this.raiseMessageAsync("BanchoBot", this.channel, `${name} left the game.`);
+    await this.emulateMessageAsync("BanchoBot", this.channel, `${name} left the game.`);
   }
 
   // async呼び出し用のディレイ関数
@@ -120,36 +120,36 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   mapidSeed: number = 0;
   // ホストがマップを変更する動作をエミュレートする
   public async emulateChangeMapAsync(delay: number = 0): Promise<void> {
-    await this.raiseMessageAsync("BanchoBot", this.channel, "Host is changing map...");
+    await this.emulateMessageAsync("BanchoBot", this.channel, "Host is changing map...");
     await this.delay(delay);
-    await this.raiseMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${this.mapidSeed++})`);
+    await this.emulateMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${this.mapidSeed++})`);
   }
 
   // 全員が準備完了になった動作をエミュレートする
   public async emulateReadyAsync(): Promise<void> {
-    await this.raiseMessageAsync("BanchoBot", this.channel, "All players are ready");
+    await this.emulateMessageAsync("BanchoBot", this.channel, "All players are ready");
   }
 
   // 試合をエミュレートする
   public async emulateMatchAsync(delay: number = 0): Promise<void> {
     this.isMatching = true;
-    await this.raiseMessageAsync("BanchoBot", this.channel, "The match has started!");
+    await this.emulateMessageAsync("BanchoBot", this.channel, "The match has started!");
     if (delay) {
       await this.delay(delay);
     }
     const tasks: Promise<void>[] = [];
     for (let u of this.players) {
       if (!this.isMatching) return;
-      tasks.push(this.raiseMessageAsync("BanchoBot", this.channel, `${u} finished playing (Score: 100000, PASSED).`));
+      tasks.push(this.emulateMessageAsync("BanchoBot", this.channel, `${u} finished playing (Score: 100000, PASSED).`));
     }
     await Promise.all(tasks);
     if (!this.isMatching) return;
     this.isMatching = false;
-    await this.raiseMessageAsync("BanchoBot", this.channel, "The match has finished!");
+    await this.emulateMessageAsync("BanchoBot", this.channel, "The match has finished!");
   }
 
   public async emulatePlayerFinishAsync(userid: string): Promise<void> {
-    await this.raiseMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
+    await this.emulateMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
   }
 
   // IRCClientのjoin
@@ -165,7 +165,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   // IRCClientのsay
   public say(target: string, message: string): void {
     new Promise(() => {
-      this.raiseMessageAsync(this.nick, target, message);
+      this.emulateMessageAsync(this.nick, target, message);
       let mp = parser.ParseMPCommand(message);
       if (mp != null) {
         this.processMpCommand(target, message, mp);
@@ -177,49 +177,49 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     if (target == "BanchoBot" && mp.command == "make") {
       const title = mp.args.join(' ').trim();
       if (title === "") {
-        this.raiseMessage("BanchoBot", this.nick, "No name provided");
+        this.emulateMessage("BanchoBot", this.nick, "No name provided");
         return;
       }
       setImmediate(() => {
         let id = "12345";
         this.raiseJoin("#mp_" + id, this.nick);
-        this.raiseMessage("BanchoBot", this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
+        this.emulateMessage("BanchoBot", this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
       });
     } else if (target == this.channel) {
       switch (mp.command) {
         case "host":
           if (this.players.has(mp.args[0])) {
-            this.raiseMessageAsync("BanchoBot", this.channel, `${mp.args[0]} became the host.`);
+            this.emulateMessageAsync("BanchoBot", this.channel, `${mp.args[0]} became the host.`);
           } else {
-            this.raiseMessageAsync("BanchoBot", this.channel, "User not found");
+            this.emulateMessageAsync("BanchoBot", this.channel, "User not found");
           }
           break;
         case "password":
           if (mp.args.length == 0) {
-            this.raiseMessageAsync("BanchoBot", this.channel, "Removed the match password");
+            this.emulateMessageAsync("BanchoBot", this.channel, "Removed the match password");
           } else {
-            this.raiseMessageAsync("BanchoBot", this.channel, "Changed the match password");
+            this.emulateMessageAsync("BanchoBot", this.channel, "Changed the match password");
           }
           break;
         case "invite":
-          this.raiseMessageAsync("BanchoBot", this.channel, `Invited ${mp.args[0]} to the room`);
+          this.emulateMessageAsync("BanchoBot", this.channel, `Invited ${mp.args[0]} to the room`);
           break;
         case "close":
           setImmediate(() => {
-            this.raiseMessage("BanchoBot", this.channel, "Closed the match");
+            this.emulateMessage("BanchoBot", this.channel, "Closed the match");
             this.raisePart(this.channel, this.nick);
           });
           break;
         case "abort":
           if (this.isMatching) {
             this.isMatching = false;
-            this.raiseMessageAsync("BanchoBot", this.channel, "Aborted the match");
+            this.emulateMessageAsync("BanchoBot", this.channel, "Aborted the match");
           } else {
-            this.raiseMessageAsync("BanchoBot", this.channel, "The match is not in progress");
+            this.emulateMessageAsync("BanchoBot", this.channel, "The match is not in progress");
           }
           break;
         case "settings":
-          const m = (msg: string) => this.raiseMessageAsync("BanchoBot", this.channel, msg);
+          const m = (msg: string) => this.emulateMessageAsync("BanchoBot", this.channel, msg);
           m('Room name: lobby name, History: https://osu.ppy.sh/mp/123');
           m("Beatmap: https://osu.ppy.sh/b/1562893 Feryquitous feat. Aitsuki Nakuru - Kairikou [Miura's Extra]");
           m("Team mode: HeadToHead, Win condition: Score");

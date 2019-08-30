@@ -167,7 +167,7 @@ describe("ostSkipperTest", function () {
       const { skipper, lobby, ircClient } = await prepare(10);
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
       await tu.changeHostAsync("p1", lobby);
-      await ircClient.raiseMessageAsync("p1", ircClient.channel, "hello");
+      await ircClient.emulateMessageAsync("p1", ircClient.channel, "hello");
       await rejectSkipAsync(lobby, 100);
     });
     this.slow(dslow);
@@ -200,7 +200,7 @@ describe("ostSkipperTest", function () {
       await tu.AddPlayersAsync(3, ircClient);
       await tu.changeHostAsync("p0", lobby);
       const rt = resolveSkipAsync(lobby);
-      ircClient.raiseMessage("p0", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p0", ircClient.channel, "!skip");
       await rt;
     });
     it("host skip should be ignored at cool time", async () => {
@@ -208,14 +208,14 @@ describe("ostSkipperTest", function () {
       await tu.AddPlayersAsync(3, ircClient);
       await tu.changeHostAsync("p0", lobby);
       const rt = rejectSkipAsync(lobby, 20);
-      ircClient.raiseMessage("p0", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p0", ircClient.channel, "!skip");
       await rt;
     });
     it("host invalid skip", async () => {
       const { skipper, lobby, ircClient } = await prepare(0, 0);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p0", ircClient.channel, "!skipaaaaa");
+      ircClient.emulateMessage("p0", ircClient.channel, "!skipaaaaa");
       await rejectSkipAsync(lobby, 10);
     });
     it("skip by players", async () => {
@@ -224,16 +224,16 @@ describe("ostSkipperTest", function () {
       await tu.changeHostAsync("p0", lobby);
       let skipped = false;
       const task = resolveSkipAsync(lobby, () => skipped = true);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.equal(skipper.countSkip, 1);
       assert.isFalse(skipped);
-      ircClient.raiseMessage("p2", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.equal(skipper.countSkip, 2);
       assert.isFalse(skipped);
 
-      ircClient.raiseMessage("p3", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       await task;
       assert.equal(skipper.countSkip, 3);
@@ -245,16 +245,16 @@ describe("ostSkipperTest", function () {
       await tu.changeHostAsync("p0", lobby);
       let skipped = false;
       const task = rejectSkipAsync(lobby, 50);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.equal(skipper.countSkip, 0);
       assert.isFalse(skipped);
-      ircClient.raiseMessage("p2", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.equal(skipper.countSkip, 0);
       assert.isFalse(skipped);
 
-      ircClient.raiseMessage("p3", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       await task;
       assert.equal(skipper.countSkip, 0);
@@ -264,11 +264,11 @@ describe("ostSkipperTest", function () {
       const { skipper, lobby, ircClient } = await prepare(0, 0);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
-      ircClient.raiseMessage("p2", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.equal(skipper.countSkip, 2);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.equal(skipper.countSkip, 2);
     });
@@ -278,13 +278,13 @@ describe("ostSkipperTest", function () {
       await tu.changeHostAsync("p0", lobby);
       let skipped = false;
       const task = resolveSkipAsync(lobby, () => skipped = true);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
-      ircClient.raiseMessage("p2", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       assert.isFalse(skipped);
       ircClient.emulateChangeMapAsync(0);
       await tu.delayAsync(10);
-      ircClient.raiseMessage("p3", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       await task;
       assert.equal(skipper.countSkip, 3);
@@ -294,13 +294,13 @@ describe("ostSkipperTest", function () {
       const { skipper, lobby, ircClient } = await prepare(0);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip");
-      ircClient.raiseMessage("p2", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       ircClient.emulateMatchAsync(10);
       await tu.delayAsync(1);
-      ircClient.raiseMessage("p3", ircClient.channel, "!skip");
-      ircClient.raiseMessage("p4", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p3", ircClient.channel, "!skip");
+      ircClient.emulateMessage("p4", ircClient.channel, "!skip");
       await tu.delayAsync(1);
       assert.equal(skipper.countSkip, 0);
       await tu.delayAsync(10);
@@ -314,7 +314,7 @@ describe("ostSkipperTest", function () {
       let skipped = false;
       const task = resolveSkipAsync(lobby, () => skipped = true);
       for (let i = 1; i < numplayers; i++) {
-        ircClient.raiseMessage("p" + i, ircClient.channel, "!skip");
+        ircClient.emulateMessage("p" + i, ircClient.channel, "!skip");
         await tu.delayAsync(1);
         assert.equal(skipper.countSkip, Math.min(i, skipper.requiredSkip));
         assert.equal(skipped, skipper.requiredSkip <= i);
@@ -324,7 +324,7 @@ describe("ostSkipperTest", function () {
       const { skipper, lobby, ircClient } = await prepare();
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip p0");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip p0");
       assert.equal(skipper.countSkip, 1);
     });
     it("accept !skip with host id with complex name", async () => {
@@ -332,14 +332,14 @@ describe("ostSkipperTest", function () {
       const players = ["abc xxx[aaui]", "a", "b", "c"];
       await tu.AddPlayersAsync(players, ircClient);
       await tu.changeHostAsync(players[0], lobby);
-      ircClient.raiseMessage(players[1], ircClient.channel, "!skip " + players[0]);
+      ircClient.emulateMessage(players[1], ircClient.channel, "!skip " + players[0]);
       assert.equal(skipper.countSkip, 1);
     });
     it("accept !skip with space", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       const players = await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync(players[0], lobby);
-      ircClient.raiseMessage(players[1], ircClient.channel, "!skip ");
+      ircClient.emulateMessage(players[1], ircClient.channel, "!skip ");
       assert.equal(skipper.countSkip, 1);
     });
 
@@ -347,7 +347,7 @@ describe("ostSkipperTest", function () {
       const { skipper, lobby, ircClient } = await prepare();
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "!skip abc");
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip abc");
       assert.equal(skipper.countSkip, 0);
     });
 
@@ -359,7 +359,7 @@ describe("ostSkipperTest", function () {
       var t = resolveSkipAsync(lobby);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "*skip");
+      ircClient.emulateMessage("p1", ircClient.channel, "*skip");
       await t;
     });
     it("*skip by authorized user with param test", async () => {
@@ -368,7 +368,7 @@ describe("ostSkipperTest", function () {
       var t = resolveSkipAsync(lobby);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "*skip aaa");
+      ircClient.emulateMessage("p1", ircClient.channel, "*skip aaa");
       await t;
     });
     it("*skip by Unauthorized test", async () => {
@@ -377,7 +377,7 @@ describe("ostSkipperTest", function () {
       var t = rejectSkipAsync(lobby, 25);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p2", ircClient.channel, "*skip");
+      ircClient.emulateMessage("p2", ircClient.channel, "*skip");
       await t;
     });
     it("*skipto test", async () => {
@@ -386,7 +386,7 @@ describe("ostSkipperTest", function () {
       var t = resolveSkiptoAsync(lobby, "p3");
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "*skipto p3");
+      ircClient.emulateMessage("p1", ircClient.channel, "*skipto p3");
       await t;
     });
     it("failed *skipto if param isn't userid", async () => {
@@ -395,7 +395,7 @@ describe("ostSkipperTest", function () {
       var t = rejectSkiptoAsync(lobby, 25);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      ircClient.raiseMessage("p1", ircClient.channel, "*skipto pvv3 asdv");
+      ircClient.emulateMessage("p1", ircClient.channel, "*skipto pvv3 asdv");
       await t;
     });
   })

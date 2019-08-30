@@ -443,7 +443,7 @@ describe("LobbyTest", function () {
         lobby.ReceivedCustomCommand.once(a => {
           assert.fail();
         });
-        ircClient.raiseMessage(players[0].id, ircClient.channel, msg);
+        ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
       });
     });
     it("BanchoChated event", done => {
@@ -460,7 +460,7 @@ describe("LobbyTest", function () {
         lobby.ReceivedCustomCommand.once(a => {
           assert.fail();
         });
-        ircClient.raiseMessage("BanchoBot", ircClient.channel, msg);
+        ircClient.emulateMessage("BanchoBot", ircClient.channel, msg);
       });
     });
     it("ReceivedCustomCommand", async () => {
@@ -481,7 +481,7 @@ describe("LobbyTest", function () {
         assert.equal(a.player, players[0]);
         ma = 1;
       });
-      ircClient.raiseMessage(players[0].id, ircClient.channel, msg);
+      ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
       await delay(5);
       assert.equal(ma, 1);
     });
@@ -500,7 +500,7 @@ describe("LobbyTest", function () {
         assert.equal(a.player, players[0]);
         ma = 1;
       });
-      ircClient.raiseMessage(players[0].id, ircClient.channel, msg);
+      ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
       await delay(5);
       assert.equal(ma, 1);
     });
