@@ -114,13 +114,13 @@
         "console",
         "file_pm"
       ],
-      "level": "all"
+      "level": "debug"
     },
     "wordCounter": {
       "appenders": [
         "file_counter"
       ],
-      "level": "all"
+      "level": "debug"
     }
   }
 }

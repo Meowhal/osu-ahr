@@ -2,80 +2,10 @@
   "appenders": {
     "console": {
       "type": "console"
-    },
-    "console_f": {
-      "type": "logLevelFilter",
-      "level": "info",
-      "appender": "console"
-    },
-    "file_all": {
-      "type": "dateFile",
-      "filename": "logs/mocha.log"
-    },
-    "file_all_f": {
-      "type": "logLevelFilter",
-      "level": "info",
-      "appender": "file_all"
-    },
-    "file_irc": {
-      "type": "dateFile",
-      "filename": "logs/irc.log"
-    },
-    "file_app": {
-      "type": "dateFile",
-      "filename": "logs/app.log"
     }
   },
   "categories": {
     "default": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "irc": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "lobby": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "plugin": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "autoHostSelector": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "hostSkipper": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "lobbyTerminator": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "matchAborter": {
-      "appenders": [
-        "console"
-      ],
-      "level": "warn"
-    },
-    "chat": {
       "appenders": [
         "console"
       ],

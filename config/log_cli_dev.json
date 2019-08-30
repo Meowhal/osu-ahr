@@ -32,6 +32,10 @@
     "file_pm": {
       "type": "file",
       "filename": "logs/pm.log"
+    },
+    "file_counter": {
+      "type": "file",
+      "filename": "logs/ct.log"
     }
   },
   "categories": {
@@ -109,6 +113,12 @@
       "appenders": [
         "console",
         "file_pm"
+      ],
+      "level": "all"
+    },
+    "wordCounter": {
+      "appenders": [
+        "file_counter"
       ],
       "level": "all"
     }
