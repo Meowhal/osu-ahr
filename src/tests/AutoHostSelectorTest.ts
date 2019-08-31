@@ -2,11 +2,12 @@ import { assert } from 'chai';
 import { DummyIrcClient } from '../dummies';
 import { Lobby, logIrcEvent } from "..";
 import { AutoHostSelector } from "../plugins";
+import tu from "./TestUtils";
 import log4js from "log4js";
 
 describe("AutoHostSelectorTest", function () {
   before(function () {
-    log4js.configure("config/log_mocha_silent.json");
+    tu.configMochaAsSilent();
   });
   async function prepareSelector(logIrc = false): Promise<{ selector: AutoHostSelector, lobby: Lobby, ircClient: DummyIrcClient }> {
     const ircClient = new DummyIrcClient("osu_irc_server", "creator");

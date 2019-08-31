@@ -7,7 +7,7 @@ import { HostSkipper, HostSkipperOption } from '../plugins';
 
 describe("ostSkipperTest", function () {
   before(function () {
-    tu.configMochaSilent();
+    tu.configMochaAsSilent();
   });
   async function prepare(timer_delay: number = 0, vote_delay: number = 0, logIrc: boolean = false):
     Promise<{ skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {

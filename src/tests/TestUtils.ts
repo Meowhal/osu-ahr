@@ -59,11 +59,11 @@ class TestUtils {
     return p;
   }
 
-  configMochaNoisy(): void {
+  configMochaAsNoisy(): void {
     log4js.configure("config/log_mocha.json");
   }
 
-  configMochaSilent(): void {
+  configMochaAsSilent(): void {
     log4js.configure("config/log_mocha_silent.json");
   }
 

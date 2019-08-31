@@ -6,7 +6,7 @@ import { MatchAborter, MatchAborterOption } from '../plugins';
 
 describe("Match Aboter Tests", function () {
   before(function () {
-    tu.configMochaSilent();
+    tu.configMochaAsSilent();
   });
 
   async function setupAsync(timerDelay: number = 10):

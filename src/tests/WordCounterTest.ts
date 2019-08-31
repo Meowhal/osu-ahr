@@ -6,7 +6,7 @@ import { WordCounter, WordCounterOption, WordCounterPeriod } from '../plugins';
 
 describe("CommandParserTest", function () {
   before(function () {
-    tu.configMochaSilent();
+    tu.configMochaAsSilent();
   });
 
   async function setup(periods = [{ symbol: "a", duration_ms: 1000 }]):
