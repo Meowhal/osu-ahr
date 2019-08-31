@@ -1,5 +1,6 @@
 import * as irc from 'irc';
-import { parser, logIrcEvent } from "..";
+import { logIrcEvent } from "..";
+import { parser } from "../parsers"
 import { getIrcConfig } from "../TypedConfig";
 
 export function MakeLobbyTrial() {
