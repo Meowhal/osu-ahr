@@ -6,8 +6,8 @@ import log4js from "log4js";
 const logger = log4js.getLogger("autoHostSelector");
 
 export interface AutoHostSelectorOption {
-  show_queue_chars_limit : number;
-  show_queue_cooltime_ms:number;
+  show_queue_chars_limit: number;
+  show_queue_cooltime_ms: number;
 }
 
 const DefaultOption = config.get<AutoHostSelectorOption>("AutoHostSelector");
@@ -28,7 +28,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
-    this.lobby.BeatmapChanging.on(a => this.onBeatmapChanging());
+    this.lobby.BeatmapChanging.on(() => this.onBeatmapChanging());
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
@@ -89,7 +89,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private onBeatmapChanging(): void {
     if (this.hostQueue[0] != this.lobby.host) {
-      // アボートで中断後にマップ変更し用とした場合は次のホストに変更
+      // アボートで中断後にマップ変更しようとした場合は次のホストに変更
       this.changeHost();
       this.needsRotate = false;
     } else {
@@ -119,10 +119,17 @@ export class AutoHostSelector extends LobbyPlugin {
     if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
       logger.info("The match was aborted after several players were Finished. call normal match finish process");
       this.onMatchFinished();
-    } else { // 誰も終了していない場合は試合再開許可モードへ
-      this.needsRotate = false;
-      logger.info("The match was aborted before any Player Finished.");
-      this.lobby.SendMessage("bot : The match was Aborted. Restart the match.");
+    } else {
+      if (this.lobby.host != null) {
+        // 誰も終了していない場合は試合再開許可モードへ
+        this.needsRotate = false;
+        logger.info("The match was aborted before any Player Finished.");
+        this.lobby.SendMessage("bot : The match was Aborted. Restart the match.");
+      } else {
+        // ホストがいない状態で試合が中断されたら、
+        logger.info("The match was aborted after the host left.");
+        this.changeHost();
+      }
     }
   }
 
@@ -138,7 +145,7 @@ export class AutoHostSelector extends LobbyPlugin {
       logger.trace(m);
       if (this.option.show_queue_chars_limit < m.length) {
         m = m.substring(0, this.option.show_queue_chars_limit) + "...";
-      }    
+      }
       return "host queue : " + m;
     }, "!queue", this.option.show_queue_cooltime_ms);
   }
