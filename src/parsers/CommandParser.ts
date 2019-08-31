@@ -88,9 +88,54 @@ export class CommandParser {
       return makeBanchoResponse(BanchoResponseType.PasswordRemoved);
     }
 
-    const m_ref = message.match(/Added (.+) to the match referees/);
-    if (m_ref) {
-      return makeBanchoResponse(BanchoResponseType.AddedReferees, m_ref[1]);
+    const m_add_ref = message.match(/Added (.+) to the match referees/);
+    if (m_add_ref) {
+      return makeBanchoResponse(BanchoResponseType.AddedReferee, m_add_ref[1]);
+    }
+
+    const m_rm_ref = message.match(/Removed (.+) from the match referees/)
+    if (m_rm_ref) {
+      return makeBanchoResponse(BanchoResponseType.RemovedReferee, m_rm_ref[1]);
+    }
+
+    const m_kick = message.match(/Kicked (.+) from the match/);
+    if (m_kick) {
+      return makeBanchoResponse(BanchoResponseType.KickedPlayer, m_kick[1]);
+    }
+
+    if (message.startsWith("Match starts in ")) {
+      const m_sec = message.match(/(\d+) seconds?/);
+      const m_min = message.match(/(\d+) minutes?/);
+      let secs = 0;
+      if (m_sec) {
+        secs += parseInt(m_sec[1]);
+      }
+      if (m_min) {
+        secs += parseInt(m_min[1]) * 60;
+      }
+      return makeBanchoResponse(BanchoResponseType.Countdown, secs);
+    }
+
+    if (message == "Good luck, have fun!") {
+      return makeBanchoResponse(BanchoResponseType.CountdownEnded);
+    }
+
+    if (message == "Countdown aborted") {
+      return makeBanchoResponse(BanchoResponseType.CountdownAborted);
+    }
+
+    if (message.match(/^(Room name:|Beatmap:|Team mode:|Active mods:|Players:|Slot \d+)/)) {
+      return makeBanchoResponse(BanchoResponseType.Settings);
+    }
+
+    if (message == "Match referees:") {
+      return makeBanchoResponse(BanchoResponseType.ListRefs);
+
+      /* 注意点、頭文字が大文字になる、終点が明示されない
+      [2019-08-31T16:09:36.892] [DEBUG] irc - @msg  BanchoBot => #mp_54496537: Match referees:
+      [2019-08-31T16:09:36.892] [DEBUG] irc - @msg  BanchoBot => #mp_54496537: D_am_n
+      [2019-08-31T16:09:36.892] [DEBUG] irc - @msg  BanchoBot => #mp_54496537: Gnsksz
+      */
     }
 
     return makeBanchoResponse(BanchoResponseType.Unhandled);
@@ -202,7 +247,14 @@ export enum BanchoResponseType {
   AllPlayerReady,
   PasswordChanged,
   PasswordRemoved,
-  AddedReferees,
+  AddedReferee,
+  RemovedReferee,
+  KickedPlayer,
+  Countdown,
+  CountdownEnded,
+  CountdownAborted,
+  Settings,
+  ListRefs,
 }
 
 function makeBanchoResponse(type: BanchoResponseType, ...params: any[]) {

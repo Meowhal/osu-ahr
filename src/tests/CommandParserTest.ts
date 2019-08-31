@@ -8,6 +8,7 @@ describe("CommandParserTest", function () {
   it("make lobby message parse test", () => {
     let message = "Created the tournament match https://osu.ppy.sh/mp/52612489 irctestroom";
     let v = parser.ParseMpMakeResponse("BanchoBot", message);
+    assert.isNotNull(v);
     if (v == null) {
       assert.fail();
     } else {
@@ -64,56 +65,40 @@ describe("CommandParserTest", function () {
     it("player joined parse test", () => {
       let message = "Swgciai joined in slot 4.";
       let v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerJoined) {
-        assert.equal(v.params[0], "Swgciai");
-        assert.equal(v.params[1], 4);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerJoined);
+      assert.equal(v.params[0], "Swgciai");
+      assert.equal(v.params[1], 4);
 
       message = "Foet_Mnagyo joined in slot 1.";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerJoined) {
-        assert.equal(v.params[0], "Foet_Mnagyo");
-        assert.equal(v.params[1], 1);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerJoined);
+      assert.equal(v.params[0], "Foet_Mnagyo");
+      assert.equal(v.params[1], 1);
 
       message = "- Cylcl joined in slot 5.";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerJoined) {
-        assert.equal(v.params[0], "- Cylcl");
-        assert.equal(v.params[1], 5);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerJoined);
+      assert.equal(v.params[0], "- Cylcl");
+      assert.equal(v.params[1], 5);
+
     });
 
     it("player left parse test", () => {
       let message = "Swgciai left the game.";
       let v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerLeft) {
-        assert.equal(v.params[0], "Swgciai");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerLeft);
+      assert.equal(v.params[0], "Swgciai");
 
       message = "Foet_Mnagyo left the game.";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerLeft) {
-        assert.equal(v.params[0], "Foet_Mnagyo");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerLeft);
+      assert.equal(v.params[0], "Foet_Mnagyo");
 
       message = "- Cylcl left the game.";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerLeft) {
-        assert.equal(v.params[0], "- Cylcl");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerLeft);
+      assert.equal(v.params[0], "- Cylcl");
+
     });
 
     it("map changing test", () => {
@@ -125,53 +110,35 @@ describe("CommandParserTest", function () {
     it("map changed test", () => {
       let message = "Beatmap changed to: Noah - Celestial stinger [apl's EXHAUST] (https://osu.ppy.sh/b/1454083)";
       let v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.BeatmapChanged) {
-        assert.equal(v.params[0], "1454083");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.BeatmapChanged);
+      assert.equal(v.params[0], "1454083");
 
       message = "Beatmap changed to: Paul Bazooka - DrunkenSteiN [bor's Insane] (https://osu.ppy.sh/b/1913126)";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.BeatmapChanged) {
-        assert.equal(v.params[0], "1913126");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.BeatmapChanged);
+      assert.equal(v.params[0], "1913126");
 
       message = "Beatmap changed to: supercell - Hoshi ga Matataku Konna Yoru ni [Sharlo's Insane] (https://osu.ppy.sh/b/670743)";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.BeatmapChanged) {
-        assert.equal(v.params[0], "670743");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.BeatmapChanged);
+      assert.equal(v.params[0], "670743");
     });
 
     it("host change test", () => {
       let message = "Swgciai became the host.";
       let v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.HostChanged) {
-        assert.equal(v.params[0], "Swgciai");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.HostChanged);
+      assert.equal(v.params[0], "Swgciai");
 
       message = "Foet_Mnagyo became the host.";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.HostChanged) {
-        assert.equal(v.params[0], "Foet_Mnagyo");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.HostChanged);
+      assert.equal(v.params[0], "Foet_Mnagyo");
 
       message = "- Cylcl became the host.";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.HostChanged) {
-        assert.equal(v.params[0], "- Cylcl");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.HostChanged);
+      assert.equal(v.params[0], "- Cylcl");
     });
 
     it("match test", () => {
@@ -180,33 +147,24 @@ describe("CommandParserTest", function () {
 
       let message = "Swgciai finished playing (Score: 18048202, PASSED).";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerFinished) {
-        assert.equal(v.params[0], "Swgciai");
-        assert.equal(v.params[1], 18048202);
-        assert.equal(v.params[2], true);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerFinished);
+      assert.equal(v.params[0], "Swgciai");
+      assert.equal(v.params[1], 18048202);
+      assert.equal(v.params[2], true);
 
       message = "Foet_Mnagyo finished playing (Score: 290043, FAILED).";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerFinished) {
-        assert.equal(v.params[0], "Foet_Mnagyo");
-        assert.equal(v.params[1], 290043);
-        assert.equal(v.params[2], false);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerFinished);
+      assert.equal(v.params[0], "Foet_Mnagyo");
+      assert.equal(v.params[1], 290043);
+      assert.equal(v.params[2], false);
 
       message = "- Cylcl finished playing (Score: 2095838, PASSED).";
       v = parser.ParseBanchoResponse(message);
-      if (v.type == BanchoResponseType.PlayerFinished) {
-        assert.equal(v.params[0], "- Cylcl");
-        assert.equal(v.params[1], 2095838);
-        assert.equal(v.params[2], true);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerFinished);
+      assert.equal(v.params[0], "- Cylcl");
+      assert.equal(v.params[1], 2095838);
+      assert.equal(v.params[2], true);
 
       v = parser.ParseBanchoResponse("The match has finished!");
       assert.equal(v.type, BanchoResponseType.MatchFinished);
@@ -225,21 +183,15 @@ describe("CommandParserTest", function () {
 
     it("PlayerMovedSlot test", () => {
       let v = parser.ParseBanchoResponse("azi03 moved to slot 6");
-      if (v.type == BanchoResponseType.PlayerMovedSlot) {
-        assert.equal(v.params[0], "azi03");
-        assert.equal(v.params[1], 6);
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.PlayerMovedSlot);
+      assert.equal(v.params[0], "azi03");
+      assert.equal(v.params[1], 6);
     });
 
     it("MpHostChanged test", () => {
       let v = parser.ParseBanchoResponse("Changed match host to Brena_Pia");
-      if (v.type == BanchoResponseType.MpHostChanged) {
-        assert.equal(v.params[0], "Brena_Pia");
-      } else {
-        assert.fail();
-      }
+      assert.equal(v.type, BanchoResponseType.MpHostChanged);
+      assert.equal(v.params[0], "Brena_Pia");
     });
 
     it("MpMatchStarted test", () => {
@@ -262,14 +214,61 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.PasswordRemoved);
     });
 
-    it("AddedReferees test", () => {
+    it("AddedReferee test", () => {
       let v = parser.ParseBanchoResponse("Added damn to the match referees");
-      if (v.type == BanchoResponseType.AddedReferees) {
-        assert.equal(v.params[0], "damn");
-      } else {
-        assert.fail();
-      }
-    })
+      assert.equal(v.type, BanchoResponseType.AddedReferee);
+      assert.equal(v.params[0], "damn");
+
+    });
+    it("RemovedReferee test", () => {
+      let v = parser.ParseBanchoResponse("Removed damn from the match referees");
+      assert.equal(v.type, BanchoResponseType.RemovedReferee);
+      assert.equal(v.params[0], "damn");
+    });
+    it("kick player test", () => {
+      let v = parser.ParseBanchoResponse("Kicked damn from the match");
+      assert.equal(v.type, BanchoResponseType.KickedPlayer);
+      assert.equal(v.params[0], "damn");
+    });
+    it("countdown test", () => {
+      let v = parser.ParseBanchoResponse("Match starts in 10 seconds");
+      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.params[0], 10);
+
+      v = parser.ParseBanchoResponse("Match starts in 2 minutes and 40 seconds");
+      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.params[0], 160);
+
+      v = parser.ParseBanchoResponse("Match starts in 2 minutes");
+      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.params[0], 120);
+    
+      v = parser.ParseBanchoResponse("Match starts in 1 minute and 1 second");
+      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.params[0], 61);
+    });
+    it("countdonw end test", () => {
+      let v = parser.ParseBanchoResponse("Good luck, have fun!");
+      assert.equal(v.type, BanchoResponseType.CountdownEnded);
+    });
+    it("countdonw abort test", () => {
+      let v = parser.ParseBanchoResponse("Countdown aborted");
+      assert.equal(v.type, BanchoResponseType.CountdownAborted);
+    });
+    it("mp settings test", () => {
+      let v = parser.ParseBanchoResponse("Room name: 4* auto host rotation test, History: https://osu.ppy.sh/mp/xxxxxxx");
+      assert.equal(v.type, BanchoResponseType.Settings);
+      v = parser.ParseBanchoResponse("Beatmap: https://osu.ppy.sh/b/xxxxxx DJ Genericname - Dear You [Dear Rue]");
+      assert.equal(v.type, BanchoResponseType.Settings);
+      v = parser.ParseBanchoResponse("Team mode: HeadToHead, Win condition: Score");
+      assert.equal(v.type, BanchoResponseType.Settings);
+      v = parser.ParseBanchoResponse("Active mods: Freemod");
+      assert.equal(v.type, BanchoResponseType.Settings);
+      v = parser.ParseBanchoResponse("Players: 2");
+      assert.equal(v.type, BanchoResponseType.Settings);
+      v = parser.ParseBanchoResponse("Slot 1  Not Ready https://osu.ppy.sh/u/xxxxxxxx xxxx          [Host]");
+      assert.equal(v.type, BanchoResponseType.Settings);
+    });
   });
 
   it("ensure channel test", () => {
