@@ -78,10 +78,11 @@ export class AutoHostSelector extends LobbyPlugin {
       if (this.mapChanger != null && this.mapChanger != newhost) { // 前任のホストがマップを変更している
         this.needsRotate = false;
         logger.info("host is appointed after map change");
-        this.lobby.SendMessageWithCoolTime("bot : If you start the match without changing the map, you remain the host.", "ahs_hostchange", 10000);
+        //this.lobby.SendMessageWithCoolTime("bot : If you start the match without changing the map, you remain the host.", "ahs_hostchange", 10000);
       }
     } else {
       // ホストがキューの先頭以外に変更された場合
+      logger.trace("host may have manually changed the host");
       this.rotateQueue();
       this.changeHost();
     }
@@ -124,7 +125,7 @@ export class AutoHostSelector extends LobbyPlugin {
         // 誰も終了していない場合は試合再開許可モードへ
         this.needsRotate = false;
         logger.info("The match was aborted before any Player Finished.");
-        this.lobby.SendMessage("bot : The match was Aborted. Restart the match.");
+        //this.lobby.SendMessage("bot : The match was Aborted. Restart the match.");
       } else {
         // ホストがいない状態で試合が中断されたら、
         logger.info("The match was aborted after the host left.");
