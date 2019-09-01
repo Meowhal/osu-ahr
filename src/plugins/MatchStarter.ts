@@ -31,12 +31,14 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player, a.succeeded));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
+    this.lobby.MatchStarted.on(a => this.onMatchStarted());
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.AllPlayerReady) {
         this.onAllPlayerReady()
       }
     });
   }
+  
 
   private onPlayerJoined(player: Player) {
     this.voting.AddVoter(player);
@@ -86,6 +88,10 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
+  private onMatchStarted() {
+    this.isTimerActive = false;
+  }
+
   private vote(player: Player) {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
@@ -129,8 +135,7 @@ export class MatchStarter extends LobbyPlugin {
   getPluginStatus(): string {
     return `-- MatchStarter --
     timer : ${this.isTimerActive ? "active" : "--"}
-    vote : ${this.voting.toString()}
-  `;
+    vote : ${this.voting.toString()}`;
   }
 
   getInfoMessage(): string[] {

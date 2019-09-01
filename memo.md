@@ -195,10 +195,10 @@ sudo kill [PID]
 ## todo
 
 - 試合中にEnterした場合正常に動作する？
-
+- wordcounter用のinfo出力作成
 ## wip
 - MatchStarter拡張、!start vote, !start timer 機能を追加
-
+- プレイヤーが一人のときにタイマーが起動中判定になってしまう
 - spamフィルター対策
 ## done
 - 試合中にhostsが抜けた状態でAbortが受け付けられるとhostが誰もいない状態になる

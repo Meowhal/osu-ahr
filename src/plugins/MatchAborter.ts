@@ -155,8 +155,7 @@ export class MatchAborter extends LobbyPlugin {
   getPluginStatus(): string {
     return `-- Match Aborter --
       timer : ${this.abortTimer != null ? "active" : "---"}
-      vote : ${this.voting.toString()}
-    `;
+      vote : ${this.voting.toString()}`;
   }
 
   getInfoMessage(): string[] {

@@ -245,8 +245,7 @@ export class AutoHostSelector extends LobbyPlugin {
   current host queue
     ${m}
   map changer : ${this.mapChanger == null ? "null" : this.mapChanger.id}
-  needsRotate : ${this.needsRotate}
-  `;
+  needsRotate : ${this.needsRotate}`;
   }
 
   getInfoMessage(): string[] {

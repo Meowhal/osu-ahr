@@ -470,12 +470,11 @@ export class Lobby implements ILobby {
   lobby id : ${this.id}
   status : ${this.status}
   players : ${[...this.players].map(p => p.id).join(", ")}
-  host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}
-`
+  host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
       ;
 
     for (let p of this.plugins) {
-      s += p.getPluginStatus();
+      s += "\n" + p.getPluginStatus();
     }
     return s;
   }
@@ -484,11 +483,11 @@ export class Lobby implements ILobby {
     if (this.SendMessageWithCoolTime("- Osu Auto Host Rotation Bot -", "infomessage", 30000)) {
       this.SendMessage("-  The host order is based on when you entered the lobby.");
       this.SendMessage("-  github : https://github.com/Meowhal/osu-ahr");
-      this.SendMessage("- bot commands -");
+      /*this.SendMessage("- bot commands -");
       this.SendMessage("-  !info => show this message.");
       this.plugins.forEach(p => p.getInfoMessage().forEach(m => {
         this.SendMessage("-  " + m);
-      }));
+      }));*/
     } else {
       logger.trace("info cool time");
     }
