@@ -3,6 +3,7 @@ import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
+import { BanchoResponseType } from "../parsers";
 const logger = log4js.getLogger("autoHostSelector");
 
 export interface AutoHostSelectorOption {
@@ -28,12 +29,16 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
-    this.lobby.BeatmapChanging.on(() => this.onBeatmapChanging());
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
+    this.lobby.RecievedBanchoResponse.on(a => {
+      if (a.response.type == BanchoResponseType.BeatmapChanging) {
+        this.onBeatmapChanging()
+      }
+    });
   }
 
   // プレイヤーが参加した際に実行される

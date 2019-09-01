@@ -1,6 +1,6 @@
 import { Player, escapeUserId } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
-import { parser, BanchoResponseType } from "./parsers";
+import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "./libs/events";
 import { MpSettingsParser } from "./parsers/MpSettingsParser";
@@ -40,22 +40,19 @@ export class Lobby implements ILobby {
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
   PlayerLeft = new TypedEvent<Player>();
-  BeatmapChanging = new TypedEvent<void>();
-  BeatmapChanged = new TypedEvent<string>();
   HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
   UserNotFound = new TypedEvent<void>();
   MatchStarted = new TypedEvent<void>();
   PlayerFinished = new TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>();
   MatchFinished = new TypedEvent<void>();
   AbortedMatch = new TypedEvent<{ playersFinished: number, playersInGame: number }>();
-  AllPlayerReady = new TypedEvent<void>();
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
-  BanchoChated = new TypedEvent<{ message: string }>();
   PlayerChated = new TypedEvent<{ player: Player, message: string }>();
   ReceivedCustomCommand = new TypedEvent<{ player: Player, authority: number, command: string, param: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
-  SentMessage = new TypedEvent<{ message: string }>();
+  SentMessage = new TypedEvent<string>();
+  RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
 
   constructor(ircClient: IIrcClient, option: any | null = null) {
     if (ircClient.conn == null) {
@@ -135,7 +132,7 @@ export class Lobby implements ILobby {
     if (this.channel != undefined) {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
-      this.SentMessage.emit({ message });
+      this.SentMessage.emit(message);
     }
   }
 
@@ -160,7 +157,6 @@ export class Lobby implements ILobby {
   private handleMessage(from: string, to: string, message: string) {
     if (from == "BanchoBot") {
       this.handleBanchoResponse(message);
-      this.BanchoChated.emit({ message });
     } else {
       const p = this.GetPlayer(from);
       if (p != null) {
@@ -176,12 +172,6 @@ export class Lobby implements ILobby {
   private handleBanchoResponse(message: string) {
     const c = parser.ParseBanchoResponse(message);
     switch (c.type) {
-      case BanchoResponseType.BeatmapChanged:
-        this.RaiseBeatmapChanged(c.params[0]);
-        break;
-      case BanchoResponseType.BeatmapChanging:
-        this.RaiseBeatmapChanging();
-        break;
       case BanchoResponseType.HostChanged:
         this.RaiseHostChanged(c.params[0]);
         break;
@@ -206,13 +196,11 @@ export class Lobby implements ILobby {
       case BanchoResponseType.AbortedMatch:
         this.RaiseAbortedMatch();
         break;
-      case BanchoResponseType.AllPlayerReady:
-        this.RaiseAllPlayerReady();
-        break;
       case BanchoResponseType.Unhandled:
         logger.debug("unhandled bancho response : %s", message);
         break;
     }
+    this.RecievedBanchoResponse.emit({ message, response: c });
   }
 
   private raiseReceivedCustomCommand(player: Player, message: string): void {
@@ -263,14 +251,6 @@ export class Lobby implements ILobby {
     }
   }
 
-  RaiseBeatmapChanging(): void {
-    this.BeatmapChanging.emit();
-  }
-
-  RaiseBeatmapChanged(mapid: string): void {
-    this.BeatmapChanged.emit(mapid);
-  }
-
   RaiseHostChanged(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
     if (!this.players.has(player)) {
@@ -317,10 +297,6 @@ export class Lobby implements ILobby {
     logger.info("match aborted %d / %d", this.playersFinished.size, this.playersInGame.size);
     this.isMatching = false;
     this.AbortedMatch.emit({ playersFinished: this.playersFinished.size, playersInGame: this.playersInGame.size });
-  }
-
-  RaiseAllPlayerReady(): void {
-    this.AllPlayerReady.emit();
   }
 
   RaiseNetError(err: Error): void {

@@ -1,6 +1,7 @@
 import { Player } from "./Player";
 import { TypedEvent } from "./libs/events";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
+import { BanchoResponse } from "./parsers";
 export { Player }
 
 // BanchoBotとの対話を抽象化する
@@ -35,21 +36,18 @@ export interface ILobby {
 
   PlayerJoined: TypedEvent<{ player: Player, slot: number }>;
   PlayerLeft: TypedEvent<Player>;
-  BeatmapChanging: TypedEvent<void>;
-  BeatmapChanged: TypedEvent<string>;
   HostChanged: TypedEvent<{ succeeded: boolean, player: Player }>;
   MatchStarted: TypedEvent<void>;
   PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>;
   MatchFinished: TypedEvent<void>;
   AbortedMatch: TypedEvent<{ playersFinished: number, playersInGame: number }>;
-  AllPlayerReady: TypedEvent<void>;
   UnexpectedAction: TypedEvent<Error>;
   NetError: TypedEvent<Error>;
-  BanchoChated: TypedEvent<{ message: string }>;
   PlayerChated: TypedEvent<{ player: Player, message: string }>;
   ReceivedCustomCommand: TypedEvent<{ player: Player, authority: number, command: string, param: string }>;
   PluginMessage: TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>;
-  SentMessage: TypedEvent<{ message: string }>;
+  SentMessage: TypedEvent<string>;
+  RecievedBanchoResponse: TypedEvent<{ message: string, response: BanchoResponse }>;
 }
 
 export enum LobbyStatus {

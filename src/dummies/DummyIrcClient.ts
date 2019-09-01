@@ -116,7 +116,6 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-
   mapidSeed: number = 0;
   // ホストがマップを変更する動作をエミュレートする
   public async emulateChangeMapAsync(delay: number = 0): Promise<void> {
@@ -174,8 +173,9 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   private processMpCommand(target: string, message: string, mp: MpCommand): void {
+    const m = (msg: string) => this.emulateMessageAsync("BanchoBot", this.channel, msg);
     if (target == "BanchoBot" && mp.command == "make") {
-      const title = mp.args.join(' ').trim();
+      const title = mp.arg;
       if (title === "") {
         this.emulateMessage("BanchoBot", this.nick, "No name provided");
         return;
@@ -188,21 +188,21 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     } else if (target == this.channel) {
       switch (mp.command) {
         case "host":
-          if (this.players.has(mp.args[0])) {
-            this.emulateMessageAsync("BanchoBot", this.channel, `${mp.args[0]} became the host.`);
+          if (this.players.has(mp.arg)) {
+            m(`${mp.arg} became the host.`);
           } else {
-            this.emulateMessageAsync("BanchoBot", this.channel, "User not found");
+            m("User not found");
           }
           break;
         case "password":
-          if (mp.args.length == 0) {
-            this.emulateMessageAsync("BanchoBot", this.channel, "Removed the match password");
+          if (mp.arg == "") {
+            m("Removed the match password");
           } else {
-            this.emulateMessageAsync("BanchoBot", this.channel, "Changed the match password");
+            m("Changed the match password");
           }
           break;
         case "invite":
-          this.emulateMessageAsync("BanchoBot", this.channel, `Invited ${mp.args[0]} to the room`);
+          m(`Invited ${mp.arg} to the room`);
           break;
         case "close":
           setImmediate(() => {
@@ -213,13 +213,12 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
         case "abort":
           if (this.isMatching) {
             this.isMatching = false;
-            this.emulateMessageAsync("BanchoBot", this.channel, "Aborted the match");
+            m("Aborted the match");
           } else {
-            this.emulateMessageAsync("BanchoBot", this.channel, "The match is not in progress");
+            m("The match is not in progress");
           }
           break;
         case "settings":
-          const m = (msg: string) => this.emulateMessageAsync("BanchoBot", this.channel, msg);
           m('Room name: lobby name, History: https://osu.ppy.sh/mp/123');
           m("Beatmap: https://osu.ppy.sh/b/1562893 Feryquitous feat. Aitsuki Nakuru - Kairikou [Miura's Extra]");
           m("Team mode: HeadToHead, Win condition: Score");
@@ -232,8 +231,17 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             i++;
           }
           break;
+        case "start":
+          if (mp.arg == "") {
+            m("The match has started!");
+            m("Started the match");
+          } else {
+            // カウントダウンや分表示は面倒なので省略
+            m("Match starts in " + mp.arg + " seconds");
+          }
+          break;
         default:
-          logger.warn("unhandled command", mp.command, mp.args);
+          logger.warn("unhandled command", mp.command, mp.arg);
           break;
       }
     }

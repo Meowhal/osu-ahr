@@ -73,7 +73,12 @@ export class MatchAborter extends LobbyPlugin {
   private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
     if (!this.lobby.isMatching) return;
     if (command == "!abort") {
-      this.vote(player, auth);
+      if (player == this.lobby.host) {
+        logger.trace("host(%s) sent !abort command", player.id);
+        this.doAbort();
+      } else {
+        this.vote(player);
+      }
     } else if (auth >= 2) {
       if (command == "*abort") {
         this.doAbort();
@@ -81,13 +86,9 @@ export class MatchAborter extends LobbyPlugin {
     }
   }
 
-  private vote(player: Player, auth: number) {
+  private vote(player: Player) {
     if (this.voting.passed) return;
-
-    if (player == this.lobby.host) {
-      logger.trace("host(%s) sent !abort command", player.id);
-      this.doAbort();
-    } else if (this.voting.Vote(player)) {
+    if (this.voting.Vote(player)) {
       logger.trace("accept skip request from %s", player.id);
       this.checkVoteCount(true);
     } else {
@@ -159,6 +160,6 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   getInfoMessage(): string[] {
-    return ["!abort => abort the matcd. Use if the match stuck."];
+    return ["!abort => abort the match. Use if the match stuck."];
   }
 }

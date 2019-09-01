@@ -5,7 +5,7 @@ import config from "config";
 import tu from "./TestUtils";
 import { HostSkipper, HostSkipperOption } from '../plugins';
 
-describe("ostSkipperTest", function () {
+describe("HostSkipperTest", function () {
   before(function () {
     tu.configMochaAsSilent();
   });
@@ -13,9 +13,9 @@ describe("ostSkipperTest", function () {
     Promise<{ skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
     const li = await tu.SetupLobbyAsync();
     const option: HostSkipperOption = {
-      skip_request_min: 2,
-      skip_request_rate: 0.5,
-      skip_vote_delay_ms: vote_delay,
+      vote_min: 2,
+      vote_rate: 0.5,
+      vote_delay_ms: vote_delay,
       afk_timer_delay_ms: timer_delay,
       afk_timer_message: "",
       afk_timer_do_skip: true
@@ -61,9 +61,9 @@ describe("ostSkipperTest", function () {
       const lobby = new Lobby(ircClient);
       await lobby.MakeLobbyAsync("test");
       const option: HostSkipperOption = {
-        skip_request_min: 1,
-        skip_request_rate: 2,
-        skip_vote_delay_ms: 0,
+        vote_min: 1,
+        vote_rate: 2,
+        vote_delay_ms: 0,
         afk_timer_delay_ms: 3,
         afk_timer_message: "hello",
         afk_timer_do_skip: true
@@ -76,13 +76,13 @@ describe("ostSkipperTest", function () {
       const lobby = new Lobby(ircClient);
       await lobby.MakeLobbyAsync("test");
       const option = {
-        skip_request_rate: 2,
+        vote_rate: 2,
       }
       const defaultOption = config.get<HostSkipperOption>("HostSkipper");
       const skipper = new HostSkipper(lobby, option);
-      assert.equal(skipper.option.skip_request_min, defaultOption.skip_request_min);
-      assert.notEqual(skipper.option.skip_request_rate, defaultOption.skip_request_rate);
-      assert.equal(skipper.option.skip_request_rate, option.skip_request_rate);
+      assert.equal(skipper.option.vote_min, defaultOption.vote_min);
+      assert.notEqual(skipper.option.vote_rate, defaultOption.vote_rate);
+      assert.equal(skipper.option.vote_rate, option.vote_rate);
       assert.equal(skipper.option.afk_timer_delay_ms, defaultOption.afk_timer_delay_ms);
     });
     it("prepare function", async () => {

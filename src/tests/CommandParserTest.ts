@@ -42,7 +42,7 @@ describe("CommandParserTest", function () {
       assert.fail();
     } else {
       assert.equal(v.command, "host");
-      assert.equal(v.args[0], "xxx");
+      assert.equal(v.arg, "xxx");
     }
 
     message = "!mp make xxx";
@@ -51,7 +51,7 @@ describe("CommandParserTest", function () {
       assert.fail();
     } else {
       assert.equal(v.command, "make");
-      assert.equal(v.args[0], "xxx");
+      assert.equal(v.arg, "xxx");
     }
 
     message = "xx!mp make xxx";
@@ -242,7 +242,7 @@ describe("CommandParserTest", function () {
       v = parser.ParseBanchoResponse("Match starts in 2 minutes");
       assert.equal(v.type, BanchoResponseType.Countdown);
       assert.equal(v.params[0], 120);
-    
+
       v = parser.ParseBanchoResponse("Match starts in 1 minute and 1 second");
       assert.equal(v.type, BanchoResponseType.Countdown);
       assert.equal(v.params[0], 61);

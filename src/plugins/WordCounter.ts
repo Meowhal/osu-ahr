@@ -55,14 +55,14 @@ export class WordCounter extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.SentMessage.on(a => this.onSendMessage(a.message));
+    this.lobby.SentMessage.on(a => this.onSendMessage(a));
   }
 
   private onSendMessage(message: string): void {
     const now = Date.now();
     const f = this.update(message, now);
-    if (f || this.lastLogTime + this.option.log_interval_ms < now ) {
-      this.lastLogTime  = now;
+    if (f || this.lastLogTime + this.option.log_interval_ms < now) {
+      this.lastLogTime = now;
       this.log(message, f);
     }
   }
@@ -71,8 +71,8 @@ export class WordCounter extends LobbyPlugin {
     if (this.periods.length == 0) return false;
 
     const ns = { time: now, length: message.length };
-    let changedMax = false;   
-    
+    let changedMax = false;
+
     for (let p of this.periods) {
       p.chatsPerPeriod++;
       p.wordsPerPeriod += ns.length;
@@ -92,7 +92,7 @@ export class WordCounter extends LobbyPlugin {
     }
 
     this.samples.push(ns);
-    const topIndex = this.periods.reduce((p,a)=>a.index < p ? a.index : p, 1000000);
+    const topIndex = this.periods.reduce((p, a) => a.index < p ? a.index : p, 1000000);
     // 時間切れのサンプルが溜まってきたら捨てる
     if (this.samples.length / 2 < topIndex) {
       logger.trace(`gc start len:${this.samples.length}, idx:${topIndex}`);
@@ -104,11 +104,11 @@ export class WordCounter extends LobbyPlugin {
     return changedMax;
   }
 
-  private log(msg:string, important:boolean) {
+  private log(msg: string, important: boolean) {
     let f = (important ? logger.info : logger.debug).bind(logger);
     f("msg:%s", msg);
-    for(let p of this.periods) {
-      f("  %s(%dsec) cpp:%d, wpp:%d", p.symbol, (p.durationMs/1000).toFixed(2), p.chatsPerPeriod, p.wordsPerPeriod);
-    } 
+    for (let p of this.periods) {
+      f("  %s(%dsec) cpp:%d, wpp:%d", p.symbol, (p.durationMs / 1000).toFixed(2), p.chatsPerPeriod, p.wordsPerPeriod);
+    }
   }
 }

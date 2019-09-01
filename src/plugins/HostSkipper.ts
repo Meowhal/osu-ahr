@@ -4,12 +4,13 @@ import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
 import { VoteCounter } from "./VoteCounter";
+import { BanchoResponseType } from "../parsers";
 const logger = log4js.getLogger("hostSkipper");
 
 export interface HostSkipperOption {
-  skip_request_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
-  skip_request_min: number;　// 最低投票数
-  skip_vote_delay_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
+  vote_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
+  vote_min: number;　// 最低投票数
+  vote_delay_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
   afk_timer_delay_ms: number; // ホスト変更後に与えられるスキップ猶予時間
   afk_timer_message: string; // タイマー時に表示されるメッセージ
   afk_timer_do_skip: boolean; // スキップするか
@@ -44,7 +45,7 @@ export class HostSkipper extends LobbyPlugin {
   constructor(lobby: ILobby, option: any | null = null) {
     super(lobby);
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
-    this.voting = new VoteCounter(this.option.skip_request_rate, this.option.skip_request_min);
+    this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }
 
@@ -54,17 +55,21 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
-    this.lobby.BeatmapChanging.on(() => this.onBeatmapChanging());
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
+    this.lobby.RecievedBanchoResponse.on(a => {
+      if (a.response.type == BanchoResponseType.BeatmapChanging) {
+        this.onBeatmapChanging()
+      }
+    });
   }
 
-  private onPlayerJoined(player:Player) {
+  private onPlayerJoined(player: Player) {
     this.voting.AddVoter(player);
   }
 
   private onPlayerLeft(player: Player): void {
     this.voting.RemoveVoter(player);
-    if (this.lobby.isMatching) return;   
+    if (this.lobby.isMatching) return;
 
     // スキップ判定の母数が減るので再評価する
     this.checkSkipCount();
@@ -122,7 +127,7 @@ export class HostSkipper extends LobbyPlugin {
   private vote(player: Player) {
     if (this.voting.passed) {
       logger.debug("vote from %s was ignored, already skipped", player.id);
-    } else if (this.elapsed < this.option.skip_vote_delay_ms) {
+    } else if (this.elapsed < this.option.vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
       //this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
     } else if (player == this.lobby.host) {

@@ -152,21 +152,9 @@ export class CommandParser {
   }
 
   ParseMPCommand(message: string): MpCommand | null {
-    const reg = /^!mp/;
-    message = message.toLowerCase();
-    const res = message.match(reg);
+    const res = message.match(/^!mp (\w+)\s*(.*)\s*/i);
     if (res) {
-      let [_mp, command, ...args] = message.split(' ');
-      switch (command) {
-        case "make":
-        case "invlide":
-        case "host":
-          const username = args.join(" ");
-          return { command: command, args: [username] };
-
-        default:
-          return { command: command, args: args };
-      }
+      return { command: res[1], arg: res[2] };
     }
     return null;
   }
@@ -223,7 +211,7 @@ export class CommandParser {
 
 export interface MpCommand {
   command: string;
-  args: string[];
+  arg: string;
 }
 
 export enum BanchoResponseType {
