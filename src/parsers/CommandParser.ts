@@ -113,15 +113,15 @@ export class CommandParser {
       if (m_min) {
         secs += parseInt(m_min[1]) * 60;
       }
-      return makeBanchoResponse(BanchoResponseType.Countdown, secs);
+      return makeBanchoResponse(BanchoResponseType.BeganStartTimer, secs);
     }
 
     if (message == "Good luck, have fun!") {
-      return makeBanchoResponse(BanchoResponseType.CountdownEnded);
+      return makeBanchoResponse(BanchoResponseType.FinishStartTimer);
     }
 
     if (message == "Countdown aborted") {
-      return makeBanchoResponse(BanchoResponseType.CountdownAborted);
+      return makeBanchoResponse(BanchoResponseType.AbortedStartTimer);
     }
 
     if (message.match(/^(Room name:|Beatmap:|Team mode:|Active mods:|Players:|Slot \d+)/)) {
@@ -238,9 +238,9 @@ export enum BanchoResponseType {
   AddedReferee,
   RemovedReferee,
   KickedPlayer,
-  Countdown,
-  CountdownEnded,
-  CountdownAborted,
+  BeganStartTimer,
+  FinishStartTimer,
+  AbortedStartTimer,
   Settings,
   ListRefs,
 }

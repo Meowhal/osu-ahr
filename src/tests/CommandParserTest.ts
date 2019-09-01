@@ -230,30 +230,30 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.KickedPlayer);
       assert.equal(v.params[0], "damn");
     });
-    it("countdown test", () => {
+    it("BeganStartTimer test", () => {
       let v = parser.ParseBanchoResponse("Match starts in 10 seconds");
-      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 10);
 
       v = parser.ParseBanchoResponse("Match starts in 2 minutes and 40 seconds");
-      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 160);
 
       v = parser.ParseBanchoResponse("Match starts in 2 minutes");
-      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 120);
 
       v = parser.ParseBanchoResponse("Match starts in 1 minute and 1 second");
-      assert.equal(v.type, BanchoResponseType.Countdown);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 61);
     });
-    it("countdonw end test", () => {
+    it("FinishStartTimer test", () => {
       let v = parser.ParseBanchoResponse("Good luck, have fun!");
-      assert.equal(v.type, BanchoResponseType.CountdownEnded);
+      assert.equal(v.type, BanchoResponseType.FinishStartTimer);
     });
-    it("countdonw abort test", () => {
+    it("AbortedStartTimer test", () => {
       let v = parser.ParseBanchoResponse("Countdown aborted");
-      assert.equal(v.type, BanchoResponseType.CountdownAborted);
+      assert.equal(v.type, BanchoResponseType.AbortedStartTimer);
     });
     it("mp settings test", () => {
       let v = parser.ParseBanchoResponse("Room name: 4* auto host rotation test, History: https://osu.ppy.sh/mp/xxxxxxx");

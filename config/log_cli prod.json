@@ -94,6 +94,14 @@
       ],
       "level": "debug"
     },
+    "matchStarter": {
+      "appenders": [
+        "console_f",
+        "file_all_f",
+        "file_app"
+      ],
+      "level": "debug"
+    },
     "matchAborter": {
       "appenders": [
         "console_f",

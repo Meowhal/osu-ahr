@@ -189,17 +189,22 @@ sudo kill [PID]
 案２は他の場合には、前ホストが変更後に去り、現ホストが変更しなかった場合に次回もホストでいられる
 しかしこれではアボート時にマップを変更するとその次のユーザーまでスキップされてしまう。
 
-案３：誰がマップを変更したか保存する
+案３：誰がマップを変更したか保存する　採用
 
 # TASK
 ## todo
-- MatchStarter拡張、!start vote, !start timer 機能を追加
+
 - 試合中にEnterした場合正常に動作する？
 
 ## wip
-- 試合中にhostsが抜けた状態でAbortが受け付けられるとhostが誰もいない状態になる
+- MatchStarter拡張、!start vote, !start timer 機能を追加
+
 - spamフィルター対策
 ## done
+- 試合中にhostsが抜けた状態でAbortが受け付けられるとhostが誰もいない状態になる
+- !mp start の連続使用時の挙動
+- !mp start 1, !mp start 60 のときの挙動 second(s)?
+- mp response check !mp start, !mp aborttimer, !mp kick, !mp addref, !mp removeref, !mp listrefs
 - !mp abortもAbort判定にしたい
 - cli ロビー作成時と入室時にコンソールにもっと情報を表示する
 - hostsキュー表示するとき全員を表示する必要はない？名前を省略するか、後半を省くか

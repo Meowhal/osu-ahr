@@ -240,6 +240,9 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             m("Match starts in " + mp.arg + " seconds");
           }
           break;
+        case "aborttimer":
+          m("Countdown aborted")
+          break;
         default:
           logger.warn("unhandled command", mp.command, mp.arg);
           break;
