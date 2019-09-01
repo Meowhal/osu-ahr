@@ -3,6 +3,7 @@ import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
+import { VoteCounter } from "./VoteCounter";
 const logger = log4js.getLogger("matchAborter");
 
 export interface MatchAborterOption {
@@ -21,19 +22,18 @@ const defaultOption = config.get<MatchAborterOption>("MatchAborter");
 export class MatchAborter extends LobbyPlugin {
   option: MatchAborterOption;
   abortTimer: NodeJS.Timer | null = null;
-  abortRequesters: Set<Player> = new Set<Player>();
-  aborting: boolean = false;
+  voting: VoteCounter;
 
   constructor(lobby: ILobby, option: any | null = null) {
     super(lobby);
     this.option = { ...defaultOption, ...option } as MatchAborterOption;
+    this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }
 
   private registerEvents(): void {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
-    this.lobby.AbortedMatch.on(a => this.onAbortedMatch(a.playersFinished, a.playersInGame));
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
@@ -42,10 +42,7 @@ export class MatchAborter extends LobbyPlugin {
   // 試合中に抜けた場合
   private onPlayerLeft(player: Player): void {
     if (!this.lobby.isMatching) return;
-
-    if (this.abortRequesters.has(player)) {
-      this.abortRequesters.delete(player);
-    }
+    this.voting.RemoveVoter(player);
 
     // 母数が減るので投票とタイマーを再評価する
     this.checkVoteCount();
@@ -53,18 +50,16 @@ export class MatchAborter extends LobbyPlugin {
 
     // 誰もいなくなったらタイマーを止める
     if (this.lobby.players.size == 0) {
-      this.clearVote();
+      this.voting.Clear();
       this.stopTimer();
     }
   }
 
   private onMatchStarted(): void {
-    this.clearVote();
-    this.aborting = false;
-  }
-
-  private onAbortedMatch(playersFinished: number, playersInGame: number) {
-    this.aborting = false;
+    this.voting.RemoveAllVoters();
+    for (let p of this.lobby.players) {
+      this.voting.AddVoter(p);
+    }
   }
 
   private onPlayerFinished(player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number) {
@@ -87,34 +82,25 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private vote(player: Player, auth: number) {
-    if (!this.lobby.playersInGame.has(player)) {
-      // 試合に参加していないプレイヤーの投票は無視
-      return;
-    } else if (this.aborting) {
-      // 受付後の投票は無視
-      logger.debug("vote from %s was ignored, already aborting", player.id);
-    } else if (player == this.lobby.host) {
-      // ホストからの投票
-      logger.debug("host(%s) sent !abort command", player.id);
-      this.lobby.SendMessage("bot : Accepted !abort from current host.");
+    if (this.voting.passed) return;
+
+    if (player == this.lobby.host) {
+      logger.trace("host(%s) sent !abort command", player.id);
       this.doAbort();
-    } else if (!this.abortRequesters.has(player)) {
-      this.abortRequesters.add(player);
+    } else if (this.voting.Vote(player)) {
       logger.trace("accept skip request from %s", player.id);
       this.checkVoteCount(true);
     } else {
-      logger.debug("vote from %s was ignored, double vote", player.id);
+      logger.trace("vote was ignored");
     }
   }
 
   // 投票数を確認して必要数に達していたら試合中断
   private checkVoteCount(showMessage: boolean = false): void {
-    const r = this.voteRequired;
-    const c = this.voteCount;
-    if (c != 0 && showMessage) {
-      this.lobby.SendMessage(`bot : match abort progress: ${c} / ${r}`)
+    if (this.voting.count != 0 && showMessage) {
+      this.lobby.SendMessage(`bot : match abort progress: ${this.voting.toString()}`)
     }
-    if (r <= c) {
+    if (this.voting.passed) {
       this.doAbort();
     }
   }
@@ -124,11 +110,6 @@ export class MatchAborter extends LobbyPlugin {
     return Math.ceil(Math.max(
       this.lobby.playersInGame.size * this.option.vote_rate,
       this.option.vote_min));
-  }
-
-  /** 投票した人数 */
-  get voteCount(): number {
-    return this.abortRequesters.size;
   }
 
   private checkAutoAbort(): void {
@@ -146,16 +127,8 @@ export class MatchAborter extends LobbyPlugin {
 
   private doAbort(): void {
     logger.info("do abort");
-    this.aborting = true;
     this.stopTimer();
     this.lobby.AbortMatch();
-  }
-
-  private clearVote(): void {
-    if (this.abortRequesters.size != 0) {
-      logger.trace("clear vote");
-      this.abortRequesters.clear();
-    }
   }
 
   private startTimer(): void {
@@ -181,9 +154,7 @@ export class MatchAborter extends LobbyPlugin {
   getPluginStatus(): string {
     return `-- Match Aborter --
       timer : ${this.abortTimer != null ? "active" : "---"}
-      vote_require : ${this.voteRequired}
-      vote_count : ${this.voteCount}
-      vote_requesters : [${[...this.abortRequesters].map(v => v.id).join(", ")}]
+      vote : ${this.voting.toString()}
     `;
   }
 

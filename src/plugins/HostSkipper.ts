@@ -3,6 +3,7 @@ import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
+import { VoteCounter } from "./VoteCounter";
 const logger = log4js.getLogger("hostSkipper");
 
 export interface HostSkipperOption {
@@ -32,9 +33,8 @@ const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
 export class HostSkipper extends LobbyPlugin {
   option: HostSkipperOption;
   afkTimer: NodeJS.Timer | undefined;
-  skipRequesters: Set<Player> = new Set<Player>();
   timeStart: number = Date.now();
-  skipping: boolean = false; // 
+  voting: VoteCounter;
 
   // skip受付からの経過時間
   get elapsed(): number {
@@ -44,10 +44,12 @@ export class HostSkipper extends LobbyPlugin {
   constructor(lobby: ILobby, option: any | null = null) {
     super(lobby);
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
+    this.voting = new VoteCounter(this.option.skip_request_rate, this.option.skip_request_min);
     this.registerEvents();
   }
 
   private registerEvents(): void {
+    this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player));
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
@@ -56,19 +58,20 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
   }
 
-  private onPlayerLeft(player: Player): void {
-    if (this.lobby.isMatching) return;
+  private onPlayerJoined(player:Player) {
+    this.voting.AddVoter(player);
+  }
 
-    if (this.skipRequesters.has(player)) {
-      this.skipRequesters.delete(player);
-    }
+  private onPlayerLeft(player: Player): void {
+    this.voting.RemoveVoter(player);
+    if (this.lobby.isMatching) return;   
 
     // スキップ判定の母数が減るので再評価する
     this.checkSkipCount();
 
     // 誰もいなくなったらタイマーを止める
     if (this.lobby.players.size == 0) {
-      this.clearVote();
+      this.voting.Clear();
       this.stopTimer();
     }
   }
@@ -79,8 +82,8 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private onMatchStarted(): void {
+    this.voting.Clear();
     this.stopTimer();
-    this.clearVote();
   }
 
   // ホストがマップを変更している
@@ -99,10 +102,10 @@ export class HostSkipper extends LobbyPlugin {
   private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
-    if (command == "!skip" || command == "!s") {
+    if (command == "!skip") {
       if (this.lobby.host == null) return; // ホストがいないなら何もしない
       if (param != "" && param != this.lobby.host.id) return; // 関係ないユーザーのスキップは無視
-      this.vote(player, auth);
+      this.vote(player);
     } else if (auth >= 2) {
       if (command == "*skip") {
         this.doSkip();
@@ -116,53 +119,38 @@ export class HostSkipper extends LobbyPlugin {
     }
   }
 
-  private vote(player: Player, auth: number) {
-    if (this.skipping) {
+  private vote(player: Player) {
+    if (this.voting.passed) {
       logger.debug("vote from %s was ignored, already skipped", player.id);
     } else if (this.elapsed < this.option.skip_vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
-      this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
+      //this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
     } else if (player == this.lobby.host) {
       logger.debug("host(%s) sent !skip command", player.id);
-      this.lobby.SendMessage("bot : Accepted !skip from current host.");
+      //this.lobby.SendMessage("bot : Accepted !skip from current host.");
       this.doSkip();
-    } else if (this.skipRequesters.has(player)) {
-      logger.debug("vote from %s was ignored, double vote", player.id);
-      this.lobby.SendMessageWithCoolTime(`bot : ${player.id} has already requested skip.`, "skipDoubleVote", 5000);
     } else {
-      this.skipRequesters.add(player);
-      logger.trace("accept skip request from %s", player.id);
-      this.checkSkipCount(true);
+      if (this.voting.Vote(player)) {
+        logger.trace("accept skip request from %s", player.id);
+        this.checkSkipCount();
+      } else {
+        logger.debug("vote from %s was ignored, double vote", player.id);
+      }
     }
   }
 
   // スキップ状況を確認して、必要数に達している場合は
   private checkSkipCount(showMessage: boolean = false): void {
-    const r = this.requiredSkip;
-    const c = this.countSkip;
-    if (c != 0 && showMessage) {
-      this.lobby.SendMessageWithCoolTime(`bot : Host skip progress: ${c} / ${r}`, "checkSkipCount", 5000);
+    if (this.voting.count != 0 && showMessage) {
+      this.lobby.SendMessageWithCoolTime(`bot : Host skip progress: ${this.voting.toString()}`, "checkSkipCount", 5000);
     }
-    if (r <= c) {
+    if (this.voting.passed) {
       this.doSkip();
     }
   }
 
-  /** スキップ投票の必要数 */
-  get requiredSkip(): number {
-    return Math.ceil(Math.max(
-      this.lobby.players.size * this.option.skip_request_rate,
-      this.option.skip_request_min));
-  }
-
-  /** スキップに投票した人数 */
-  get countSkip(): number {
-    return this.skipRequesters.size;
-  }
-
   private doSkip(): void {
     logger.info("do skip");
-    this.skipping = true;
     this.stopTimer();
     this.sendPluginMessage("skip");
   }
@@ -173,24 +161,15 @@ export class HostSkipper extends LobbyPlugin {
       return;
     }
     logger.info("do skipTo : %s", userid);
-    this.skipping = true;
     this.stopTimer();
     this.sendPluginMessage("skipto", [userid]);
   }
 
 
   restart(): void {
-    this.clearVote();
+    this.voting.Clear();
     this.startTimer();
-    this.skipping = false;
     this.timeStart = Date.now();
-  }
-
-  clearVote(): void {
-    if (this.skipRequesters.size != 0) {
-      logger.trace("clear vote");
-      this.skipRequesters.clear();
-    }
   }
 
   startTimer(): void {
@@ -221,9 +200,7 @@ export class HostSkipper extends LobbyPlugin {
   getPluginStatus(): string {
     return `-- Host Skipper --
       timer : ${this.afkTimer != undefined ? "active" : "---"}
-      skip_require : ${this.requiredSkip}
-      skip_count : ${this.countSkip}
-      skip_requesters : [${[...this.skipRequesters].map(v => v.id).join(", ")}]
+      skip_vote : ${this.voting.toString()}
     `;
   }
 

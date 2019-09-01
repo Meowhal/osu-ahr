@@ -81,9 +81,9 @@ describe("Match Aboter Tests", function () {
       ircClient.emulateMatchAsync(100);
       const et = tu.assertEventFire(lobby.AbortedMatch, null, 100);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
       await ircClient.emulateMessageAsync(players[2], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 2);
+      assert.equal(aborter.voting.count, 2);
       await et;
     });
     it("the match won't be aborted if there are not enough votes", async () => {
@@ -93,7 +93,7 @@ describe("Match Aboter Tests", function () {
       ircClient.emulateMatchAsync(10);
       const et = tu.assertEventNeverFire(lobby.AbortedMatch, null, 10);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
       await et;
     });
     it("double vote", async () => {
@@ -103,11 +103,11 @@ describe("Match Aboter Tests", function () {
       ircClient.emulateMatchAsync(10);
       const et = tu.assertEventNeverFire(lobby.AbortedMatch, null, 10);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
       await et;
     });
     it("authorized user aborts the match", async () => {
@@ -128,9 +128,9 @@ describe("Match Aboter Tests", function () {
       const et = tu.assertEventFire(lobby.AbortedMatch, null, 100);
       assert.equal(aborter.voteRequired, 3);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
       await ircClient.emulateMessageAsync(players[2], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 2);
+      assert.equal(aborter.voting.count, 2);
       await ircClient.emulateRemovePlayerAsync(players[3]);
 
       await et;
@@ -144,14 +144,14 @@ describe("Match Aboter Tests", function () {
       assert.equal(aborter.voteRequired, 2);
       assert.equal(lobby.playersInGame.size, 6);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 1);
+      assert.equal(aborter.voting.count, 1);
 
       await ircClient.emulateAddPlayerAsync("tom");
       assert.equal(lobby.playersInGame.size, 6);
       assert.equal(aborter.voteRequired, 2);
 
       await ircClient.emulateMessageAsync(players[2], ircClient.channel, "!abort");
-      assert.equal(aborter.voteCount, 2);
+      assert.equal(aborter.voting.count, 2);
 
       await et;
     });

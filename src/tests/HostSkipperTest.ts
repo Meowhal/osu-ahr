@@ -100,7 +100,7 @@ describe("ostSkipperTest", function () {
       assert.isUndefined(skipper.afkTimer);
       await tu.changeHostAsync("p1", lobby);
       assert.isDefined(skipper.afkTimer);
-      assert.isEmpty(skipper.skipRequesters);
+      assert.equal(skipper.voting.count, 0);
       await resolveSkipAsync(lobby);
       assert.isUndefined(skipper.afkTimer);
     });
@@ -177,23 +177,23 @@ describe("ostSkipperTest", function () {
   describe("skip vote test", function () {
     it("vote required check", async () => {
       const { skipper, lobby, ircClient } = await prepare();
-      assert.equal(skipper.requiredSkip, 2);
+      assert.equal(skipper.voting.required, 2);
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 2);
+      assert.equal(skipper.voting.required, 2);
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 2);
+      assert.equal(skipper.voting.required, 2);
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 2); // player:3
+      assert.equal(skipper.voting.required, 2); // player:3
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 2);
+      assert.equal(skipper.voting.required, 2);
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 3); // player:5
+      assert.equal(skipper.voting.required, 3); // player:5
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 3);
+      assert.equal(skipper.voting.required, 3);
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 4); // player:7
+      assert.equal(skipper.voting.required, 4); // player:7
       await tu.AddPlayersAsync(1, ircClient);
-      assert.equal(skipper.requiredSkip, 4);
+      assert.equal(skipper.voting.required, 4);
     });
     it("host skip", async () => {
       const { skipper, lobby, ircClient } = await prepare(0, 0);
@@ -226,17 +226,17 @@ describe("ostSkipperTest", function () {
       const task = resolveSkipAsync(lobby, () => skipped = true);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 1);
+      assert.equal(skipper.voting.count, 1);
       assert.isFalse(skipped);
       ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 2);
+      assert.equal(skipper.voting.count, 2);
       assert.isFalse(skipped);
 
       ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       await task;
-      assert.equal(skipper.countSkip, 3);
+      assert.equal(skipper.voting.count, 3);
       assert.isTrue(skipped);
     });
     it("is player skip ignored at cooltime", async () => {
@@ -247,17 +247,17 @@ describe("ostSkipperTest", function () {
       const task = rejectSkipAsync(lobby, 50);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 0);
+      assert.equal(skipper.voting.count, 0);
       assert.isFalse(skipped);
       ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 0);
+      assert.equal(skipper.voting.count, 0);
       assert.isFalse(skipped);
 
       ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       await task;
-      assert.equal(skipper.countSkip, 0);
+      assert.equal(skipper.voting.count, 0);
       assert.isFalse(skipped);
     });
     it("duplicate vote", async () => {
@@ -267,10 +267,10 @@ describe("ostSkipperTest", function () {
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       ircClient.emulateMessage("p2", ircClient.channel, "!skip");
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 2);
+      assert.equal(skipper.voting.count, 2);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 2);
+      assert.equal(skipper.voting.count, 2);
     });
     it("vote can valid after mapchanging", async () => {
       const { skipper, lobby, ircClient } = await prepare(0, 0);
@@ -287,7 +287,7 @@ describe("ostSkipperTest", function () {
       ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       await tu.delayAsync(10);
       await task;
-      assert.equal(skipper.countSkip, 3);
+      assert.equal(skipper.voting.count, 3);
       assert.isTrue(skipped);
     });
     it("vote reject when match", async () => {
@@ -302,9 +302,9 @@ describe("ostSkipperTest", function () {
       ircClient.emulateMessage("p3", ircClient.channel, "!skip");
       ircClient.emulateMessage("p4", ircClient.channel, "!skip");
       await tu.delayAsync(1);
-      assert.equal(skipper.countSkip, 0);
+      assert.equal(skipper.voting.count, 0);
       await tu.delayAsync(10);
-      assert.equal(skipper.countSkip, 0);
+      assert.equal(skipper.voting.count, 0);
     });
     it("is lots of vote ignored", async () => {
       const { skipper, lobby, ircClient } = await prepare(0);
@@ -316,8 +316,8 @@ describe("ostSkipperTest", function () {
       for (let i = 1; i < numplayers; i++) {
         ircClient.emulateMessage("p" + i, ircClient.channel, "!skip");
         await tu.delayAsync(1);
-        assert.equal(skipper.countSkip, Math.min(i, skipper.requiredSkip));
-        assert.equal(skipped, skipper.requiredSkip <= i);
+        assert.equal(skipper.voting.count, Math.min(i, skipper.voting.required));
+        assert.equal(skipped, skipper.voting.required <= i);
       }
     });
     it("accept !skip with host id", async () => {
@@ -325,7 +325,7 @@ describe("ostSkipperTest", function () {
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip p0");
-      assert.equal(skipper.countSkip, 1);
+      assert.equal(skipper.voting.count, 1);
     });
     it("accept !skip with host id with complex name", async () => {
       const { skipper, lobby, ircClient } = await prepare();
@@ -333,14 +333,14 @@ describe("ostSkipperTest", function () {
       await tu.AddPlayersAsync(players, ircClient);
       await tu.changeHostAsync(players[0], lobby);
       ircClient.emulateMessage(players[1], ircClient.channel, "!skip " + players[0]);
-      assert.equal(skipper.countSkip, 1);
+      assert.equal(skipper.voting.count, 1);
     });
     it("accept !skip with space", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       const players = await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync(players[0], lobby);
       ircClient.emulateMessage(players[1], ircClient.channel, "!skip ");
-      assert.equal(skipper.countSkip, 1);
+      assert.equal(skipper.voting.count, 1);
     });
 
     it("ignore !skip if none host player targeted", async () => {
@@ -348,7 +348,7 @@ describe("ostSkipperTest", function () {
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip abc");
-      assert.equal(skipper.countSkip, 0);
+      assert.equal(skipper.voting.count, 0);
     });
 
   });
