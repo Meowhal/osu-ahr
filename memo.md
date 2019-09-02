@@ -173,7 +173,7 @@ banchobotのメッセージからユーザー名を抜き出すための正規�
 https://osu.ppy.sh/community/matches/54000487/history?after=1255711787&limit=100
 
 ## バックグラウンド実行
-ターミナルからnpmを実行すると、ターミナルを閉じたときにアプリケーションが終了してしまう。
+ターミナルからnpmを実行すると、ターミナルを閉じたときにアプリケーションが終了してしまう。  
 `sudo nohup npm start -- [m / e] [lobby name / lobby id] &` 
 でターミナルを閉じてもバックグラウンドで実行し続けるようにできる。
 終了する場合は
@@ -193,14 +193,17 @@ sudo kill [PID]
 
 # TASK
 ## todo
-
+- infoの自動表示機能、infoを見たユーザーを記録し、ロビーに誰もいない場合は表示する
+- 再起動時現在のホストに!mp host が発行される
 - 試合中にEnterした場合正常に動作する？
-- wordcounter用のinfo出力作成
 ## wip
-- MatchStarter拡張、!start vote, !start timer 機能を追加
-- プレイヤーが一人のときにタイマーが起動中判定になってしまう
+- skip受付後にメッセージが表示されない
+- wordcounter用のinfo出力作成
 - spamフィルター対策
 ## done
+- MatchStarter拡張、!start vote, !start timer 機能を追加
+- プレイヤーが一人のときにタイマーが起動中判定になってしまう
+- auto abortまでの時間が短い?
 - 試合中にhostsが抜けた状態でAbortが受け付けられるとhostが誰もいない状態になる
 - !mp start の連続使用時の挙動
 - !mp start 1, !mp start 60 のときの挙動 second(s)?
