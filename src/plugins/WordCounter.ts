@@ -113,9 +113,10 @@ export class WordCounter extends LobbyPlugin {
   }
 
   getPluginStatus(): string {
-    let m =  "-- Word Counter --";
+    let m = "-- Word Counter --";
     for (let p of this.periods) {
-      m += `\n  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cpp:${p.chatsPerPeriod}, wpp:${p.wordsPerPeriod}`;
+      m +=
+        `\n  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cpp:${p.chatsPerPeriod}, cppmax:${p.chatsPerPeriodMax} wpp:${p.wordsPerPeriod}, wppmax:${p.wordsPerPeriodMax} `;
     }
     return m;
   }
