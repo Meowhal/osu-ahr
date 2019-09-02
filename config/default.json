@@ -26,14 +26,14 @@
     "terminate_time_ms": 180000
   },
   "MatchStarter":{
-    "vote_rate": 2,
-    "vote_min": 0.75
+    "vote_rate": 0.75,
+    "vote_min": 2
   },
   "MatchAborter": {
     "vote_rate": 0.3,
     "vote_min": 2,
     "auto_abort_rate": 0.5,
-    "auto_abort_delay_ms": 15000
+    "auto_abort_delay_ms": 25000
   },
   "WordCounter":{
     "periods":[

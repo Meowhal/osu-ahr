@@ -145,8 +145,8 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   // スキップ状況を確認して、必要数に達している場合は
-  private checkSkipCount(showMessage: boolean = false): void {
-    if (this.voting.count != 0 && showMessage) {
+  private checkSkipCount(): void {
+    if (this.voting.count != 0) {
       this.lobby.SendMessageWithCoolTime(`bot : Host skip progress: ${this.voting.toString()}`, "checkSkipCount", 5000);
     }
     if (this.voting.passed) {

@@ -265,7 +265,7 @@ describe.only("MatchStarterTest", function () {
       assert.isFalse(starter.isTimerActive);
       await t;
     });
-    it("!stop from player test", async() => {
+    it("!stop from player test", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
       const players = await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync(players[0], lobby);
@@ -279,7 +279,4 @@ describe.only("MatchStarterTest", function () {
       await t;
     });
   });
-
-
-
 });
