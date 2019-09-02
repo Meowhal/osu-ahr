@@ -1,5 +1,23 @@
 # osu-ahr
-irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation
+irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
+The host order is based on when Player entered the lobby.
+
+## chat commands
+|for player||
+|:--|:--|
+|- `!queue`| Show host queue.|
+|- `!skip `| Votes to skip current host.|
+|- `!start`| Votes to start the match.|
+|- `!abort`| Votes to abort the match. Use when the match is stuck.|
+ 
+|for host||
+|:--|:--|
+|`!skip`| Transfers host to next player.|
+|`!start [secs]`| Begins start timer.|
+|`!abort`| Stops current start timer.|
+
+(I am looking for someone to correct my English mistakes..😖)
+
 
 osu!のマルチロビーでホストを自動的にローテーションするためのIRCボットです。
 
