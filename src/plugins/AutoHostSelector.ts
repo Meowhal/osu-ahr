@@ -1,5 +1,5 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
+import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -31,7 +31,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
+    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
     this.lobby.RecievedBanchoResponse.on(a => {
@@ -139,7 +139,7 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
+  private onCustomCommand(player: Player, command: string, param: string): void {
     if (command.startsWith("!q")) {
       this.showHostQueue();
     }
@@ -177,13 +177,13 @@ export class AutoHostSelector extends LobbyPlugin {
       logger.error("skipto invalid arguments length");
       return;
     }
-    const to = args[0];
+    const to = escapeUserId(args[0]);
     if (!this.lobby.Includes(to)) {
       logger.error("skipto target dosent exist");
       return;
     }
     let c = 0;
-    while (this.hostQueue[0].id != to) {
+    while (this.hostQueue[0].escaped_id != to) {
       this.rotateQueue();
       if (c++ > 16) {
         logger.error("infinity loop detected");

@@ -193,14 +193,20 @@ sudo kill [PID]
 
 # TASK
 ## todo
+- 順番がどういう仕組なのか理解してもらえない？
+- 試合開始１０後くらいに誰かがチャットしたらabortの案内を出す
 - infoの自動表示機能、infoを見たユーザーを記録し、ロビーに誰もいない場合は表示する
 - 再起動時現在のホストに!mp host が発行される
 - 試合中にEnterした場合正常に動作する？
 ## wip
-- skip受付後にメッセージが表示されない
-- wordcounter用のinfo出力作成
-- spamフィルター対策
+-  長い名前のユーザー名が処理できない
 ## done
+- 権限ユーザーが!mp start 30 すると２重でチャットしてしまう 権限管理の見直し、プレイヤー情報に権限を保存
+- cliからコマンドを起動したい
+- wordcounter用のinfo出力作成
+- skip受付後にメッセージが表示されない
+- refereeが部屋を抜けたら？listref => 部屋を抜けてもrefreeは継続する
+- spamフィルター対策
 - MatchStarter拡張、!start vote, !start timer 機能を追加
 - プレイヤーが一人のときにタイマーが起動中判定になってしまう
 - auto abortまでの時間が短い?

@@ -1,5 +1,5 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
+import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -54,7 +54,7 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
+    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanging) {
@@ -104,14 +104,14 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   // スキップメッセージを処理
-  private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
+  private onCustomCommand(player: Player, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
     if (command == "!skip") {
       if (this.lobby.host == null) return; // ホストがいないなら何もしない
-      if (param != "" && param != this.lobby.host.id) return; // 関係ないユーザーのスキップは無視
+      if (param != "" && escapeUserId(param) != this.lobby.host.escaped_id) return; // 関係ないユーザーのスキップは無視
       this.vote(player);
-    } else if (auth >= 2) {
+    } else if (player.isAuthorized) {
       if (command == "*skip") {
         this.doSkip();
       } else if (command == "*stopSkipCounter") {
@@ -130,7 +130,7 @@ export class HostSkipper extends LobbyPlugin {
     } else if (this.elapsed < this.option.vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
       //this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
-    } else if (player == this.lobby.host) {
+    } else if (player.isHost) {
       logger.debug("host(%s) sent !skip command", player.id);
       //this.lobby.SendMessage("bot : Accepted !skip from current host.");
       this.doSkip();

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../dummies';
-import { Lobby, Player } from "..";
+import { Lobby, Player, Role } from "..";
 import config from "config";
 import tu from "./TestUtils";
 import { HostSkipper, HostSkipperOption } from '../plugins';
@@ -355,7 +355,7 @@ describe("HostSkipperTest", function () {
   describe("custom command tests", function () {
     it("*skip by authorized user test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
-      lobby.option.authorized_users.push("p1");
+      lobby.GetOrMakePlayer("p1").setRole(Role.Authorized);
       var t = resolveSkipAsync(lobby);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
@@ -364,7 +364,7 @@ describe("HostSkipperTest", function () {
     });
     it("*skip by authorized user with param test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
-      lobby.option.authorized_users.push("p1");
+      lobby.GetOrMakePlayer("p1").setRole(Role.Authorized);
       var t = resolveSkipAsync(lobby);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
@@ -373,7 +373,7 @@ describe("HostSkipperTest", function () {
     });
     it("*skip by Unauthorized test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
-      lobby.option.authorized_users.push("p1");
+      lobby.GetOrMakePlayer("p1").setRole(Role.Authorized);
       var t = rejectSkipAsync(lobby, 25);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
@@ -382,7 +382,7 @@ describe("HostSkipperTest", function () {
     });
     it("*skipto test", async () => {
       const { skipper, lobby, ircClient } = await prepare();
-      lobby.option.authorized_users.push("p1");
+      lobby.GetOrMakePlayer("p1").setRole(Role.Authorized);
       var t = resolveSkiptoAsync(lobby, "p3");
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
@@ -391,7 +391,7 @@ describe("HostSkipperTest", function () {
     });
     it("failed *skipto if param isn't userid", async () => {
       const { skipper, lobby, ircClient } = await prepare();
-      lobby.option.authorized_users.push("p1");
+      lobby.GetOrMakePlayer("p1").setRole(Role.Authorized);
       var t = rejectSkiptoAsync(lobby, 25);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);

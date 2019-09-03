@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import { Lobby, LobbyStatus, Player } from '..';
 import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
 import log4js from "log4js";
+import tu from "./TestUtils";
 
 describe("LobbyTest", function () {
   before(function () {
@@ -29,11 +30,6 @@ describe("LobbyTest", function () {
       lobby: lobby,
       players: players
     };
-  }
-
-  function delay(ms: number): Promise<void> {
-    if (ms == 0) return Promise.resolve();
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   describe("lobby management tests", function () {
@@ -185,25 +181,25 @@ describe("LobbyTest", function () {
     });
     it("host change test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      const getNewHostAsync = async () => {
+      const assertHost = async (next: Player) => {
         return new Promise<Player>(resolve => {
           lobby.HostChanged.once(({ succeeded, player }) => {
+            assert.equal(player, next);
+            tu.assertHost(next.id, lobby);
+            assert.equal(lobby.hostPending, null);
             resolve(player);
           });
         });
       }
       let nexthost = players[0];
-      let task = getNewHostAsync();
+      let task = assertHost(nexthost);
       lobby.TransferHost(nexthost);
-      let host = await task;
-      assert.equal(host, nexthost);
-      assert.equal(lobby.hostPending, null);
+      await task;
+
       nexthost = players[1];
-      task = getNewHostAsync();
+      task = assertHost(nexthost);
       lobby.TransferHost(nexthost);
-      host = await task;
-      assert.equal(host, nexthost);
-      assert.equal(lobby.hostPending, null);
+      await task;
     });
 
     // ホスト任命後に離脱した場合
@@ -387,7 +383,7 @@ describe("LobbyTest", function () {
         ma = true;
       });
       lobby.SendMessage(msg);
-      await delay(10);
+      await tu.delayAsync(10);
       assert.isTrue(ma);
     });
     it("SendMessageWithCoolTime test", async () => {
@@ -404,7 +400,7 @@ describe("LobbyTest", function () {
       assert.equal(ma, 1);
       assert.isFalse(lobby.SendMessageWithCoolTime(msg, "tag", 10));
       assert.equal(ma, 1);
-      await delay(15);
+      await tu.delayAsync(15);
       assert.isTrue(lobby.SendMessageWithCoolTime(msg, "tag", 10));
       assert.equal(ma, 2);
       assert.isTrue(lobby.SendMessageWithCoolTime(msg, "tag2", 10));
@@ -425,7 +421,7 @@ describe("LobbyTest", function () {
         mf = true;
       });
       assert.isTrue(lobby.SendMessageWithCoolTime(msg, "tag", 10));
-      await delay(10);
+      await tu.delayAsync(10);
       assert.isTrue(mf);
     });
     it("PlayerChated event", (done) => {
@@ -475,14 +471,14 @@ describe("LobbyTest", function () {
         assert.fail();
       });
       lobby.ReceivedCustomCommand.once(a => {
-        assert.equal(a.authority, 0);
+        assert.isFalse(a.player.isHost);
         assert.equal(a.command, "!hello");
         assert.equal(a.param, "world");
         assert.equal(a.player, players[0]);
         ma = 1;
       });
       ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
-      await delay(5);
+      await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
     it("ReceivedCustomCommand", async () => {
@@ -494,14 +490,14 @@ describe("LobbyTest", function () {
         assert.equal(a.message, msg);
       });
       lobby.ReceivedCustomCommand.once(a => {
-        assert.equal(a.authority, 1);
+        assert.isTrue(a.player.isHost);
         assert.equal(a.command, "!hoge");
         assert.equal(a.param, "piyo");
         assert.equal(a.player, players[0]);
         ma = 1;
       });
       ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
-      await delay(5);
+      await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
   });

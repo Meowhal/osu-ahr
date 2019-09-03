@@ -4,8 +4,9 @@ import { Lobby, Player } from "..";
 import tu from "./TestUtils";
 import { MatchStarter, MatchStarterOption } from '../plugins';
 import { BanchoResponseType } from '../parsers';
+import { Role } from '../Player';
 
-describe.only("MatchStarterTest", function () {
+describe("MatchStarterTest", function () {
   before(function () {
     tu.configMochaAsSilent();
   });
@@ -170,7 +171,7 @@ describe.only("MatchStarterTest", function () {
     it("auth *start test", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
       const players = await tu.AddPlayersAsync(5, ircClient);
-      lobby.option.authorized_users.push(players[0]);
+      lobby.GetOrMakePlayer(players[0]).setRole(Role.Authorized);
       await tu.changeHostAsync(players[1], lobby);
       assert.isFalse(lobby.isMatching);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "*start");
@@ -243,7 +244,7 @@ describe.only("MatchStarterTest", function () {
     it("!start timer from auth player test", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
       const players = await tu.AddPlayersAsync(5, ircClient);
-      lobby.option.authorized_users.push(players[0]);
+      lobby.GetOrMakePlayer(players[0]).setRole(Role.Authorized);
       await tu.changeHostAsync(players[1], lobby);
       assert.isFalse(lobby.isMatching);
       const t = assertBeginTimer(lobby, 30);

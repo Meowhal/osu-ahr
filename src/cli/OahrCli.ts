@@ -1,10 +1,9 @@
-import { Lobby, IIrcClient, LobbyStatus } from "..";
+import {  IIrcClient, LobbyStatus } from "..";
 import * as readline from 'readline';
-import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter } from "../plugins";
 import { parser } from "../parsers";
 import { OahrBase } from "./OahrBase";
+import { Player } from "../ILobby";
 
 const logger = log4js.getLogger("cli");
 
@@ -67,7 +66,7 @@ export class OahrCli extends OahrBase {
 
     lobbyMenu: {
       name: "lobbyMenu",
-      prompt: "[s]say, [i]nfo, [c]lose, [q]uit > ",
+      prompt: "[s]ay, [d]command [i]nfo, [c]lose, [q]uit > ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
@@ -77,6 +76,11 @@ export class OahrCli extends OahrBase {
         switch (l.command) {
           case "s":
             this.lobby.SendMessage(l.arg);
+            break;
+          case "d":
+            if (parser.IsCustomCommand(l.arg)) {              
+              this.lobby.RaiseReceivedCustomCommand(this.lobby.GetPlayer(this.client.nick) as Player, l.arg)
+            }
             break;
           case "i":
             this.displayInfo();

@@ -3,6 +3,7 @@ import { DummyIrcClient } from '../dummies';
 import { Lobby } from "..";
 import tu from "./TestUtils";
 import { MatchAborter, MatchAborterOption } from '../plugins';
+import { Role } from '../Player';
 
 describe("Match Aboter Tests", function () {
   before(function () {
@@ -113,7 +114,7 @@ describe("Match Aboter Tests", function () {
     it("authorized user aborts the match", async () => {
       const { aborter, lobby, ircClient } = await setupAsync(50);
       const players = await tu.AddPlayersAsync(5, ircClient);
-      lobby.option.authorized_users.push(players[1]);
+      lobby.GetOrMakePlayer(players[1]).setRole(Role.Authorized);
       await tu.changeHostAsync(players[0], lobby);
       ircClient.emulateMatchAsync(10);
       const et = tu.assertEventFire(lobby.AbortedMatch, null, 10);

@@ -8,11 +8,12 @@
     }
   },
   "Lobby": {
-    "authorized_users": []
+    "authorized_users": [],
+    "listref_duration": 1000
   },
   "AutoHostSelector": {
-    "show_queue_chars_limit" : 90,
-    "show_queue_cooltime_ms":30000
+    "show_queue_chars_limit": 90,
+    "show_queue_cooltime_ms": 15000
   },
   "HostSkipper": {
     "vote_rate": 0.5,
@@ -25,7 +26,7 @@
   "LobbyTerminator": {
     "terminate_time_ms": 180000
   },
-  "MatchStarter":{
+  "MatchStarter": {
     "vote_rate": 0.75,
     "vote_min": 2
   },
@@ -33,23 +34,23 @@
     "vote_rate": 0.3,
     "vote_min": 2,
     "auto_abort_rate": 0.5,
-    "auto_abort_delay_ms": 25000
+    "auto_abort_delay_ms": 30000
   },
-  "WordCounter":{
-    "periods":[
+  "WordCounter": {
+    "periods": [
       {
-        "symbol":"s",
-        "duration_ms":1000
+        "symbol": "s",
+        "duration_ms": 1000
       },
       {
-        "symbol":"m",
-        "duration_ms":60000
+        "symbol": "m",
+        "duration_ms": 60000
       }
     ],
-    "log_interval_ms": 30000
+    "log_interval_ms": 3600000
   },
   "OahrCli": {
     "invite_users": [],
     "password": ""
-  }  
+  }
 }
