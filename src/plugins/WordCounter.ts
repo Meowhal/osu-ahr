@@ -94,7 +94,7 @@ export class WordCounter extends LobbyPlugin {
     this.samples.push(ns);
     const topIndex = this.periods.reduce((p, a) => a.index < p ? a.index : p, 1000000);
     // 時間切れのサンプルが溜まってきたら捨てる
-    if (this.samples.length / 2 < topIndex) {
+    if (this.samples.length / 2 < topIndex && 100 < this.samples.length) {
       logger.trace(`gc start len:${this.samples.length}, idx:${topIndex}`);
       this.samples = this.samples.slice(topIndex);
       for (let p of this.periods) {
@@ -108,7 +108,7 @@ export class WordCounter extends LobbyPlugin {
     let f = (important ? logger.info : logger.debug).bind(logger);
     f("msg:%s", msg);
     for (let p of this.periods) {
-      f("  %s(%dsec) cpp:%d, wpp:%d", p.symbol, (p.durationMs / 1000).toFixed(2), p.chatsPerPeriod, p.wordsPerPeriod);
+      f(`  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `);
     }
   }
 
@@ -116,7 +116,7 @@ export class WordCounter extends LobbyPlugin {
     let m = "-- Word Counter --";
     for (let p of this.periods) {
       m +=
-        `\n  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cpp:${p.chatsPerPeriod}, cppmax:${p.chatsPerPeriodMax} wpp:${p.wordsPerPeriod}, wppmax:${p.wordsPerPeriodMax} `;
+        `\n  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `;
     }
     return m;
   }
