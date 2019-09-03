@@ -1,5 +1,5 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
+import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -109,7 +109,7 @@ export class HostSkipper extends LobbyPlugin {
 
     if (command == "!skip") {
       if (this.lobby.host == null) return; // ホストがいないなら何もしない
-      if (param != "" && param != this.lobby.host.id) return; // 関係ないユーザーのスキップは無視
+      if (param != "" && escapeUserId(param) != this.lobby.host.escaped_id) return; // 関係ないユーザーのスキップは無視
       this.vote(player);
     } else if (player.isAuthorized) {
       if (command == "*skip") {

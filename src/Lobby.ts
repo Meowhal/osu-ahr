@@ -4,7 +4,6 @@ import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent } from "./libs/events";
 import { MpSettingsParser } from "./parsers/MpSettingsParser";
-import { getIrcConfig } from "./TypedConfig";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -165,7 +164,7 @@ export class Lobby implements ILobby {
       const p = this.GetPlayer(from);
       if (p != null) {
         if (parser.IsCustomCommand(message)) {
-          this.raiseReceivedCustomCommand(p, message);
+          this.RaiseReceivedCustomCommand(p, message);
         }
         this.PlayerChated.emit({ player: p, message });
         chatlogger.trace("%s:%s", p.id, message);
@@ -220,17 +219,15 @@ export class Lobby implements ILobby {
   private checkListRef(message: string) {
     if (this.listRefStart != 0) {
       if (Date.now() < this.listRefStart + this.option.listref_duration) {
-        const p = this.GetPlayer(message);
-        if (p != null) {
-          p.setRole(Role.Referee);
-        }
+        const p = this.GetOrMakePlayer(message);
+        p.setRole(Role.Referee);
       } else {
         this.listRefStart = 0;
       }
     }
   }
 
-  private raiseReceivedCustomCommand(player: Player, message: string): void {
+  RaiseReceivedCustomCommand(player: Player, message: string): void {
     logger.trace("custom command %s:%s", player.id, message);
     if (player.isReferee && message.startsWith("!mp")) return;
     const { command, param } = parser.ParseCustomCommand(message);
@@ -468,7 +465,9 @@ export class Lobby implements ILobby {
         }
         logger.debug("parsed mp settings");
         this.margeMpSettingsResult(this.mpSettingParser);
+        this.SendMessage("!mp listrefs");
         this.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
+
         logger.trace("completed loadLobbySettings");
         this.mpSettingParser = undefined;
         resolve();
@@ -506,6 +505,7 @@ export class Lobby implements ILobby {
   lobby id : ${this.id}
   status : ${this.status}
   players : ${this.players.size}
+  refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.id).join(",")}
   host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
       ;
 
@@ -542,22 +542,4 @@ export class Lobby implements ILobby {
       c.setRole(Role.Referee);
     }
   }
-
-  private botOwnerCache: string | undefined;
-
-  private getPlayerAuthority(player: Player): number {
-    if (this.botOwnerCache == undefined) {
-      this.botOwnerCache = getIrcConfig().nick;
-    }
-    if (player.id == this.botOwnerCache) {
-      return 3;
-    } else if (this.option.authorized_users.includes(player.id)) {
-      return 2;
-    } else if (player == this.host) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
 }

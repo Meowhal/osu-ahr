@@ -39,5 +39,5 @@ export enum Role {
 }
 
 export function escapeUserId(id: string): string {
-  return id.replace(' ', '_');
+  return id.toLowerCase().replace(' ', '_');
 }

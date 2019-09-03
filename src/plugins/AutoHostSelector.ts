@@ -1,5 +1,5 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
+import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -177,13 +177,13 @@ export class AutoHostSelector extends LobbyPlugin {
       logger.error("skipto invalid arguments length");
       return;
     }
-    const to = args[0];
+    const to = escapeUserId(args[0]);
     if (!this.lobby.Includes(to)) {
       logger.error("skipto target dosent exist");
       return;
     }
     let c = 0;
-    while (this.hostQueue[0].id != to) {
+    while (this.hostQueue[0].escaped_id != to) {
       this.rotateQueue();
       if (c++ > 16) {
         logger.error("infinity loop detected");
