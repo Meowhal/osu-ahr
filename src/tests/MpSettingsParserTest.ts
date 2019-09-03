@@ -71,11 +71,11 @@ describe("MpSettingsParserTest", function () {
     assert.isFalse(b);
     b = p.feedLine("Players: 5");
     assert.isFalse(b);
-    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gns ksz          [Host]");
+    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gns ksz         [Host]");
     assert.isFalse(b);
     b = p.feedLine("Slot 2  Not Ready https://osu.ppy.sh/u/10351992 Discuzz         [Hidden, DoubleTime]");
     assert.isFalse(b);
-    b = p.feedLine("Slot 3  Not Ready https://osu.ppy.sh/u/13745792 Seido  sam        ");
+    b = p.feedLine("Slot 3  Not Ready https://osu.ppy.sh/u/13745792 Seido sam       ");
     assert.isFalse(b);
     b = p.feedLine("Slot 4  Not Ready https://osu.ppy.sh/u/7354213 Suitaksas       ");
     assert.isFalse(b);
@@ -92,7 +92,7 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players.length, 5);
     assert.equal(p.players[0].id, "gns ksz");
     assert.equal(p.players[1].id, "Discuzz");
-    assert.equal(p.players[2].id, "Seido  sam");
+    assert.equal(p.players[2].id, "Seido sam");
     assert.equal(p.players[3].id, "Suitaksas");
     assert.equal(p.players[4].id, "-Kasell");
     assert.equal(p.players[0].isHost, true);
@@ -122,15 +122,15 @@ describe("MpSettingsParserTest", function () {
     assert.isFalse(b);
     b = p.feedLine("Players: 5");
     assert.isFalse(b);
-    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gnsksz[aueie]          [Host]");
+    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gnsksz[aueie]   [Host]");
     assert.isFalse(b);
-    b = p.feedLine("Slot 2  Not Ready https://osu.ppy.sh/u/10351992 Discuzz [as]v       [Hidden, DoubleTime]");
+    b = p.feedLine("Slot 2  Not Ready https://osu.ppy.sh/u/10351992 Discuzz [as]v   [Hidden, DoubleTime]");
     assert.isFalse(b);
-    b = p.feedLine("Slot 3  Not Ready https://osu.ppy.sh/u/13745792 Seido sam [quit]        ");
+    b = p.feedLine("Slot 3  Not Ready https://osu.ppy.sh/u/13745792 Sedo sam [quit] ");
     assert.isFalse(b);
-    b = p.feedLine("Slot 4  Not Ready https://osu.ppy.sh/u/7354213 Suit[__]aksas       ");
+    b = p.feedLine("Slot 4  Not Ready https://osu.ppy.sh/u/7354213 Suit[__]aksas   ");
     assert.isFalse(b);
-    b = p.feedLine("Slot 5  Not Ready https://osu.ppy.sh/u/13585495 -K][][a sell         ");
+    b = p.feedLine("Slot 5  Not Ready https://osu.ppy.sh/u/13585495 -K][][a sell    ");
     assert.isTrue(b);
 
     assert.equal(p.name, "5* (´・ω・`) host rotate");
@@ -143,7 +143,7 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players.length, 5);
     assert.equal(p.players[0].id, "gnsksz[aueie]");
     assert.equal(p.players[1].id, "Discuzz [as]v");
-    assert.equal(p.players[2].id, "Seido sam [quit]");
+    assert.equal(p.players[2].id, "Sedo sam [quit]");
     assert.equal(p.players[3].id, "Suit[__]aksas");
     assert.equal(p.players[4].id, "-K][][a sell");
     assert.equal(p.players[0].isHost, true);
@@ -209,5 +209,59 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[1].options.length, 2);
     assert.equal(p.players[1].options[0], "Hidden");
     assert.equal(p.players[1].options[1], "DoubleTime");
+  });
+
+  it("mp settings long name (15 characters)", () => {
+    const p = new MpSettingsParser();
+    let b: boolean = false;
+
+    b = p.feedLine("Room name: 4-5* auto host rotaion, History: https://osu.ppy.sh/mp/54581109");
+    assert.isFalse(b);
+    b = p.feedLine("Beatmap: https://osu.ppy.sh/b/1418503 tofubeats - CANDYYYLAND feat LIZ - Pa's Lam System Remix [Nathan's Extra]");
+    assert.isFalse(b);
+    b = p.feedLine("Team mode: HeadToHead, Win condition: Score");
+    assert.isFalse(b);
+    b = p.feedLine("Active mods: Freemod");
+    assert.isFalse(b);
+    b = p.feedLine("Players: 8");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/x 0123456789abcde ");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 2  No Map    https://osu.ppy.sh/u/x ZhiZhaChn [acv] [Hidden]");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 3  Not Ready https://osu.ppy.sh/u/1 Hot Cocoa       ");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 4  Not Ready https://osu.ppy.sh/u/2 POv2II          ");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 6  Not Ready https://osu.ppy.sh/u/3 MONTBLANC_heart [Host]");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 8  No Map    https://osu.ppy.sh/u/4 NewRecruit_Jack ");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 9  No Map    https://osu.ppy.sh/u/5 ya nunta        ");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 16 Not Ready https://osu.ppy.sh/u/6 Jow             [Hidden]");
+    assert.isTrue(b);
+
+    assert.equal(p.name, "4-5* auto host rotaion");
+    assert.equal(p.history, "https://osu.ppy.sh/mp/54581109");
+    assert.equal(p.beatmapUrl, "https://osu.ppy.sh/b/1418503");
+    assert.equal(p.beatmapTitle, "tofubeats - CANDYYYLAND feat LIZ - Pa's Lam System Remix [Nathan's Extra]");
+    assert.equal(p.teamMode, "HeadToHead");
+    assert.equal(p.winCondition, "Score");
+    assert.equal(p.activeMods, "Freemod");
+    assert.equal(p.players.length, 8);
+    assert.equal(p.players[0].id, "0123456789abcde");
+    assert.equal(p.players[1].id, "ZhiZhaChn [acv]");
+    assert.equal(p.players[2].id, "Hot Cocoa");
+    assert.equal(p.players[3].id, "POv2II");
+    assert.equal(p.players[4].id, "MONTBLANC_heart");
+    assert.equal(p.players[0].isHost, false);
+    assert.equal(p.players[1].isHost, false);
+    assert.equal(p.players[2].isHost, false);
+    assert.equal(p.players[3].isHost, false);
+    assert.equal(p.players[4].isHost, true);
+
+    assert.equal(p.players[1].options.length, 1);
+    assert.equal(p.players[1].options[0], "Hidden");
   });
 });
