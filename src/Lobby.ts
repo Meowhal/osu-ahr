@@ -1,4 +1,4 @@
-import { Player, escapeUserId } from "./Player";
+import { Player, escapeUserId, Role } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
 import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
@@ -8,13 +8,13 @@ import { getIrcConfig } from "./TypedConfig";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
-import { isArray } from "util";
 
 const logger = log4js.getLogger("lobby");
 const chatlogger = log4js.getLogger("chat");
 
 export interface LobbyOption {
-  authorized_users: string[] // 特権ユーザー
+  authorized_users: string[], // 特権ユーザー
+  listref_duration: number,
 }
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
@@ -36,6 +36,7 @@ export class Lobby implements ILobby {
   isMatching: boolean;
   mpSettingParser: MpSettingsParser | undefined;
   plugins: LobbyPlugin[] = [];
+  listRefStart: number;
 
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
@@ -49,7 +50,7 @@ export class Lobby implements ILobby {
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
   PlayerChated = new TypedEvent<{ player: Player, message: string }>();
-  ReceivedCustomCommand = new TypedEvent<{ player: Player, authority: number, command: string, param: string }>();
+  ReceivedCustomCommand = new TypedEvent<{ player: Player, command: string, param: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
   SentMessage = new TypedEvent<string>();
   RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
@@ -68,8 +69,8 @@ export class Lobby implements ILobby {
     this.host = null;
     this.hostPending = null;
     this.isMatching = false;
-
-    this.authorizeIrcUser();
+    this.listRefStart = 0;
+    this.assignCreatorRole();
 
     this.ircClient.on("message", (from, to, message) => {
       if (to == this.channel) {
@@ -96,6 +97,9 @@ export class Lobby implements ILobby {
     } else {
       const nu = new Player(userid);
       this.playersMap.set(eid, nu);
+      if (this.option.authorized_users.includes(userid)) {
+        nu.setRole(Role.Authorized);
+      }
       return nu;
     }
   }
@@ -196,21 +200,44 @@ export class Lobby implements ILobby {
       case BanchoResponseType.AbortedMatch:
         this.RaiseAbortedMatch();
         break;
+      case BanchoResponseType.AddedReferee:
+        this.GetOrMakePlayer(c.params[0]).setRole(Role.Referee);
+        break;
+      case BanchoResponseType.RemovedReferee:
+        this.GetOrMakePlayer(c.params[0]).removeRole(Role.Referee);
+        break;
+      case BanchoResponseType.ListRefs:
+        this.listRefStart = Date.now();
+        break;
       case BanchoResponseType.Unhandled:
+        this.checkListRef(message);
         logger.debug("unhandled bancho response : %s", message);
         break;
     }
     this.RecievedBanchoResponse.emit({ message, response: c });
   }
 
+  private checkListRef(message: string) {
+    if (this.listRefStart != 0) {
+      if (Date.now() < this.listRefStart + this.option.listref_duration) {
+        const p = this.GetPlayer(message);
+        if (p != null) {
+          p.setRole(Role.Referee);
+        }
+      } else {
+        this.listRefStart = 0;
+      }
+    }
+  }
+
   private raiseReceivedCustomCommand(player: Player, message: string): void {
     logger.trace("custom command %s:%s", player.id, message);
+    if (player.isReferee && message.startsWith("!mp")) return;
     const { command, param } = parser.ParseCustomCommand(message);
-    const authority = this.getPlayerAuthority(player);
     if (command == "!info" || command == "!help") {
       this.showInfoMessage();
     }
-    this.ReceivedCustomCommand.emit({ player, authority, command, param });
+    this.ReceivedCustomCommand.emit({ player, command, param });
   }
 
   // #endregion
@@ -219,10 +246,12 @@ export class Lobby implements ILobby {
 
   RaisePlayerJoined(userid: string, slot: number, asHost: boolean = false): void {
     const player = this.GetOrMakePlayer(userid);
+    player.setRole(Role.Player);
     if (!this.players.has(player)) {
       this.players.add(player);
       if (asHost) {
         this.host = player;
+        player.setRole(Role.Host);
       }
       this.PlayerJoined.emit({ player, slot });
     } else {
@@ -233,6 +262,8 @@ export class Lobby implements ILobby {
 
   RaisePlayerLeft(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
+    player.removeRole(Role.Player);
+    player.removeRole(Role.Host);
     if (this.players.has(player)) {
       this.players.delete(player);
       if (this.host == player) {
@@ -263,7 +294,12 @@ export class Lobby implements ILobby {
     } else if (this.hostPending != null) {
       logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.id, userid);
     } // pending == null は有効
+
+    if (this.host != null) {
+      this.host.removeRole(Role.Host);
+    }
     this.host = player;
+    player.setRole(Role.Host);
     this.HostChanged.emit({ succeeded: true, player });
   }
 
@@ -469,7 +505,7 @@ export class Lobby implements ILobby {
     let s = `=== lobby status ===
   lobby id : ${this.id}
   status : ${this.status}
-  players : ${[...this.players].map(p => p.id).join(", ")}
+  players : ${this.players.size}
   host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
       ;
 
@@ -494,18 +530,16 @@ export class Lobby implements ILobby {
   }
 
   // ircでログインしたユーザーに権限を与える
-  private authorizeIrcUser() {
+  private assignCreatorRole() {
     if (!this.ircClient.nick) {
       this.ircClient.once("registered", () => {
-        this.authorizeIrcUser();
+        this.assignCreatorRole();
       });
-    } else if (!this.option.authorized_users.includes(this.ircClient.nick)) {
-      if (!isArray(this.option.authorized_users)) {
-        this.option.authorized_users = [];
-      } else {
-        this.option.authorized_users = Array.from(this.option.authorized_users);
-      }
-      this.option.authorized_users.push(this.ircClient.nick);
+    } else {
+      var c = this.GetOrMakePlayer(this.ircClient.nick);
+      c.setRole(Role.Authorized);
+      c.setRole(Role.Creator);
+      c.setRole(Role.Referee);
     }
   }
 
@@ -515,7 +549,9 @@ export class Lobby implements ILobby {
     if (this.botOwnerCache == undefined) {
       this.botOwnerCache = getIrcConfig().nick;
     }
-    if (this.option.authorized_users.includes(player.id)) {
+    if (player.id == this.botOwnerCache) {
+      return 3;
+    } else if (this.option.authorized_users.includes(player.id)) {
       return 2;
     } else if (player == this.host) {
       return 1;

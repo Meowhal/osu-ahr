@@ -36,7 +36,7 @@ export class MatchAborter extends LobbyPlugin {
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
+    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
   }
 
   // 試合中に抜けた場合
@@ -70,7 +70,7 @@ export class MatchAborter extends LobbyPlugin {
     this.stopTimer();
   }
 
-  private onCustomCommand(player: Player, auth: number, command: string, param: string): void {
+  private onCustomCommand(player: Player, command: string, param: string): void {
     if (!this.lobby.isMatching) return;
     if (command == "!abort") {
       if (player == this.lobby.host) {
@@ -79,7 +79,7 @@ export class MatchAborter extends LobbyPlugin {
       } else {
         this.vote(player);
       }
-    } else if (auth >= 2) {
+    } else if (player.isAuthorized) {
       if (command == "*abort") {
         this.doAbort();
       }

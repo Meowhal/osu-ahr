@@ -30,7 +30,7 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player, a.succeeded));
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.authority, a.command, a.param));
+    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.MatchStarted.on(a => this.onMatchStarted());
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.AllPlayerReady) {
@@ -38,7 +38,6 @@ export class MatchStarter extends LobbyPlugin {
       }
     });
   }
-  
 
   private onPlayerJoined(player: Player) {
     this.voting.AddVoter(player);
@@ -63,28 +62,31 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private onCustomCommand(player: Player, authority: number, command: string, param: string): any {
+  private onCustomCommand(player: Player, command: string, param: string): any {
     if (this.lobby.isMatching) return;
 
-    if (player == this.lobby.host || authority >= 2) {
-      if (command == "!start") {
+    switch (command) {
+      case "!start":
         if (param == "") {
-          this.start();
-        } else if (param.match(/^\d+$/)) {
+          if (player.isHost) {
+            this.start();
+          } else {
+            this.vote(player);
+          }
+        } else if ((player.isHost || player.isAuthorized) && param.match(/^\d+$/)) {
           this.startTimer(parseInt(param));
         }
-        return;
-      } else if (command == "!stop" || command == "!abort") {
-        this.stopTimer();
-        return;
-      }
-    }
-    if (authority >= 2 && command == "*start") {
-      this.start();
-      return;
-    }
-    if (command == "!start") {
-      this.vote(player);
+        break;
+      case "!stop":
+      case "!abort":
+        if (player.isHost || player.isAuthorized) {
+          this.stopTimer();
+        }
+        break;
+      case "*start":
+        if (player.isAuthorized) {
+          this.start();
+        }
     }
   }
 

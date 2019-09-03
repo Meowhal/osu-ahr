@@ -47,6 +47,13 @@ class TestUtils {
     } else {
       assert.equal(host.id, userid);
     }
+    for (let p of lobby.players) {
+      if (p == host) {
+        assert.isTrue(p.isHost);
+      } else {
+        assert.isFalse(p.isHost);
+      }
+    }
   }
 
   async changeHostAsync(id: string, lobby: Lobby): Promise<number> {
@@ -75,10 +82,10 @@ class TestUtils {
    */
   async assertEventFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number = 0): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      let id : NodeJS.Timeout;
+      let id: NodeJS.Timeout;
       if (timeout != 0) {
         id = setTimeout(() => {
-          d.dispose();          
+          d.dispose();
           reject("The event was expected to fire, but it didn't fire");
         }, timeout);
       }
