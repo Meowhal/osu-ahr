@@ -1,3 +1,5 @@
+import { Teams } from "../Player";
+
 /**
  * ircテキストを解析して抽象化するためのクラス
  * テキストの解析とその後の処理を分離し、テストなどを容易にすることが目的。
@@ -7,8 +9,8 @@ export class CommandParser {
   ParseBanchoResponse(message: string): BanchoResponse {
     const m_joined = message.match(/(.+) joined in slot (\d+)( for team (blue|red))?\./);
     if (m_joined) {
-      
-      return makeBanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1], parseInt(m_joined[2]), (m_joined[4] == "blue" ? Teams.Blue : Teams.Red));
+      const team = m_joined[4] == undefined ? Teams.None : m_joined[4] == "blue" ? Teams.Blue : Teams.Red
+      return makeBanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1], parseInt(m_joined[2]), team);
     }
 
     const m_left = message.match(/(.+) left the game\./);
@@ -20,9 +22,9 @@ export class CommandParser {
       return makeBanchoResponse(BanchoResponseType.BeatmapChanging);
     }
 
-    const m_map = message.match(/Beatmap changed to\: .+ \[.+\] \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
+    const m_map = message.match(/Beatmap changed to\: (.+ \[.+\]) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
     if (m_map) {
-      return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[1]);
+      return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[2], m_map[1]);
     }
 
     const m_host = message.match(/(.+) became the host\./);
@@ -285,11 +287,6 @@ function makeBanchoResponse(type: BanchoResponseType, ...params: any[]) {
 export interface BanchoResponse {
   type: BanchoResponseType;
   params: any[];
-}
-
-export enum Teams {
-  Blue,
-  Red,
 }
 
 export const parser = new CommandParser();

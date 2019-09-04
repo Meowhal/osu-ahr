@@ -1,9 +1,8 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../dummies';
-import { Lobby } from "..";
+import { Lobby, Roles } from "..";
 import tu from "./TestUtils";
 import { MatchAborter, MatchAborterOption } from '../plugins';
-import { Role } from '../Player';
 
 describe("Match Aboter Tests", function () {
   before(function () {
@@ -17,7 +16,8 @@ describe("Match Aboter Tests", function () {
       vote_min: 2,
       vote_rate: 0.3,
       auto_abort_delay_ms: timerDelay,
-      auto_abort_rate: 0.5
+      auto_abort_rate: 0.5,
+      auto_abort_do_abort: true,
     };
     const ma = new MatchAborter(li.lobby, option);
     return { aborter: ma, ...li };
@@ -114,7 +114,7 @@ describe("Match Aboter Tests", function () {
     it("authorized user aborts the match", async () => {
       const { aborter, lobby, ircClient } = await setupAsync(50);
       const players = await tu.AddPlayersAsync(5, ircClient);
-      lobby.GetOrMakePlayer(players[1]).setRole(Role.Authorized);
+      lobby.GetOrMakePlayer(players[1]).setRole(Roles.Authorized);
       await tu.changeHostAsync(players[0], lobby);
       ircClient.emulateMatchAsync(10);
       const et = tu.assertEventFire(lobby.AbortedMatch, null, 10);

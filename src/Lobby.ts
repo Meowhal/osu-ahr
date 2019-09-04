@@ -1,4 +1,4 @@
-import { Player, escapeUserId, Role } from "./Player";
+import { Player, escapeUserId, Roles, Teams } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
 import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
@@ -36,6 +36,7 @@ export class Lobby implements ILobby {
   mpSettingParser: MpSettingsParser | undefined;
   plugins: LobbyPlugin[] = [];
   listRefStart: number;
+  map: string;
 
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
@@ -69,6 +70,7 @@ export class Lobby implements ILobby {
     this.hostPending = null;
     this.isMatching = false;
     this.listRefStart = 0;
+    this.map = "";
     this.assignCreatorRole();
 
     this.ircClient.on("message", (from, to, message) => {
@@ -97,7 +99,7 @@ export class Lobby implements ILobby {
       const nu = new Player(userid);
       this.playersMap.set(eid, nu);
       if (this.option.authorized_users.includes(userid)) {
-        nu.setRole(Role.Authorized);
+        nu.setRole(Roles.Authorized);
       }
       return nu;
     }
@@ -191,7 +193,7 @@ export class Lobby implements ILobby {
         this.RaisePlayerFinished(c.params[0], c.params[1], c.params[2]);
         break;
       case BanchoResponseType.PlayerJoined:
-        this.RaisePlayerJoined(c.params[0], c.params[1]);
+        this.RaisePlayerJoined(c.params[0], c.params[1], c.params[2]);
         break;
       case BanchoResponseType.PlayerLeft:
         this.RaisePlayerLeft(c.params[0] as string);
@@ -200,13 +202,26 @@ export class Lobby implements ILobby {
         this.RaiseAbortedMatch();
         break;
       case BanchoResponseType.AddedReferee:
-        this.GetOrMakePlayer(c.params[0]).setRole(Role.Referee);
+        this.GetOrMakePlayer(c.params[0]).setRole(Roles.Referee);
+        logger.trace("AddedReferee : %s", c.params[0]);
         break;
       case BanchoResponseType.RemovedReferee:
-        this.GetOrMakePlayer(c.params[0]).removeRole(Role.Referee);
+        this.GetOrMakePlayer(c.params[0]).removeRole(Roles.Referee);
+        logger.trace("RemovedReferee : %s", c.params[0]);
         break;
       case BanchoResponseType.ListRefs:
         this.listRefStart = Date.now();
+        break;
+      case BanchoResponseType.PlayerMovedSlot:
+        this.GetOrMakePlayer(c.params[0]).slot = c.params[1];
+        logger.trace("slot moved : %s, %d", c.params[0], c.params[1]);
+        break;
+      case BanchoResponseType.TeamChanged:
+        this.GetOrMakePlayer(c.params[0]).team = c.params[1];
+        logger.trace("team changed : %s, %s", c.params[0], Teams[c.params[1]]);
+        break;
+      case BanchoResponseType.BeatmapChanged:
+        this.map = `https://osu.ppy.sh/b/${c.params[0]} ${c.params[1]}`;
         break;
       case BanchoResponseType.Unhandled:
         this.checkListRef(message);
@@ -220,9 +235,11 @@ export class Lobby implements ILobby {
     if (this.listRefStart != 0) {
       if (Date.now() < this.listRefStart + this.option.listref_duration) {
         const p = this.GetOrMakePlayer(message);
-        p.setRole(Role.Referee);
+        p.setRole(Roles.Referee);
+        logger.trace("AddedReferee : %s", p.escaped_id);
       } else {
         this.listRefStart = 0;
+        logger.trace("check list ref ended");
       }
     }
   }
@@ -241,14 +258,16 @@ export class Lobby implements ILobby {
 
   // #region event handling
 
-  RaisePlayerJoined(userid: string, slot: number, asHost: boolean = false): void {
+  RaisePlayerJoined(userid: string, slot: number, team: Teams, asHost: boolean = false): void {
     const player = this.GetOrMakePlayer(userid);
-    player.setRole(Role.Player);
+    player.setRole(Roles.Player);
+    player.slot = slot;
+    player.team = team;
     if (!this.players.has(player)) {
       this.players.add(player);
       if (asHost) {
         this.host = player;
-        player.setRole(Role.Host);
+        player.setRole(Roles.Host);
       }
       this.PlayerJoined.emit({ player, slot });
     } else {
@@ -259,8 +278,8 @@ export class Lobby implements ILobby {
 
   RaisePlayerLeft(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
-    player.removeRole(Role.Player);
-    player.removeRole(Role.Host);
+    player.removeRole(Roles.Player);
+    player.removeRole(Roles.Host);
     if (this.players.has(player)) {
       this.players.delete(player);
       if (this.host == player) {
@@ -293,15 +312,15 @@ export class Lobby implements ILobby {
     } // pending == null は有効
 
     if (this.host != null) {
-      this.host.removeRole(Role.Host);
+      this.host.removeRole(Roles.Host);
     }
     this.host = player;
-    player.setRole(Role.Host);
+    player.setRole(Roles.Host);
     this.HostChanged.emit({ succeeded: true, player });
   }
 
   RaiseMatchStarted(): void {
-    logger.info("match started");
+    logger.info("match started %s", this.map);
     this.isMatching = true;
     this.playersInGame.clear();
     this.players.forEach(p => this.playersInGame.add(p));
@@ -316,7 +335,7 @@ export class Lobby implements ILobby {
     if (!this.players.has(player)) {
       logger.info("未参加のプレイヤーがゲームを終えた: %s", userid);
       this.players.add(player);
-      this.RaisePlayerJoined(userid, 0);
+      this.RaisePlayerJoined(userid, 0, Teams.None);
     }
   }
 
@@ -494,7 +513,7 @@ export class Lobby implements ILobby {
     const temp = Array.from(parser.players);
     const players = (hostidx == -1) ? temp : temp.splice(hostidx).concat(temp);
     players.forEach((v, i) => {
-      this.RaisePlayerJoined(v.id, v.slot, i == hostidx);
+      this.RaisePlayerJoined(v.id, v.slot, v.team, i == hostidx);
     });
   }
 
@@ -503,7 +522,7 @@ export class Lobby implements ILobby {
   GetLobbyStatus(): string {
     let s = `=== lobby status ===
   lobby id : ${this.id}
-  status : ${this.status}
+  status : ${LobbyStatus[this.status]}
   players : ${this.players.size}
   refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.id).join(",")}
   host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
@@ -537,9 +556,9 @@ export class Lobby implements ILobby {
       });
     } else {
       var c = this.GetOrMakePlayer(this.ircClient.nick);
-      c.setRole(Role.Authorized);
-      c.setRole(Role.Creator);
-      c.setRole(Role.Referee);
+      c.setRole(Roles.Authorized);
+      c.setRole(Roles.Creator);
+      c.setRole(Roles.Referee);
     }
   }
 }

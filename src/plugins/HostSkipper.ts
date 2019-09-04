@@ -204,8 +204,8 @@ export class HostSkipper extends LobbyPlugin {
 
   getPluginStatus(): string {
     return `-- Host Skipper --
-      timer : ${this.afkTimer != undefined ? "active" : "---"}
-      skip_vote : ${this.voting.toString()}`;
+  timer : ${this.afkTimer != undefined ? "active" : "---"}
+  skip_vote : ${this.voting.toString()}`;
   }
 
   getInfoMessage(): string[] {

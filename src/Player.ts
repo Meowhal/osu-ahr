@@ -1,35 +1,38 @@
 export class Player {
   id: string;
   escaped_id: string;
-  role: Role = Role.Player;
+  role: Roles = Roles.Player;
+  team: Teams = Teams.None; // いつteammodeに変更されたか検知する方法がないので、正確な情報ではない
+  slot: number = 0;
+
   constructor(id: string) {
     this.id = id;
     this.escaped_id = escapeUserId(id);
   }
-  is(r: Role): boolean {
+  is(r: Roles): boolean {
     return (this.role & r) != 0;
   }
   get isHost(): boolean {
-    return this.is(Role.Host);
+    return this.is(Roles.Host);
   }
   get isAuthorized(): boolean {
-    return this.is(Role.Authorized);
+    return this.is(Roles.Authorized);
   }
   get isReferee(): boolean {
-    return this.is(Role.Referee);
+    return this.is(Roles.Referee);
   }
   get isCreator(): boolean {
-    return this.is(Role.Creator);
+    return this.is(Roles.Creator);
   }
-  setRole(r: Role): void {
+  setRole(r: Roles): void {
     this.role |= r;
   }
-  removeRole(r: Role): void {
+  removeRole(r: Roles): void {
     this.role &= ~r;
   }
 }
 
-export enum Role {
+export enum Roles {
   None = 0,
   Player = 1,
   Host = 2,
@@ -37,6 +40,13 @@ export enum Role {
   Referee = 8,
   Creator = 16
 }
+
+export enum Teams {
+  None,
+  Blue,
+  Red,
+}
+
 
 export function escapeUserId(id: string): string {
   return id.toLowerCase().replace(' ', '_');

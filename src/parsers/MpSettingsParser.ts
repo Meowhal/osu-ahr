@@ -1,10 +1,13 @@
+import { Teams } from "../Player";
+
 export interface PlayerSettings {
   slot: number;
   ready: string;
   profile: string;
   id: string;
   isHost: boolean;
-  options: string[];
+  options: string;
+  team: Teams;
 }
 
 export class MpSettingsParser {
@@ -60,13 +63,17 @@ export class MpSettingsParser {
         throw new Error("unexpected mpsetting response order");
       }
 
+      let team = m[6] == undefined || !m[6].includes("Team") ? Teams.None
+        : m[6].includes("Blue") ? Teams.Blue : Teams.Red
+
       const p = {
         slot: parseInt(m[1]),
         ready: m[2],
         profile: m[3],
         id: m[4].trim(),
         isHost: m[6] == undefined ? false : m[6].includes("Host"),
-        options: m[6] == undefined ? [] : m[6].split(",").map(s => s.trim())
+        team: team,
+        options: m[6] == undefined ? "" : m[6]
       }
       this.players[this.loaded_players] = p;
       this.loaded_players += 1;

@@ -1,6 +1,8 @@
 import { assert } from 'chai';
 import log4js from "log4js";
-import { parser, BanchoResponseType, Teams } from '../parsers';
+import { parser, BanchoResponseType } from '../parsers';
+import { Teams } from '../Player';
+
 describe("CommandParserTest", function () {
   before(function () {
     log4js.configure("config/log_mocha_silent.json");
@@ -68,18 +70,21 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.PlayerJoined);
       assert.equal(v.params[0], "Swgciai");
       assert.equal(v.params[1], 4);
+      assert.equal(v.params[2], Teams.None);
 
       message = "Foet_Mnagyo joined in slot 1.";
       v = parser.ParseBanchoResponse(message);
       assert.equal(v.type, BanchoResponseType.PlayerJoined);
       assert.equal(v.params[0], "Foet_Mnagyo");
       assert.equal(v.params[1], 1);
+      assert.equal(v.params[2], Teams.None);
 
       message = "- Cylcl joined in slot 5.";
       v = parser.ParseBanchoResponse(message);
       assert.equal(v.type, BanchoResponseType.PlayerJoined);
       assert.equal(v.params[0], "- Cylcl");
       assert.equal(v.params[1], 5);
+      assert.equal(v.params[2], Teams.None);
     });
 
     it("player joined team mode test", () => {
@@ -93,6 +98,12 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.PlayerJoined);
       assert.equal(v.params[0], "hmelevsky");
       assert.equal(v.params[1], 8);
+      assert.equal(v.params[2], Teams.Red);
+
+      v = parser.ParseBanchoResponse("Xiux joined in slot 2 for team red.");
+      assert.equal(v.type, BanchoResponseType.PlayerJoined);
+      assert.equal(v.params[0], "Xiux");
+      assert.equal(v.params[1], 2);
       assert.equal(v.params[2], Teams.Red);
     });
 
