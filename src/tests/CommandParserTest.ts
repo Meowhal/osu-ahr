@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import log4js from "log4js";
-import { parser, BanchoResponseType } from '../parsers';
+import { parser, BanchoResponseType, Teams } from '../parsers';
 describe("CommandParserTest", function () {
   before(function () {
     log4js.configure("config/log_mocha_silent.json");
@@ -80,7 +80,20 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.PlayerJoined);
       assert.equal(v.params[0], "- Cylcl");
       assert.equal(v.params[1], 5);
+    });
 
+    it("player joined team mode test", () => {
+      let v = parser.ParseBanchoResponse("Cartist joined in slot 7 for team blue.");
+      assert.equal(v.type, BanchoResponseType.PlayerJoined);
+      assert.equal(v.params[0], "Cartist");
+      assert.equal(v.params[1], 7);
+      assert.equal(v.params[2], Teams.Blue);
+
+      v = parser.ParseBanchoResponse("hmelevsky joined in slot 8 for team red.");
+      assert.equal(v.type, BanchoResponseType.PlayerJoined);
+      assert.equal(v.params[0], "hmelevsky");
+      assert.equal(v.params[1], 8);
+      assert.equal(v.params[2], Teams.Red);
     });
 
     it("player left parse test", () => {
@@ -247,6 +260,19 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 61);
     });
+    it("MpBeganStartTimer test", () => {
+      let v = parser.ParseBanchoResponse("Queued the match to start in 30 seconds");
+      assert.equal(v.type, BanchoResponseType.MPBeganStartTimer);
+      assert.equal(v.params[0], 30);
+
+      v = parser.ParseBanchoResponse("Queued the match to start in 1 second");
+      assert.equal(v.type, BanchoResponseType.MPBeganStartTimer);
+      assert.equal(v.params[0], 1);
+
+      v = parser.ParseBanchoResponse("Queued the match to start in 5 minutes and 40 seconds");
+      assert.equal(v.type, BanchoResponseType.MPBeganStartTimer);
+      assert.equal(v.params[0], 340);
+    });
     it("FinishStartTimer test", () => {
       let v = parser.ParseBanchoResponse("Good luck, have fun!");
       assert.equal(v.type, BanchoResponseType.FinishStartTimer);
@@ -268,6 +294,43 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.Settings);
       v = parser.ParseBanchoResponse("Slot 1  Not Ready https://osu.ppy.sh/u/xxxxxxxx xxxx          [Host]");
       assert.equal(v.type, BanchoResponseType.Settings);
+    });
+    it("roll test", () => {
+      let v = parser.ParseBanchoResponse("Natu rolls 13 point(s)");
+      assert.equal(v.type, BanchoResponseType.Rolled);
+      assert.equal(v.params[0], "Natu");
+      assert.equal(v.params[1], 13);
+
+      v = parser.ParseBanchoResponse("gurdil203 rolls 1 point(s)");
+      assert.equal(v.type, BanchoResponseType.Rolled);
+      assert.equal(v.params[0], "gurdil203");
+      assert.equal(v.params[1], 1);
+
+      v = parser.ParseBanchoResponse("DAE rolls rolls 46 point(s)");
+      assert.equal(v.type, BanchoResponseType.Rolled);
+      assert.equal(v.params[0], "DAE rolls");
+      assert.equal(v.params[1], 46);
+    });
+    it("stats test", () => {
+      let v = parser.ParseBanchoResponse("Stats for (DAEVOTAKU)[https://osu.ppy.sh/u/10933699] is Multiplayer:");
+      assert.equal(v.type, BanchoResponseType.Stats);
+      v = parser.ParseBanchoResponse("Score:    906,297,690 (#203086)");
+      assert.equal(v.type, BanchoResponseType.Stats);
+      v = parser.ParseBanchoResponse("Plays:    3874 (lv76)");
+      assert.equal(v.type, BanchoResponseType.Stats);
+      v = parser.ParseBanchoResponse("Accuracy: 90.06%");
+      assert.equal(v.type, BanchoResponseType.Stats);
+    });
+    it("team change test", () => {
+      let v = parser.ParseBanchoResponse("a6387534 changed to Red");
+      assert.equal(v.type, BanchoResponseType.TeamChanged);
+      assert.equal(v.params[0], "a6387534");
+      assert.equal(v.params[1], Teams.Red);
+
+      v = parser.ParseBanchoResponse("milisaurus changed to Blue");
+      assert.equal(v.type, BanchoResponseType.TeamChanged);
+      assert.equal(v.params[0], "milisaurus");
+      assert.equal(v.params[1], Teams.Blue);
     });
   });
 

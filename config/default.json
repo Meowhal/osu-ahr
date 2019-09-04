@@ -27,7 +27,7 @@
     "terminate_time_ms": 180000
   },
   "MatchStarter": {
-    "vote_rate": 0.75,
+    "vote_rate": 0.45,
     "vote_min": 2
   },
   "MatchAborter": {
