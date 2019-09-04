@@ -504,6 +504,6 @@ describe("LobbyTest", function () {
   it("plugin test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const lp = new DummyLobbyPlugin(lobby);
-    console.log(lobby.GetLobbyStatus());
+    //console.log(lobby.GetLobbyStatus());
   });
 });

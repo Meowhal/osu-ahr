@@ -24,17 +24,18 @@
     "afk_timer_do_skip": false
   },
   "LobbyTerminator": {
-    "terminate_time_ms": 180000
+    "terminate_time_ms": 60000
   },
   "MatchStarter": {
-    "vote_rate": 0.75,
+    "vote_rate": 0.45,
     "vote_min": 2
   },
   "MatchAborter": {
     "vote_rate": 0.3,
     "vote_min": 2,
     "auto_abort_rate": 0.5,
-    "auto_abort_delay_ms": 30000
+    "auto_abort_delay_ms": 30000,
+    "auto_abort_do_abort": false
   },
   "WordCounter": {
     "periods": [

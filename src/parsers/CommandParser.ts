@@ -1,3 +1,5 @@
+import { Teams } from "../Player";
+
 /**
  * ircテキストを解析して抽象化するためのクラス
  * テキストの解析とその後の処理を分離し、テストなどを容易にすることが目的。
@@ -5,9 +7,10 @@
 export class CommandParser {
 
   ParseBanchoResponse(message: string): BanchoResponse {
-    const m_joined = message.match(/(.+) joined in slot (\d+)\./);
+    const m_joined = message.match(/(.+) joined in slot (\d+)( for team (blue|red))?\./);
     if (m_joined) {
-      return makeBanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1], parseInt(m_joined[2]));
+      const team = m_joined[4] == undefined ? Teams.None : m_joined[4] == "blue" ? Teams.Blue : Teams.Red
+      return makeBanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1], parseInt(m_joined[2]), team);
     }
 
     const m_left = message.match(/(.+) left the game\./);
@@ -19,9 +22,9 @@ export class CommandParser {
       return makeBanchoResponse(BanchoResponseType.BeatmapChanging);
     }
 
-    const m_map = message.match(/Beatmap changed to\: .+ \[.+\] \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
+    const m_map = message.match(/Beatmap changed to\: (.+ \[.+\]) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
     if (m_map) {
-      return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[1]);
+      return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[2], m_map[1]);
     }
 
     const m_host = message.match(/(.+) became the host\./);
@@ -116,6 +119,19 @@ export class CommandParser {
       return makeBanchoResponse(BanchoResponseType.BeganStartTimer, secs);
     }
 
+    if (message.startsWith("Queued the match to start in ")) {
+      const m_sec = message.match(/(\d+) seconds?/);
+      const m_min = message.match(/(\d+) minutes?/);
+      let secs = 0;
+      if (m_sec) {
+        secs += parseInt(m_sec[1]);
+      }
+      if (m_min) {
+        secs += parseInt(m_min[1]) * 60;
+      }
+      return makeBanchoResponse(BanchoResponseType.MPBeganStartTimer, secs);
+    }
+
     if (message == "Good luck, have fun!") {
       return makeBanchoResponse(BanchoResponseType.FinishStartTimer);
     }
@@ -136,6 +152,21 @@ export class CommandParser {
       [2019-08-31T16:09:36.892] [DEBUG] irc - @msg  BanchoBot => #mp_54496537: D_am_n
       [2019-08-31T16:09:36.892] [DEBUG] irc - @msg  BanchoBot => #mp_54496537: Gnsksz
       */
+    }
+
+    const m_roll = message.match(/(.+) rolls (\d+) point\(s\)/);
+    if (m_roll) {
+      return makeBanchoResponse(BanchoResponseType.Rolled, m_roll[1], parseInt(m_roll[2]));
+    }
+
+    const m_stat = message.match(/(Stats for \(|Score:\s+\d|Plays:\s+\d|Accuracy:\s+\d)/);
+    if (m_stat) {
+      return makeBanchoResponse(BanchoResponseType.Stats);
+    }
+
+    const m_team_change = message.match(/(.+) changed to (Blue|Red)/);
+    if (m_team_change) {
+      return makeBanchoResponse(BanchoResponseType.TeamChanged, m_team_change[1], (m_team_change[2] == "Blue" ? Teams.Blue : Teams.Red));
     }
 
     return makeBanchoResponse(BanchoResponseType.Unhandled);
@@ -239,10 +270,14 @@ export enum BanchoResponseType {
   RemovedReferee,
   KickedPlayer,
   BeganStartTimer,
+  MPBeganStartTimer,
   FinishStartTimer,
   AbortedStartTimer,
   Settings,
   ListRefs,
+  Rolled,
+  Stats,
+  TeamChanged,
 }
 
 function makeBanchoResponse(type: BanchoResponseType, ...params: any[]) {

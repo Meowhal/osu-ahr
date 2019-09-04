@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { MpSettingsParser } from "../parsers";
 import log4js from "log4js";
+import { Teams } from '../Player';
 
 describe("MpSettingsParserTest", function () {
   before(function () {
@@ -49,12 +50,17 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[2].isHost, false);
     assert.equal(p.players[3].isHost, false);
     assert.equal(p.players[4].isHost, false);
-    assert.equal(p.players[0].options.length, 1);
-    assert.equal(p.players[0].options[0], "Host");
-
-    assert.equal(p.players[1].options.length, 2);
-    assert.equal(p.players[1].options[0], "Hidden");
-    assert.equal(p.players[1].options[1], "DoubleTime");
+ 
+    assert.equal(p.players[0].team, Teams.None);
+    assert.equal(p.players[1].team, Teams.None);
+    assert.equal(p.players[2].team, Teams.None);
+    assert.equal(p.players[3].team, Teams.None);
+    assert.equal(p.players[4].team, Teams.None);
+    assert.equal(p.players[0].options, "Host");
+    assert.equal(p.players[1].options, "Hidden, DoubleTime");
+    assert.equal(p.players[2].options, "");
+    assert.equal(p.players[3].options, "");
+    assert.equal(p.players[4].options, "");
   });
 
   it("mp settings parse with space test", () => {
@@ -100,12 +106,10 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[2].isHost, false);
     assert.equal(p.players[3].isHost, false);
     assert.equal(p.players[4].isHost, false);
-    assert.equal(p.players[0].options.length, 1);
-    assert.equal(p.players[0].options[0], "Host");
+    assert.equal(p.players[0].options, "Host");
+    assert.equal(p.players[0].team, Teams.None);
 
-    assert.equal(p.players[1].options.length, 2);
-    assert.equal(p.players[1].options[0], "Hidden");
-    assert.equal(p.players[1].options[1], "DoubleTime");
+    assert.equal(p.players[1].options, "Hidden, DoubleTime");
   });
 
   it("mp settings parse with blackets test", () => {
@@ -151,12 +155,8 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[2].isHost, false);
     assert.equal(p.players[3].isHost, false);
     assert.equal(p.players[4].isHost, false);
-    assert.equal(p.players[0].options.length, 1);
-    assert.equal(p.players[0].options[0], "Host");
-
-    assert.equal(p.players[1].options.length, 2);
-    assert.equal(p.players[1].options[0], "Hidden");
-    assert.equal(p.players[1].options[1], "DoubleTime");
+    assert.equal(p.players[0].options, "Host");
+    assert.equal(p.players[1].options, "Hidden, DoubleTime");
   });
 
 
@@ -203,12 +203,8 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[2].isHost, false);
     assert.equal(p.players[3].isHost, false);
     assert.equal(p.players[4].isHost, false);
-    assert.equal(p.players[0].options.length, 1);
-    assert.equal(p.players[0].options[0], "Host");
-
-    assert.equal(p.players[1].options.length, 2);
-    assert.equal(p.players[1].options[0], "Hidden");
-    assert.equal(p.players[1].options[1], "DoubleTime");
+    assert.equal(p.players[0].options, "Host");
+    assert.equal(p.players[1].options, "Hidden, DoubleTime");
   });
 
   it("mp settings long name (15 characters)", () => {
@@ -261,7 +257,61 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[3].isHost, false);
     assert.equal(p.players[4].isHost, true);
 
-    assert.equal(p.players[1].options.length, 1);
-    assert.equal(p.players[1].options[0], "Hidden");
+    assert.equal(p.players[1].options, "Hidden");
+    assert.equal(p.players[4].options, "Host");
+    assert.equal(p.players[7].options, "Hidden");
+  });
+
+  it("mp settings host and mods", () => {
+    const p = new MpSettingsParser();
+    let b: boolean = false;
+
+    b = p.feedLine("Room name: ahr test, History: https://osu.ppy.sh/mp/54598622");
+    assert.isFalse(b);
+    b = p.feedLine("Beatmap: https://osu.ppy.sh/b/86920 SID - Ranbu no Melody (TV Size) [Happy's Insane]");
+    assert.isFalse(b);
+    b = p.feedLine("Team mode: HeadToHead, Win condition: Score");
+    assert.isFalse(b);
+    b = p.feedLine("Active mods: DoubleTime, Freemod");
+    assert.isFalse(b);
+    b = p.feedLine("Players: 1");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gnsksz          [Host / Hidden, HardRock]");
+    assert.isTrue(b);
+   
+    assert.equal(p.teamMode, "HeadToHead");
+    assert.equal(p.winCondition, "Score");
+    assert.equal(p.activeMods, "DoubleTime, Freemod");
+    assert.equal(p.players.length, 1);
+    assert.equal(p.players[0].id, "gnsksz");
+    assert.equal(p.players[0].isHost, true);
+    assert.equal(p.players[0].options, "Host / Hidden, HardRock");
+  });
+
+  it("mp settings team", () => {
+    const p = new MpSettingsParser();
+    let b: boolean = false;
+
+    b = p.feedLine("Room name: ahr test, History: https://osu.ppy.sh/mp/54598622");
+    assert.isFalse(b);
+    b = p.feedLine("Beatmap: https://osu.ppy.sh/b/86920 SID - Ranbu no Melody (TV Size) [Happy's Insane]");
+    assert.isFalse(b);
+    b = p.feedLine("Team mode: TeamVs, Win condition: Score");
+    assert.isFalse(b);
+    b = p.feedLine("Active mods: DoubleTime, Freemod");
+    assert.isFalse(b);
+    b = p.feedLine("Players: 1");
+    assert.isFalse(b);
+    b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gnsksz          [Host / Team Blue / Hidden, HardRock]");
+    assert.isTrue(b);
+   
+    assert.equal(p.teamMode, "TeamVs");
+    assert.equal(p.winCondition, "Score");
+    assert.equal(p.activeMods, "DoubleTime, Freemod");
+    assert.equal(p.players.length, 1);
+    assert.equal(p.players[0].id, "gnsksz");
+    assert.equal(p.players[0].isHost, true);
+    assert.equal(p.players[0].options, "Host / Team Blue / Hidden, HardRock");
+    assert.equal(p.players[0].team, Teams.Blue);
   });
 });

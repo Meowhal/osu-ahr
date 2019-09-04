@@ -11,6 +11,7 @@ export interface MatchAborterOption {
   vote_min: number;　// 最低投票数
   auto_abort_rate: number; // 何割終了したらアボートタイマーを起動するか？
   auto_abort_delay_ms: number; // 試合終了後のアボート実行までの猶予時間
+  auto_abort_do_abort: boolean; // 実際にアボートを実行するか
 }
 
 const defaultOption = config.get<MatchAborterOption>("MatchAborter");
@@ -139,9 +140,22 @@ export class MatchAborter extends LobbyPlugin {
     this.abortTimer = setTimeout(() => {
       logger.trace("abort timer action");
       if (this.abortTimer != null) {
-        this.doAbort();
+        this.doAutoAbort();
       }
     }, this.option.auto_abort_delay_ms);
+  }
+
+  private doAutoAbort(): void {
+    const playersStillPlaying = Array.from(this.lobby.playersInGame).filter(v => !this.lobby.playersFinished.has(v));
+    if (this.option.auto_abort_do_abort) {
+      this.doAbort();
+    } else {
+      this.lobby.SendMessage("bot : if the game is stuck, abort the game with !abort vote.");
+    }
+
+    for (let p of playersStillPlaying) {
+      this.lobby.SendMessage(`!stat ${p.id}`);
+    }
   }
 
   private stopTimer(): void {
@@ -154,8 +168,8 @@ export class MatchAborter extends LobbyPlugin {
 
   getPluginStatus(): string {
     return `-- Match Aborter --
-      timer : ${this.abortTimer != null ? "active" : "---"}
-      vote : ${this.voting.toString()}`;
+  timer : ${this.abortTimer != null ? "active" : "---"}
+  vote : ${this.voting.toString()}`;
   }
 
   getInfoMessage(): string[] {
