@@ -273,15 +273,15 @@ describe("CommandParserTest", function () {
     });
     it("MpBeganStartTimer test", () => {
       let v = parser.ParseBanchoResponse("Queued the match to start in 30 seconds");
-      assert.equal(v.type, BanchoResponseType.MPBeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.MpBeganStartTimer);
       assert.equal(v.params[0], 30);
 
       v = parser.ParseBanchoResponse("Queued the match to start in 1 second");
-      assert.equal(v.type, BanchoResponseType.MPBeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.MpBeganStartTimer);
       assert.equal(v.params[0], 1);
 
       v = parser.ParseBanchoResponse("Queued the match to start in 5 minutes and 40 seconds");
-      assert.equal(v.type, BanchoResponseType.MPBeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.MpBeganStartTimer);
       assert.equal(v.params[0], 340);
     });
     it("FinishStartTimer test", () => {

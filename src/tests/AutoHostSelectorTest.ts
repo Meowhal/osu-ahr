@@ -39,15 +39,12 @@ describe("AutoHostSelectorTest", function () {
     }
   }
 
-  describe("setup tests", function () {
-    it("constructor test", async () => {
-      const { selector } = await prepareSelector();
-      assertStateIs("s0", selector);
-    });
+  it("constructor test", async () => {
+    const { selector } = await prepareSelector();
+    assertStateIs("s0", selector);
   });
-
+  
   describe("state transition tests", function () {
-
     it("s0 -> h test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       assertStateIs("s0", selector);

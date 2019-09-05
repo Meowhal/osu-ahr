@@ -1,8 +1,5 @@
-import { Lobby, IIrcClient } from "..";
-import config from "config";
+import { IIrcClient } from "..";
 import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter } from "../plugins";
-import { parser } from "../parsers";
 import { OahrBase } from "./OahrBase";
 
 const logger = log4js.getLogger("cli");
@@ -26,10 +23,10 @@ export class OahrNohup extends OahrBase {
           process.exit(1);
           break;
       }
-    } catch(e) {
+    } catch (e) {
       logger.error(e);
       process.exit(1);
     }
-    
+
   }
 }

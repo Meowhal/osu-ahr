@@ -88,6 +88,7 @@ typings/
 .dynamodb/
 
 # custom settings
+data/
 dist/
 irc-log/
 config/development.json

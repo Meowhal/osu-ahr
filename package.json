@@ -20,11 +20,13 @@
     "@types/node": "^12.0.8",
     "config": "^3.1.0",
     "irc": "^0.5.2",
-    "log4js": "^4.4.0"
+    "log4js": "^4.4.0",
+    "nedb": "^1.8.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.7",
+    "@types/nedb": "^1.8.8",
     "chai": "^4.2.0",
     "cross-env": "^5.2.0",
     "mocha": "^6.1.4",

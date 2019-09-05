@@ -129,7 +129,7 @@ export class CommandParser {
       if (m_min) {
         secs += parseInt(m_min[1]) * 60;
       }
-      return makeBanchoResponse(BanchoResponseType.MPBeganStartTimer, secs);
+      return makeBanchoResponse(BanchoResponseType.MpBeganStartTimer, secs);
     }
 
     if (message == "Good luck, have fun!") {
@@ -270,7 +270,7 @@ export enum BanchoResponseType {
   RemovedReferee,
   KickedPlayer,
   BeganStartTimer,
-  MPBeganStartTimer,
+  MpBeganStartTimer,
   FinishStartTimer,
   AbortedStartTimer,
   Settings,

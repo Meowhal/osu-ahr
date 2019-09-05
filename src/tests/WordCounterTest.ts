@@ -4,7 +4,7 @@ import { Lobby, Player } from "..";
 import tu from "./TestUtils";
 import { WordCounter, WordCounterOption, WordCounterPeriod } from '../plugins';
 
-describe("CommandParserTest", function () {
+describe("WordCounter Tests", function () {
   before(function () {
     tu.configMochaAsSilent();
   });
@@ -27,7 +27,6 @@ describe("CommandParserTest", function () {
   }
 
   describe("single period tests", function () {
-
     it("info count", async () => {
       const { counter, lobby, ircClient } = await setup();
       const players = await tu.AddPlayersAsync(3, ircClient);
@@ -111,7 +110,7 @@ describe("CommandParserTest", function () {
     });
   });
   describe("multi periods tests", function () {
-    it("period test", async () => {      
+    it("period test", async () => {
       const def_periods = [
         { symbol: "a", duration_ms: 10 },
         { symbol: "b", duration_ms: 100 }
@@ -149,7 +148,7 @@ describe("CommandParserTest", function () {
       assertPeriod(counter.periods[1], 100, 100, 1200, 1200);
       assertPeriod(counter.periods[2], 100, 100, 1200, 1200);
       assert.equal(counter.samples.length, 100);
-      
+
       counter.update("abcdef", 30);
       assertPeriod(counter.periods[0], 1, 100, 6, 1200);
       assertPeriod(counter.periods[1], 101, 101, 1206, 1206);
@@ -178,5 +177,4 @@ describe("CommandParserTest", function () {
     assert.equal(counter.periods.length, 0);
     counter.update("test", Date.now());
   });
-
 });

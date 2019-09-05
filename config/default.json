@@ -50,6 +50,10 @@
     ],
     "log_interval_ms": 3600000
   },
+  "Recorder": {
+    "path_player": "data/player.nedb",
+    "path_map": "data/map.nedb"
+  },
   "OahrCli": {
     "invite_users": [],
     "password": ""

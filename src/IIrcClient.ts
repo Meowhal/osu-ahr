@@ -48,11 +48,12 @@ export function logIrcEvent(client: IIrcClient) {
   client.on('notice', function (from, to, message) {
     ircLogger.debug('@notice  %s => %s: %s', from, to, message);
   });
+  /*
   if (!(client instanceof DummyIrcClient)) {
     client.on('sentMessage', function (to, message) {
       ircLogger.debug(`@sent bot => ${to}: ${message}`);
     });
-  }
+  }*/
 }
 
 export function logPrivateMessage(client:IIrcClient) {

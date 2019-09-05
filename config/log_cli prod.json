@@ -21,10 +21,6 @@
       "type": "file",
       "filename": "logs/irc.log"
     },
-    "file_app": {
-      "type": "file",
-      "filename": "logs/app.log"
-    },
     "file_chat": {
       "type": "file",
       "filename": "logs/chat.log"
@@ -51,62 +47,6 @@
         "console_f",
         "file_all_f",
         "file_irc"
-      ],
-      "level": "debug"
-    },
-    "lobby": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
-      ],
-      "level": "debug"
-    },
-    "plugin": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
-      ],
-      "level": "debug"
-    },
-    "autoHostSelector": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
-      ],
-      "level": "debug"
-    },
-    "hostSkipper": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
-      ],
-      "level": "debug"
-    },
-    "lobbyTerminator": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
-      ],
-      "level": "debug"
-    },
-    "matchStarter": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
-      ],
-      "level": "debug"
-    },
-    "matchAborter": {
-      "appenders": [
-        "console_f",
-        "file_all_f",
-        "file_app"
       ],
       "level": "debug"
     },

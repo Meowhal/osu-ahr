@@ -5,3 +5,4 @@ export * from "./HostSkipper";
 export * from "./LobbyTerminator";
 export * from "./MatchAborter";
 export * from "./WordCounter";
+export * from "./Recorder";

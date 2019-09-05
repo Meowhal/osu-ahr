@@ -1,8 +1,7 @@
-import { Player } from "./Player";
+import { Player, Teams } from "./Player";
 import { TypedEvent } from "./libs/events";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import { BanchoResponse } from "./parsers";
-export { Player }
 
 // BanchoBotとの対話を抽象化する
 // channelへの接続管理と、トーナメントコマンドの実行
@@ -34,10 +33,10 @@ export interface ILobby {
   CloseLobbyAsync(): Promise<void>;
   LoadLobbySettingsAsync(): Promise<void>;
 
-  PlayerJoined: TypedEvent<{ player: Player, slot: number }>;
+  PlayerJoined: TypedEvent<{ player: Player, slot: number, team: Teams }>;
   PlayerLeft: TypedEvent<Player>;
   HostChanged: TypedEvent<{ succeeded: boolean, player: Player }>;
-  MatchStarted: TypedEvent<void>;
+  MatchStarted: TypedEvent<{ mapId: number, mapTitle: string }>;
   PlayerFinished: TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>;
   MatchFinished: TypedEvent<void>;
   AbortedMatch: TypedEvent<{ playersFinished: number, playersInGame: number }>;

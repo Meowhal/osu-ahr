@@ -36,14 +36,15 @@ export class Lobby implements ILobby {
   mpSettingParser: MpSettingsParser | undefined;
   plugins: LobbyPlugin[] = [];
   listRefStart: number;
-  map: string;
+  mapTitle: string;
+  mapId: number;
 
   // Events
-  PlayerJoined = new TypedEvent<{ player: Player; slot: number; }>();
+  PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
   PlayerLeft = new TypedEvent<Player>();
   HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
   UserNotFound = new TypedEvent<void>();
-  MatchStarted = new TypedEvent<void>();
+  MatchStarted = new TypedEvent<{ mapId: number, mapTitle: string }>();
   PlayerFinished = new TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>();
   MatchFinished = new TypedEvent<void>();
   AbortedMatch = new TypedEvent<{ playersFinished: number, playersInGame: number }>();
@@ -70,7 +71,8 @@ export class Lobby implements ILobby {
     this.hostPending = null;
     this.isMatching = false;
     this.listRefStart = 0;
-    this.map = "";
+    this.mapTitle = "";
+    this.mapId = 0;
     this.assignCreatorRole();
 
     this.ircClient.on("message", (from, to, message) => {
@@ -138,6 +140,7 @@ export class Lobby implements ILobby {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
       this.SentMessage.emit(message);
+      chatlogger.trace("bot:%s", message);
     }
   }
 
@@ -221,7 +224,8 @@ export class Lobby implements ILobby {
         logger.trace("team changed : %s, %s", c.params[0], Teams[c.params[1]]);
         break;
       case BanchoResponseType.BeatmapChanged:
-        this.map = `https://osu.ppy.sh/b/${c.params[0]} ${c.params[1]}`;
+        this.mapId = c.params[0];
+        this.mapTitle = c.params[1];
         break;
       case BanchoResponseType.Unhandled:
         this.checkListRef(message);
@@ -269,7 +273,7 @@ export class Lobby implements ILobby {
         this.host = player;
         player.setRole(Roles.Host);
       }
-      this.PlayerJoined.emit({ player, slot });
+      this.PlayerJoined.emit({ player, slot, team });
     } else {
       logger.warn("参加済みのプレイヤーが再度参加した: %s", userid);
       this.UnexpectedAction.emit(new Error("unexpected join"));
@@ -320,12 +324,12 @@ export class Lobby implements ILobby {
   }
 
   RaiseMatchStarted(): void {
-    logger.info("match started %s", this.map);
+    logger.info(`match started : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
     this.isMatching = true;
     this.playersInGame.clear();
     this.players.forEach(p => this.playersInGame.add(p));
     this.playersFinished.clear();
-    this.MatchStarted.emit();
+    this.MatchStarted.emit({ mapId: this.mapId, mapTitle: this.mapTitle });
   }
 
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean): void {

@@ -1,9 +1,8 @@
-import {  IIrcClient, LobbyStatus } from "..";
+import { IIrcClient, LobbyStatus, Player } from "..";
 import * as readline from 'readline';
 import log4js from "log4js";
 import { parser } from "../parsers";
 import { OahrBase } from "./OahrBase";
-import { Player } from "../ILobby";
 
 const logger = log4js.getLogger("cli");
 
@@ -78,7 +77,7 @@ export class OahrCli extends OahrBase {
             this.lobby.SendMessage(l.arg);
             break;
           case "d":
-            if (parser.IsCustomCommand(l.arg)) {              
+            if (parser.IsCustomCommand(l.arg)) {
               this.lobby.RaiseReceivedCustomCommand(this.lobby.GetPlayer(this.client.nick) as Player, l.arg)
             }
             break;
