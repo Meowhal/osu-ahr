@@ -201,6 +201,7 @@ sudo kill [PID]
 - 再起動時現在のホストに!mp host が発行される
 - 試合中にEnterした場合正常に動作する？
 ## wip
+- lobbyのplayersfinishedやplayersingameはplayerクラスにgamestatusというプロパティをもたせて管理したほうが良い.
 - team mode でのmp settings
 ## done
 - Team modeになるとユーザー参加を検知できない

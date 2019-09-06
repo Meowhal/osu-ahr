@@ -1,5 +1,5 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
+import { Player, PlayerStatus } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -110,13 +110,13 @@ export class MatchAborter extends LobbyPlugin {
   /** 投票の必要数 */
   get voteRequired(): number {
     return Math.ceil(Math.max(
-      this.lobby.playersInGame.size * this.option.vote_rate,
+      this.lobby.playersInGame * this.option.vote_rate,
       this.option.vote_min));
   }
 
   private checkAutoAbort(): void {
     if (this.abortTimer == null) {
-      if (this.autoAbortRequired <= this.lobby.playersFinished.size) { // 半数以上終了したらタイマー起動
+      if (this.autoAbortRequired <= this.lobby.playersFinished) { // 半数以上終了したらタイマー起動
         this.startTimer();
       }
     }
@@ -124,7 +124,7 @@ export class MatchAborter extends LobbyPlugin {
 
   get autoAbortRequired(): number {
     return Math.ceil(
-      this.lobby.playersInGame.size * this.option.auto_abort_rate);
+      this.lobby.playersInGame * this.option.auto_abort_rate);
   }
 
   private doAbort(): void {
@@ -146,7 +146,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private doAutoAbort(): void {
-    const playersStillPlaying = Array.from(this.lobby.playersInGame).filter(v => !this.lobby.playersFinished.has(v));
+    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.status == PlayerStatus.InGame);
     if (this.option.auto_abort_do_abort) {
       this.doAbort();
     } else {

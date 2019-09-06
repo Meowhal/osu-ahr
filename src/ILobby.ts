@@ -15,8 +15,8 @@ export interface ILobby {
   host: Player | null;
   hostPending: Player | null;
   playersMap: Map<string, Player>;
-  playersFinished: Set<Player>;
-  playersInGame: Set<Player>;
+  playersFinished: number;
+  playersInGame: number;
   isMatching: boolean;
   plugins: LobbyPlugin[];
 

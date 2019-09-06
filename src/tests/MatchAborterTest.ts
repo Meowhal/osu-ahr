@@ -142,12 +142,12 @@ describe("Match Aboter Tests", function () {
       ircClient.emulateMatchAsync(100);
       const et = tu.assertEventFire(lobby.AbortedMatch, null, 100);
       assert.equal(aborter.voteRequired, 2);
-      assert.equal(lobby.playersInGame.size, 6);
+      assert.equal(lobby.playersInGame, 6);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!abort");
       assert.equal(aborter.voting.count, 1);
 
       await ircClient.emulateAddPlayerAsync("tom");
-      assert.equal(lobby.playersInGame.size, 6);
+      assert.equal(lobby.playersInGame, 6);
       assert.equal(aborter.voteRequired, 2);
 
       await ircClient.emulateMessageAsync(players[2], ircClient.channel, "!abort");

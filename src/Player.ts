@@ -4,7 +4,7 @@ export class Player {
   role: Roles = Roles.Player;
   team: Teams = Teams.None; // いつteammodeに変更されたか検知する方法がないので、正確な情報ではない
   slot: number = 0;
-
+  status: PlayerStatus = PlayerStatus.None;
   constructor(id: string) {
     this.id = id;
     this.escaped_id = escapeUserId(id);
@@ -47,6 +47,12 @@ export enum Teams {
   Red,
 }
 
+export enum PlayerStatus {
+  None,
+  InLobby,
+  InGame,
+  Finished,
+}
 
 export function escapeUserId(id: string): string {
   return id.toLowerCase().replace(' ', '_');

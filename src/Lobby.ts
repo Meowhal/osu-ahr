@@ -1,4 +1,4 @@
-import { Player, escapeUserId, Roles, Teams } from "./Player";
+import { Player, escapeUserId, Roles, Teams, PlayerStatus } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
 import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
@@ -28,8 +28,6 @@ export class Lobby implements ILobby {
   channel: string | undefined;
   status: LobbyStatus;
   players: Set<Player>;
-  playersFinished: Set<Player>;
-  playersInGame: Set<Player>;
   ircClient: IIrcClient;
   playersMap: Map<string, Player>;
   isMatching: boolean;
@@ -63,8 +61,6 @@ export class Lobby implements ILobby {
     this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
     this.status = LobbyStatus.Standby;
     this.players = new Set();
-    this.playersFinished = new Set();
-    this.playersInGame = new Set();
     this.playersMap = new Map();
     this.ircClient = ircClient;
     this.host = null;
@@ -88,6 +84,41 @@ export class Lobby implements ILobby {
         this.status = LobbyStatus.Left;
       }
     });
+  }
+
+  get playersFinished(): number {
+    let i = 0;
+    for (let p of this.players) {
+      if (p.status == PlayerStatus.Finished) i++;
+    }
+    return i;
+  }
+
+  get playersInGame(): number {
+    let i = 0;
+    for (let p of this.players) {
+      if (p.status == PlayerStatus.Finished || p.status == PlayerStatus.InGame) i++;
+    }
+    return i;
+  }
+
+  countPlayersStatus(): { inGame: number, finished: number, inlobby: number, total: number } {
+    const r = { inGame: 0, finished: 0, inlobby: 0, total: this.players.size };
+    for (let p of this.players) {
+      switch (p.status) {
+        case PlayerStatus.InLobby:
+          r.inlobby++;
+          break;
+        case PlayerStatus.InGame:
+          r.inGame++;
+          break;
+        case PlayerStatus.Finished:
+          r.finished++;
+          break;
+      }
+    }
+    r.inGame += r.finished;
+    return r;
   }
 
   // useridからプレイヤーオブジェクトを取得する
@@ -267,6 +298,8 @@ export class Lobby implements ILobby {
     player.setRole(Roles.Player);
     player.slot = slot;
     player.team = team;
+    player.status = PlayerStatus.InLobby;
+
     if (!this.players.has(player)) {
       this.players.add(player);
       if (asHost) {
@@ -284,6 +317,8 @@ export class Lobby implements ILobby {
     const player = this.GetOrMakePlayer(userid);
     player.removeRole(Roles.Player);
     player.removeRole(Roles.Host);
+    player.status = PlayerStatus.None;
+
     if (this.players.has(player)) {
       this.players.delete(player);
       if (this.host == player) {
@@ -291,9 +326,6 @@ export class Lobby implements ILobby {
       }
       if (this.hostPending == player) {
         this.hostPending = null;
-      }
-      if (this.isMatching) {
-        this.playersInGame.delete(player);
       }
       this.PlayerLeft.emit(player);
     } else {
@@ -326,19 +358,17 @@ export class Lobby implements ILobby {
   RaiseMatchStarted(): void {
     logger.info(`match started : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
     this.isMatching = true;
-    this.playersInGame.clear();
-    this.players.forEach(p => this.playersInGame.add(p));
-    this.playersFinished.clear();
+    this.players.forEach(p => p.status = PlayerStatus.InGame);
     this.MatchStarted.emit({ mapId: this.mapId, mapTitle: this.mapTitle });
   }
 
   RaisePlayerFinished(userid: string, score: number, isPassed: boolean): void {
     const player = this.GetOrMakePlayer(userid);
-    this.playersFinished.add(player);
-    this.PlayerFinished.emit({ player, score, isPassed, playersFinished: this.playersFinished.size, playersInGame: this.playersInGame.size });
+    player.status = PlayerStatus.Finished;
+    const sc = this.countPlayersStatus();
+    this.PlayerFinished.emit({ player, score, isPassed, playersFinished: sc.finished, playersInGame: sc.inGame });
     if (!this.players.has(player)) {
-      logger.info("未参加のプレイヤーがゲームを終えた: %s", userid);
-      this.players.add(player);
+      logger.warn("未参加のプレイヤーがゲームを終えた: %s", userid);
       this.RaisePlayerJoined(userid, 0, Teams.None);
     }
   }
@@ -346,13 +376,16 @@ export class Lobby implements ILobby {
   RaiseMatchFinished(): void {
     logger.info("match finished");
     this.isMatching = false;
+    this.players.forEach(p => p.status = PlayerStatus.InLobby);
     this.MatchFinished.emit();
   }
 
   RaiseAbortedMatch(): void {
-    logger.info("match aborted %d / %d", this.playersFinished.size, this.playersInGame.size);
+    const sc = this.countPlayersStatus();
+    logger.info("match aborted %d / %d", sc.finished, sc.inGame);
     this.isMatching = false;
-    this.AbortedMatch.emit({ playersFinished: this.playersFinished.size, playersInGame: this.playersInGame.size });
+    this.players.forEach(p => p.status = PlayerStatus.InLobby);
+    this.AbortedMatch.emit({ playersFinished: sc.finished, playersInGame: sc.inGame });
   }
 
   RaiseNetError(err: Error): void {
