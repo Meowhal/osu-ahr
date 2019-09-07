@@ -1,7 +1,7 @@
 {
   "irc": {
     "server": "irc.ppy.sh",
-    "nick": "your account name",
+    "nick": "your account id",
     "opt": {
       "port": 6667,
       "password": "you can get password from 'https://osu.ppy.sh/p/irc'"

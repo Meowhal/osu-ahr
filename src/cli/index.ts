@@ -1,5 +1,5 @@
 import { OahrCli } from './OahrCli';
-import { OahrNohup } from "./OahrNohup";
+import { OahrHeadless } from "./OahrHeadless";
 import * as irc from '../libs/irc';
 import { logIrcEvent } from "..";
 import { getIrcConfig } from "../TypedConfig";
@@ -7,20 +7,17 @@ import log4js from "log4js";
 import { logPrivateMessage } from '../IIrcClient';
 const logger = log4js.getLogger("cli");
 
-if (process.env.NODE_ENV === 'production') {
-  log4js.configure("./config/log_cli_prod.json");
-} else {
-  log4js.configure("./config/log_cli_dev.json");
-}
+const config_path = (process.env.NODE_ENV === 'production')
+  ? "./config/log_cli_prod.json"
+  : "./config/log_cli_dev.json";
+
+log4js.configure(config_path);
 
 const c = getIrcConfig();
-if (c.nick == "your account name" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
-  logger.error("you need to enter your account name and password to the config file. ")
-  if (process.env.NODE_ENV === 'production') {
-    logger.error("copy config/default.json to config/production.json, and enter your account and password.");
-  } else {
-    logger.error("copy config/default.json to config/development.json, and enter your account and password.");
-  }
+if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
+  logger.error("you must enter your account name and irc password in the config file. ");
+  logger.error("you can get the password from 'https://osu.ppy.sh/p/irc' ");
+  logger.error("Copy config/default.json to %s, and enter your id and irc password.", config_path);
   process.exit(1);
 }
 
@@ -32,11 +29,12 @@ client.on("error", err => {
     process.exit(1);
   }
 });
+
 logIrcEvent(client);
 logPrivateMessage(client);
 
 if (process.argv.length > 2) {
-  const oahr = new OahrNohup(client);
+  const oahr = new OahrHeadless(client);
   const command = process.argv[2];
   const arg = process.argv.slice(3).join(" ");
   oahr.startApp(command, arg);

@@ -4,7 +4,7 @@ import { OahrBase } from "./OahrBase";
 
 const logger = log4js.getLogger("cli");
 
-export class OahrNohup extends OahrBase {
+export class OahrHeadless extends OahrBase {
 
   constructor(client: IIrcClient) {
     super(client);
