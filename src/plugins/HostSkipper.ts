@@ -1,10 +1,10 @@
 import { ILobby } from "../ILobby";
 import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
-import log4js from "log4js";
 import { VoteCounter } from "./VoteCounter";
 import { BanchoResponseType } from "../parsers";
+import config from "config";
+import log4js from "log4js";
 const logger = log4js.getLogger("hostSkipper");
 
 export interface HostSkipperOption {
@@ -129,15 +129,13 @@ export class HostSkipper extends LobbyPlugin {
       logger.debug("vote from %s was ignored, already skipped", player.id);
     } else if (this.elapsed < this.option.vote_delay_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
-      //this.lobby.SendMessage("bot : skip vote was ignored due to cool time. try again.");
     } else if (player.isHost) {
       logger.debug("host(%s) sent !skip command", player.id);
-      //this.lobby.SendMessage("bot : Accepted !skip from current host.");
       this.doSkip();
     } else {
       if (this.voting.Vote(player)) {
         logger.trace("accept skip request from %s", player.id);
-        this.checkSkipCount();
+        this.checkSkipCount(true);
       } else {
         logger.debug("vote from %s was ignored, double vote", player.id);
       }
@@ -145,8 +143,8 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   // スキップ状況を確認して、必要数に達している場合は
-  private checkSkipCount(): void {
-    if (this.voting.count != 0) {
+  private checkSkipCount(showMessage: boolean = false): void {
+    if (this.voting.count != 0 && showMessage) {
       this.lobby.SendMessageWithCoolTime(`bot : Host skip progress: ${this.voting.toString()}`, "checkSkipCount", 5000);
     }
     if (this.voting.passed) {
@@ -169,7 +167,6 @@ export class HostSkipper extends LobbyPlugin {
     this.stopTimer();
     this.sendPluginMessage("skipto", [userid]);
   }
-
 
   restart(): void {
     this.voting.Clear();

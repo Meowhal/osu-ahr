@@ -50,7 +50,7 @@ export enum Teams {
 export enum PlayerStatus {
   None,
   InLobby,
-  InGame,
+  Playing,
   Finished,
 }
 

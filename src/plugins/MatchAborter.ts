@@ -146,7 +146,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private doAutoAbort(): void {
-    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.status == PlayerStatus.InGame);
+    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.status == PlayerStatus.Playing);
     if (this.option.auto_abort_do_abort) {
       this.doAbort();
     } else {

@@ -1,11 +1,10 @@
 import { assert } from 'chai';
+import { Lobby } from '..';
+import { Recorder } from "../plugins";
+import { DummyIrcClient } from '../dummies';
 import fs from "fs";
 import Nedb from 'nedb';
-
-import { Recorder } from "../plugins";
 import tu from "./TestUtils";
-import { Lobby } from '../Lobby';
-import { DummyIrcClient } from '../dummies';
 
 const DB_PATHS: { [key: string]: string } = {
   test: "data/test.nedb",
@@ -97,11 +96,8 @@ describe.skip("Recorder tests", function () {
       const { recorder, lobby, ircClient } = await setupAsync(false);
       await recorder.LoadDatabaseAsync();
       assert.isTrue(fs.existsSync(DB_PATHS.map));
-
       const players = await tu.AddPlayersAsync(5, ircClient);
-
       await tu.delayAsync(10);
-
       for (let p of players) {
         await ircClient.emulateRemovePlayerAsync(p);
       }

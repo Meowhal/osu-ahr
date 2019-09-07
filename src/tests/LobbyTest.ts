@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, Player } from '..';
+import { Lobby, LobbyStatus, Player, PlayerStatus, Roles, Teams } from '..';
 import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
 import log4js from "log4js";
 import tu from "./TestUtils";
@@ -40,9 +40,9 @@ describe("LobbyTest", function () {
       const lobby = new Lobby(ircClient);
       const name = "test";
       const id = await lobby.MakeLobbyAsync(name);
-      assert.equal(lobby.id, id);
+      assert.equal(lobby.lobbyId, id);
       assert.equal(lobby.channel, ircClient.channel);
-      assert.equal(lobby.name, name);
+      assert.equal(lobby.lobbyName, name);
       assert.equal(lobby.status, LobbyStatus.Entered);
       lobby.SendMessage("!mp password");
       lobby.SendMessage("!mp invite gnsksz");
@@ -110,10 +110,19 @@ describe("LobbyTest", function () {
 
       // 参加人数を調べる
       assert.equal(players.length, lobby.players.size);
-
-      // 参加者が一致しているか調べる
+      
       for (let p of lobby.players) {
+        // 参加者が一致しているか調べる
         assert.isTrue(players.includes(p.id));
+
+        // プレイヤーの状態をチェック
+        assert.equal(p.role, Roles.Player);
+        assert.isFalse(p.isAuthorized);
+        assert.isFalse(p.isCreator);
+        assert.isFalse(p.isHost);
+        assert.isFalse(p.isReferee);
+        assert.equal(p.status, PlayerStatus.InLobby);
+        assert.equal(p.team, Teams.None);
       }
     });
 
@@ -321,7 +330,7 @@ describe("LobbyTest", function () {
         assert.equal(a.playersInGame, 3);
       });
       const p = ircClient.emulateMatchAsync(10);
-      await lobby.AbortMatch();
+      lobby.AbortMatch();
       await p;
       assert.isTrue(ma);
     });
@@ -335,7 +344,7 @@ describe("LobbyTest", function () {
       });
       const p = ircClient.emulateMatchAsync(10);
       await ircClient.emulateRemovePlayerAsync("user1");
-      await lobby.AbortMatch();
+      lobby.AbortMatch();
       await p;
       assert.isTrue(ma);
     });
@@ -349,7 +358,7 @@ describe("LobbyTest", function () {
       });
       const p = ircClient.emulateMatchAsync(10);
       await ircClient.emulatePlayerFinishAsync("user1");
-      await lobby.AbortMatch();
+      lobby.AbortMatch();
       await p;
       assert.isTrue(ma);
     });
@@ -365,10 +374,44 @@ describe("LobbyTest", function () {
       await ircClient.emulatePlayerFinishAsync("user1");
       await ircClient.emulateRemovePlayerAsync("user2");
       await ircClient.emulatePlayerFinishAsync("user3");
-      await lobby.AbortMatch();
+      lobby.AbortMatch();
       await p;
       assert.isTrue(ma);
     });
+    it("player statuses count test", async () => {
+      function assertPc(lobby:Lobby, total:number, inLobby:number, playing:number) {
+        let pc = lobby.countPlayersStatus();
+        assert.equal(pc.inlobby, inLobby);
+        assert.equal(pc.inGame, total - inLobby);
+        assert.equal(pc.playing, playing);
+        assert.equal(pc.finished, total - inLobby - playing);
+        assert.equal(pc.total, total);
+        assert.equal(lobby.playersFinished, total - inLobby - playing);
+        assert.equal(lobby.playersInGame, total - inLobby);
+      }
+
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      lobby.RaiseHostChanged(players[0]);
+      assertPc(lobby, 5, 5, 0);
+
+      await ircClient.emulateRemovePlayerAsync(players[4]);
+      assertPc(lobby, 4, 4, 0);
+
+      const mt = ircClient.emulateMatchAsync(10);
+      await tu.AddPlayersAsync(1, ircClient);
+      assertPc(lobby, 5, 1, 4);
+
+      await ircClient.emulateRemovePlayerAsync(players[3]);
+      assertPc(lobby, 4, 1, 3);
+
+      ircClient.emulatePlayerFinishAsync(players[0]);
+      assertPc(lobby, 4, 1, 2);
+      
+      await mt;
+      assertPc(lobby, 4, 4, 0);
+
+    })
   });
 
   describe("message handling tests", function () {

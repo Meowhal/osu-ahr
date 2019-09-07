@@ -1,10 +1,10 @@
 import { ILobby } from "../ILobby";
 import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
-import log4js from "log4js";
 import { VoteCounter } from "./VoteCounter";
 import { BanchoResponseType } from "../parsers";
+import config from "config";
+import log4js from "log4js";
 const logger = log4js.getLogger("matchStarter");
 
 export interface MatchStarterOption {
@@ -31,7 +31,7 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player, a.succeeded));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
-    this.lobby.MatchStarted.on(a => this.onMatchStarted());
+    this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.AllPlayerReady) {
         this.onAllPlayerReady()
@@ -104,10 +104,10 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  // スキップ状況を確認して、必要数に達している場合は
+  // 投票状況を確認して、必要数に達している場合は試合を開始する
   private checkVoteCount(showMessage: boolean = false): void {
     if (this.voting.count != 0 && showMessage) {
-      this.lobby.SendMessageWithCoolTime(`bot : Match start progress: ${this.voting.toString()}`, "checkSkipCount", 5000);
+      this.lobby.SendMessageWithCoolTime(`bot : Match start progress: ${this.voting.toString()}`, "checkStartCount", 5000);
     }
     if (this.voting.passed) {
       this.start();

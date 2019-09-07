@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 import { IIrcClient } from "..";
 import log4js from "log4js";
 import { parser, MpCommand } from "../parsers";
+import { isArray } from "util";
 const logger = log4js.getLogger("irc");
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
@@ -147,9 +148,38 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     await this.emulateMessageAsync("BanchoBot", this.channel, "The match has finished!");
   }
 
+  // 試合中断をエミュレートする
+  public async emulateMatchAndAbortAsync(delay: number = 0, finishers:(number|string[]) = 0): Promise<void> {
+    this.isMatching = true;
+    await this.emulateMessageAsync("BanchoBot", this.channel, "The match has started!");
+    if (delay) {
+      await this.delay(delay);
+    }
+    const tasks: Promise<void>[] = [];
+    if (isArray(finishers)) {
+      for(let p of finishers) {
+        tasks.push(this.emulatePlayerFinishAsync(p));
+      }
+    } else {
+      const players = Array.from(this.players);
+      for(let i = 0; i < finishers && i < players.length; i++ ) {
+        let p = players[i];
+        tasks.push(this.emulatePlayerFinishAsync(p));
+      }
+    }    
+    await Promise.all(tasks);
+    if (!this.isMatching) {
+      await this.emulateMessageAsync("BanchoBot", this.channel, "The match is not in progress");
+      return;
+    }
+    this.isMatching = false;
+    await this.emulateMessageAsync("BanchoBot", this.channel, "Aborted the match");
+  }
+
   public async emulatePlayerFinishAsync(userid: string): Promise<void> {
     await this.emulateMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
   }
+
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {

@@ -1,6 +1,5 @@
 import * as irc from "./libs/irc";
 import { EventEmitter } from "events";
-import { DummyIrcClient } from "./dummies/DummyIrcClient";
 import log4js from "log4js";
 const ircLogger = log4js.getLogger("irc");
 const pmLogger = log4js.getLogger("PMLogger");
@@ -48,12 +47,6 @@ export function logIrcEvent(client: IIrcClient) {
   client.on('notice', function (from, to, message) {
     ircLogger.debug('@notice  %s => %s: %s', from, to, message);
   });
-  /*
-  if (!(client instanceof DummyIrcClient)) {
-    client.on('sentMessage', function (to, message) {
-      ircLogger.debug(`@sent bot => ${to}: ${message}`);
-    });
-  }*/
 }
 
 export function logPrivateMessage(client:IIrcClient) {

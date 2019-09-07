@@ -1,10 +1,9 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../dummies';
 import { Lobby, Roles } from "..";
-import tu from "./TestUtils";
-import { MatchStarter, MatchStarterOption } from '../plugins';
+import { DummyIrcClient } from '../dummies';
 import { BanchoResponseType } from '../parsers';
-
+import { MatchStarter, MatchStarterOption } from '../plugins';
+import tu from "./TestUtils";
 describe("MatchStarterTest", function () {
   before(function () {
     tu.configMochaAsSilent();

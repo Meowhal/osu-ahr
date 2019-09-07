@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../dummies';
 import { Lobby } from "..";
+import { DummyIrcClient } from '../dummies';
 import { AutoHostSelector } from "../plugins";
 import tu from "./TestUtils";
 
@@ -24,9 +24,16 @@ describe("AutoHostSelectorTest", function () {
         assert.isTrue(!l.isMatching);
         assert.isTrue(l.host == null);
         break;
-      case "h": // has host
+      case "hr": // has host and needs to rotate 
         assert.isTrue(s.hostQueue.length > 0);
         assert.isTrue(!l.isMatching);
+        assert.isTrue(s.needsRotate);
+        assert.isTrue(l.host != null);
+        break;
+      case "hn": // has host and no needs to rotate
+        assert.isTrue(s.hostQueue.length > 0);
+        assert.isTrue(!l.isMatching);
+        assert.isFalse(s.needsRotate);
         assert.isTrue(l.host != null);
         break;
       case "m": // matching
@@ -43,16 +50,16 @@ describe("AutoHostSelectorTest", function () {
     const { selector } = await prepareSelector();
     assertStateIs("s0", selector);
   });
-  
+
   describe("state transition tests", function () {
     it("s0 -> h test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       assertStateIs("s0", selector);
       await ircClient.emulateAddPlayerAsync("player1");
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
     });
 
-    it("s0 -> s1 -> h test", async () => {
+    it("s0 -> s1 -> hr test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       ircClient.latency = 1;
       let s1checked = false;
@@ -65,96 +72,195 @@ describe("AutoHostSelectorTest", function () {
 
       await ircClient.emulateAddPlayerAsync("player1");
       await tu.delayAsync(5);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       assert.isTrue(s1checked);
     });
 
-    it("s0 -> h[1] -> s0 test", async () => {
+    it("s0 -> hr -> s0 test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       assertStateIs("s0", selector);
       await ircClient.emulateAddPlayerAsync("player1");
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       await tu.delayAsync(10);
       await ircClient.emulateRemovePlayerAsync("player1");
       assertStateIs("s0", selector);
     });
 
-    it("h[1] -> h[3] -> s0", async () => {
+    it("hr[1] -> hr[3] -> s0", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       assertStateIs("s0", selector);
       const pids = ["player1", "player2", "player3"];
       await tu.AddPlayersAsync(pids, ircClient);
       tu.assertHost("player1", lobby);
-      assertStateIs("h", selector);
-
+      assertStateIs("hr", selector);
       await ircClient.emulateRemovePlayerAsync("player2");
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
       await ircClient.emulateRemovePlayerAsync("player1");
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player3", lobby);
-
       await ircClient.emulateRemovePlayerAsync("player3");
       assertStateIs("s0", selector);
     });
 
-    it("h[3] -> m -> h[3]", async () => {
+    it("hr -> m -> hr", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
     });
 
-    it("h[3] -> m -> h[3] repeat", async () => {
+    it("hr -> m -> hr repeat", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
-
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player3", lobby);
-
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
+    });
+    it("hr -> hn -> m -> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      await ircClient.emulateRemovePlayerAsync("player1");
+      assertStateIs("hn", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player2", lobby);
+    });
+    it("hr -[leave]-> hn -[change map]-> hr -> m -> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      await ircClient.emulateRemovePlayerAsync("player1");
+      assertStateIs("hn", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player3", lobby);
+    });
+    it("hr -> m -[abort]-> hn", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+
+      await ircClient.emulateMatchAndAbortAsync(0, 0);
+      assertStateIs("hn", selector);
+      tu.assertHost("player1", lobby);
+    });
+    // アボート後にホストがマップを変更するとhostが切り替わる
+    it("hr -> m -[abort]-> hn -[mapchange]-> hn -> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      await ircClient.emulateMatchAndAbortAsync(0, 0);
+      assertStateIs("hn", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hn", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player2", lobby);
+    });
+    it("hr -> m -[abort]-> hn -[leave]-> hn -> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      await ircClient.emulateMatchAndAbortAsync(0, 0);
+      assertStateIs("hn", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateRemovePlayerAsync("player1");
+      assertStateIs("hn", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player2", lobby);
+    });
+    it("hr -> s0 -> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      await ircClient.emulateRemovePlayerAsync("player1");
+      assertStateIs("s0", selector);
+      await tu.AddPlayersAsync(["player1"], ircClient);
+      tu.assertHost("player1", lobby);
+      assertStateIs("hr", selector);
+    });
+    it("hr -> s0 -> hn -[map change]-> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      await ircClient.emulateRemovePlayerAsync("player1");
+      assertStateIs("s0", selector);
+      await tu.AddPlayersAsync(["player2", "player3"], ircClient);
+      tu.assertHost("player2", lobby);
+      assertStateIs("hn", selector);
+      await ircClient.emulateMatchAsync(0);
+      tu.assertHost("player2", lobby);
+      assertStateIs("hr", selector);
     });
   });
 
   describe("join and left tests", function () {
     // 試合中にプレイヤーが入ってきた場合、現在のホストの後ろに配置される
-    it("m join", async () => {
+    it("newcomer who join during the match should be enqueued after the currnt host.", async () => {
       const { selector, lobby, ircClient } = await prepareSelector(false);
       await tu.AddPlayersAsync(["player1", "player2"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
 
       const task = ircClient.emulateMatchAsync(4);
       await tu.delayAsync(1);
-      ircClient.emulateAddPlayerAsync("player3");
+      ircClient.emulateAddPlayerAsync("player3"); // join during the match
       await task;
 
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
 
       await ircClient.emulateMatchAsync();
-      assertStateIs("h", selector);
-      tu.assertHost("player1", lobby);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby); // not player3
     });
 
-    it("m left", async () => {
+    it("player left in the match", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
 
       let task = ircClient.emulateMatchAsync(4);
@@ -162,14 +268,14 @@ describe("AutoHostSelectorTest", function () {
       await ircClient.emulateRemovePlayerAsync("player3");
       await task;
 
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
 
       task = ircClient.emulateMatchAsync(4);
       await tu.delayAsync(1);
       await ircClient.emulateRemovePlayerAsync("player2");
       await task;
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
 
       await ircClient.emulateAddPlayerAsync("player4");
@@ -180,14 +286,14 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       await ircClient.emulateRemovePlayerAsync("player1");
       await task;
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player4", lobby);
     });
 
-    it("host skip test", async () => {
+    it("transfer host manually test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
 
       lobby.RaiseHostChanged("player2");
@@ -207,12 +313,11 @@ describe("AutoHostSelectorTest", function () {
       tu.assertHost("player1", lobby);
     });
 
-    it("h left test", async () => {
+    it("appoint next host when current host leave", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
       await ircClient.emulateRemovePlayerAsync("player1");
       await tu.delayAsync(1);
       tu.assertHost("player2", lobby);
@@ -223,7 +328,7 @@ describe("AutoHostSelectorTest", function () {
     it("plugin message skip test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
       selector.sendPluginMessage("skip");
       await tu.delayAsync(5);
@@ -233,8 +338,15 @@ describe("AutoHostSelectorTest", function () {
     it("plugin message skipto test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
+      selector.sendPluginMessage("skipto", ["player3"]);
+      await tu.delayAsync(5);
+      tu.assertHost("player3", lobby);
+      assert.equal(selector.hostQueue[0].id, "player3");
+      assert.equal(selector.hostQueue[1].id, "player1");
+      assert.equal(selector.hostQueue[2].id, "player2");
+
       selector.sendPluginMessage("skipto", ["player3"]);
       await tu.delayAsync(5);
       tu.assertHost("player3", lobby);
@@ -245,43 +357,41 @@ describe("AutoHostSelectorTest", function () {
   });
 
   describe("skip tests", function () {
-    it("should change host when map change -> !skip -> map change -> match start", async () => {
+    it("should change host when changed map -> changed host -> map change -> match start", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
-      tu.assertHost("player2", lobby);
-      await ircClient.emulateChangeMapAsync(0);
-      assert.isTrue(selector.needsRotate);
-      await ircClient.emulateRemovePlayerAsync("player2");
-      assertStateIs("h", selector);
-      tu.assertHost("player3", lobby);
-      assert.isFalse(selector.needsRotate);
-      await ircClient.emulateChangeMapAsync(0);
-      assert.isTrue(selector.needsRotate);
-      await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-      assert.isTrue(selector.needsRotate);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      await ircClient.emulateRemovePlayerAsync("player2");
+      assertStateIs("hn", selector);
+      tu.assertHost("player3", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player3", lobby);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
     });
-    it("should not change host when. map change -> !skip -> match start", async () => {
+    it("should not change host when changed map -> changed host -> started match", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
       await ircClient.emulateChangeMapAsync(0);
-      assert.isTrue(selector.needsRotate);
       await ircClient.emulateRemovePlayerAsync("player2");
-      assertStateIs("h", selector);
+      assertStateIs("hn", selector);
       tu.assertHost("player3", lobby);
-      assert.isFalse(selector.needsRotate);
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player3", lobby);
-      assert.isTrue(selector.needsRotate);
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
     });
   });
@@ -290,115 +400,103 @@ describe("AutoHostSelectorTest", function () {
     it("should not change host if match is aborted before any player finished", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
-      ircClient.emulateMatchAsync(10);
-      await tu.delayAsync(1);
-      await lobby.AbortMatch();
-      assert.isFalse(lobby.isMatching);
-      assert.isFalse(selector.needsRotate);
-
-      assertStateIs("h", selector);
+      await ircClient.emulateMatchAndAbortAsync();
+      assertStateIs("hn", selector);
       tu.assertHost("player1", lobby);
 
       await ircClient.emulateMatchAsync(0);
-      assert.isFalse(lobby.isMatching);
-      assert.isTrue(selector.needsRotate);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
     });
     it("should change host when match is aborted after some players finished", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
-      ircClient.emulateMatchAsync(10);
-      await tu.delayAsync(1);
-      ircClient.emulatePlayerFinishAsync("player1");
-      await lobby.AbortMatch();
-      assert.isFalse(lobby.isMatching);
-      assert.isTrue(selector.needsRotate);
-      assertStateIs("h", selector);
+      await ircClient.emulateMatchAndAbortAsync(0, 1);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
 
-      await tu.delayAsync(10);
-
-      await ircClient.emulateMatchAsync(10);
-      assertStateIs("h", selector);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
       tu.assertHost("player3", lobby);
     });
     it("should change host when match start -> abort -> map change", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
-      assertStateIs("h", selector);
+      assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
 
-      ircClient.emulateMatchAsync(10);
-      await tu.delayAsync(1);
-      await lobby.AbortMatch();
-      assert.isFalse(lobby.isMatching);
-      assert.isFalse(selector.needsRotate);
-
-      assertStateIs("h", selector);
+      await ircClient.emulateMatchAndAbortAsync();
+      assertStateIs("hn", selector);
       tu.assertHost("player1", lobby);
-
       await ircClient.emulateChangeMapAsync();
-
-      assertStateIs("h", selector);
+      assertStateIs("hn", selector);
       tu.assertHost("player2", lobby);
-
-      await tu.delayAsync(10);
-
-      await ircClient.emulateMatchAsync(10);
-      assert.isFalse(lobby.isMatching);
-      assert.isTrue(selector.needsRotate);
-      assertStateIs("h", selector);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
       tu.assertHost("player2", lobby);
     });
     it("should change host and be remainable when map change -> match start -> host left -> match abort", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       const players = await tu.AddPlayersAsync(5, ircClient);
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
-      tu.assertHost(players[1], lobby);
       await ircClient.emulateChangeMapAsync(0);
-      assert.isTrue(selector.needsRotate);
-      let t = ircClient.emulateMatchAsync(100);
-      await tu.delayAsync(5);
+      assertStateIs("hr", selector);
+      tu.assertHost(players[1], lobby);
+      let t = ircClient.emulateMatchAsync(60);
+      await tu.delayAsync(1);
       await ircClient.emulateRemovePlayerAsync(players[1]);
       assertStateIs("m", selector);
       assert.isNull(lobby.host);
-      await lobby.AbortMatch();
-      assertStateIs("h", selector);
+      lobby.AbortMatch();
+      await tu.delayAsync(1);
+      assertStateIs("hn", selector);
       tu.assertHost(players[2], lobby);
-      assert.isFalse(lobby.isMatching);
-      assert.isFalse(selector.needsRotate);
       await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
       tu.assertHost(players[2], lobby);
     });
     it("should not change host when -> match start -> host left -> match abort -> map change", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       const players = await tu.AddPlayersAsync(5, ircClient);
       await ircClient.emulateMatchAsync(0);
-      assertStateIs("h", selector);
-      tu.assertHost(players[1], lobby);
       await ircClient.emulateChangeMapAsync(0);
-      assert.isTrue(selector.needsRotate);
-      let t = ircClient.emulateMatchAsync(100);
-      await tu.delayAsync(5);
+      assertStateIs("hr", selector);
+      tu.assertHost(players[1], lobby);
+      let t = ircClient.emulateMatchAsync(30);
+      await tu.delayAsync(1);
       await ircClient.emulateRemovePlayerAsync(players[1]);
       assertStateIs("m", selector);
       assert.isNull(lobby.host);
-      await lobby.AbortMatch();
-      assertStateIs("h", selector);
+      lobby.AbortMatch();
+      await tu.delayAsync(1);
+      assertStateIs("hn", selector);
       tu.assertHost(players[2], lobby);
-      assert.isFalse(lobby.isMatching);
-      assert.isFalse(selector.needsRotate);
       await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
       tu.assertHost(players[2], lobby);
-      assert.isTrue(selector.needsRotate);
+    });
+    it("should change host when -> match start -> host left -> player finish -> match abort -> map change", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const players = await tu.AddPlayersAsync(["a", "b", "c", "d"], ircClient);
+      await ircClient.emulateMatchAsync(0);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("b", lobby);
+      let t = ircClient.emulateMatchAndAbortAsync(10, ["a", "c", "d"]);
+      await tu.delayAsync(1);
+      await ircClient.emulateRemovePlayerAsync("b");
+      assertStateIs("m", selector);
+      assert.isNull(lobby.host);
+      await t;
+      assertStateIs("hr", selector);
+      tu.assertHost("c", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("c", lobby);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
+import { Teams } from '..';
 import { MpSettingsParser } from "../parsers";
 import log4js from "log4js";
-import { Teams } from '../Player';
 
 describe("MpSettingsParserTest", function () {
   before(function () {
@@ -50,7 +50,7 @@ describe("MpSettingsParserTest", function () {
     assert.equal(p.players[2].isHost, false);
     assert.equal(p.players[3].isHost, false);
     assert.equal(p.players[4].isHost, false);
- 
+
     assert.equal(p.players[0].team, Teams.None);
     assert.equal(p.players[1].team, Teams.None);
     assert.equal(p.players[2].team, Teams.None);
@@ -278,7 +278,7 @@ describe("MpSettingsParserTest", function () {
     assert.isFalse(b);
     b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gnsksz          [Host / Hidden, HardRock]");
     assert.isTrue(b);
-   
+
     assert.equal(p.teamMode, "HeadToHead");
     assert.equal(p.winCondition, "Score");
     assert.equal(p.activeMods, "DoubleTime, Freemod");
@@ -304,7 +304,7 @@ describe("MpSettingsParserTest", function () {
     assert.isFalse(b);
     b = p.feedLine("Slot 1  Not Ready https://osu.ppy.sh/u/8286882 gnsksz          [Host / Team Blue / Hidden, HardRock]");
     assert.isTrue(b);
-   
+
     assert.equal(p.teamMode, "TeamVs");
     assert.equal(p.winCondition, "Score");
     assert.equal(p.activeMods, "DoubleTime, Freemod");

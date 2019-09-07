@@ -21,21 +21,22 @@ const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
 export class Lobby implements ILobby {
   // Members
   option: LobbyOption;
-  host: Player | null;
-  hostPending: Player | null;
-  name: string | undefined;
-  id: string | undefined;
+  ircClient: IIrcClient;
+  lobbyName: string | undefined;
+  lobbyId: string | undefined;
   channel: string | undefined;
   status: LobbyStatus;
-  players: Set<Player>;
-  ircClient: IIrcClient;
-  playersMap: Map<string, Player>;
-  isMatching: boolean;
+  host: Player | null = null;
+  hostPending: Player | null = null;
+  players: Set<Player> = new Set<Player>();
+  playersMap: Map<string, Player> = new Map<string, Player>();
+  isMatching: boolean = false;
   mpSettingParser: MpSettingsParser | undefined;
   plugins: LobbyPlugin[] = [];
-  listRefStart: number;
-  mapTitle: string;
-  mapId: number;
+  listRefStart: number = 0;
+  mapTitle: string = "";
+  mapId: number = 0;
+  coolTimes: { [key: string]: number } = {};
 
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
@@ -60,15 +61,8 @@ export class Lobby implements ILobby {
     }
     this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
     this.status = LobbyStatus.Standby;
-    this.players = new Set();
-    this.playersMap = new Map();
     this.ircClient = ircClient;
-    this.host = null;
-    this.hostPending = null;
-    this.isMatching = false;
-    this.listRefStart = 0;
-    this.mapTitle = "";
-    this.mapId = 0;
+
     this.assignCreatorRole();
 
     this.ircClient.on("message", (from, to, message) => {
@@ -97,27 +91,27 @@ export class Lobby implements ILobby {
   get playersInGame(): number {
     let i = 0;
     for (let p of this.players) {
-      if (p.status == PlayerStatus.Finished || p.status == PlayerStatus.InGame) i++;
+      if (p.status == PlayerStatus.Finished || p.status == PlayerStatus.Playing) i++;
     }
     return i;
   }
 
-  countPlayersStatus(): { inGame: number, finished: number, inlobby: number, total: number } {
-    const r = { inGame: 0, finished: 0, inlobby: 0, total: this.players.size };
+  countPlayersStatus(): { inGame: number, playing: number, finished: number, inlobby: number, total: number } {
+    const r = { inGame: 0, playing: 0, finished: 0, inlobby: 0, total: this.players.size };
     for (let p of this.players) {
       switch (p.status) {
         case PlayerStatus.InLobby:
           r.inlobby++;
           break;
-        case PlayerStatus.InGame:
-          r.inGame++;
+        case PlayerStatus.Playing:
+          r.playing++;
           break;
         case PlayerStatus.Finished:
           r.finished++;
           break;
       }
     }
-    r.inGame += r.finished;
+    r.inGame = r.finished + r.playing;
     return r;
   }
 
@@ -175,7 +169,6 @@ export class Lobby implements ILobby {
     }
   }
 
-  private coolTimes: { [key: string]: number } = {};
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
     const now = Date.now();
     if (tag in this.coolTimes) {
@@ -358,7 +351,7 @@ export class Lobby implements ILobby {
   RaiseMatchStarted(): void {
     logger.info(`match started : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
     this.isMatching = true;
-    this.players.forEach(p => p.status = PlayerStatus.InGame);
+    this.players.forEach(p => p.status = PlayerStatus.Playing);
     this.MatchStarted.emit({ mapId: this.mapId, mapTitle: this.mapTitle });
   }
 
@@ -433,12 +426,12 @@ export class Lobby implements ILobby {
       const onJoin = (channel: string, who: string) => {
         if (who == this.ircClient.nick) {
           this.channel = channel;
-          this.name = title;
-          this.id = channel.replace("#mp_", "");
+          this.lobbyName = title;
+          this.lobbyId = channel.replace("#mp_", "");
           this.ircClient.off("join", onJoin);
           this.status = LobbyStatus.Entered;
           this.players.clear();
-          resolve(this.id);
+          resolve(this.lobbyId);
           logger.trace("completed makeLobby");
         }
       };
@@ -461,11 +454,11 @@ export class Lobby implements ILobby {
       }
       this.ircClient.join(ch, () => {
         this.channel = channel;
-        this.name = "__";
-        this.id = channel.replace("#mp_", "");
+        this.lobbyName = "__";
+        this.lobbyId = channel.replace("#mp_", "");
         this.status = LobbyStatus.Entered;
         this.players.clear();
-        resolve(this.id);
+        resolve(this.lobbyId);
         logger.trace("completed EnterLobby");
       });
     });
@@ -536,7 +529,7 @@ export class Lobby implements ILobby {
 
   // 一旦ロビーから全員退出させ、現在のホストからスロット順に追加していく
   private margeMpSettingsResult(parser: MpSettingsParser): void {
-    this.name = parser.name;
+    this.lobbyName = parser.name;
     this.host = null;
     this.hostPending = null;
     Array.from(this.players).forEach(p => this.RaisePlayerLeft(p.id));
@@ -557,10 +550,11 @@ export class Lobby implements ILobby {
   // #endregion
 
   GetLobbyStatus(): string {
+    const pc = this.countPlayersStatus();
     let s = `=== lobby status ===
-  lobby id : ${this.id}
+  lobby id : ${this.lobbyId}
   status : ${LobbyStatus[this.status]}
-  players : ${this.players.size}
+  players : ${this.players.size}, inGame : ${pc.inGame} (playing : ${pc.playing})
   refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.id).join(",")}
   host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
       ;
@@ -575,11 +569,6 @@ export class Lobby implements ILobby {
     if (this.SendMessageWithCoolTime("- Osu Auto Host Rotation Bot -", "infomessage", 30000)) {
       this.SendMessage("-  The host order is based on when you entered the lobby.");
       this.SendMessage("-  github : https://github.com/Meowhal/osu-ahr");
-      /*this.SendMessage("- bot commands -");
-      this.SendMessage("-  !info => show this message.");
-      this.plugins.forEach(p => p.getInfoMessage().forEach(m => {
-        this.SendMessage("-  " + m);
-      }));*/
     } else {
       logger.trace("info cool time");
     }

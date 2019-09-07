@@ -8,8 +8,8 @@ import { BanchoResponse } from "./parsers";
 // Make/Enter/LeaveはEvent形式ではなくasync/wait形式のほうがいい？
 // Eventは文字列指定のため、一覧をインターフェースに含めることができない！
 export interface ILobby {
-  name: string | undefined;
-  id: string | undefined;
+  lobbyName: string | undefined;
+  lobbyId: string | undefined;
   status: LobbyStatus;
   players: Set<Player>;
   host: Player | null;
