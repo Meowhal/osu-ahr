@@ -68,6 +68,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // メッセージイベントを発行する
   public emulateMessage(from: string, to: string, message: string): void {
+    if (from == this.nick) return;
     this.emit('message', from, to, message, this.msg);
     if (to == this.channel) {
       this.emit('message#', from, to, message, this.msg);

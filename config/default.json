@@ -57,6 +57,7 @@
   "MapRecaster": {},
   "OahrCli": {
     "invite_users": [],
-    "password": ""
+    "password": "",
+    "use_recoder": false
   }
 }

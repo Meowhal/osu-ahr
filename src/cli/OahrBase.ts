@@ -9,6 +9,7 @@ const logger = log4js.getLogger("cli");
 export interface OahrCliOption {
   invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
   password: string;　// デフォルトのパスワード, 空文字でパスワードなし。
+  use_recoder: boolean; // プレイヤーの入退室記録や選択マップなどを保存するか
 }
 
 const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
@@ -22,7 +23,7 @@ export class OahrBase {
   terminator: LobbyTerminator;
   aborter: MatchAborter;
   wordCounter: WordCounter;
-  recorder: Recorder;
+  recorder: Recorder | null = null;
   recaster: MapRecaster;
   option: OahrCliOption = OahrCliDefaultOption;
 
@@ -35,7 +36,9 @@ export class OahrBase {
     this.terminator = new LobbyTerminator(this.lobby);
     this.aborter = new MatchAborter(this.lobby);
     this.wordCounter = new WordCounter(this.lobby);
-    this.recorder = new Recorder(this.lobby, true);
+    if (this.option.use_recoder) {
+      this.recorder = new Recorder(this.lobby, true);
+    }    
     this.recaster = new MapRecaster(this.lobby);
   }
 

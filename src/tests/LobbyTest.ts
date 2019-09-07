@@ -419,9 +419,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = false;
       const msg = "hello world";
-      ircClient.once("message", (from, to, message) => {
-        assert.equal(from, ircClient.nick);
-        assert.equal(to, ircClient.channel);
+      lobby.SentMessage.once((message) => {
         assert.equal(message, msg);
         ma = true;
       });
@@ -433,9 +431,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = 0;
       const msg = "hello world";
-      ircClient.on("message", (from, to, message) => {
-        assert.equal(from, ircClient.nick);
-        assert.equal(to, ircClient.channel);
+      lobby.SentMessage.on((message) => {
         assert.equal(message, msg);
         ma = ma + 1;
       });
@@ -457,9 +453,7 @@ describe("LobbyTest", function () {
       const msg = () => {
         return "a" + "b" + "c";
       };
-      ircClient.on("message", (from, to, message) => {
-        assert.equal(from, ircClient.nick);
-        assert.equal(to, ircClient.channel);
+      lobby.SentMessage.on((message) => {
         assert.equal(message, msg());
         mf = true;
       });
@@ -544,9 +538,14 @@ describe("LobbyTest", function () {
       assert.equal(ma, 1);
     });
   });
-  it("plugin test", async () => {
+  it.skip("plugin test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const lp = new DummyLobbyPlugin(lobby);
-    //console.log(lobby.GetLobbyStatus());
+    console.log(lobby.GetLobbyStatus());
+  });
+  it.skip("showInfoMessage test", async() => {
+    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+    tu.configMochaAsNoisy();
+    lobby.RaiseReceivedCustomCommand(lobby.GetOrMakePlayer("tester"), "!info");
   });
 });
