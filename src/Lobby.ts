@@ -570,7 +570,7 @@ export class Lobby implements ILobby {
   private showInfoMessage(): void {
     if (this.SendMessageWithCoolTime(`- Osu Auto Host Rotation Bot ver ${pkg.version} -`, "infomessage", 30000)) {
       this.SendMessage("-  The host order is based on when you entered the lobby.");
-      this.SendMessage("-  github : https://github.com/Meowhal/osu-ahr");
+      this.SendMessage("-  github|cmdRefs : [https://github.com/Meowhal/osu-ahr github/osu-ahr]");
     } else {
       logger.trace("info cool time");
     }

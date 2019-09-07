@@ -23,7 +23,7 @@ export class OahrCli extends OahrBase {
   private scenes = {
     mainMenu: {
       name: "",
-      prompt: "[m]ake lobby, [e]nter lobby, [q]uit > ",
+      prompt: "[m]ake, [e]nter, [q]uit > ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         switch (l.command) {
@@ -33,7 +33,7 @@ export class OahrCli extends OahrBase {
               return;
             }
             try {
-              this.makeLobbyAsync(l.arg);
+              await this.makeLobbyAsync(l.arg);
               this.scene = this.scenes.lobbyMenu;
             } catch (e) {
               logger.info("faiiled to make lobby : %s", e);
@@ -46,7 +46,7 @@ export class OahrCli extends OahrBase {
                 logger.info("e command needs lobby id. ex:e 123456");
                 return;
               }
-              this.enterLobbyAsync(l.arg);
+              await this.enterLobbyAsync(l.arg);
               this.scene = this.scenes.lobbyMenu;
             } catch (e) {
               logger.info("invalid channel : %s", e);
@@ -62,10 +62,9 @@ export class OahrCli extends OahrBase {
         }
       }
     },
-
     lobbyMenu: {
       name: "lobbyMenu",
-      prompt: "[s]ay, [d]command, [i]nfo, [c]lose, [q]uit > ",
+      prompt: "[s]ay, [i]nfo, [c]lose, [q]quit > ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
@@ -74,27 +73,37 @@ export class OahrCli extends OahrBase {
         }
         switch (l.command) {
           case "s":
-            this.lobby.SendMessage(l.arg);
-            break;
-          case "d":
-            if (parser.IsCustomCommand(l.arg)) {
+          case "say":
+            if (l.arg.startsWith("!") || l.arg.startsWith("*")) {
               this.lobby.RaiseReceivedCustomCommand(this.lobby.GetPlayer(this.client.nick) as Player, l.arg)
+            } else {
+              this.lobby.SendMessage(l.arg);
             }
             break;
           case "i":
+          case "info":
             this.displayInfo();
             break;
           case "c":
-            logger.info("close");
-            await this.lobby.CloseLobbyAsync();
-            this.scene = this.scenes.exited;
+          case "close":
+            if (l.arg == "") {
+              // close now
+              await this.lobby.CloseLobbyAsync();
+              this.scene = this.scenes.exited;
+            } else if (l.arg.match(/\d+/)) {
+              // close after secs
+              this.terminator.CloseLobby(parseInt(l.arg) * 1000);
+            } else {
+              // close after everyone leaves
+              this.terminator.CloseLobby();
+            }
             break;
           case "q":
             logger.info("quit");
             this.scene = this.scenes.exited;
             break;
           default:
-            logger.info("invalid command : %s", line);
+            console.log("invalid command : %s", line);
             break;
         }
       }

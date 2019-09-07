@@ -5,7 +5,7 @@ The host order is based on when Player entered the lobby.
 ## chat commands
 |for player||
 |:--|:--|
-|- `!queue`| Show host queue.|
+|- `!queue`| Shows host queue.|
 |- `!skip `| Votes to skip current host.|
 |- `!start`| Votes to start the match.|
 |- `!abort`| Votes to abort the match. Use when the match is stuck.|
@@ -18,7 +18,7 @@ The host order is based on when Player entered the lobby.
 |`!start [secs]`| Begins start timer.|
 |`!stop`| Stops current start timer.|
 
-(I am looking for someone to correct my English mistakes..😖)
+(I am looking for ppl who can correct my English mistakes..😖)
 
 
 ## Usage

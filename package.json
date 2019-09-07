@@ -1,8 +1,9 @@
 {
   "name": "osu-ahr",
   "version": "1.0.1",
-  "description": "",
+  "description": "irc bot for osu! multi lobby auto host rotation.",
   "main": "index.js",
+  "homepage":"https://github.com/Meowhal/osu-ahr",
   "scripts": {
     "build-dev": "cross-env NODE_ENV=development npm run build",
     "build": "rimraf dist && tsc",
@@ -11,7 +12,7 @@
     "test-dev": "cross-env Node_ENV=development npm run test",
     "test": "mocha -r ts-node/register src/tests/*Test.ts"
   },
-  "author": "",
+  "author": "gnsksz",
   "license": "ISC",
   "dependencies": {
     "@types/config": "0.0.34",
