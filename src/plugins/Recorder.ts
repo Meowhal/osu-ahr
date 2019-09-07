@@ -141,7 +141,7 @@ export class Recorder extends LobbyPlugin {
           resolve();
         });
       } else {
-        this.db.player.update({ _id: record._id }, record, undefined, err => {
+        this.db.player.update({ _id: record._id }, record, {}, err => {
           if (this.checkDbError(err)) return reject(err);
           resolve();
         });
