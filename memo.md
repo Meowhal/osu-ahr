@@ -193,6 +193,7 @@ sudo kill [PID]
 
 # TASK
 ## todo
+- !infoにバージョンを表示する。
 - マップを持っていないプレイヤーでも試合が開始するとPlayersInGameに入ってしまう。（どうしようもない？
 - ゲームモードや勝利条件を変更したときに挙動が変化しないか確かめる
 - 順番がどういう仕組なのか理解してもらえない？
@@ -204,6 +205,7 @@ sudo kill [PID]
 - lobbyのplayersfinishedやplayersingameはplayerクラスにgamestatusというプロパティをもたせて管理したほうが良い.
 - team mode でのmp settings
 ## done
+- 自作マップを貼ったときのイベント => mapid 0
 - Team modeになるとユーザー参加を検知できない
 - 長い名前のユーザー名が処理できない
 - cliで試合開始時にマップ名を表示したい

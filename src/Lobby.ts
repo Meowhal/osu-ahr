@@ -248,6 +248,7 @@ export class Lobby implements ILobby {
         logger.trace("team changed : %s, %s", c.params[0], Teams[c.params[1]]);
         break;
       case BanchoResponseType.BeatmapChanged:
+      case BanchoResponseType.MpBeatmapChanged:
         this.mapId = c.params[0];
         this.mapTitle = c.params[1];
         break;

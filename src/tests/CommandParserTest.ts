@@ -146,6 +146,24 @@ describe("CommandParserTest", function () {
       v = parser.ParseBanchoResponse(message);
       assert.equal(v.type, BanchoResponseType.BeatmapChanged);
       assert.equal(v.params[0], "670743");
+
+      message = "Beatmap changed to: Lil Boom - \"Already Dead \" instrumental (Omae Wa Mou) (https://osu.ppy.sh/b/2122318)";
+      v = parser.ParseBanchoResponse(message);
+      assert.equal(v.type, BanchoResponseType.BeatmapChanged);
+      assert.equal(v.params[0], "2122318");
+    });
+
+    it("mp map changed test", () => {
+      let message = "Changed beatmap to https://osu.ppy.sh/b/2145701 Camellia feat. Nanahira - NANI THE FUCK!!";
+      let v = parser.ParseBanchoResponse(message);
+      assert.equal(v.type, BanchoResponseType.MpBeatmapChanged);
+      assert.equal(v.params[0], "2145701");
+    });
+
+    it("mpInvalidMapId test", () => {
+      let message = "Invalid map ID provided";
+      let v = parser.ParseBanchoResponse(message);
+      assert.equal(v.type, BanchoResponseType.MpInvalidMapId);
     });
 
     it("host change test", () => {
@@ -342,6 +360,19 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.TeamChanged);
       assert.equal(v.params[0], "milisaurus");
       assert.equal(v.params[1], Teams.Blue);
+    });
+    it("request sleep test", () => {
+      let v = parser.ParseBanchoResponse("[https://www.youtube.com/watch?v=y61v2QCHlpY Don't let osu! keep you up until 4 AM. Getting sleep is important too!]");
+      assert.equal(v.type, BanchoResponseType.RequestSleep);
+    });
+    it("lobby size changed test", () => {
+      let v = parser.ParseBanchoResponse("Changed match to size 8");
+      assert.equal(v.type, BanchoResponseType.LobbySizeChanged);
+      assert.equal(v.params[0], 8);
+
+      v = parser.ParseBanchoResponse("Changed match to size 16");
+      assert.equal(v.type, BanchoResponseType.LobbySizeChanged);
+      assert.equal(v.params[0], 16);
     });
   });
 

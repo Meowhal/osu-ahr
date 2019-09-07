@@ -65,7 +65,7 @@ export class OahrCli extends OahrBase {
 
     lobbyMenu: {
       name: "lobbyMenu",
-      prompt: "[s]ay, [d]command [i]nfo, [c]lose, [q]uit > ",
+      prompt: "[s]ay, [d]command, [i]nfo, [c]lose, [q]uit > ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {

@@ -3,6 +3,7 @@ import { DummyIrcClient } from "../dummies";
 import { assert } from 'chai';
 import log4js from "log4js";
 import { TypedEvent } from "../libs/events";
+import { BanchoResponse, BanchoResponseType } from "../parsers";
 
 class TestUtils {
   ownerNickname: string = "creator";
@@ -77,7 +78,7 @@ class TestUtils {
   /**
    * 時間内に指定したイベントが発生することを確認する
    * @param event 対象のイベント
-   * @param cb イベント発生時に引数をチェックするためのコールバック関数。falseを返す監視は継続される
+   * @param cb イベント発生時に引数をチェックするためのコールバック関数。falseを返すと監視が継続される
    * @param timeout リジェクトまでのミリ秒時間
    */
   async assertEventFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number = 0): Promise<number> {
@@ -86,7 +87,7 @@ class TestUtils {
       if (timeout != 0) {
         id = setTimeout(() => {
           d.dispose();
-          reject("The event was expected to fire, but it didn't fire");
+          reject("The expected event was not fired");
         }, timeout);
       }
       const d = event.on(a => {
@@ -99,9 +100,9 @@ class TestUtils {
   }
 
   /**
-   * 時間内に指定したイベントが発生"しない"ことを確認する
+   * 時間内に指定したイベントが"発生しない"ことを確認する
    * @param event 対象のイベント
-   * @param cb イベント発生時に引数をチェックするためのコールバック関数。falseを返す監視は継続される
+   * @param cb イベント発生時に引数をチェックするためのコールバック関数。falseを返すと監視が継続される
    * @param timeout イベント発生までの待ち時間
    */
   async assertEventNeverFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number): Promise<number> {
@@ -114,7 +115,56 @@ class TestUtils {
         if (cb != null && cb(a) === false) return;
         clearTimeout(id);
         d.dispose();
-        reject("The event was expected not to fire, but it fired");
+        reject("The event expected not to fire was fired");
+      });
+    });
+  }
+
+  /**
+   * 時間内に指定したBanchoResponseが返されることを確認する
+   * @param lobby 対象のlobby
+   * @param expected 期待されるBanshoResponseの種類
+   * @param cb BanchoResponseを評価するためのコールバック関数。falseを返すと監視が継続される
+   * @param timeout リジェクトまでのミリ秒時間
+   */
+  async assertBanchoRespond(lobby:Lobby, expected : BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number = 0): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      let id: NodeJS.Timeout;
+      if (timeout != 0) {
+        id = setTimeout(() => {
+          d.dispose();
+          reject("the expected response was not returned.");
+        }, timeout);
+      }
+      const d = lobby.RecievedBanchoResponse.on(a => {
+        if (a.response.type != expected) return;
+        if (cb != null && cb(a.response) === false) return;
+        d.dispose();
+        clearTimeout(id);
+        resolve(Date.now());
+      });
+    });
+  }
+
+  /**
+   * 時間内に指定したBanchoResponseが"返されない"ことを確認する
+   * @param lobby 対象のlobby
+   * @param expected 期待されるBanshoResponseの種類
+   * @param cb BanchoResponseを評価するためのコールバック関数。falseを返すと監視が継続される
+   * @param timeout 監視継続ミリ秒時間
+   */
+  async assertBanchoNotRespond(lobby:Lobby, notExpected : BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const id = setTimeout(() => {
+        d.dispose();
+        resolve(Date.now());
+      }, timeout);
+      const d = lobby.RecievedBanchoResponse.on(a => {
+        if (a.response.type != notExpected) return;
+        if (cb != null && cb(a.response) === false) return;
+        clearTimeout(id);
+        d.dispose();
+        reject("the response not expected was returned.");
       });
     });
   }

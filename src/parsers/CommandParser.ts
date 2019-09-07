@@ -22,9 +22,18 @@ export class CommandParser {
       return makeBanchoResponse(BanchoResponseType.BeatmapChanging);
     }
 
-    const m_map = message.match(/Beatmap changed to\: (.+ \[.+\]) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)/);
+    const m_map = message.match(/Beatmap changed to\: (.+) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)$/);
     if (m_map) {
       return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[2], m_map[1]);
+    }
+
+    const m_mpmap = message.match(/Changed beatmap to https:\/\/osu.ppy.sh\/b\/(\d+) (.+)/);
+    if (m_mpmap) {
+      return makeBanchoResponse(BanchoResponseType.MpBeatmapChanged, m_mpmap[1], m_mpmap[2]);
+    }
+
+    if (message == "Invalid map ID provided") {
+      return makeBanchoResponse(BanchoResponseType.MpInvalidMapId);
     }
 
     const m_host = message.match(/(.+) became the host\./);
@@ -169,6 +178,15 @@ export class CommandParser {
       return makeBanchoResponse(BanchoResponseType.TeamChanged, m_team_change[1], (m_team_change[2] == "Blue" ? Teams.Blue : Teams.Red));
     }
 
+    if (message.match(/Don't let osu! keep you up until 4 AM./)) {
+      return makeBanchoResponse(BanchoResponseType.RequestSleep);
+    }
+
+    const m_size = message.match(/Changed match to size (\d+)/);
+    if (m_size) {
+      return makeBanchoResponse(BanchoResponseType.LobbySizeChanged, parseInt(m_size[1]));
+    }
+
     return makeBanchoResponse(BanchoResponseType.Unhandled);
   }
 
@@ -252,6 +270,8 @@ export enum BanchoResponseType {
   PlayerMovedSlot,
   BeatmapChanging,
   BeatmapChanged,
+  MpBeatmapChanged,
+  MpInvalidMapId,
   HostChanged,
   MpHostChanged,
   UserNotFound,
@@ -278,6 +298,8 @@ export enum BanchoResponseType {
   Rolled,
   Stats,
   TeamChanged,
+  RequestSleep,
+  LobbySizeChanged
 }
 
 function makeBanchoResponse(type: BanchoResponseType, ...params: any[]) {

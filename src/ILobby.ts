@@ -18,6 +18,8 @@ export interface ILobby {
   playersFinished: number;
   playersInGame: number;
   isMatching: boolean;
+  mapTitle: string;
+  mapId: number;
   plugins: LobbyPlugin[];
 
   GetPlayer(userid: string): Player | null;

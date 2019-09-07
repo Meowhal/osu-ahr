@@ -23,6 +23,9 @@ export class LobbyTerminator extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player, p.slot));
+    this.lobby.RecievedBanchoResponse.on(p => {
+      
+    });
   }
   onPlayerJoined(player: Player, slot: number): void {
     if (this.terminateTimer) {

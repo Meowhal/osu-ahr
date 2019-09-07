@@ -54,6 +54,7 @@
     "path_player": "data/player.nedb",
     "path_map": "data/map.nedb"
   },
+  "MapRecaster": {},
   "OahrCli": {
     "invite_users": [],
     "password": ""
