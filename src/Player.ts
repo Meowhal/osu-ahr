@@ -55,5 +55,5 @@ export enum PlayerStatus {
 }
 
 export function escapeUserId(id: string): string {
-  return id.toLowerCase().replace(' ', '_');
+  return id.toLowerCase().replace(/ /g, '_');
 }

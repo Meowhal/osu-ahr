@@ -548,4 +548,17 @@ describe("LobbyTest", function () {
     tu.configMochaAsNoisy();
     lobby.RaiseReceivedCustomCommand(lobby.GetOrMakePlayer("tester"), "!info");
   });
+
+  describe.only("Reproduction of bug that occurred", function() {
+    it("some chat cant handle as chat", async () => {
+      tu.configMochaAsNoisy();
+      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+      await tu.AddPlayersAsync(5, ircClient);
+      ircClient.emulateMessage("BanchoBot", ircClient.channel, "Omen de cobra joined in slot 2.");
+      await tu.delayAsync(10);
+      assert.isTrue(lobby.Includes("Omen de cobra"));
+      assert.isTrue(lobby.Includes("Omen_de_cobra"));
+      ircClient.emulateMessage("Omen_de_cobra", ircClient.channel, " is this winnner rotation?");
+    });
+  });
 });

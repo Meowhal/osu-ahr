@@ -1,16 +1,18 @@
 # TODO TASK 一覧
 ## todo
-- request sleep時にロビーを終了する。
-- マップを持っていないプレイヤーでも試合が開始するとPlayersInGameに入ってしまう。（どうしようもない？
+- Afk検知機能、複数試合で結果を残さない場合kickする
+- All players are ready が連続で発生することがある？!mp startに短いcooltimeを設ける
 - 順番がどういう仕組なのか理解してもらえない？
 - 試合開始１０後くらいに誰かがチャットしたらabortの案内を出す
 - infoの自動表示機能、infoを見たユーザーを記録し、ロビーに誰もいない場合は表示する
 - 再起動時現在のホストに!mp host が発行される
 - 試合中にEnterした場合正常に動作する？
-## wip
 - ゲームモードや勝利条件を変更したときに挙動が変化しないか確かめる
+## wip
+- request sleep時にロビーを終了する。
 - recorderの使用をオプションから切り替え
 ## done
+- 一部のチャットがircでは記録されているのにchatとして認識されない問題。ユーザー単位で発生している？ => replaceが１つ分のスペースしか変換していなかった
 - team mode でのmp settings
 - lobbyのplayersfinishedやplayersingameはplayerクラスにgamestatusというプロパティをもたせて管理したほうが良い.
 - !infoにバージョンを表示する。
