@@ -116,7 +116,7 @@ export class MatchStarter extends LobbyPlugin {
 
   private startTimer(count: number) {
     if (count == 0) {
-      this.lobby.SendMessage("!mp start");
+      this.start();
     } else {
       this.lobby.SendMessage("!mp start " + count);
       this.isTimerActive = true;
@@ -124,7 +124,7 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   private start() {
-    this.lobby.SendMessage("!mp start");
+    this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000);
   }
 
   private stopTimer() {
@@ -136,8 +136,8 @@ export class MatchStarter extends LobbyPlugin {
 
   getPluginStatus(): string {
     return `-- MatchStarter --
-    timer : ${this.isTimerActive ? "active" : "--"}
-    vote : ${this.voting.toString()}`;
+  timer : ${this.isTimerActive ? "active" : "--"}
+  vote : ${this.voting.toString()}`;
   }
 
   getInfoMessage(): string[] {

@@ -549,7 +549,7 @@ describe("LobbyTest", function () {
     lobby.RaiseReceivedCustomCommand(lobby.GetOrMakePlayer("tester"), "!info");
   });
 
-  describe.only("Reproduction of bug that occurred", function() {
+  describe("Reproduction of bug that occurred", function() {
     it("some chat cant handle as chat", async () => {
       tu.configMochaAsNoisy();
       const {lobby, ircClient} = await tu.SetupLobbyAsync();

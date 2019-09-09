@@ -562,7 +562,10 @@ export class Lobby implements ILobby {
       ;
 
     for (let p of this.plugins) {
-      s += "\n" + p.getPluginStatus();
+      const ps = p.getPluginStatus();
+      if (ps != "") {
+        s += "\n" + ps;
+      }      
     }
     return s;
   }

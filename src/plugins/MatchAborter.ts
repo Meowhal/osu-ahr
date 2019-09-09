@@ -90,10 +90,10 @@ export class MatchAborter extends LobbyPlugin {
   private vote(player: Player) {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
-      logger.trace("accept skip request from %s", player.id);
+      logger.trace("accept abort request from %s (%s)", player.id, this.voting.toString());
       this.checkVoteCount(true);
     } else {
-      logger.trace("vote was ignored");
+      logger.trace("vote from %s was ignored", player.id);
     }
   }
 
