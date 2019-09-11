@@ -1,6 +1,6 @@
 import { ILobby } from "../ILobby";
 import { Player } from "../Player";
-import { TypedEvent } from "../libs/events";
+import { TypedEvent } from "../libs";
 
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。

@@ -110,7 +110,7 @@ describe("LobbyTest", function () {
 
       // 参加人数を調べる
       assert.equal(players.length, lobby.players.size);
-      
+
       for (let p of lobby.players) {
         // 参加者が一致しているか調べる
         assert.isTrue(players.includes(p.id));
@@ -316,7 +316,7 @@ describe("LobbyTest", function () {
       });
 
       const p = ircClient.emulateMatchAsync(10);
-      await lobby.AbortMatch();
+      lobby.AbortMatch();
       await p;
       assert.isTrue(ms);
       assert.isTrue(ma);
@@ -379,7 +379,7 @@ describe("LobbyTest", function () {
       assert.isTrue(ma);
     });
     it("player statuses count test", async () => {
-      function assertPc(lobby:Lobby, total:number, inLobby:number, playing:number) {
+      function assertPc(lobby: Lobby, total: number, inLobby: number, playing: number) {
         let pc = lobby.countPlayersStatus();
         assert.equal(pc.inlobby, inLobby);
         assert.equal(pc.inGame, total - inLobby);
@@ -407,7 +407,7 @@ describe("LobbyTest", function () {
 
       ircClient.emulatePlayerFinishAsync(players[0]);
       assertPc(lobby, 4, 1, 2);
-      
+
       await mt;
       assertPc(lobby, 4, 4, 0);
 
@@ -538,27 +538,75 @@ describe("LobbyTest", function () {
       assert.equal(ma, 1);
     });
   });
+
+  describe("message tests", function () {
+    it.skip("showInfoMessage test", async () => {
+      const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+      tu.configMochaAsNoisy();
+      lobby.RaiseReceivedCustomCommand(lobby.GetOrMakePlayer("tester"), "!info");
+    });
+    it.skip("SendMessageWithDelayAsync test", async () => {
+      const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+      tu.configMochaAsNoisy();
+      lobby.SendMessage("hello");
+      lobby.SendMessageWithDelayAsync("world", 1000);
+    });
+    it.skip("SendMultilineMessageWithInterval test", async () => {
+      const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+      tu.configMochaAsNoisy();
+      lobby.SendMultilineMessageWithInterval(["a", "b", "c", "d"], 1000, "a", 100);
+      lobby.SendMultilineMessageWithInterval(["e", "f", "g", "h"], 1000, "a", 100);
+    });
+    it.skip("DeferMessage test", async () => {
+      const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+      tu.configMochaAsNoisy();
+      lobby.DeferMessage("a", "abc", 10, false);
+      await tu.delayAsync(20);
+      lobby.DeferMessage("b", "abc", 10, false);
+      await tu.delayAsync(5);
+      lobby.DeferMessage("c", "abc", 10, false);
+      await tu.delayAsync(5);
+      lobby.DeferMessage("d", "abc", 10, false);
+      await tu.delayAsync(5);
+      lobby.DeferMessage("e", "abc", 10, false);
+      await tu.delayAsync(20);
+      lobby.DeferMessage("xa", "abc", 10, true);
+      await tu.delayAsync(20);
+      lobby.DeferMessage("xb", "abc", 10, true);
+      await tu.delayAsync(5);
+      lobby.DeferMessage("xc", "abc", 10, true);
+      await tu.delayAsync(5);
+      lobby.DeferMessage("xd", "abc", 10, true);
+      await tu.delayAsync(5);
+      lobby.DeferMessage("xe", "abc", 10, true);
+      await tu.delayAsync(20);
+    });
+  });
   it.skip("plugin test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const lp = new DummyLobbyPlugin(lobby);
     console.log(lobby.GetLobbyStatus());
   });
-  it.skip("showInfoMessage test", async() => {
-    const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-    tu.configMochaAsNoisy();
-    lobby.RaiseReceivedCustomCommand(lobby.GetOrMakePlayer("tester"), "!info");
-  });
-
-  describe("Reproduction of bug that occurred", function() {
+  describe("Reproduction of bug that occurred", function () {
     it("some chat cant handle as chat", async () => {
-      tu.configMochaAsNoisy();
-      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
       await tu.AddPlayersAsync(5, ircClient);
       ircClient.emulateMessage("BanchoBot", ircClient.channel, "Omen de cobra joined in slot 2.");
       await tu.delayAsync(10);
       assert.isTrue(lobby.Includes("Omen de cobra"));
       assert.isTrue(lobby.Includes("Omen_de_cobra"));
       ircClient.emulateMessage("Omen_de_cobra", ircClient.channel, " is this winnner rotation?");
+    });
+    it("creator role check", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      await tu.AddPlayersAsync([tu.ownerNickname], ircClient);
+      let p = lobby.GetPlayer(tu.ownerNickname);
+      assert.isNotNull(p);
+      p = p as Player;
+      assert.isTrue(p.isCreator);
+      assert.isTrue(p.isAuthorized);
+      assert.isFalse(p.isHost);
+      assert.isTrue(p.isReferee);
     });
   });
 });

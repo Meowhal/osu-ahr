@@ -10,7 +10,8 @@ const logger = log4js.getLogger("hostSkipper");
 export interface HostSkipperOption {
   vote_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
   vote_min: number;　// 最低投票数
-  vote_delay_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
+  vote_cooltime_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
+  vote_msg_defer_ms: number; // 投票メッセージの延期時間
   afk_timer_delay_ms: number; // ホスト変更後に与えられるスキップ猶予時間
   afk_timer_message: string; // タイマー時に表示されるメッセージ
   afk_timer_do_skip: boolean; // スキップするか
@@ -42,7 +43,7 @@ export class HostSkipper extends LobbyPlugin {
     return Date.now() - this.timeStart;
   }
 
-  constructor(lobby: ILobby, option: any | null = null) {
+  constructor(lobby: ILobby, option: Partial<HostSkipperOption> = {}) {
     super(lobby);
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
@@ -127,7 +128,7 @@ export class HostSkipper extends LobbyPlugin {
   private vote(player: Player) {
     if (this.voting.passed) {
       logger.debug("vote from %s was ignored, already skipped", player.id);
-    } else if (this.elapsed < this.option.vote_delay_ms) {
+    } else if (this.elapsed < this.option.vote_cooltime_ms) {
       logger.debug("vote from %s was ignored, at cool time.", player.id);
     } else if (player.isHost) {
       logger.debug("host(%s) sent !skip command", player.id);
@@ -145,9 +146,10 @@ export class HostSkipper extends LobbyPlugin {
   // スキップ状況を確認して、必要数に達している場合は
   private checkSkipCount(showMessage: boolean = false): void {
     if (this.voting.count != 0 && showMessage) {
-      this.lobby.SendMessageWithCoolTime(`bot : Host skip progress: ${this.voting.toString()}`, "checkSkipCount", 5000);
+      this.lobby.DeferMessage(`bot : Host skip progress: ${this.voting.toString()}`, "checkSkipCount", this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
+      this.lobby.DeferMessage(`bot : Passed skip vote: ${this.voting.toString()}`, "checkSkipCount", 100, true);
       this.doSkip();
     }
   }

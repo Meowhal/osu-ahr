@@ -102,6 +102,8 @@ export class OahrCli extends OahrBase {
             logger.info("quit");
             this.scene = this.scenes.exited;
             break;
+          case "":
+            break;
           default:
             console.log("invalid command : %s", line);
             break;

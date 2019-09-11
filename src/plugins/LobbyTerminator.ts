@@ -12,15 +12,15 @@ export interface LobbyTerminatorOption {
   terminate_time_ms: number;
   terminate_when_sleep_msg: boolean;
   sleep_message_interval: number;
-
 }
+
 const LobbyTerminatorDefaultOption = config.get<LobbyTerminatorOption>("LobbyTerminator");
 
 export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
   terminateTimer: NodeJS.Timer | undefined;
 
-  constructor(lobby: ILobby, option: any | null = null) {
+  constructor(lobby: ILobby, option: Partial<LobbyTerminatorOption> = {}) {
     super(lobby);
     this.option = { ...LobbyTerminatorDefaultOption, ...option } as LobbyTerminatorOption;
     this.registerEvents();
@@ -35,7 +35,7 @@ export class LobbyTerminator extends LobbyPlugin {
           this.CloseLobby();
         }
       });
-    }    
+    }
   }
   onPlayerJoined(player: Player, slot: number): void {
     if (this.terminateTimer) {
@@ -59,17 +59,19 @@ export class LobbyTerminator extends LobbyPlugin {
 
   CloseLobby(time_ms: number = 0): void {
     if (time_ms == 0) {
-      this.sendMessageWithDelay("!mp password closed", this.option.sleep_message_interval)
-        .then(() => this.sendMessageWithDelay("This lobby will be closed after everyone leaves.", this.option.sleep_message_interval))
-        .then(() => this.sendMessageWithDelay("Thank you for playing with the auto host rotation bot.", this.option.sleep_message_interval))
-        .then(() => this.sendMessageWithDelay(`- You can get the information about this bot from [${pkg.homepage} github:osu-ahr].`, this.option.sleep_message_interval));
+      this.lobby.SendMultilineMessageWithInterval([
+        "!mp password closed",
+        "This lobby will be closed after everyone leaves.",
+        "Thank you for playing with the auto host rotation lobby."
+      ], this.option.sleep_message_interval, "close lobby announcement", 100000);
       this.option.terminate_time_ms = 1000;
     } else {
-      this.sendMessageWithDelay("!mp password closed", this.option.sleep_message_interval)
-        .then(() => this.sendMessageWithDelay(`This lobby will be closed after ${(time_ms / 1000).toFixed(0)}sec(s).`, this.option.sleep_message_interval))
-        .then(() => this.sendMessageWithDelay("Thank you for playing with the auto host rotation bot.", this.option.sleep_message_interval))
-        .then(() => this.sendMessageWithDelay(`- You can get the information about this bot from [${pkg.homepage} github:osu-ahr].`, time_ms))
-        .then(() => this.lobby.SendMessage("!mp close"));
+      this.lobby.SendMultilineMessageWithInterval([
+        "!mp password closed",
+        `This lobby will be closed after ${(time_ms / 1000).toFixed(0)}sec(s).`,
+        "Thank you for playing with the auto host rotation lobby."
+      ], this.option.sleep_message_interval, "close lobby announcement", 100000)
+        .then(() => this.sendMessageWithDelay("!mp close", time_ms));
     }
   }
 

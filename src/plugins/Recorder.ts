@@ -39,7 +39,7 @@ export class Recorder extends LobbyPlugin {
   mapChanger: Player | null = null;
   loadingTask: Promise<void[]> | null = null;
 
-  constructor(lobby: ILobby, autoload: boolean, option: any | null = null) {
+  constructor(lobby: ILobby, autoload: boolean, option: Partial<RecorderOption> = {}) {
     super(lobby);
     this.option = { ...defaultOption, ...option } as RecorderOption;
     this.db = {

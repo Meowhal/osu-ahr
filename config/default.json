@@ -9,7 +9,13 @@
   },
   "Lobby": {
     "authorized_users": [],
-    "listref_duration": 1000
+    "listref_duration": 1000,
+    "info_message": [
+      "-  The order of hosts is managed by queue. Added last when a player joins the lobby.",
+      "-  github|cmdRefs : [https://github.com/Meowhal/osu-ahr github/osu-ahr]"
+    ],
+    "info_message_interval": 500,
+    "info_message_cooltime": 60000
   },
   "AutoHostSelector": {
     "show_queue_chars_limit": 90,
@@ -18,7 +24,8 @@
   "HostSkipper": {
     "vote_rate": 0.5,
     "vote_min": 2,
-    "vote_delay_ms": 3000,
+    "vote_cooltime_ms": 10000,
+    "vote_msg_defer_ms": 5000,
     "afk_timer_delay_ms": 30000,
     "afk_timer_message": "bot : you can skip afk host by !skip command.",
     "afk_timer_do_skip": false
@@ -35,6 +42,7 @@
   "MatchAborter": {
     "vote_rate": 0.3,
     "vote_min": 2,
+    "vote_msg_defer": 5000,
     "auto_abort_rate": 0.5,
     "auto_abort_delay_ms": 30000,
     "auto_abort_do_abort": false

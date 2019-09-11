@@ -18,7 +18,7 @@ const DefaultOption = config.get<MapRecasterOption>("MapRecaster");
 export class MapRecaster extends LobbyPlugin {
   option: MapRecasterOption;
   canRecast: boolean = true;
-  constructor(lobby: ILobby, option: MapRecasterOption | any | null = null) {
+  constructor(lobby: ILobby, option: Partial<MapRecasterOption> = {}) {
     super(lobby);
     this.option = { ...DefaultOption, ...option } as MapRecasterOption;
     this.registerEvents();

@@ -1,5 +1,5 @@
 import { Player, Teams } from "./Player";
-import { TypedEvent } from "./libs/events";
+import { TypedEvent } from "./libs";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import { BanchoResponse } from "./parsers";
 
@@ -29,7 +29,9 @@ export interface ILobby {
   AbortMatch(): void;
   SendMessage(message: string): void;
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltime: number): boolean;
-
+  SendMessageWithDelayAsync(message: string, delay: number): Promise<void>;
+  SendMultilineMessageWithInterval(lines: string[], intervalMs: number, tag: string, cooltimeMs: number): Promise<void>;
+  DeferMessage(message: string, tag: string, delay: number, resetTimer: boolean): void;
   MakeLobbyAsync(title: string): Promise<string>;
   EnterLobbyAsync(channel: string): Promise<string>; // TODO:ロビーのチャンネルが存在しないときの処理
   CloseLobbyAsync(): Promise<void>;

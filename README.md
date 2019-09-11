@@ -1,6 +1,6 @@
 # osu-ahr
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
-The host order is based on when Player entered the lobby.
+The order of hosts is managed by queue. Added last when a player joins the lobby.
 
 ## chat commands
 |for player||
@@ -30,7 +30,7 @@ npm install
 + get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
 + copy `./config/default.json` to `./config/development.json`
 + enter your account id and irc password to `./config/development.json`
-+ lauch bot
++ launch the bot
 ```bash 
 npm start
 [m]ake, [e]nter, [q]uit > m lobby_name

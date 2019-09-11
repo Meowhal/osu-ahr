@@ -19,7 +19,7 @@ export class MatchStarter extends LobbyPlugin {
   voting: VoteCounter;
   isTimerActive: boolean = false;
 
-  constructor(lobby: ILobby, option: any | null = null) {
+  constructor(lobby: ILobby, option: Partial<MatchStarterOption> = {}) {
     super(lobby);
     this.option = { ...defaultOption, ...option } as MatchStarterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
@@ -107,9 +107,10 @@ export class MatchStarter extends LobbyPlugin {
   // 投票状況を確認して、必要数に達している場合は試合を開始する
   private checkVoteCount(showMessage: boolean = false): void {
     if (this.voting.count != 0 && showMessage) {
-      this.lobby.SendMessageWithCoolTime(`bot : Match start progress: ${this.voting.toString()}`, "checkStartCount", 5000);
+      this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, "match start vote", 5000, false);
     }
     if (this.voting.passed) {
+      this.lobby.DeferMessage(`bot : passed start vote: ${this.voting.toString()}`, "match start vote", 100, true);
       this.start();
     }
   }

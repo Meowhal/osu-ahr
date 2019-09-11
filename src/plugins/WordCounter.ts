@@ -37,7 +37,7 @@ export class WordCounter extends LobbyPlugin {
   periods: WordCounterPeriod[];
   lastLogTime: number = 0;
 
-  constructor(lobby: ILobby, option: any | null = null) {
+  constructor(lobby: ILobby, option: Partial<WordCounterOption> = {}) {
     super(lobby);
     this.option = { ...DefaultOption, ...option } as WordCounterOption;
     this.periods = this.option.periods.map(a => {

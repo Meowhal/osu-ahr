@@ -2,7 +2,7 @@ import { Player, escapeUserId, Roles, Teams, PlayerStatus } from "./Player";
 import { ILobby, LobbyStatus } from "./ILobby";
 import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
-import { TypedEvent } from "./libs/events";
+import { TypedEvent, DeferredAction } from "./libs";
 import { MpSettingsParser } from "./parsers/MpSettingsParser";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import config from "config";
@@ -15,6 +15,9 @@ const chatlogger = log4js.getLogger("chat");
 export interface LobbyOption {
   authorized_users: string[], // 特権ユーザー
   listref_duration: number,
+  info_message: string[],
+  info_message_interval: number,
+  info_message_cooltime: number,
 }
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
@@ -38,6 +41,7 @@ export class Lobby implements ILobby {
   mapTitle: string = "";
   mapId: number = 0;
   coolTimes: { [key: string]: number } = {};
+  defferedMessages: { [key: string]: DeferredAction<string> } = {}
 
   // Events
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
@@ -183,6 +187,39 @@ export class Lobby implements ILobby {
     }
     this.SendMessage(message);
     return true;
+  }
+
+  SendMessageWithDelayAsync(message: string, delay: number): Promise<void> {
+    return new Promise<void>(resolve => {
+      setTimeout(() => {
+        this.SendMessage(message);
+        resolve();
+      }, delay);
+    });
+  }
+
+  DeferMessage(message: string, tag: string, delay: number, resetTimer: boolean = false): void {
+    if (!(tag in this.defferedMessages)) {
+      this.defferedMessages[tag] = new DeferredAction(msg => {
+        this.SendMessage(msg);
+      });
+    }
+    const d = this.defferedMessages[tag];
+    if (message == "") {
+      d.cancel();
+    } else {
+      d.start(delay, message, resetTimer);
+    }
+  }
+
+  async SendMultilineMessageWithInterval(lines: string[], intervalMs: number, tag: string, cooltimeMs: number): Promise<void> {
+    if (lines.length == 0) return;
+    const totalTime = lines.length * intervalMs + cooltimeMs;
+    if (this.SendMessageWithCoolTime(lines[0], tag, totalTime)) {
+      for (let i = 1; i < lines.length; i++) {
+        await this.SendMessageWithDelayAsync(lines[i], intervalMs);
+      }
+    }
   }
 
   // #region message handling
@@ -404,10 +441,10 @@ export class Lobby implements ILobby {
 
   MakeLobbyAsync(title: string): Promise<string> {
     if (title === "") {
-      throw new Error("title が空です。");
+      throw new Error("title is empty");
     }
     if (this.status != LobbyStatus.Standby) {
-      throw new Error("すでに部屋を作成済みです.");
+      throw new Error("A lobby has already been made.");
     }
     this.status = LobbyStatus.Making;
     logger.trace("start makeLobby");
@@ -565,16 +602,17 @@ export class Lobby implements ILobby {
       const ps = p.getPluginStatus();
       if (ps != "") {
         s += "\n" + ps;
-      }      
+      }
     }
     return s;
   }
 
   private showInfoMessage(): void {
-    if (this.SendMessageWithCoolTime(`- Osu Auto Host Rotation Bot ver ${pkg.version} -`, "infomessage", 30000)) {
-      this.SendMessage("-  The host order is based on when you entered the lobby.");
-      this.SendMessage("-  github|cmdRefs : [https://github.com/Meowhal/osu-ahr github/osu-ahr]");
-    } else {
+    const msgs = [
+      `- Osu Auto Host Rotation Bot ver ${pkg.version} -`,
+      ...this.option.info_message
+    ];
+    if (!this.SendMultilineMessageWithInterval(msgs, this.option.info_message_interval, "infomessage", this.option.info_message_cooltime)) {
       logger.trace("info cool time");
     }
   }
@@ -590,6 +628,8 @@ export class Lobby implements ILobby {
       c.setRole(Roles.Authorized);
       c.setRole(Roles.Creator);
       c.setRole(Roles.Referee);
+      logger.info("assigned %s creators role", this.ircClient.nick);
     }
   }
 }
+

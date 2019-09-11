@@ -19,7 +19,7 @@ export class AutoHostSelector extends LobbyPlugin {
   needsRotate: boolean = true;
   mapChanger: Player | null = null;
 
-  constructor(lobby: ILobby, option: AutoHostSelectorOption | any | null = null) {
+  constructor(lobby: ILobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby);
     this.option = { ...DefaultOption, ...option } as AutoHostSelectorOption;
     this.registerEvents();
@@ -71,8 +71,8 @@ export class AutoHostSelector extends LobbyPlugin {
   // ホストが実際に変更された際に実行される
   // !mphostで指定したホストならok
   // ユーザーが自分でホストを変更した場合
-  //  queueの次のホストならそのまま
-  //  順番を無視していたら任命し直す
+  // queueの次のホストならそのまま
+  // 順番を無視していたら任命し直す
   private onHostChanged(succeeded: boolean, newhost: Player): void {
     if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する(player left eventで対応)
     if (this.lobby.isMatching) return; // 試合中は何もしない
@@ -86,7 +86,7 @@ export class AutoHostSelector extends LobbyPlugin {
       }
     } else {
       // ホストがキューの先頭以外に変更された場合
-      logger.trace("host may have manually changed the host");
+      logger.trace("host may have manually changed by the host");
       this.rotateQueue();
       this.changeHost();
     }

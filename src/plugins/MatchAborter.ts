@@ -9,6 +9,7 @@ const logger = log4js.getLogger("matchAborter");
 export interface MatchAborterOption {
   vote_rate: number; // アボート投票時の必要数/プレイヤー数
   vote_min: number;　// 最低投票数
+  vote_msg_defer: number; // メッセージの延期時間
   auto_abort_rate: number; // 何割終了したらアボートタイマーを起動するか？
   auto_abort_delay_ms: number; // 試合終了後のアボート実行までの猶予時間
   auto_abort_do_abort: boolean; // 実際にアボートを実行するか
@@ -25,7 +26,7 @@ export class MatchAborter extends LobbyPlugin {
   abortTimer: NodeJS.Timer | null = null;
   voting: VoteCounter;
 
-  constructor(lobby: ILobby, option: any | null = null) {
+  constructor(lobby: ILobby, option: Partial<MatchAborterOption> = {}) {
     super(lobby);
     this.option = { ...defaultOption, ...option } as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
@@ -100,9 +101,10 @@ export class MatchAborter extends LobbyPlugin {
   // 投票数を確認して必要数に達していたら試合中断
   private checkVoteCount(showMessage: boolean = false): void {
     if (this.voting.count != 0 && showMessage) {
-      this.lobby.SendMessage(`bot : match abort progress: ${this.voting.toString()}`)
+      this.lobby.DeferMessage(`bot : match abort progress: ${this.voting.toString()}`, "aborter vote", 5000, false);
     }
     if (this.voting.passed) {
+      this.lobby.DeferMessage(`bot : passed abort vote: ${this.voting.toString()}`, "aborter vote", 100, true);
       this.doAbort();
     }
   }

@@ -15,6 +15,7 @@ describe("Match Aboter Tests", function () {
     const option: MatchAborterOption = {
       vote_min: 2,
       vote_rate: 0.3,
+      vote_msg_defer: 10,
       auto_abort_delay_ms: timerDelay,
       auto_abort_rate: 0.5,
       auto_abort_do_abort: true,

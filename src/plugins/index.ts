@@ -7,3 +7,4 @@ export * from "./MatchAborter";
 export * from "./WordCounter";
 export * from "./Recorder";
 export * from "./MapRecaster";
+export * from "./InOutLogger";
