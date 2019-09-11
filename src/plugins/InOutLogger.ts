@@ -30,12 +30,16 @@ export class InOutLogger extends LobbyPlugin {
       const msgIn = Array.from(this.lobby.players).filter(p => !this.players.has(p)).map(p => p.id).join(", ");
       let msg = "";
 
-      if (msgIn != "") msg = "In > \x1b[32m" + msgIn +"\x1b[0m";
+      if (msgIn != "") {
+        msg = "In > \x1b[32m" + msgIn +"\x1b[0m";
+      }
       if (msgOut != "") {
         if (msg != "") msg += ", "
         msg += "out < \x1b[31m" + msgOut + "\x1b[0m";
       }
-      logger.debug(msg);
+      if (msg != "") {
+        logger.debug(msg);
+      }      
     }
   }
 

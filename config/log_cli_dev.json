@@ -21,9 +21,9 @@
       "type": "file",
       "filename": "logs/irc.log"
     },
-    "file_chat": {
+    "file_cli": {
       "type": "file",
-      "filename": "logs/chat.log"
+      "filename": "logs/cli.log"
     },
     "file_pm": {
       "type": "file",
@@ -53,20 +53,28 @@
     "chat": {
       "appenders": [
         "console",
-        "file_chat"
+        "file_cli"
       ],
       "level": "all"
     },
     "PMLogger": {
       "appenders": [
         "console",
-        "file_pm"
+        "file_pm",
+        "file_cli"
       ],
       "level": "all"
     },
     "wordCounter": {
       "appenders": [
         "file_counter"
+      ],
+      "level": "all"
+    },
+    "InOut" : {
+      "appenders": [
+        "console",
+        "file_cli"
       ],
       "level": "all"
     }
