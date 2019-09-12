@@ -63,7 +63,7 @@ export class LobbyTerminator extends LobbyPlugin {
     } else {
       this.lobby.SendMultilineMessageWithInterval([
         "!mp password closed",
-        `This lobby will be closed after ${(time_ms / 1000).toFixed(0)}sec(s).`,
+        `This lobby will be closed in ${(time_ms / 1000).toFixed(0)}sec(s).`,
         "Thank you for playing with the auto host rotation lobby."
       ], this.option.sleep_message_interval, "close lobby announcement", 100000)
         .then(() => this.sendMessageWithDelay("!mp close", time_ms));

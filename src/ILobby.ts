@@ -35,7 +35,7 @@ export interface ILobby {
   MakeLobbyAsync(title: string): Promise<string>;
   EnterLobbyAsync(channel: string): Promise<string>; // TODO:ロビーのチャンネルが存在しないときの処理
   CloseLobbyAsync(): Promise<void>;
-  LoadLobbySettingsAsync(): Promise<void>;
+  LoadLobbySettingsAsync(resetQueue:boolean): Promise<void>;
 
   JoinedLobby: TypedEvent<{channel:string, creator:Player}>;
   PlayerJoined: TypedEvent<{ player: Player, slot: number, team: Teams }>;

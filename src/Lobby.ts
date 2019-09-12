@@ -44,7 +44,7 @@ export class Lobby implements ILobby {
   defferedMessages: { [key: string]: DeferredAction<string> } = {}
 
   // Events
-  JoinedLobby = new TypedEvent<{channel:string, creator:Player}>();
+  JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
   PlayerLeft = new TypedEvent<Player>();
   HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
@@ -437,7 +437,7 @@ export class Lobby implements ILobby {
     this.NetError.emit(err);
   }
 
-  RaiseJoinedLobby(channel:string) {
+  RaiseJoinedLobby(channel: string) {
     this.players.clear();
     this.channel = channel;
     this.lobbyId = channel.replace("#mp_", "");
@@ -447,11 +447,11 @@ export class Lobby implements ILobby {
     this.assignCreatorRole();
     if (this.channel != undefined) {
       logger.addContext("channel", this.channel);
-      for(let p of this.plugins) {
+      for (let p of this.plugins) {
         p.logger.addContext("channel", this.channel);
       }
-      this.JoinedLobby.emit({channel:this.channel, creator})
-    }    
+      this.JoinedLobby.emit({ channel: this.channel, creator })
+    }
   }
 
   OnUserNotFound(): void {
@@ -491,7 +491,7 @@ export class Lobby implements ILobby {
   private makeLobbyAsyncCore(title: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       this.JoinedLobby.once(a => {
-        this.lobbyName = title;        
+        this.lobbyName = title;
         logger.trace("completed makeLobby");
         resolve(this.lobbyId);
       });
@@ -541,7 +541,7 @@ export class Lobby implements ILobby {
     });
   }
 
-  LoadLobbySettingsAsync(): Promise<void> {
+  LoadLobbySettingsAsync(resetQueue: boolean): Promise<void> {
     if (this.status != LobbyStatus.Entered || this.mpSettingParser != undefined) {
       return Promise.reject();
     }
@@ -568,7 +568,7 @@ export class Lobby implements ILobby {
           return;
         }
         logger.debug("parsed mp settings");
-        this.margeMpSettingsResult(this.mpSettingParser);
+        this.margeMpSettingsResult(this.mpSettingParser, resetQueue);
         this.SendMessage("!mp listrefs");
         this.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
 
@@ -583,7 +583,7 @@ export class Lobby implements ILobby {
   }
 
   // 一旦ロビーから全員退出させ、現在のホストからスロット順に追加していく
-  private margeMpSettingsResult(parser: MpSettingsParser): void {
+  private margeMpSettingsResult(parser: MpSettingsParser, resetQueue: boolean): void {
     this.lobbyName = parser.name;
     this.mapId = parser.beatmapId;
     this.mapTitle = parser.beatmapTitle;
