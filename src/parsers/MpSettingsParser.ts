@@ -14,6 +14,7 @@ export class MpSettingsParser {
   name: string = "";
   history: string = "";
   beatmapUrl: string = "";
+  beatmapId:number = 0;
   beatmapTitle: string = "";
   teamMode: string = "";
   winCondition: string = "";
@@ -34,10 +35,11 @@ export class MpSettingsParser {
       this.history = m[2];
       return false;
     }
-    m = line.match(/Beatmap: (\S+) (.+)/);
+    m = line.match(/Beatmap: (\S+?(\d+)) (.+)/);
     if (m) {
       this.beatmapUrl = m[1];
-      this.beatmapTitle = m[2];
+      this.beatmapId = parseInt(m[2]);
+      this.beatmapTitle = m[3];      
       return false;
     }
     m = line.match(/Team mode: (.+), Win condition: (.+)/);

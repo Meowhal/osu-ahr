@@ -10,7 +10,7 @@
     },
     "file_all": {
       "type": "multiFile",
-      "base": "logs/all-",
+      "base": "logs/all",
       "property": "channel",
       "extension": ".log"
     },
@@ -24,8 +24,10 @@
       "filename": "logs/irc.log"
     },
     "file_cli": {
-      "type": "file",
-      "filename": "logs/cli.log"
+      "type": "multiFile",
+      "base": "logs/cli",
+      "property": "channel",
+      "extension": ".log"
     },
     "file_cli_f": {
       "type": "logLevelFilter",
@@ -73,7 +75,7 @@
       ],
       "level": "all"
     },
-    "wordCounter": {
+    "wcounter": {
       "appenders": [
         "file_counter"
       ],

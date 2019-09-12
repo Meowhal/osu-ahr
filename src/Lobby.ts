@@ -68,11 +68,19 @@ export class Lobby implements ILobby {
     this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
     this.status = LobbyStatus.Standby;
     this.ircClient = ircClient;
-    this.ircClient.on("join", (channel, who) => {
+    logger.addContext("channel", "lobby");
+
+    this.registerEvents();
+  }
+
+  private registerEvents() {
+    const onjoin = (channel: string, who: string) => {
       if (who == this.ircClient.nick) {
         this.RaiseJoinedLobby(channel);
+        this.ircClient.off("join", onjoin);
       }
-    });
+    };
+    this.ircClient.on("join", onjoin);
     this.ircClient.on("message", (from, to, message) => {
       if (to == this.channel) {
         this.handleMessage(from, to, message);
@@ -577,6 +585,8 @@ export class Lobby implements ILobby {
   // 一旦ロビーから全員退出させ、現在のホストからスロット順に追加していく
   private margeMpSettingsResult(parser: MpSettingsParser): void {
     this.lobbyName = parser.name;
+    this.mapId = parser.beatmapId;
+    this.mapTitle = parser.beatmapTitle;
     this.host = null;
     this.hostPending = null;
     Array.from(this.players).forEach(p => this.RaisePlayerLeft(p.id));
