@@ -4,8 +4,6 @@ import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
-import log4js from "log4js";
-const logger = log4js.getLogger("hostSkipper");
 
 export interface HostSkipperOption {
   vote_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
@@ -35,16 +33,16 @@ const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
 export class HostSkipper extends LobbyPlugin {
   option: HostSkipperOption;
   afkTimer: NodeJS.Timer | undefined;
-  timeStart: number = Date.now();
+  timeVotePassed: number = 0;
   voting: VoteCounter;
 
   // skip受付からの経過時間
-  get elapsed(): number {
-    return Date.now() - this.timeStart;
+  get elapsedSinceVotePassed(): number {
+    return Date.now() - this.timeVotePassed;
   }
 
   constructor(lobby: ILobby, option: Partial<HostSkipperOption> = {}) {
-    super(lobby);
+    super(lobby, "skipper");
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
@@ -127,18 +125,22 @@ export class HostSkipper extends LobbyPlugin {
 
   private vote(player: Player) {
     if (this.voting.passed) {
-      logger.debug("vote from %s was ignored, already skipped", player.id);
-    } else if (this.elapsed < this.option.vote_cooltime_ms) {
-      logger.debug("vote from %s was ignored, at cool time.", player.id);
+      this.logger.debug("vote from %s was ignored, already skipped", player.id);
+    } else if (this.elapsedSinceVotePassed < this.option.vote_cooltime_ms) {
+      this.logger.debug("vote from %s was ignored, at cool time.", player.id);
+      if (player.isHost) {
+        const secs = (this.option.vote_cooltime_ms - this.elapsedSinceVotePassed) / 1000;
+        this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).` );
+      }
     } else if (player.isHost) {
-      logger.debug("host(%s) sent !skip command", player.id);
+      this.logger.debug("host(%s) sent !skip command", player.id);
       this.doSkip();
     } else {
       if (this.voting.Vote(player)) {
-        logger.trace("accept skip request from %s", player.id);
+        this.logger.trace("accept skip request from %s", player.id);
         this.checkSkipCount(true);
       } else {
-        logger.debug("vote from %s was ignored, double vote", player.id);
+        this.logger.debug("vote from %s was ignored, double vote", player.id);
       }
     }
   }
@@ -155,17 +157,18 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private doSkip(): void {
-    logger.info("do skip");
+    this.logger.info("do skip");
     this.stopTimer();
     this.sendPluginMessage("skip");
+    this.timeVotePassed = Date.now();
   }
 
   private doSkipTo(userid: string): void {
     if (!this.lobby.Includes(userid)) {
-      logger.info("invalid userid @skipto : %s", userid);
+      this.logger.info("invalid userid @skipto : %s", userid);
       return;
     }
-    logger.info("do skipTo : %s", userid);
+    this.logger.info("do skipTo : %s", userid);
     this.stopTimer();
     this.sendPluginMessage("skipto", [userid]);
   }
@@ -173,15 +176,14 @@ export class HostSkipper extends LobbyPlugin {
   restart(): void {
     this.voting.Clear();
     this.startTimer();
-    this.timeStart = Date.now();
   }
 
   startTimer(): void {
     if (this.option.afk_timer_delay_ms == 0) return;
     this.stopTimer();
-    logger.trace("start timer");
+    this.logger.trace("start timer");
     this.afkTimer = setTimeout(() => {
-      logger.trace("afk timer action");
+      this.logger.trace("afk timer action");
       if (this.afkTimer != undefined) {
         if (this.option.afk_timer_message != "") {
           this.lobby.SendMessage(this.option.afk_timer_message);
@@ -195,7 +197,7 @@ export class HostSkipper extends LobbyPlugin {
 
   stopTimer(): void {
     if (this.afkTimer != undefined) {
-      logger.trace("stop timer");
+      this.logger.trace("stop timer");
       clearTimeout(this.afkTimer);
       this.afkTimer = undefined;
     }

@@ -9,8 +9,10 @@
       "appender": "console"
     },
     "file_all": {
-      "type": "file",
-      "filename": "logs/all.log"
+      "type": "multiFile",
+      "base": "logs/all-",
+      "property": "channel",
+      "extension": ".log"
     },
     "file_all_f": {
       "type": "logLevelFilter",
@@ -25,6 +27,11 @@
       "type": "file",
       "filename": "logs/cli.log"
     },
+    "file_cli_f": {
+      "type": "logLevelFilter",
+      "level": "info",
+      "appender": "file_cli"
+    },
     "file_pm": {
       "type": "file",
       "filename": "logs/pm.log"
@@ -38,7 +45,8 @@
     "default": {
       "appenders": [
         "console_f",
-        "file_all_f"
+        "file_all_f",
+        "file_cli_f"
       ],
       "level": "all"
     },
@@ -68,13 +76,6 @@
     "wordCounter": {
       "appenders": [
         "file_counter"
-      ],
-      "level": "all"
-    },
-    "InOut" : {
-      "appenders": [
-        "console",
-        "file_cli"
       ],
       "level": "all"
     }

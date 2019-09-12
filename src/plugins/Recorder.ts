@@ -3,9 +3,6 @@ import { ILobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
 import Nedb from 'nedb';
-import log4js from "log4js";
-
-const logger = log4js.getLogger("recorder");
 
 export interface RecorderOption {
   path_player: string,
@@ -40,7 +37,7 @@ export class Recorder extends LobbyPlugin {
   loadingTask: Promise<void[]> | null = null;
 
   constructor(lobby: ILobby, autoload: boolean, option: Partial<RecorderOption> = {}) {
-    super(lobby);
+    super(lobby, "recorder");
     this.option = { ...defaultOption, ...option } as RecorderOption;
     this.db = {
       player: new Nedb(this.option.path_player),
@@ -152,7 +149,7 @@ export class Recorder extends LobbyPlugin {
   private checkDbError(err: any): boolean {
     this.hasError = this.hasError || (err != null);
     if (err) {
-      logger.error(err);
+      this.logger.error(err);
     }
     return this.hasError;
   }

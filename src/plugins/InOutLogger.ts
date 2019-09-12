@@ -1,15 +1,12 @@
-import { LobbyPlugin } from "./LobbyPlugin";
 import { ILobby, Player } from "..";
+import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType, BanchoResponse } from "../parsers";
-import log4js from "log4js";
-
-const logger = log4js.getLogger("InOut");
 
 export class InOutLogger extends LobbyPlugin {
   players: Set<Player> = new Set<Player>();
 
   constructor(lobby: ILobby) {
-    super(lobby);
+    super(lobby, "inout");
     this.lobby.RecievedBanchoResponse.on(a => this.onRecievedBanchoResponse(a.message, a.response));
   }
 
@@ -25,21 +22,20 @@ export class InOutLogger extends LobbyPlugin {
   }
 
   logInOutPlayers(): void {
-    if (logger.isDebugEnabled) {
+    if (this.logger.isInfoEnabled) {
       const msgOut = Array.from(this.players).filter(p => !this.lobby.players.has(p)).map(p => p.id).join(", ");
       const msgIn = Array.from(this.lobby.players).filter(p => !this.players.has(p)).map(p => p.id).join(", ");
       let msg = "";
-
       if (msgIn != "") {
-        msg = "In > \x1b[32m" + msgIn +"\x1b[0m";
+        msg = "+ \x1b[32m" + msgIn + "\x1b[0m";
       }
       if (msgOut != "") {
         if (msg != "") msg += ", "
-        msg += "out < \x1b[31m" + msgOut + "\x1b[0m";
+        msg += "- \x1b[31m" + msgOut + "\x1b[0m";
       }
       if (msg != "") {
-        logger.debug(msg);
-      }      
+        this.logger.info(msg);
+      }
     }
   }
 

@@ -28,7 +28,6 @@ describe("Integrated Plugins Tests", function () {
       assert.isTrue(owner.isCreator);
       assert.isTrue(owner.isAuthorized);
       assert.isTrue(owner.isHost);
-      assert.isTrue(owner.isReferee);
 
       await ircClient.emulateMatchAsync(0);
 

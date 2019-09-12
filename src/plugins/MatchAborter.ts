@@ -2,9 +2,7 @@ import { ILobby } from "../ILobby";
 import { Player, PlayerStatus } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import log4js from "log4js";
 import { VoteCounter } from "./VoteCounter";
-const logger = log4js.getLogger("matchAborter");
 
 export interface MatchAborterOption {
   vote_rate: number; // アボート投票時の必要数/プレイヤー数
@@ -27,7 +25,7 @@ export class MatchAborter extends LobbyPlugin {
   voting: VoteCounter;
 
   constructor(lobby: ILobby, option: Partial<MatchAborterOption> = {}) {
-    super(lobby);
+    super(lobby, "aborter");
     this.option = { ...defaultOption, ...option } as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
@@ -76,7 +74,7 @@ export class MatchAborter extends LobbyPlugin {
     if (!this.lobby.isMatching) return;
     if (command == "!abort") {
       if (player == this.lobby.host) {
-        logger.trace("host(%s) sent !abort command", player.id);
+        this.logger.trace("host(%s) sent !abort command", player.id);
         this.doAbort();
       } else {
         this.vote(player);
@@ -91,10 +89,10 @@ export class MatchAborter extends LobbyPlugin {
   private vote(player: Player) {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
-      logger.trace("accept abort request from %s (%s)", player.id, this.voting.toString());
+      this.logger.trace("accept abort request from %s (%s)", player.id, this.voting.toString());
       this.checkVoteCount(true);
     } else {
-      logger.trace("vote from %s was ignored", player.id);
+      this.logger.trace("vote from %s was ignored", player.id);
     }
   }
 
@@ -130,7 +128,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private doAbort(): void {
-    logger.info("do abort");
+    this.logger.info("do abort");
     this.stopTimer();
     this.lobby.AbortMatch();
   }
@@ -138,9 +136,9 @@ export class MatchAborter extends LobbyPlugin {
   private startTimer(): void {
     if (this.option.auto_abort_delay_ms == 0) return;
     this.stopTimer();
-    logger.trace("start timer");
+    this.logger.trace("start timer");
     this.abortTimer = setTimeout(() => {
-      logger.trace("abort timer action");
+      this.logger.trace("abort timer action");
       if (this.abortTimer != null) {
         this.doAutoAbort();
       }
@@ -162,7 +160,7 @@ export class MatchAborter extends LobbyPlugin {
 
   private stopTimer(): void {
     if (this.abortTimer != null) {
-      logger.trace("stop timer");
+      this.logger.trace("stop timer");
       clearTimeout(this.abortTimer);
       this.abortTimer = null;
     }

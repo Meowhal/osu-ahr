@@ -606,7 +606,6 @@ describe("LobbyTest", function () {
       assert.isTrue(p.isCreator);
       assert.isTrue(p.isAuthorized);
       assert.isFalse(p.isHost);
-      assert.isTrue(p.isReferee);
     });
   });
 });

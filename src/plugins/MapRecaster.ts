@@ -2,9 +2,6 @@ import { ILobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
-import log4js from "log4js";
-
-const logger = log4js.getLogger("mapRecaster");
 
 export interface MapRecasterOption {
 }
@@ -19,7 +16,7 @@ export class MapRecaster extends LobbyPlugin {
   option: MapRecasterOption;
   canRecast: boolean = true;
   constructor(lobby: ILobby, option: Partial<MapRecasterOption> = {}) {
-    super(lobby);
+    super(lobby, "recaster");
     this.option = { ...DefaultOption, ...option } as MapRecasterOption;
     this.registerEvents();
   }

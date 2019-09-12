@@ -4,8 +4,6 @@ import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
-import log4js from "log4js";
-const logger = log4js.getLogger("matchStarter");
 
 export interface MatchStarterOption {
   vote_rate: number; // 投票時の必要数/プレイヤー数
@@ -20,7 +18,7 @@ export class MatchStarter extends LobbyPlugin {
   isTimerActive: boolean = false;
 
   constructor(lobby: ILobby, option: Partial<MatchStarterOption> = {}) {
-    super(lobby);
+    super(lobby, "starter");
     this.option = { ...defaultOption, ...option } as MatchStarterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
@@ -97,10 +95,10 @@ export class MatchStarter extends LobbyPlugin {
   private vote(player: Player) {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
-      logger.trace("accepted start request from %s", player.id);
+      this.logger.trace("accepted start request from %s", player.id);
       this.checkVoteCount(true);
     } else {
-      logger.trace("vote was ignored");
+      this.logger.trace("vote was ignored");
     }
   }
 

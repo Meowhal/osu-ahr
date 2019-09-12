@@ -1,12 +1,7 @@
 import { LobbyPlugin } from "./LobbyPlugin";
-import { ILobby } from "../ILobby";
-import { Player } from "../Player";
+import { ILobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
-import log4js from "log4js";
 import config from "config";
-import pkg from "../../package.json";
-
-const logger = log4js.getLogger("lobbyTerminator");
 
 export interface LobbyTerminatorOption {
   terminate_time_ms: number;
@@ -21,7 +16,7 @@ export class LobbyTerminator extends LobbyPlugin {
   terminateTimer: NodeJS.Timer | undefined;
 
   constructor(lobby: ILobby, option: Partial<LobbyTerminatorOption> = {}) {
-    super(lobby);
+    super(lobby, "terminator");
     this.option = { ...LobbyTerminatorDefaultOption, ...option } as LobbyTerminatorOption;
     this.registerEvents();
   }
@@ -41,7 +36,7 @@ export class LobbyTerminator extends LobbyPlugin {
     if (this.terminateTimer) {
       clearTimeout(this.terminateTimer);
       this.terminateTimer = undefined;
-      logger.trace("terminate_timer canceled");
+      this.logger.trace("terminate_timer canceled");
     }
   }
   onPlayerLeft(p: Player): void {
@@ -49,9 +44,9 @@ export class LobbyTerminator extends LobbyPlugin {
       if (this.terminateTimer) {
         clearTimeout(this.terminateTimer);
       }
-      logger.trace("terminate_timer start")
+      this.logger.trace("terminate_timer start")
       this.terminateTimer = setTimeout(() => {
-        logger.info("terminated lobby");
+        this.logger.info("terminated lobby");
         this.lobby.CloseLobbyAsync();
       }, this.option.terminate_time_ms);
     }

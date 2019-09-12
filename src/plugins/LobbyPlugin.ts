@@ -1,15 +1,17 @@
 import { ILobby } from "../ILobby";
-import { Player } from "../Player";
-import { TypedEvent } from "../libs";
+import log4js from "log4js";
 
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。
  */
 export class LobbyPlugin {
   lobby: ILobby;
-  constructor(lobby: ILobby) {
+  logger: log4js.Logger;
+  constructor(lobby: ILobby, loggerTag:string = "default") {
     this.lobby = lobby;
     this.lobby.plugins.push(this);
+    this.logger = log4js.getLogger(loggerTag);
+    this.logger.addContext("channel", "lobby");
   }
 
   /**

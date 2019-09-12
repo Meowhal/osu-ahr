@@ -44,6 +44,7 @@ export class Lobby implements ILobby {
   defferedMessages: { [key: string]: DeferredAction<string> } = {}
 
   // Events
+  JoinedLobby = new TypedEvent<{channel:string, creator:Player}>();
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
   PlayerLeft = new TypedEvent<Player>();
   HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
@@ -67,9 +68,11 @@ export class Lobby implements ILobby {
     this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
     this.status = LobbyStatus.Standby;
     this.ircClient = ircClient;
-
-    this.assignCreatorRole();
-
+    this.ircClient.on("join", (channel, who) => {
+      if (who == this.ircClient.nick) {
+        this.RaiseJoinedLobby(channel);
+      }
+    });
     this.ircClient.on("message", (from, to, message) => {
       if (to == this.channel) {
         this.handleMessage(from, to, message);
@@ -426,6 +429,23 @@ export class Lobby implements ILobby {
     this.NetError.emit(err);
   }
 
+  RaiseJoinedLobby(channel:string) {
+    this.players.clear();
+    this.channel = channel;
+    this.lobbyId = channel.replace("#mp_", "");
+    this.status = LobbyStatus.Entered;
+
+    const creator = this.GetOrMakePlayer(this.ircClient.nick);
+    this.assignCreatorRole();
+    if (this.channel != undefined) {
+      logger.addContext("channel", this.channel);
+      for(let p of this.plugins) {
+        p.logger.addContext("channel", this.channel);
+      }
+      this.JoinedLobby.emit({channel:this.channel, creator})
+    }    
+  }
+
   OnUserNotFound(): void {
     if (this.hostPending != null) {
       const p = this.hostPending;
@@ -462,19 +482,11 @@ export class Lobby implements ILobby {
 
   private makeLobbyAsyncCore(title: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      const onJoin = (channel: string, who: string) => {
-        if (who == this.ircClient.nick) {
-          this.channel = channel;
-          this.lobbyName = title;
-          this.lobbyId = channel.replace("#mp_", "");
-          this.ircClient.off("join", onJoin);
-          this.status = LobbyStatus.Entered;
-          this.players.clear();
-          resolve(this.lobbyId);
-          logger.trace("completed makeLobby");
-        }
-      };
-      this.ircClient.on("join", onJoin);
+      this.JoinedLobby.once(a => {
+        this.lobbyName = title;        
+        logger.trace("completed makeLobby");
+        resolve(this.lobbyId);
+      });
       const trg = "BanchoBot";
       const msg = "!mp make " + title;
       this.ircClient.say(trg, msg);
@@ -492,13 +504,9 @@ export class Lobby implements ILobby {
         return;
       }
       this.ircClient.join(ch, () => {
-        this.channel = channel;
         this.lobbyName = "__";
-        this.lobbyId = channel.replace("#mp_", "");
-        this.status = LobbyStatus.Entered;
-        this.players.clear();
-        resolve(this.lobbyId);
         logger.trace("completed EnterLobby");
+        resolve(this.lobbyId);
       });
     });
   }
@@ -627,7 +635,6 @@ export class Lobby implements ILobby {
       var c = this.GetOrMakePlayer(this.ircClient.nick);
       c.setRole(Roles.Authorized);
       c.setRole(Roles.Creator);
-      c.setRole(Roles.Referee);
       logger.info("assigned %s creators role", this.ircClient.nick);
     }
   }

@@ -205,10 +205,13 @@ describe("HostSkipperTest", function () {
       ircClient.emulateMessage("p0", ircClient.channel, "!skip");
       await rt;
     });
-    it("host skip should be ignored at cool time", async () => {
-      const { skipper, lobby, ircClient } = await prepare(0, 10);
+    it("host skip should be ignored during cool time", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0, 10000);
       await tu.AddPlayersAsync(3, ircClient);
       await tu.changeHostAsync("p0", lobby);
+      const r = resolveSkipAsync(lobby);
+      ircClient.emulateMessage("p0", ircClient.channel, "!skip");
+      await r;
       const rt = rejectSkipAsync(lobby, 20);
       ircClient.emulateMessage("p0", ircClient.channel, "!skip");
       await rt;
@@ -242,25 +245,28 @@ describe("HostSkipperTest", function () {
       assert.isTrue(skipped);
     });
     it("is player skip ignored at cooltime", async () => {
-      const { skipper, lobby, ircClient } = await prepare(0, 100);
+      const { skipper, lobby, ircClient } = await prepare(0, 20);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      let skipped = false;
-      const task = rejectSkipAsync(lobby, 50);
+      const r = resolveSkipAsync(lobby);
+      ircClient.emulateMessage("p0", ircClient.channel, "!skip");
+      await r;
+      const task = rejectSkipAsync(lobby, 20);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
-      await tu.delayAsync(10);
+      await tu.delayAsync(1);
       assert.equal(skipper.voting.count, 0);
-      assert.isFalse(skipped);
       ircClient.emulateMessage("p2", ircClient.channel, "!skip");
-      await tu.delayAsync(10);
+      await tu.delayAsync(1);
       assert.equal(skipper.voting.count, 0);
-      assert.isFalse(skipped);
-
       ircClient.emulateMessage("p3", ircClient.channel, "!skip");
-      await tu.delayAsync(10);
+      await tu.delayAsync(1);
       await task;
       assert.equal(skipper.voting.count, 0);
-      assert.isFalse(skipped);
+
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
+      await tu.delayAsync(1);
+      assert.equal(skipper.voting.count, 1);
+
     });
     it("duplicate vote", async () => {
       const { skipper, lobby, ircClient } = await prepare(0, 0);

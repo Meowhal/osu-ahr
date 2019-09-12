@@ -37,6 +37,7 @@ export interface ILobby {
   CloseLobbyAsync(): Promise<void>;
   LoadLobbySettingsAsync(): Promise<void>;
 
+  JoinedLobby: TypedEvent<{channel:string, creator:Player}>;
   PlayerJoined: TypedEvent<{ player: Player, slot: number, team: Teams }>;
   PlayerLeft: TypedEvent<Player>;
   HostChanged: TypedEvent<{ succeeded: boolean, player: Player }>;

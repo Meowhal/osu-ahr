@@ -1,8 +1,6 @@
 import { ILobby } from "../ILobby";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import log4js from "log4js";
-const logger = log4js.getLogger("wordCounter");
 
 export interface WordCounterOption {
   periods: {
@@ -38,7 +36,7 @@ export class WordCounter extends LobbyPlugin {
   lastLogTime: number = 0;
 
   constructor(lobby: ILobby, option: Partial<WordCounterOption> = {}) {
-    super(lobby);
+    super(lobby, "wcounter");
     this.option = { ...DefaultOption, ...option } as WordCounterOption;
     this.periods = this.option.periods.map(a => {
       return {
@@ -95,7 +93,7 @@ export class WordCounter extends LobbyPlugin {
     const topIndex = this.periods.reduce((p, a) => a.index < p ? a.index : p, 1000000);
     // 時間切れのサンプルが溜まってきたら捨てる
     if (this.samples.length / 2 < topIndex && 100 < this.samples.length) {
-      logger.trace(`gc start len:${this.samples.length}, idx:${topIndex}`);
+      this.logger.trace(`gc start len:${this.samples.length}, idx:${topIndex}`);
       this.samples = this.samples.slice(topIndex);
       for (let p of this.periods) {
         p.index -= topIndex;
@@ -105,7 +103,7 @@ export class WordCounter extends LobbyPlugin {
   }
 
   private log(msg: string, important: boolean) {
-    let f = (important ? logger.info : logger.debug).bind(logger);
+    let f = (important ? this.logger.info : this.logger.debug).bind(this.logger);
     f("msg:%s", msg);
     for (let p of this.periods) {
       f(`  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `);
