@@ -53,7 +53,7 @@ export class WordCounter extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.SentMessage.on(a => this.onSendMessage(a));
+    this.lobby.SentMessage.on(a => this.onSendMessage(a.message));
   }
 
   private onSendMessage(message: string): void {

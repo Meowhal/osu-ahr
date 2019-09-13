@@ -21,7 +21,7 @@ describe("MatchStarterTest", function () {
   }
 
   async function assertSendMpStart(lobby: Lobby): Promise<number> {
-    return tu.assertEventFire(lobby.SentMessage, message => {
+    return tu.assertEventFire(lobby.SentMessage, ({ message }) => {
       return message.startsWith("!mp start");
     });
   }

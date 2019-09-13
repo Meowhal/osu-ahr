@@ -136,8 +136,8 @@ describe("LobbyTest", function () {
       // 一人だけ退出
       const leftindex = 1;
       const lp = new Promise<void>(resolve => {
-        lobby.PlayerLeft.on(player => {
-          assert.equal(player, players[leftindex]);
+        lobby.PlayerLeft.on(a => {
+          assert.equal(a.player, players[leftindex]);
           resolve();
         });
       });
@@ -195,7 +195,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       const assertHost = async (next: Player) => {
         return new Promise<Player>(resolve => {
-          lobby.HostChanged.once(({ succeeded, player }) => {
+          lobby.HostChanged.once(({ player }) => {
             assert.equal(player, next);
             tu.assertHost(next.id, lobby);
             assert.equal(lobby.hostPending, null);
@@ -217,22 +217,13 @@ describe("LobbyTest", function () {
     // ホスト任命後に離脱した場合
     it("host change & left test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      const getNewHostAsync = async () => {
-        return new Promise<Player>(resolve => {
-          lobby.HostChanged.once(({ succeeded, player }) => {
-            assert.isFalse(succeeded);
-            resolve(player);
-          });
-        });
-      }
+      const tr = tu.assertEventNeverFire(lobby.HostChanged, null, 10);
       //logIrcEvent(ircClient);
       let nexthost = players[0];
-      let taskHost = getNewHostAsync();
       let taskLeft = ircClient.emulateRemovePlayerAsync(nexthost.id);
       lobby.TransferHost(nexthost);
-      let host = await taskHost;
       await taskLeft;
-      assert.equal(host, nexthost);
+      await tr;
     });
   });
 
@@ -422,7 +413,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = false;
       const msg = "hello world";
-      lobby.SentMessage.once((message) => {
+      lobby.SentMessage.once(({ message }) => {
         assert.equal(message, msg);
         ma = true;
       });
@@ -434,7 +425,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = 0;
       const msg = "hello world";
-      lobby.SentMessage.on((message) => {
+      lobby.SentMessage.on(({ message }) => {
         assert.equal(message, msg);
         ma = ma + 1;
       });
@@ -456,7 +447,7 @@ describe("LobbyTest", function () {
       const msg = () => {
         return "a" + "b" + "c";
       };
-      lobby.SentMessage.on((message) => {
+      lobby.SentMessage.on(({ message }) => {
         assert.equal(message, msg());
         mf = true;
       });
@@ -585,16 +576,16 @@ describe("LobbyTest", function () {
       await tu.delayAsync(20);
     });
   });
-  describe("mp settings load tests", function() {
-    async function emulateMpSettingsResponse(ircClient:DummyIrcClient, texts:string[]) {
-      for(let m of texts) {
+  describe("mp settings load tests", function () {
+    async function emulateMpSettingsResponse(ircClient: DummyIrcClient, texts: string[]) {
+      for (let m of texts) {
         await ircClient.emulateMessageAsync("BanchoBot", ircClient.channel, m);
       }
     }
 
-    function assertMpSettingsResult(lobby:Lobby, result:MpSettingsResult) {
+    function assertMpSettingsResult(lobby: Lobby, result: MpSettingsResult) {
       assert.equal(lobby.players.size, result.players.length);
-      for(let r of result.players) {
+      for (let r of result.players) {
         const p = lobby.GetPlayer(r.id);
         if (p == null) {
           assert.fail();
@@ -604,16 +595,16 @@ describe("LobbyTest", function () {
         assert.isTrue(p.is(Roles.Player));
         assert.equal(p.isHost, r.isHost);
       }
-    }   
-    it("load settings, empty lobby", async() =>{
-      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+    }
+    it("load settings, empty lobby", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
       const c1 = MpSettingsCases.case1_1;
       await ircClient.emulateMessageAsync(ircClient.nick, ircClient.channel, "!mp settings");
       await emulateMpSettingsResponse(ircClient, c1.texts);
       assertMpSettingsResult(lobby, c1.result);
     });
-    it("load settings, change host", async() =>{
-      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+    it("load settings, change host", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
       const c1_1 = MpSettingsCases.case1_1;
       const c1_2 = MpSettingsCases.case1_2;
       await ircClient.emulateMessageAsync(ircClient.nick, ircClient.channel, "!mp settings");
@@ -622,8 +613,8 @@ describe("LobbyTest", function () {
       await emulateMpSettingsResponse(ircClient, c1_2.texts);
       assertMpSettingsResult(lobby, c1_2.result);
     });
-    it("load settings, resore", async() =>{
-      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+    it("load settings, resore", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
       const c1_1 = MpSettingsCases.case1_1;
       const c1_2 = MpSettingsCases.case1_2;
       await ircClient.emulateMessageAsync(ircClient.nick, ircClient.channel, "!mp settings");

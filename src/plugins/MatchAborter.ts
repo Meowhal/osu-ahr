@@ -32,7 +32,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());

@@ -26,8 +26,8 @@ export class MatchStarter extends LobbyPlugin {
 
   private registerEvents(): void {
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player));
-    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a));
-    this.lobby.HostChanged.on(a => this.onHostChanged(a.player, a.succeeded));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
+    this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.RecievedBanchoResponse.on(a => {
@@ -48,8 +48,8 @@ export class MatchStarter extends LobbyPlugin {
     this.checkVoteCount();
   }
 
-  private onHostChanged(player: Player, succeeded: boolean): any {
-    if (!succeeded || this.lobby.isMatching) return;
+  private onHostChanged(player: Player): any {
+    if (this.lobby.isMatching) return;
     this.voting.Clear();
     this.stopTimer();
   }

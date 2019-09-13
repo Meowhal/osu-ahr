@@ -25,14 +25,14 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private registerEvents(): void {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
-    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
-    this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
+    this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.changedPlayers));
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanging) {
         this.onBeatmapChanging()
@@ -72,8 +72,7 @@ export class AutoHostSelector extends LobbyPlugin {
   // ユーザーが自分でホストを変更した場合
   // queueの次のホストならそのまま
   // 順番を無視していたら任命し直す
-  private onHostChanged(succeeded: boolean, newhost: Player): void {
-    if (!succeeded) return; // 存在しないユーザーを指定した場合は無視する(player left eventで対応)
+  private onHostChanged(newhost: Player): void {
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
     if (this.hostQueue[0] == newhost) {
@@ -136,7 +135,7 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  private onParsedSettings(result: MpSettingsResult, changedPlayers: boolean): any {
+  onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
     this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
   }
 

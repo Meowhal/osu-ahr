@@ -127,7 +127,7 @@ class TestUtils {
    * @param cb BanchoResponseを評価するためのコールバック関数。falseを返すと監視が継続される
    * @param timeout リジェクトまでのミリ秒時間
    */
-  async assertBanchoRespond(lobby:Lobby, expected : BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number = 0): Promise<number> {
+  async assertBanchoRespond(lobby: Lobby, expected: BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number = 0): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       let id: NodeJS.Timeout;
       if (timeout != 0) {
@@ -153,7 +153,7 @@ class TestUtils {
    * @param cb BanchoResponseを評価するためのコールバック関数。falseを返すと監視が継続される
    * @param timeout 監視継続ミリ秒時間
    */
-  async assertBanchoNotRespond(lobby:Lobby, notExpected : BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number): Promise<number> {
+  async assertBanchoNotRespond(lobby: Lobby, notExpected: BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       const id = setTimeout(() => {
         d.dispose();

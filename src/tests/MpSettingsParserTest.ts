@@ -314,9 +314,9 @@ describe("MpSettingsParserTest", function () {
   });
   it("check cases", () => {
     const p = new MpSettingsParser();
-    for(let key in MpSettingsCases) {
+    for (let key in MpSettingsCases) {
       const c = MpSettingsCases[key];
-      for(let t of c.texts) {
+      for (let t of c.texts) {
         p.feedLine(t);
       }
       assert.isTrue(p.isParsed, c.title);

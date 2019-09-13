@@ -7,7 +7,7 @@ import log4js from "log4js";
 export class LobbyPlugin {
   lobby: Lobby;
   logger: log4js.Logger;
-  constructor(lobby: Lobby, loggerTag:string = "default") {
+  constructor(lobby: Lobby, loggerTag: string = "default") {
     this.lobby = lobby;
     this.lobby.plugins.push(this);
     this.logger = log4js.getLogger(loggerTag);

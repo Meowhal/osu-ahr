@@ -56,9 +56,8 @@ export class Lobby {
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
-  PlayerLeft = new TypedEvent<Player>();
-  HostChanged = new TypedEvent<{ succeeded: boolean, player: Player }>();
-  UserNotFound = new TypedEvent<void>();
+  PlayerLeft = new TypedEvent<{ player: Player }>();
+  HostChanged = new TypedEvent<{ player: Player }>();
   MatchStarted = new TypedEvent<{ mapId: number, mapTitle: string }>();
   PlayerFinished = new TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>();
   MatchFinished = new TypedEvent<void>();
@@ -68,10 +67,10 @@ export class Lobby {
   PlayerChated = new TypedEvent<{ player: Player, message: string }>();
   ReceivedCustomCommand = new TypedEvent<{ player: Player, command: string, param: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
-  SentMessage = new TypedEvent<string>();
+  SentMessage = new TypedEvent<{ message: string }>();
   RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
-  ParsedStat = new TypedEvent<StatResult>();
-  ParsedSettings = new TypedEvent<{ result: MpSettingsResult, changedPlayers: boolean }>();
+  ParsedStat = new TypedEvent<{ result: StatResult }>();
+  ParsedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
 
   constructor(ircClient: IIrcClient, option: any | null = null) {
     if (ircClient.conn == null) {
@@ -195,7 +194,7 @@ export class Lobby {
     if (this.channel != undefined) {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
-      this.SentMessage.emit(message);
+      this.SentMessage.emit({ message });
       chatlogger.trace("bot:%s", message);
     }
   }
@@ -373,14 +372,14 @@ export class Lobby {
   RaisePlayerLeft(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
     if (this.removePlayer(player)) {
-      this.PlayerLeft.emit(player);
+      this.PlayerLeft.emit({ player });
     }
   }
 
   RaiseHostChanged(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
     this.setAsHost(player);
-    this.HostChanged.emit({ succeeded: true, player });
+    this.HostChanged.emit({ player });
   }
 
   RaiseMatchStarted(): void {
@@ -443,18 +442,18 @@ export class Lobby {
     if (!this.settingParser.isParsing && this.settingParser.result != null) {
       logger.debug("parsed mp settings");
       const result = this.settingParser.result;
-      let changedPlayers = this.margeMpSettingsResult(result);
-      if (changedPlayers) {
+      const r = this.margeMpSettingsResult(result);
+      if (r.hostChanged || r.playersIn.length != 0 || r.playersOut.length != 0) {
         logger.info("applied mp settings");
       }
-      this.ParsedSettings.emit({ result, changedPlayers });
+      this.ParsedSettings.emit({ result, ...r });
     }
   }
 
   RaiseParsedStat() {
     if (!this.statParser.isParsing && this.statParser.result != null) {
       logger.debug("parsed stat");
-      this.ParsedStat.emit(this.statParser.result);
+      this.ParsedStat.emit({ result: this.statParser.result });
     }
   }
 
@@ -463,7 +462,6 @@ export class Lobby {
       const p = this.hostPending;
       logger.warn("occured OnUserNotFound : " + p.id);
       this.hostPending = null;
-      this.HostChanged.emit({ succeeded: false, player: p });
     }
   }
 
@@ -552,7 +550,7 @@ export class Lobby {
     }
     logger.trace("start loadLobbySettings");
     const p = new Promise<void>(resolve => {
-      this.ParsedSettings.once(({ result, changedPlayers }) => {
+      this.ParsedSettings.once(() => {
         this.SendMessage("!mp listrefs");
         logger.trace("completed loadLobbySettings");
         resolve();
@@ -625,19 +623,21 @@ export class Lobby {
   /**
    * MpSettingsの結果を取り込む。join/left/hostの発生しない
    * @param result 
-   * @param resetQueue 
    */
-  private margeMpSettingsResult(result: MpSettingsResult): boolean {
+  private margeMpSettingsResult(result: MpSettingsResult): { playersIn: Player[], playersOut: Player[], hostChanged: boolean } {
     this.lobbyName = result.name;
     this.mapId = result.beatmapId;
     this.mapTitle = result.beatmapTitle;
-    let playersChanged = false;
+
     const mpPlayers = result.players.map(r => this.GetOrMakePlayer(r.id));
+    const playersIn: Player[] = [];
+    const playersOut: Player[] = [];
+    let hostChanged = false;
 
     for (let p of this.players) {
       if (!mpPlayers.includes(p)) {
         this.removePlayer(p);
-        playersChanged = true;
+        playersOut.push(p);
       }
     }
 
@@ -645,18 +645,18 @@ export class Lobby {
       let p = this.GetOrMakePlayer(r.id);
       if (!this.players.has(p)) {
         this.addPlayer(p, r.slot, r.team);
-        playersChanged = true;
+        playersIn.push(p);
       } else {
         p.slot = r.slot;
         p.team = r.team;
       }
       if (r.isHost && p != this.host) {
         this.setAsHost(p);
-        playersChanged = true;
+        hostChanged = true;
       }
     }
 
-    return playersChanged;
+    return { playersIn, playersOut, hostChanged };
   }
 
   // #endregion

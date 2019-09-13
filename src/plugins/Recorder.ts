@@ -49,7 +49,7 @@ export class Recorder extends LobbyPlugin {
     this.registerEvents();
   }
   private registerEvents(): void {
-    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.MatchStarted.on(a => this.onMatchStarted(a.mapId, a.mapTitle));
 

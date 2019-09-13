@@ -49,7 +49,7 @@ export function logIrcEvent(client: IIrcClient) {
   });
 }
 
-export function logPrivateMessage(client:IIrcClient) {
+export function logPrivateMessage(client: IIrcClient) {
   client.on("message", (from, to, message) => {
     if (to == client.nick) {
       pmLogger.info(`pm ${from} -> ${message}`);

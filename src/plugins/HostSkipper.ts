@@ -49,9 +49,9 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player));
-    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
-    this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
+    this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
+    this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
@@ -80,8 +80,8 @@ export class HostSkipper extends LobbyPlugin {
     }
   }
 
-  private onHostChanged(succeeded: boolean, newhost: Player): void {
-    if (!succeeded || this.lobby.isMatching) return;
+  private onHostChanged(newhost: Player): void {
+    if (this.lobby.isMatching) return;
     this.restart();
   }
 
@@ -130,7 +130,7 @@ export class HostSkipper extends LobbyPlugin {
       this.logger.debug("vote from %s was ignored, at cool time.", player.id);
       if (player.isHost) {
         const secs = (this.option.vote_cooltime_ms - this.elapsedSinceVotePassed) / 1000;
-        this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).` );
+        this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
       this.logger.debug("host(%s) sent !skip command", player.id);

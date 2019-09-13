@@ -31,7 +31,7 @@ export class MapRecaster extends LobbyPlugin {
   }
 
   onReceivedCustomCommand(command: string, param: string, player: Player): any {
-    if(command == "!update") {
+    if (command == "!update") {
       if (this.canRecast) {
         this.canRecast = false;
         this.lobby.SendMessage("!mp map " + this.lobby.mapId);
