@@ -1,9 +1,9 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "..";
 import { LobbyPlugin } from "../plugins/LobbyPlugin";
 
 export class DummyLobbyPlugin extends LobbyPlugin {
 
-  constructor(lobby: ILobby) {
+  constructor(lobby: Lobby) {
     super(lobby);
   }
 

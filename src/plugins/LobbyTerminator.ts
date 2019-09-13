@@ -1,5 +1,5 @@
 import { LobbyPlugin } from "./LobbyPlugin";
-import { ILobby, Player } from "..";
+import { Lobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
 
@@ -15,7 +15,7 @@ export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
   terminateTimer: NodeJS.Timer | undefined;
 
-  constructor(lobby: ILobby, option: Partial<LobbyTerminatorOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<LobbyTerminatorOption> = {}) {
     super(lobby, "terminator");
     this.option = { ...LobbyTerminatorDefaultOption, ...option } as LobbyTerminatorOption;
     this.registerEvents();

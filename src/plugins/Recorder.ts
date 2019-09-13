@@ -1,5 +1,5 @@
 import { LobbyPlugin } from "./LobbyPlugin";
-import { ILobby, Player } from "..";
+import { Lobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
 import Nedb from 'nedb';
@@ -36,7 +36,7 @@ export class Recorder extends LobbyPlugin {
   mapChanger: Player | null = null;
   loadingTask: Promise<void[]> | null = null;
 
-  constructor(lobby: ILobby, autoload: boolean, option: Partial<RecorderOption> = {}) {
+  constructor(lobby: Lobby, autoload: boolean, option: Partial<RecorderOption> = {}) {
     super(lobby, "recorder");
     this.option = { ...defaultOption, ...option } as RecorderOption;
     this.db = {

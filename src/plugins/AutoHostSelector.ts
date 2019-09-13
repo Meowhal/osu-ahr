@@ -1,8 +1,8 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "..";
 import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import { BanchoResponseType } from "../parsers";
+import { BanchoResponseType, MpSettingsResult } from "../parsers";
 
 export interface AutoHostSelectorOption {
   show_queue_chars_limit: number;
@@ -17,7 +17,7 @@ export class AutoHostSelector extends LobbyPlugin {
   needsRotate: boolean = true;
   mapChanger: Player | null = null;
 
-  constructor(lobby: ILobby, option: Partial<AutoHostSelectorOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "selector");
     this.option = { ...DefaultOption, ...option } as AutoHostSelectorOption;
     this.registerEvents();
@@ -32,6 +32,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.changedPlayers));
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanging) {
         this.onBeatmapChanging()
@@ -133,6 +134,10 @@ export class AutoHostSelector extends LobbyPlugin {
         this.changeHost();
       }
     }
+  }
+
+  private onParsedSettings(result: MpSettingsResult, changedPlayers: boolean): any {
+    this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
   }
 
   private onCustomCommand(player: Player, command: string, param: string): void {

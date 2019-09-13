@@ -1,9 +1,8 @@
 import { Player, escapeUserId, Roles, Teams, PlayerStatus } from "./Player";
-import { ILobby, LobbyStatus } from "./ILobby";
-import { parser, BanchoResponseType, BanchoResponse } from "./parsers";
+import { parser, BanchoResponseType, BanchoResponse, StatResult, StatParser } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent, DeferredAction } from "./libs";
-import { MpSettingsParser } from "./parsers/MpSettingsParser";
+import { MpSettingsParser, MpSettingsResult } from "./parsers/MpSettingsParser";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import config from "config";
 import log4js from "log4js";
@@ -11,6 +10,16 @@ import pkg from "../package.json";
 
 const logger = log4js.getLogger("lobby");
 const chatlogger = log4js.getLogger("chat");
+
+export enum LobbyStatus {
+  Standby,
+  Making,
+  Made,
+  Entering,
+  Entered,
+  Leaving,
+  Left
+}
 
 export interface LobbyOption {
   authorized_users: string[], // 特権ユーザー
@@ -22,7 +31,7 @@ export interface LobbyOption {
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
 
-export class Lobby implements ILobby {
+export class Lobby {
   // Members
   option: LobbyOption;
   ircClient: IIrcClient;
@@ -35,13 +44,14 @@ export class Lobby implements ILobby {
   players: Set<Player> = new Set<Player>();
   playersMap: Map<string, Player> = new Map<string, Player>();
   isMatching: boolean = false;
-  mpSettingParser: MpSettingsParser | undefined;
   plugins: LobbyPlugin[] = [];
   listRefStart: number = 0;
   mapTitle: string = "";
   mapId: number = 0;
   coolTimes: { [key: string]: number } = {};
   defferedMessages: { [key: string]: DeferredAction<string> } = {}
+  settingParser: MpSettingsParser;
+  statParser: StatParser;
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
@@ -60,6 +70,8 @@ export class Lobby implements ILobby {
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
   SentMessage = new TypedEvent<string>();
   RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
+  ParsedStat = new TypedEvent<StatResult>();
+  ParsedSettings = new TypedEvent<{ result: MpSettingsResult, changedPlayers: boolean }>();
 
   constructor(ircClient: IIrcClient, option: any | null = null) {
     if (ircClient.conn == null) {
@@ -67,6 +79,9 @@ export class Lobby implements ILobby {
     }
     this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
     this.status = LobbyStatus.Standby;
+    this.settingParser = new MpSettingsParser();
+    this.statParser = new StatParser();
+
     this.ircClient = ircClient;
     logger.addContext("channel", "lobby");
 
@@ -301,25 +316,37 @@ export class Lobby implements ILobby {
         this.mapId = c.params[0];
         this.mapTitle = c.params[1];
         break;
+      case BanchoResponseType.Settings:
+        if (this.settingParser.feedLine(message)) {
+          this.RaiseParsedSettings();
+        }
+        break;
+      case BanchoResponseType.Stats:
+        if (this.statParser.feedLine(message)) {
+          this.RaiseParsedStat();
+        }
+        break;
       case BanchoResponseType.Unhandled:
-        this.checkListRef(message);
+        if (this.checkListRef(message)) break;
         logger.debug("unhandled bancho response : %s", message);
         break;
     }
     this.RecievedBanchoResponse.emit({ message, response: c });
   }
 
-  private checkListRef(message: string) {
+  private checkListRef(message: string): boolean {
     if (this.listRefStart != 0) {
       if (Date.now() < this.listRefStart + this.option.listref_duration) {
         const p = this.GetOrMakePlayer(message);
         p.setRole(Roles.Referee);
         logger.trace("AddedReferee : %s", p.escaped_id);
+        return true;
       } else {
         this.listRefStart = 0;
         logger.trace("check list ref ended");
       }
     }
+    return false;
   }
 
   RaiseReceivedCustomCommand(player: Player, message: string): void {
@@ -338,63 +365,21 @@ export class Lobby implements ILobby {
 
   RaisePlayerJoined(userid: string, slot: number, team: Teams, asHost: boolean = false): void {
     const player = this.GetOrMakePlayer(userid);
-    player.setRole(Roles.Player);
-    player.slot = slot;
-    player.team = team;
-    player.status = PlayerStatus.InLobby;
-
-    if (!this.players.has(player)) {
-      this.players.add(player);
-      if (asHost) {
-        this.host = player;
-        player.setRole(Roles.Host);
-      }
+    if (this.addPlayer(player, slot, team)) {
       this.PlayerJoined.emit({ player, slot, team });
-    } else {
-      logger.warn("参加済みのプレイヤーが再度参加した: %s", userid);
-      this.UnexpectedAction.emit(new Error("unexpected join"));
     }
   }
 
   RaisePlayerLeft(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
-    player.removeRole(Roles.Player);
-    player.removeRole(Roles.Host);
-    player.status = PlayerStatus.None;
-
-    if (this.players.has(player)) {
-      this.players.delete(player);
-      if (this.host == player) {
-        this.host = null;
-      }
-      if (this.hostPending == player) {
-        this.hostPending = null;
-      }
+    if (this.removePlayer(player)) {
       this.PlayerLeft.emit(player);
-    } else {
-      logger.warn("未参加のプレイヤーが退出した: %s", userid);
-      this.UnexpectedAction.emit(new Error("unexpected left"));
     }
   }
 
   RaiseHostChanged(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
-    if (!this.players.has(player)) {
-      logger.warn("未参加のプレイヤーがホストになった: %s", userid);
-      this.players.add(player);
-    }
-
-    if (this.hostPending == player) {
-      this.hostPending = null;
-    } else if (this.hostPending != null) {
-      logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.id, userid);
-    } // pending == null は有効
-
-    if (this.host != null) {
-      this.host.removeRole(Roles.Host);
-    }
-    this.host = player;
-    player.setRole(Roles.Host);
+    this.setAsHost(player);
     this.HostChanged.emit({ succeeded: true, player });
   }
 
@@ -454,6 +439,25 @@ export class Lobby implements ILobby {
     }
   }
 
+  RaiseParsedSettings() {
+    if (!this.settingParser.isParsing && this.settingParser.result != null) {
+      logger.debug("parsed mp settings");
+      const result = this.settingParser.result;
+      let changedPlayers = this.margeMpSettingsResult(result);
+      if (changedPlayers) {
+        logger.info("applied mp settings");
+      }
+      this.ParsedSettings.emit({ result, changedPlayers });
+    }
+  }
+
+  RaiseParsedStat() {
+    if (!this.statParser.isParsing && this.statParser.result != null) {
+      logger.debug("parsed stat");
+      this.ParsedStat.emit(this.statParser.result);
+    }
+  }
+
   OnUserNotFound(): void {
     if (this.hostPending != null) {
       const p = this.hostPending;
@@ -462,6 +466,7 @@ export class Lobby implements ILobby {
       this.HostChanged.emit({ succeeded: false, player: p });
     }
   }
+
 
   // #endregion
 
@@ -541,67 +546,117 @@ export class Lobby implements ILobby {
     });
   }
 
-  LoadLobbySettingsAsync(resetQueue: boolean): Promise<void> {
-    if (this.status != LobbyStatus.Entered || this.mpSettingParser != undefined) {
+  LoadMpSettingsAsync(resetQueue: boolean): Promise<void> {
+    if (this.status != LobbyStatus.Entered || this.settingParser != undefined) {
       return Promise.reject();
     }
     logger.trace("start loadLobbySettings");
-    this.mpSettingParser = new MpSettingsParser();
-    let completed: (() => void) | null = null;
-    const feed = (from: string, to: string, message: string): void => {
-      if (from == "BanchoBot" && to == this.channel && this.mpSettingParser != undefined) {
-        const r = this.mpSettingParser.feedLine(message);
-        if (r && completed != null) {
-          completed();
-        }
-      }
-    }
-
-    this.ircClient.on("message", feed);
-
-    const task = new Promise<void>((resolve, reject) => {
-      completed = () => {
-        this.ircClient.off("message", feed);
-        if (this.mpSettingParser == undefined) {
-          logger.error("mpSettingParser is undefined");
-          reject();
-          return;
-        }
-        logger.debug("parsed mp settings");
-        this.margeMpSettingsResult(this.mpSettingParser, resetQueue);
+    const p = new Promise<void>(resolve => {
+      this.ParsedSettings.once(({ result, changedPlayers }) => {
         this.SendMessage("!mp listrefs");
-        this.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
-
         logger.trace("completed loadLobbySettings");
-        this.mpSettingParser = undefined;
         resolve();
-      }
+      });
     });
 
     this.SendMessage("!mp settings");
-    return task;
+    return p;
   }
 
-  // 一旦ロビーから全員退出させ、現在のホストからスロット順に追加していく
-  private margeMpSettingsResult(parser: MpSettingsParser, resetQueue: boolean): void {
-    this.lobbyName = parser.name;
-    this.mapId = parser.beatmapId;
-    this.mapTitle = parser.beatmapTitle;
-    this.host = null;
-    this.hostPending = null;
-    Array.from(this.players).forEach(p => this.RaisePlayerLeft(p.id));
+  private addPlayer(player: Player, slot: number, team: Teams, asHost: boolean = false): boolean {
+    player.setRole(Roles.Player);
+    player.slot = slot;
+    player.team = team;
+    player.status = PlayerStatus.InLobby;
 
-    if (parser.players.length == 0) return;
+    if (!this.players.has(player)) {
+      this.players.add(player);
+      if (asHost) {
+        this.setAsHost(player);
+      }
+      return true;
+    } else {
+      logger.warn("参加済みのプレイヤーが再度参加した: %s", player.id);
+      this.UnexpectedAction.emit(new Error("unexpected join"));
+      return false;
+    }
+  }
 
-    let hostidx = parser.players.findIndex(p => p.isHost);
-    // if (hostidx == -1) hostidx = 0;
+  private removePlayer(player: Player): boolean {
+    player.removeRole(Roles.Player);
+    player.removeRole(Roles.Host);
+    player.status = PlayerStatus.None;
 
-    // ホストを配列の先頭にする。
-    const temp = Array.from(parser.players);
-    const players = (hostidx == -1) ? temp : temp.splice(hostidx).concat(temp);
-    players.forEach((v, i) => {
-      this.RaisePlayerJoined(v.id, v.slot, v.team, i == hostidx);
-    });
+    if (this.players.has(player)) {
+      this.players.delete(player);
+      if (this.host == player) {
+        this.host = null;
+      }
+      if (this.hostPending == player) {
+        this.hostPending = null;
+      }
+      return true;
+    } else {
+      logger.warn("未参加のプレイヤーが退出した: %s", player.id);
+      this.UnexpectedAction.emit(new Error("unexpected left"));
+      return false;
+    }
+  }
+
+  private setAsHost(player: Player): void {
+    if (!this.players.has(player)) {
+      logger.warn("未参加のプレイヤーがホストになった: %s", player.id);
+      this.players.add(player);
+    }
+
+    if (this.hostPending == player) {
+      this.hostPending = null;
+    } else if (this.hostPending != null) {
+      logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.id, player.id);
+    } // pending == null は有効
+
+    if (this.host != null) {
+      this.host.removeRole(Roles.Host);
+    }
+    this.host = player;
+    player.setRole(Roles.Host);
+  }
+
+  /**
+   * MpSettingsの結果を取り込む。join/left/hostの発生しない
+   * @param result 
+   * @param resetQueue 
+   */
+  private margeMpSettingsResult(result: MpSettingsResult): boolean {
+    this.lobbyName = result.name;
+    this.mapId = result.beatmapId;
+    this.mapTitle = result.beatmapTitle;
+    let playersChanged = false;
+    const mpPlayers = result.players.map(r => this.GetOrMakePlayer(r.id));
+
+    for (let p of this.players) {
+      if (!mpPlayers.includes(p)) {
+        this.removePlayer(p);
+        playersChanged = true;
+      }
+    }
+
+    for (let r of result.players) {
+      let p = this.GetOrMakePlayer(r.id);
+      if (!this.players.has(p)) {
+        this.addPlayer(p, r.slot, r.team);
+        playersChanged = true;
+      } else {
+        p.slot = r.slot;
+        p.team = r.team;
+      }
+      if (r.isHost && p != this.host) {
+        this.setAsHost(p);
+        playersChanged = true;
+      }
+    }
+
+    return playersChanged;
   }
 
   // #endregion
@@ -649,4 +704,3 @@ export class Lobby implements ILobby {
     }
   }
 }
-

@@ -26,7 +26,10 @@ export enum StatStatuses {
 
 export class StatParser {
   result: StatResult | null = null;
-  parsed: boolean = false;
+  isParsing: boolean = false;
+  get isParsed(): boolean {
+    return !this.isParsing && this.result != null;
+  }
   constructor() { }
 
   feedLine(message: string): boolean {
@@ -50,7 +53,7 @@ export class StatParser {
           break;
         }
       }
-      this.parsed = false;
+      this.isParsing = true;
       return true;
     }
     if (this.result == null) return false;
@@ -72,7 +75,7 @@ export class StatParser {
     const line4 = message.match(/Accuracy: ([\d.]+)%/);
     if (line4) {
       this.result.accuracy = parseFloat(line4[1]);
-      this.parsed = true;
+      this.isParsing = false;
       return true;
     }
 
@@ -83,6 +86,3 @@ export class StatParser {
 export function IsStatResponse(message: string) {
   return message.match(/^Stats for \(|Score:|Plays:|Accuracy:/);
 }
-/*
-
-*/

@@ -38,11 +38,22 @@ function defResult(name: string, id: number, status: StatStatuses, score: number
 
 it("StatParser Test", function () {
   assert.equal(testTexts.length, expectedResults.length * 4);
-  const parser = new StatParser()
+  const parser = new StatParser();
+  assert.isFalse(parser.isParsed);
+  assert.isFalse(parser.isParsing);
+  assert.isNull(parser.result);
+
   for (let i = 0; i < expectedResults.length; i++) {
+    assert.isFalse(parser.isParsing);
     for (let j = 0; j < 4; j++) {
       assert.isTrue(parser.feedLine(testTexts[i * 4 + j]));
+      if (j != 3) {
+        assert.isTrue(parser.isParsing);
+        assert.isFalse(parser.isParsed);
+      }
     }
+    assert.isFalse(parser.isParsing);
+    assert.isTrue(parser.isParsed);
     assert.deepEqual(parser.result, expectedResults[i]);
   }
 });

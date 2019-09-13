@@ -1,4 +1,4 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "..";
 import { Player, PlayerStatus } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
@@ -24,7 +24,7 @@ export class MatchAborter extends LobbyPlugin {
   abortTimer: NodeJS.Timer | null = null;
   voting: VoteCounter;
 
-  constructor(lobby: ILobby, option: Partial<MatchAborterOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<MatchAborterOption> = {}) {
     super(lobby, "aborter");
     this.option = { ...defaultOption, ...option } as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);

@@ -1,4 +1,4 @@
-import { ILobby, Player } from "..";
+import { Lobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
@@ -15,7 +15,7 @@ const DefaultOption = config.get<MapRecasterOption>("MapRecaster");
 export class MapRecaster extends LobbyPlugin {
   option: MapRecasterOption;
   canRecast: boolean = true;
-  constructor(lobby: ILobby, option: Partial<MapRecasterOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<MapRecasterOption> = {}) {
     super(lobby, "recaster");
     this.option = { ...DefaultOption, ...option } as MapRecasterOption;
     this.registerEvents();

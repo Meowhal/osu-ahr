@@ -3,6 +3,9 @@ import { Lobby, LobbyStatus, Player, PlayerStatus, Roles, Teams } from '..';
 import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
 import log4js from "log4js";
 import tu from "./TestUtils";
+import { MpSettingsCases } from "./cases/MpSettingsCases";
+import { MpSettingsResult } from '../parsers';
+import { IIrcClient } from '../IIrcClient';
 
 describe("LobbyTest", function () {
   before(function () {
@@ -580,6 +583,62 @@ describe("LobbyTest", function () {
       await tu.delayAsync(5);
       lobby.DeferMessage("xe", "abc", 10, true);
       await tu.delayAsync(20);
+    });
+  });
+  describe("mp settings load tests", function() {
+    async function emulateMpSettingsResponse(ircClient:DummyIrcClient, texts:string[]) {
+      for(let m of texts) {
+        await ircClient.emulateMessageAsync("BanchoBot", ircClient.channel, m);
+      }
+    }
+
+    function assertMpSettingsResult(lobby:Lobby, result:MpSettingsResult) {
+      assert.equal(lobby.players.size, result.players.length);
+      for(let r of result.players) {
+        const p = lobby.GetPlayer(r.id);
+        if (p == null) {
+          assert.fail();
+          return;
+        }
+        assert.isTrue(lobby.players.has(p));
+        assert.isTrue(p.is(Roles.Player));
+        assert.equal(p.isHost, r.isHost);
+      }
+    }   
+    it("load settings, empty lobby", async() =>{
+      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+      const c1 = MpSettingsCases.case1_1;
+      await ircClient.emulateMessageAsync(ircClient.nick, ircClient.channel, "!mp settings");
+      await emulateMpSettingsResponse(ircClient, c1.texts);
+      assertMpSettingsResult(lobby, c1.result);
+    });
+    it("load settings, change host", async() =>{
+      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+      const c1_1 = MpSettingsCases.case1_1;
+      const c1_2 = MpSettingsCases.case1_2;
+      await ircClient.emulateMessageAsync(ircClient.nick, ircClient.channel, "!mp settings");
+      await emulateMpSettingsResponse(ircClient, c1_1.texts);
+      assertMpSettingsResult(lobby, c1_1.result);
+      await emulateMpSettingsResponse(ircClient, c1_2.texts);
+      assertMpSettingsResult(lobby, c1_2.result);
+    });
+    it("load settings, resore", async() =>{
+      const {lobby, ircClient} = await tu.SetupLobbyAsync();
+      const c1_1 = MpSettingsCases.case1_1;
+      const c1_2 = MpSettingsCases.case1_2;
+      await ircClient.emulateMessageAsync(ircClient.nick, ircClient.channel, "!mp settings");
+      await emulateMpSettingsResponse(ircClient, c1_1.texts);
+      assertMpSettingsResult(lobby, c1_1.result);
+
+      await ircClient.emulateRemovePlayerAsync("gnsksz");
+      await ircClient.emulateRemovePlayerAsync("Discuzz");
+      await ircClient.emulateRemovePlayerAsync("Seidosam");
+      await ircClient.emulateAddPlayerAsync("p1");
+      await ircClient.emulateAddPlayerAsync("p2");
+      await ircClient.emulateAddPlayerAsync("p3");
+
+      await emulateMpSettingsResponse(ircClient, c1_2.texts);
+      assertMpSettingsResult(lobby, c1_2.result);
     });
   });
   it.skip("plugin test", async () => {

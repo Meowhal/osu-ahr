@@ -1,4 +1,4 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "..";
 import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
@@ -41,7 +41,7 @@ export class HostSkipper extends LobbyPlugin {
     return Date.now() - this.timeVotePassed;
   }
 
-  constructor(lobby: ILobby, option: Partial<HostSkipperOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<HostSkipperOption> = {}) {
     super(lobby, "skipper");
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);

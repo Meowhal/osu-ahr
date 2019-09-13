@@ -83,7 +83,7 @@ export class OahrBase {
     const channel = parser.EnsureMpChannelId(id);
     logger.info("Entering lobby, channel : %s", channel);
     await this.lobby.EnterLobbyAsync(channel);
-    await this.lobby.LoadLobbySettingsAsync(true);
+    await this.lobby.LoadMpSettingsAsync(true);
 
     logger.info(`Entered lobby : ${this.lobby.channel}`);
   }

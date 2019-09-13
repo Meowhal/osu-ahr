@@ -1,4 +1,4 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "..";
 import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
@@ -17,7 +17,7 @@ export class MatchStarter extends LobbyPlugin {
   voting: VoteCounter;
   isTimerActive: boolean = false;
 
-  constructor(lobby: ILobby, option: Partial<MatchStarterOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<MatchStarterOption> = {}) {
     super(lobby, "starter");
     this.option = { ...defaultOption, ...option } as MatchStarterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
