@@ -93,6 +93,7 @@ export class AutoHostSelector extends LobbyPlugin {
   private onBeatmapChanging(): void {
     if (this.hostQueue[0] != this.lobby.host) {
       // アボートで中断後にマップ変更しようとした場合は次のホストに変更
+      this.logger.info("host changed map after abort the match");
       this.changeHost();
       this.needsRotate = false;
     } else {

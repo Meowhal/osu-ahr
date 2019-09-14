@@ -486,7 +486,7 @@ export class Lobby {
 
   RaiseParsedSettings(): void {
     if (!this.settingParser.isParsing && this.settingParser.result != null) {
-      this.logger.debug("parsed mp settings");
+      this.logger.info("parsed mp settings");
       const result = this.settingParser.result;
       const r = this.margeMpSettingsResult(result);
       if (r.hostChanged || r.playersIn.length != 0 || r.playersOut.length != 0) {
@@ -498,9 +498,9 @@ export class Lobby {
 
   RaiseParsedStat(): void {
     if (!this.statParser.isParsing && this.statParser.result != null) {
-      this.logger.debug("parsed stat");
       const p = this.GetPlayer(this.statParser.result.name);
       if (p != null) {
+        this.logger.info("parsed stat %s", p.id);
         p.laststat = this.statParser.result;
         this.ParsedStat.emit({ result: this.statParser.result, player: p });
       }
@@ -713,8 +713,7 @@ export class Lobby {
   GetLobbyStatus(): string {
     const pc = this.CountPlayersStatus();
     let s = `=== lobby status ===
-  lobby id : ${this.lobbyId}
-  status : ${LobbyStatus[this.status]}
+  lobby id : ${this.lobbyId}, name : ${this.lobbyName},  status : ${LobbyStatus[this.status]}
   players : ${this.players.size}, inGame : ${pc.inGame} (playing : ${pc.playing})
   refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.id).join(",")}
   host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
@@ -748,6 +747,7 @@ export class Lobby {
     } else {
       var c = this.GetOrMakePlayer(this.ircClient.nick);
       c.setRole(Roles.Authorized);
+      c.setRole(Roles.Referee);
       c.setRole(Roles.Creator);
       this.logger.info("assigned %s creators role", this.ircClient.nick);
     }
