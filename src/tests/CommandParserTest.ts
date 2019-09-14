@@ -406,7 +406,7 @@ describe("CommandParserTest", function () {
       const valids = ["!aioie", "!a", "!123", "!a ", "!v x", "!vv x y[v]", "*abc"];
       const invalids = ["!", "*", "  !asa", "!!ss", "*!v", "abc", "abc !abc"];
       const used = ["!help", "!Help", "!info", "!skip", "!SKIP", "!queue", "!q", "*skip", "*stipto"];
-      const reservedInvalid = ["!mp", "!roll", "!roll 100", "!where abc", "!faq", "!report", "!request"];
+      const reservedInvalid = ["!mp", "!roll", "!roll 100", "!where abc", "!faq", "!report", "!request", "!stat", "!stats"];
       const mpredirect = ["!mp x", "!mp start", "!mp start 20"];
       valids.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
       invalids.forEach(c => assert.isFalse(parser.IsCustomCommand(c), c));

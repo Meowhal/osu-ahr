@@ -1,8 +1,8 @@
 import { Lobby } from "..";
+import { BanchoResponseType, MpSettingsResult } from "../parsers";
 import { Player } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
-import { BanchoResponseType } from "../parsers";
 import config from "config";
 
 export interface MatchStarterOption {
@@ -30,6 +30,7 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.AllPlayerReady) {
         this.onAllPlayerReady()
@@ -58,6 +59,12 @@ export class MatchStarter extends LobbyPlugin {
     if (!this.isTimerActive) {
       this.start();
     }
+  }
+
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+    playersOut.forEach(p => this.voting.RemoveVoter(p));
+    playersIn.forEach(p => this.voting.AddVoter(p));
+    this.voting.Clear();
   }
 
   private onCustomCommand(player: Player, command: string, param: string): any {

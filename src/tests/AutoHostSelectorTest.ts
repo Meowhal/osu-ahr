@@ -564,7 +564,6 @@ describe("AutoHostSelectorTest", function () {
     it("reset queue test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       const c1 = MpSettingsCases.case1_1;
-      const c3 = MpSettingsCases.case1_3;
       const q1 = ["p1", "p2", "p3", "p4", "p5"];
       const q2 = ["p4", "p5", "p6", "p7", "p2"];
       ircClient.emulateMpSettings(c1);
@@ -584,9 +583,6 @@ describe("AutoHostSelectorTest", function () {
     });
   });
   describe("reoder tests", function () {
-    before(function () {
-      tu.configMochaAsNoisy();
-    });
     it("reaoder", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       const players = await tu.AddPlayersAsync(5, ircClient);

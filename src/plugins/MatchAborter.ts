@@ -1,5 +1,6 @@
 import { Lobby } from "..";
-import { Player, PlayerStatus } from "../Player";
+import { MpSettingsResult } from "../parsers";
+import { Player, MpStatuses } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import { VoteCounter } from "./VoteCounter";
@@ -36,6 +37,7 @@ export class MatchAborter extends LobbyPlugin {
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
   }
 
@@ -68,6 +70,10 @@ export class MatchAborter extends LobbyPlugin {
 
   private onMatchFinished() {
     this.stopTimer();
+  }
+
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+    this.voting.RemoveAllVoters();
   }
 
   private onCustomCommand(player: Player, command: string, param: string): void {
@@ -146,7 +152,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private doAutoAbort(): void {
-    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.status == PlayerStatus.Playing);
+    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus == MpStatuses.Playing);
     if (this.option.auto_abort_do_abort) {
       this.doAbort();
     } else {

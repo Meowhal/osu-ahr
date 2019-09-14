@@ -1,5 +1,5 @@
 import { Lobby } from "..";
-import { Player, escapeUserId } from "../Player";
+import { Player, revealUserId, disguiseUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import { BanchoResponseType, MpSettingsResult } from "../parsers";
@@ -186,7 +186,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private showHostQueue(): void {
     this.lobby.SendMessageWithCoolTime(() => {
-      let m = this.hostQueue.map(c => this.disguiseUserId(c.id)).join(", ");
+      let m = this.hostQueue.map(c => disguiseUserId(c.id)).join(", ");
       this.logger.trace(m);
       if (this.option.show_queue_chars_limit < m.length) {
         m = m.substring(0, this.option.show_queue_chars_limit) + "...";
@@ -243,7 +243,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   Reorder(order: Player[] | string): void {
     if (typeof (order) == "string") {
-      const players = order.split(",").map(t => this.lobby.GetPlayer(this.revealUserId(t.trim()))).filter(p => p != null) as Player[];
+      const players = order.split(",").map(t => this.lobby.GetPlayer(revealUserId(t.trim()))).filter(p => p != null) as Player[];
       if (players.length == 0) {
         this.logger.info("Faild reorder, invalid order string : %s", order);
       } else {
@@ -277,16 +277,6 @@ export class AutoHostSelector extends LobbyPlugin {
     this.logger.trace("  new: %s", que.map(p => p.id).join(", "));
 
     return isValid;
-  }
-
-  // ユーザーIDを表示するときhighlightされないように名前を変更する
-  private disguiseUserId(userid: string): string {
-    return userid[0] + "\u{200B}" + userid.substring(1);
-  }
-
-  // disguiseUserIdで変更を加えた文字列をもとに戻す.
-  private revealUserId(disguisedId: string): string {
-    return disguisedId.replace(/\u200B/g, "");
   }
 
   // !mp host コマンドの発行

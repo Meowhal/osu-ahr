@@ -25,16 +25,12 @@ const testTexts = [
 ];
 
 const expectedResults = [
-  defResult("Jason", 7342098, StatStatuses.Multiplaying, 18163888782, 1631, 78245, 100, 97.36),
-  defResult("horcrux18", 8778911, StatStatuses.Afk, 584_565_786, 260177, 5695, 64, 86.94),
-  defResult("gviz", 15145414, StatStatuses.Multiplayer, 0, 0, 7, 2, 0),
-  defResult("Angel Arrow", 1970239, StatStatuses.Testing, 59315895109, 1006, 104962, 102, 98.16),
-  defResult("Foreskin", 3760263, StatStatuses.None, 0, 0, 1, 1, 0),
+  new StatResult ("Jason", 7342098, StatStatuses.Multiplaying, 18163888782, 1631, 78245, 100, 97.36),
+  new StatResult("horcrux18", 8778911, StatStatuses.Afk, 584_565_786, 260177, 5695, 64, 86.94),
+  new StatResult("gviz", 15145414, StatStatuses.Multiplayer, 0, 0, 7, 2, 0),
+  new StatResult("Angel Arrow", 1970239, StatStatuses.Testing, 59315895109, 1006, 104962, 102, 98.16),
+  new StatResult("Foreskin", 3760263, StatStatuses.None, 0, 0, 1, 1, 0),
 ];
-
-function defResult(name: string, id: number, status: StatStatuses, score: number, rank: number, plays: number, level: number, accuracy: number): StatResult {
-  return { name, id, status, score, rank, plays, level, accuracy }
-}
 
 it("StatParser Test", function () {
   assert.equal(testTexts.length, expectedResults.length * 4);
@@ -54,6 +50,7 @@ it("StatParser Test", function () {
     }
     assert.isFalse(parser.isParsing);
     assert.isTrue(parser.isParsed);
+    if (parser.result != null) parser.result.date = 0;
     assert.deepEqual(parser.result, expectedResults[i]);
   }
 });

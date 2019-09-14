@@ -2,7 +2,7 @@ import { Lobby } from "..";
 import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
-import { BanchoResponseType } from "../parsers";
+import { BanchoResponseType, MpSettingsResult } from "../parsers";
 import config from "config";
 
 export interface HostSkipperOption {
@@ -55,6 +55,7 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanging) {
         this.onBeatmapChanging()
@@ -100,6 +101,12 @@ export class HostSkipper extends LobbyPlugin {
     if (this.lobby.host == player) {
       this.stopTimer();
     }
+  }
+
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+    playersOut.forEach(p => this.voting.RemoveVoter(p));
+    playersIn.forEach(p => this.voting.AddVoter(p));
+    this.voting.Clear();
   }
 
   // スキップメッセージを処理

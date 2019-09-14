@@ -240,7 +240,7 @@ export class CommandParser {
     message = message.trimRight().toLowerCase();
     if (message[0] != "!" && message[0] != "*") return false;
     if (message == "!mp") return false;
-    return message.match(/^[\!\*](?!roll|stats|where|faq|report|request)\w+/) != null;
+    return message.match(/^[\!\*](?!roll|stats?|where|faq|report|request)\w+/) != null;
   }
 
   ParseCustomCommand(message: string): { command: string, param: string } {
