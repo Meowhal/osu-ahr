@@ -10,7 +10,7 @@ describe("Integrated Plugins Tests", function () {
     tu.configMochaAsSilent();
   });
   describe("selector and skipper tests", function () {
-    async function setup(selectorOption:Partial<AutoHostSelectorOption> = {}, skipperOption:Partial<HostSkipperOption> = {afk_timer_delay_ms:0}):
+    async function setup(selectorOption: Partial<AutoHostSelectorOption> = {}, skipperOption: Partial<HostSkipperOption> = { afk_timer_delay_ms: 0 }):
       Promise<{ selector: AutoHostSelector, skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
       const li = await tu.SetupLobbyAsync();
       const selector = new AutoHostSelector(li.lobby, selectorOption);
@@ -18,11 +18,11 @@ describe("Integrated Plugins Tests", function () {
       return { selector, skipper, ...li };
     };
 
-    it("skip to test", async() => {
-      const  { selector, skipper, lobby, ircClient} = await setup();
+    it("skip to test", async () => {
+      const { selector, skipper, lobby, ircClient } = await setup();
       const ownerId = tu.ownerNickname;
       await tu.AddPlayersAsync([ownerId, "p2", "p3", "p4"], ircClient);
-      let  owner = lobby.GetPlayer(ownerId);
+      let owner = lobby.GetPlayer(ownerId);
       assert.isNotNull(owner);
       owner = owner as Player;
       assert.isTrue(owner.isCreator);

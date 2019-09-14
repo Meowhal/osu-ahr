@@ -1,8 +1,10 @@
-import * as irc from "../libs/irc";
-import { EventEmitter } from "events";
 import { IIrcClient } from "..";
+import * as irc from "../libs/irc";
+import { parser, MpCommand, StatResult } from "../parsers";
+import { escapeUserId } from "../Player";
+import { MpSettingsCase } from "../tests/cases/MpSettingsCases";
 import log4js from "log4js";
-import { parser, MpCommand } from "../parsers";
+import { EventEmitter } from "events";
 const logger = log4js.getLogger("irc");
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
@@ -12,10 +14,12 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   msg: irc.IMessage;
   connected: boolean;
   players: Set<string>;
+  stats: Map<string, StatResult>;
   conn: boolean | null;
   isMatching: boolean;
   hostMask: string = "";
   latency: number = 0;
+  referees: string[];
 
   constructor(
     server: string,
@@ -27,8 +31,10 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     this.channel = "";
     this.connected = false;
     this.players = new Set<string>();
+    this.stats = new Map<string, StatResult>();
     this.conn = null;
     this.isMatching = false;
+    this.referees = [this.nick];
     this.msg = {
       command: "dummy command",
       rawCommand: "dummy command",
@@ -68,6 +74,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // メッセージイベントを発行する
   public emulateMessage(from: string, to: string, message: string): void {
+    this.onMessage(from, to, message);
     if (from == this.nick) return;
     this.emit('message', from, to, message, this.msg);
     if (to == this.channel) {
@@ -95,18 +102,28 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     });
   }
 
+  public emulateBanchoResponse(message: string): void {
+    this.emulateMessage("BanchoBot", this.channel, message);
+  }
+
+  public emulateChatAsync(from: string, message: string): Promise<void> {
+    return this.emulateMessageAsync(from, this.channel, message);
+  }
+
   // ロビーにプレイヤーが参加した際の動作をエミュレートする
   public async emulateAddPlayerAsync(name: string): Promise<void> {
-    if (!this.players.has(name)) {
-      this.players.add(name);
+    let ename = escapeUserId(name);
+    if (!this.players.has(ename)) {
+      this.players.add(ename);
     }
     await this.emulateMessageAsync("BanchoBot", this.channel, `${name} joined in slot ${this.players.size}.`);
   }
 
   // ロビーからプレイヤーが退出した際の動作をエミュレートする
   public async emulateRemovePlayerAsync(name: string): Promise<void> {
-    if (this.players.has(name)) {
-      this.players.delete(name);
+    let ename = escapeUserId(name);
+    if (this.players.has(ename)) {
+      this.players.delete(ename);
     }
     await this.emulateMessageAsync("BanchoBot", this.channel, `${name} left the game.`);
   }
@@ -180,6 +197,15 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     await this.emulateMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
   }
 
+  public async emulateMpSettings(testcase: MpSettingsCase): Promise<void> {
+    this.players.clear();
+    for (let p of testcase.result.players) {
+      this.players.add(escapeUserId(p.id));
+    }
+    for (let t of testcase.texts) {
+      this.emulateBanchoResponse(t);
+    }
+  }
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
@@ -193,13 +219,21 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // IRCClientのsay
   public say(target: string, message: string): void {
-    new Promise(() => {
-      this.emulateMessageAsync(this.nick, target, message);
+    this.emulateMessageAsync(this.nick, target, message);
+  }
+
+  private onMessage(from: string, to: string, message: string) {
+    if (this.referees.includes(from)) {
       let mp = parser.ParseMPCommand(message);
       if (mp != null) {
-        this.processMpCommand(target, message, mp);
+        this.processMpCommand(to, message, mp);
       }
-    });
+    } else if (message.startsWith("!stat")) {
+      const m = message.match(/^!stats? (.+)/);
+      if (m) {
+        this.sendStat(m[1], to == "BanchoBot");
+      }
+    }
   }
 
   private processMpCommand(target: string, message: string, mp: MpCommand): void {
@@ -218,7 +252,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     } else if (target == this.channel) {
       switch (mp.command) {
         case "host":
-          if (this.players.has(mp.arg)) {
+          if (this.players.has(escapeUserId(mp.arg))) {
             m(`${mp.arg} became the host.`);
           } else {
             m("User not found");
@@ -286,6 +320,21 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       }
     }
   }
+
+  SetStat(stat: StatResult) {
+    this.stats.set(escapeUserId(stat.name), stat);
+  }
+
+  private sendStat(arg: string, toPm: boolean) {
+    const s = this.stats.get(escapeUserId(arg));
+    const to = toPm ? this.nick : this.channel;
+    if (s != null) {
+      s.toString().split("\n").forEach(t => {
+        this.emulateMessage("BanchoBot", to, t);
+      });
+    }
+  }
+
 
   public connect(retryCount?: number | irc.handlers.IRaw | undefined, callback?: irc.handlers.IRaw | undefined): void {
     this.conn = true;

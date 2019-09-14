@@ -1,8 +1,8 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "..";
 import { Player, escapeUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
-import { BanchoResponseType } from "../parsers";
+import { BanchoResponseType, MpSettingsResult } from "../parsers";
 import config from "config";
 
 export interface HostSkipperOption {
@@ -41,7 +41,7 @@ export class HostSkipper extends LobbyPlugin {
     return Date.now() - this.timeVotePassed;
   }
 
-  constructor(lobby: ILobby, option: Partial<HostSkipperOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<HostSkipperOption> = {}) {
     super(lobby, "skipper");
     this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
@@ -49,12 +49,13 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player));
-    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
-    this.lobby.HostChanged.on(a => this.onHostChanged(a.succeeded, a.player));
+    this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
+    this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanging) {
         this.onBeatmapChanging()
@@ -80,8 +81,8 @@ export class HostSkipper extends LobbyPlugin {
     }
   }
 
-  private onHostChanged(succeeded: boolean, newhost: Player): void {
-    if (!succeeded || this.lobby.isMatching) return;
+  private onHostChanged(newhost: Player): void {
+    if (this.lobby.isMatching) return;
     this.restart();
   }
 
@@ -100,6 +101,12 @@ export class HostSkipper extends LobbyPlugin {
     if (this.lobby.host == player) {
       this.stopTimer();
     }
+  }
+
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+    playersOut.forEach(p => this.voting.RemoveVoter(p));
+    playersIn.forEach(p => this.voting.AddVoter(p));
+    this.voting.Clear();
   }
 
   // スキップメッセージを処理
@@ -130,7 +137,7 @@ export class HostSkipper extends LobbyPlugin {
       this.logger.debug("vote from %s was ignored, at cool time.", player.id);
       if (player.isHost) {
         const secs = (this.option.vote_cooltime_ms - this.elapsedSinceVotePassed) / 1000;
-        this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).` );
+        this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
       this.logger.debug("host(%s) sent !skip command", player.id);

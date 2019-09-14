@@ -15,7 +15,8 @@
       "-  github|cmdRefs : [https://github.com/Meowhal/osu-ahr github/osu-ahr]"
     ],
     "info_message_interval": 500,
-    "info_message_cooltime": 60000
+    "info_message_cooltime": 60000,
+    "stat_timeout": 1000
   },
   "AutoHostSelector": {
     "show_queue_chars_limit": 90,

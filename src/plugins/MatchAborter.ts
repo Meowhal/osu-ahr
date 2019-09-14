@@ -1,5 +1,6 @@
-import { ILobby } from "../ILobby";
-import { Player, PlayerStatus } from "../Player";
+import { Lobby } from "..";
+import { MpSettingsResult } from "../parsers";
+import { Player, MpStatuses } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import { VoteCounter } from "./VoteCounter";
@@ -24,7 +25,7 @@ export class MatchAborter extends LobbyPlugin {
   abortTimer: NodeJS.Timer | null = null;
   voting: VoteCounter;
 
-  constructor(lobby: ILobby, option: Partial<MatchAborterOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<MatchAborterOption> = {}) {
     super(lobby, "aborter");
     this.option = { ...defaultOption, ...option } as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
@@ -32,10 +33,11 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
+    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
   }
 
@@ -68,6 +70,10 @@ export class MatchAborter extends LobbyPlugin {
 
   private onMatchFinished() {
     this.stopTimer();
+  }
+
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+    this.voting.RemoveAllVoters();
   }
 
   private onCustomCommand(player: Player, command: string, param: string): void {
@@ -146,7 +152,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private doAutoAbort(): void {
-    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.status == PlayerStatus.Playing);
+    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus == MpStatuses.Playing);
     if (this.option.auto_abort_do_abort) {
       this.doAbort();
     } else {

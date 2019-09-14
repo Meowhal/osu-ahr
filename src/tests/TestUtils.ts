@@ -1,9 +1,9 @@
-import { Lobby, logIrcEvent, Player } from "..";
+import { Lobby, logIrcEvent, Player, Roles } from "..";
 import { DummyIrcClient } from "../dummies";
+import { BanchoResponse, BanchoResponseType, MpSettingsResult } from "../parsers";
+import { TypedEvent } from "../libs";
 import { assert } from 'chai';
 import log4js from "log4js";
-import { TypedEvent } from "../libs";
-import { BanchoResponse, BanchoResponseType } from "../parsers";
 
 class TestUtils {
   ownerNickname: string = "creator";
@@ -127,7 +127,7 @@ class TestUtils {
    * @param cb BanchoResponseを評価するためのコールバック関数。falseを返すと監視が継続される
    * @param timeout リジェクトまでのミリ秒時間
    */
-  async assertBanchoRespond(lobby:Lobby, expected : BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number = 0): Promise<number> {
+  async assertBanchoRespond(lobby: Lobby, expected: BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number = 0): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       let id: NodeJS.Timeout;
       if (timeout != 0) {
@@ -153,7 +153,7 @@ class TestUtils {
    * @param cb BanchoResponseを評価するためのコールバック関数。falseを返すと監視が継続される
    * @param timeout 監視継続ミリ秒時間
    */
-  async assertBanchoNotRespond(lobby:Lobby, notExpected : BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number): Promise<number> {
+  async assertBanchoNotRespond(lobby: Lobby, notExpected: BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       const id = setTimeout(() => {
         d.dispose();
@@ -167,6 +167,20 @@ class TestUtils {
         reject("the response not expected was returned.");
       });
     });
+  }
+
+  assertMpSettingsResult(lobby: Lobby, result: MpSettingsResult) {
+    assert.equal(lobby.players.size, result.players.length);
+    for (let r of result.players) {
+      const p = lobby.GetPlayer(r.id);
+      if (p == null) {
+        assert.fail();
+        return;
+      }
+      assert.isTrue(lobby.players.has(p));
+      assert.isTrue(p.is(Roles.Player));
+      assert.equal(p.isHost, r.isHost);
+    }
   }
 }
 

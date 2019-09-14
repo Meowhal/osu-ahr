@@ -1,11 +1,11 @@
-import { ILobby, Player } from "..";
+import { Lobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType, BanchoResponse } from "../parsers";
 
 export class InOutLogger extends LobbyPlugin {
   players: Set<Player> = new Set<Player>();
 
-  constructor(lobby: ILobby) {
+  constructor(lobby: Lobby) {
     super(lobby, "inout");
     this.lobby.RecievedBanchoResponse.on(a => this.onRecievedBanchoResponse(a.message, a.response));
   }

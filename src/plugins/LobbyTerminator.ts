@@ -1,5 +1,5 @@
 import { LobbyPlugin } from "./LobbyPlugin";
-import { ILobby, Player } from "..";
+import { Lobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
 
@@ -15,14 +15,14 @@ export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
   terminateTimer: NodeJS.Timer | undefined;
 
-  constructor(lobby: ILobby, option: Partial<LobbyTerminatorOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<LobbyTerminatorOption> = {}) {
     super(lobby, "terminator");
     this.option = { ...LobbyTerminatorDefaultOption, ...option } as LobbyTerminatorOption;
     this.registerEvents();
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p));
+    this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p.player));
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player, p.slot));
     if (this.option.terminate_when_sleep_msg) {
       this.lobby.RecievedBanchoResponse.on(p => {

@@ -1,5 +1,19 @@
 import { Teams } from "../Player";
 
+export interface MpSettingsResult {
+  name: string;
+  id: number;
+  history: string;
+  beatmapUrl: string;
+  beatmapId: number;
+  beatmapTitle: string;
+  teamMode: string;
+  winCondition: string;
+  activeMods: string;
+  players: PlayerSettings[];
+  numPlayers: number;
+}
+
 export interface PlayerSettings {
   slot: number;
   ready: string;
@@ -11,76 +25,75 @@ export interface PlayerSettings {
 }
 
 export class MpSettingsParser {
-  name: string = "";
-  history: string = "";
-  beatmapUrl: string = "";
-  beatmapId:number = 0;
-  beatmapTitle: string = "";
-  teamMode: string = "";
-  winCondition: string = "";
-  activeMods: string = "";
-  players: PlayerSettings[] = [];
-  private loaded_players = 0;
-
-  parsed: boolean;
-
-  constructor() {
-    this.parsed = false;
+  result: MpSettingsResult | null = null;
+  isParsing: boolean = false;
+  get isParsed(): boolean {
+    return !this.isParsing && this.result != null;
   }
+  constructor() { }
 
   feedLine(line: string): boolean {
-    let m = line.match(/Room name: (.+), History: (.+)/);
+    let m = line.match(/Room name: (.+), History: (.+?(\d+))/);
     if (m) {
-      this.name = m[1];
-      this.history = m[2];
-      return false;
+      this.result = {
+        name: m[1],
+        id: parseInt(m[3]),
+        history: m[2],
+        beatmapUrl: "",
+        beatmapId: 0,
+        beatmapTitle: "",
+        teamMode: "",
+        winCondition: "",
+        activeMods: "",
+        numPlayers: 0,
+        players: [],
+      }
+      this.isParsing = true;
+      return true;
     }
+    if (this.result == null) return false;
+
     m = line.match(/Beatmap: (\S+?(\d+)) (.+)/);
     if (m) {
-      this.beatmapUrl = m[1];
-      this.beatmapId = parseInt(m[2]);
-      this.beatmapTitle = m[3];      
-      return false;
+      this.result.beatmapUrl = m[1];
+      this.result.beatmapId = parseInt(m[2]);
+      this.result.beatmapTitle = m[3];
+      return true;
     }
     m = line.match(/Team mode: (.+), Win condition: (.+)/);
     if (m) {
-      this.teamMode = m[1];
-      this.winCondition = m[2];
-      return false;
+      this.result.teamMode = m[1];
+      this.result.winCondition = m[2];
+      return true;
     }
     m = line.match(/Active mods: (.+)/);
     if (m) {
-      this.activeMods = m[1];
+      this.result.activeMods = m[1];
+      return true;
     }
     m = line.match(/Players: (\d+)/);
     if (m) {
-      const len = parseInt(m[1]);
-      this.players = new Array(len);
-      this.parsed = len == 0;
-      return this.parsed;
+      this.result.numPlayers = parseInt(m[1]);
+      this.isParsing = this.result.numPlayers != 0;
+      return true;
     }
     m = line.match(/^Slot (\d+)\s+(.+) (https\S+) (.{15})\s*(\[(.+)\])?$/);
     if (m) {
-      if (this.players == null) {
-        throw new Error("unexpected mpsetting response order");
-      }
-
       let team = m[6] == undefined || !m[6].includes("Team") ? Teams.None
-        : m[6].includes("Blue") ? Teams.Blue : Teams.Red
+        : m[6].includes("Blue") ? Teams.Blue : Teams.Red;
 
-      const p = {
+      const p: PlayerSettings = {
         slot: parseInt(m[1]),
-        ready: m[2],
+        ready: m[2].trim(),
         profile: m[3],
         id: m[4].trim(),
         isHost: m[6] == undefined ? false : m[6].includes("Host"),
         team: team,
-        options: m[6] == undefined ? "" : m[6]
+        options: m[6] == undefined ? "" : m[6].trim()
       }
-      this.players[this.loaded_players] = p;
-      this.loaded_players += 1;
-      this.parsed = this.players.length == this.loaded_players;
-      return this.parsed;
+      this.result.players.push(p);
+      this.isParsing = this.result.players.length != this.result.numPlayers;
+      return true;
     }
     return false;
   }

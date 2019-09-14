@@ -1,6 +1,8 @@
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, Player, PlayerStatus, Roles, Teams } from '..';
+import { Lobby, LobbyStatus, Player, MpStatuses, Roles, Teams } from '..';
 import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
+import { StatResult, StatStatuses } from '../parsers';
+import { MpSettingsCases } from "./cases/MpSettingsCases";
 import log4js from "log4js";
 import tu from "./TestUtils";
 
@@ -121,7 +123,7 @@ describe("LobbyTest", function () {
         assert.isFalse(p.isCreator);
         assert.isFalse(p.isHost);
         assert.isFalse(p.isReferee);
-        assert.equal(p.status, PlayerStatus.InLobby);
+        assert.equal(p.mpstatus, MpStatuses.InLobby);
         assert.equal(p.team, Teams.None);
       }
     });
@@ -133,8 +135,8 @@ describe("LobbyTest", function () {
       // 一人だけ退出
       const leftindex = 1;
       const lp = new Promise<void>(resolve => {
-        lobby.PlayerLeft.on(player => {
-          assert.equal(player, players[leftindex]);
+        lobby.PlayerLeft.on(a => {
+          assert.equal(a.player, players[leftindex]);
           resolve();
         });
       });
@@ -192,7 +194,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       const assertHost = async (next: Player) => {
         return new Promise<Player>(resolve => {
-          lobby.HostChanged.once(({ succeeded, player }) => {
+          lobby.HostChanged.once(({ player }) => {
             assert.equal(player, next);
             tu.assertHost(next.id, lobby);
             assert.equal(lobby.hostPending, null);
@@ -214,22 +216,13 @@ describe("LobbyTest", function () {
     // ホスト任命後に離脱した場合
     it("host change & left test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      const getNewHostAsync = async () => {
-        return new Promise<Player>(resolve => {
-          lobby.HostChanged.once(({ succeeded, player }) => {
-            assert.isFalse(succeeded);
-            resolve(player);
-          });
-        });
-      }
+      const tr = tu.assertEventNeverFire(lobby.HostChanged, null, 10);
       //logIrcEvent(ircClient);
       let nexthost = players[0];
-      let taskHost = getNewHostAsync();
       let taskLeft = ircClient.emulateRemovePlayerAsync(nexthost.id);
       lobby.TransferHost(nexthost);
-      let host = await taskHost;
       await taskLeft;
-      assert.equal(host, nexthost);
+      await tr;
     });
   });
 
@@ -380,7 +373,7 @@ describe("LobbyTest", function () {
     });
     it("player statuses count test", async () => {
       function assertPc(lobby: Lobby, total: number, inLobby: number, playing: number) {
-        let pc = lobby.countPlayersStatus();
+        let pc = lobby.CountPlayersStatus();
         assert.equal(pc.inlobby, inLobby);
         assert.equal(pc.inGame, total - inLobby);
         assert.equal(pc.playing, playing);
@@ -419,7 +412,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = false;
       const msg = "hello world";
-      lobby.SentMessage.once((message) => {
+      lobby.SentMessage.once(({ message }) => {
         assert.equal(message, msg);
         ma = true;
       });
@@ -431,7 +424,7 @@ describe("LobbyTest", function () {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = 0;
       const msg = "hello world";
-      lobby.SentMessage.on((message) => {
+      lobby.SentMessage.on(({ message }) => {
         assert.equal(message, msg);
         ma = ma + 1;
       });
@@ -453,7 +446,7 @@ describe("LobbyTest", function () {
       const msg = () => {
         return "a" + "b" + "c";
       };
-      lobby.SentMessage.on((message) => {
+      lobby.SentMessage.on(({ message }) => {
         assert.equal(message, msg());
         mf = true;
       });
@@ -476,7 +469,7 @@ describe("LobbyTest", function () {
         lobby.ReceivedCustomCommand.once(a => {
           assert.fail();
         });
-        ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
+        ircClient.emulateChatAsync(players[0].id, msg);
       });
     });
     it("BanchoChated event", done => {
@@ -493,7 +486,7 @@ describe("LobbyTest", function () {
         lobby.ReceivedCustomCommand.once(a => {
           assert.fail();
         });
-        ircClient.emulateMessage("BanchoBot", ircClient.channel, msg);
+        ircClient.emulateBanchoResponse(msg);
       });
     });
     it("ReceivedCustomCommand", async () => {
@@ -514,7 +507,7 @@ describe("LobbyTest", function () {
         assert.equal(a.player, players[0]);
         ma = 1;
       });
-      ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
+      ircClient.emulateChatAsync(players[0].id, msg);
       await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
@@ -533,7 +526,7 @@ describe("LobbyTest", function () {
         assert.equal(a.player, players[0]);
         ma = 1;
       });
-      ircClient.emulateMessage(players[0].id, ircClient.channel, msg);
+      ircClient.emulateChatAsync(players[0].id, msg);
       await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
@@ -582,6 +575,72 @@ describe("LobbyTest", function () {
       await tu.delayAsync(20);
     });
   });
+  describe("mp settings load tests", function () {
+    it("empty lobby", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      const c1 = MpSettingsCases.case1_1;
+      await ircClient.emulateChatAsync(ircClient.nick, "!mp settings");
+      c1.texts.forEach(t => ircClient.emulateBanchoResponse(t));
+      tu.assertMpSettingsResult(lobby, c1.result);
+    });
+    it("change host", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      const c1_1 = MpSettingsCases.case1_1;
+      const c1_2 = MpSettingsCases.case1_2;
+      await ircClient.emulateChatAsync(ircClient.nick, "!mp settings");
+      c1_1.texts.forEach(t => ircClient.emulateBanchoResponse(t));
+      tu.assertMpSettingsResult(lobby, c1_1.result);
+      c1_2.texts.forEach(t => ircClient.emulateBanchoResponse(t));
+      tu.assertMpSettingsResult(lobby, c1_2.result);
+    });
+    it("resore", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      const c1_1 = MpSettingsCases.case1_1;
+      const c1_2 = MpSettingsCases.case1_2;
+      await ircClient.emulateChatAsync(ircClient.nick, "!mp settings");
+      c1_1.texts.forEach(t => ircClient.emulateBanchoResponse(t));
+      tu.assertMpSettingsResult(lobby, c1_1.result);
+
+      await ircClient.emulateRemovePlayerAsync("p1");
+      await ircClient.emulateRemovePlayerAsync("p2");
+      await ircClient.emulateRemovePlayerAsync("p3");
+      await ircClient.emulateAddPlayerAsync("p6");
+      await ircClient.emulateAddPlayerAsync("p7");
+      await ircClient.emulateAddPlayerAsync("p8");
+
+      c1_2.texts.forEach(t => ircClient.emulateBanchoResponse(t));
+      tu.assertMpSettingsResult(lobby, c1_2.result);
+    });
+  });
+  describe("stat tests", function () {
+    it("send stat", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      await tu.AddPlayersAsync([ircClient.nick], ircClient);
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const t = tu.assertEventFire(lobby.ParsedStat, null, 10);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Multiplayer));
+      ircClient.emulateChatAsync("p1", "!stats p1");
+      await t;
+    });
+    it("send stat invalid user", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      await tu.AddPlayersAsync([ircClient.nick], ircClient);
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const t = tu.assertEventNeverFire(lobby.ParsedStat, null, 10);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Multiplayer));
+      ircClient.emulateChatAsync("p1", "!stats p100");
+      await t;
+    });
+    it("send stat pm", async () => {
+      const { lobby, ircClient } = await tu.SetupLobbyAsync();
+      await tu.AddPlayersAsync([ircClient.nick], ircClient);
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const t = tu.assertEventNeverFire(lobby.ParsedStat, null, 10);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Multiplayer));
+      ircClient.emulateChatAsync(ircClient.nick, "!stats p1");
+      await t;
+    });
+  });
   it.skip("plugin test", async () => {
     const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
     const lp = new DummyLobbyPlugin(lobby);
@@ -591,11 +650,11 @@ describe("LobbyTest", function () {
     it("some chat cant handle as chat", async () => {
       const { lobby, ircClient } = await tu.SetupLobbyAsync();
       await tu.AddPlayersAsync(5, ircClient);
-      ircClient.emulateMessage("BanchoBot", ircClient.channel, "Omen de cobra joined in slot 2.");
+      ircClient.emulateBanchoResponse("Omen de cobra joined in slot 2.");
       await tu.delayAsync(10);
       assert.isTrue(lobby.Includes("Omen de cobra"));
       assert.isTrue(lobby.Includes("Omen_de_cobra"));
-      ircClient.emulateMessage("Omen_de_cobra", ircClient.channel, " is this winnner rotation?");
+      ircClient.emulateChatAsync("Omen_de_cobra", " is this winnner rotation?");
     });
     it("creator role check", async () => {
       const { lobby, ircClient } = await tu.SetupLobbyAsync();

@@ -5,13 +5,13 @@ import { parser } from "../parsers";
 import { InOutLogger } from '../plugins';
 import tu from "./TestUtils";
 
-describe.skip("In Out Logger Tests", function() {
-  before(function() {
+describe.skip("In Out Logger Tests", function () {
+  before(function () {
     tu.configMochaAsNoisy();
   });
 
-  it("test", async() => {
-    const {lobby , ircClient} = await tu.SetupLobbyAsync();
+  it("test", async () => {
+    const { lobby, ircClient } = await tu.SetupLobbyAsync();
     const logger = new InOutLogger(lobby);
     const players = await tu.AddPlayersAsync(5, ircClient);
     await ircClient.emulateMatchAsync();

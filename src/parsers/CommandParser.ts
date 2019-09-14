@@ -150,7 +150,7 @@ export class CommandParser {
     }
 
     if (message.match(/^(Room name:|Beatmap:|Team mode:|Active mods:|Players:|Slot \d+)/)) {
-      return makeBanchoResponse(BanchoResponseType.Settings);
+      return makeBanchoResponse(BanchoResponseType.Settings, message);
     }
 
     if (message == "Match referees:") {
@@ -170,7 +170,7 @@ export class CommandParser {
 
     const m_stat = message.match(/(Stats for \(|Score:\s+\d|Plays:\s+\d|Accuracy:\s+\d)/);
     if (m_stat) {
-      return makeBanchoResponse(BanchoResponseType.Stats);
+      return makeBanchoResponse(BanchoResponseType.Stats, message);
     }
 
     const m_team_change = message.match(/(.+) changed to (Blue|Red)/);
@@ -240,7 +240,7 @@ export class CommandParser {
     message = message.trimRight().toLowerCase();
     if (message[0] != "!" && message[0] != "*") return false;
     if (message == "!mp") return false;
-    return message.match(/^[\!\*](?!roll|stats|where|faq|report|request)\w+/) != null;
+    return message.match(/^[\!\*](?!roll|stats?|where|faq|report|request)\w+/) != null;
   }
 
   ParseCustomCommand(message: string): { command: string, param: string } {

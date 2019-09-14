@@ -1,4 +1,4 @@
-import { ILobby } from "../ILobby";
+import { Lobby } from "../Lobby";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 
@@ -35,7 +35,7 @@ export class WordCounter extends LobbyPlugin {
   periods: WordCounterPeriod[];
   lastLogTime: number = 0;
 
-  constructor(lobby: ILobby, option: Partial<WordCounterOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<WordCounterOption> = {}) {
     super(lobby, "wcounter");
     this.option = { ...DefaultOption, ...option } as WordCounterOption;
     this.periods = this.option.periods.map(a => {
@@ -53,7 +53,7 @@ export class WordCounter extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.SentMessage.on(a => this.onSendMessage(a));
+    this.lobby.SentMessage.on(a => this.onSendMessage(a.message));
   }
 
   private onSendMessage(message: string): void {

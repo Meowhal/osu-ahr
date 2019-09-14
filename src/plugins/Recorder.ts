@@ -1,5 +1,5 @@
 import { LobbyPlugin } from "./LobbyPlugin";
-import { ILobby, Player } from "..";
+import { Lobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
 import Nedb from 'nedb';
@@ -36,7 +36,7 @@ export class Recorder extends LobbyPlugin {
   mapChanger: Player | null = null;
   loadingTask: Promise<void[]> | null = null;
 
-  constructor(lobby: ILobby, autoload: boolean, option: Partial<RecorderOption> = {}) {
+  constructor(lobby: Lobby, autoload: boolean, option: Partial<RecorderOption> = {}) {
     super(lobby, "recorder");
     this.option = { ...defaultOption, ...option } as RecorderOption;
     this.db = {
@@ -49,7 +49,7 @@ export class Recorder extends LobbyPlugin {
     this.registerEvents();
   }
   private registerEvents(): void {
-    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.MatchStarted.on(a => this.onMatchStarted(a.mapId, a.mapTitle));
 

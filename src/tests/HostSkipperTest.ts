@@ -244,8 +244,8 @@ describe("HostSkipperTest", function () {
       assert.equal(skipper.voting.count, 3);
       assert.isTrue(skipped);
     });
-    it("is player skip ignored at cooltime", async () => {
-      const { skipper, lobby, ircClient } = await prepare(0, 20);
+    it("ignored vote when cooltime", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0, 10);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
       const r = resolveSkipAsync(lobby);
@@ -335,7 +335,7 @@ describe("HostSkipperTest", function () {
       ircClient.emulateMessage("p1", ircClient.channel, "!skip p0");
       //assert.equal(skipper.voting.count, 1);
     });
-    it("accept !skip with host id with complex name", async () => {
+    it("accept !skip with complex host id", async () => {
       const { skipper, lobby, ircClient } = await prepare();
       const players = ["abc xxx[aaui]", "a", "b", "c"];
       await tu.AddPlayersAsync(players, ircClient);

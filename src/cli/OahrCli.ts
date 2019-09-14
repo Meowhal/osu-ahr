@@ -77,7 +77,7 @@ export class OahrCli extends OahrBase {
           case "s":
           case "say":
             if ((l.arg.startsWith("!") && !l.arg.startsWith("!mp ")) || l.arg.startsWith("*")) {
-              this.lobby.RaiseReceivedCustomCommand(this.lobby.GetPlayer(this.client.nick) as Player, l.arg)
+              this.lobby.RaiseReceivedCustomCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.arg)
             } else {
               this.lobby.SendMessage(l.arg);
             }
