@@ -445,8 +445,8 @@ export class Lobby {
       const r = this.margeMpSettingsResult(result);
       if (r.hostChanged || r.playersIn.length != 0 || r.playersOut.length != 0) {
         logger.info("applied mp settings");
+        this.ParsedSettings.emit({ result, ...r });
       }
-      this.ParsedSettings.emit({ result, ...r });
     }
   }
 

@@ -1,9 +1,9 @@
-import { Lobby, logIrcEvent, Player } from "..";
+import { Lobby, logIrcEvent, Player, Roles } from "..";
 import { DummyIrcClient } from "../dummies";
+import { BanchoResponse, BanchoResponseType, MpSettingsResult } from "../parsers";
+import { TypedEvent } from "../libs";
 import { assert } from 'chai';
 import log4js from "log4js";
-import { TypedEvent } from "../libs";
-import { BanchoResponse, BanchoResponseType } from "../parsers";
 
 class TestUtils {
   ownerNickname: string = "creator";
@@ -167,6 +167,20 @@ class TestUtils {
         reject("the response not expected was returned.");
       });
     });
+  }
+
+  assertMpSettingsResult(lobby: Lobby, result: MpSettingsResult) {
+    assert.equal(lobby.players.size, result.players.length);
+    for (let r of result.players) {
+      const p = lobby.GetPlayer(r.id);
+      if (p == null) {
+        assert.fail();
+        return;
+      }
+      assert.isTrue(lobby.players.has(p));
+      assert.isTrue(p.is(Roles.Player));
+      assert.equal(p.isHost, r.isHost);
+    }
   }
 }
 

@@ -128,7 +128,7 @@ export class AutoHostSelector extends LobbyPlugin {
         this.needsRotate = false;
         this.logger.info("The match was aborted before any Player Finished.");
       } else {
-        // ホストがいない状態で試合が中断されたら、
+        // ホストがいない状態で試合が中断されたら
         this.logger.info("The match was aborted after the host left.");
         this.changeHost();
       }
@@ -136,18 +136,57 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+    if (this.lobby.host == null) {
+      this.hostQueue = [];
+    }
+    if (this.hostQueue.length == 0 || this.lobby.host == null || !this.hostQueue.includes(this.lobby.host)) {
+      // キューが空、ホストがいない、ホストが新しく入った人の場合はスロットベースで再構築する
+      this.orderBySlotBase(result);
+    } else {
+      // 少人数が出入りしただけとみなし、現在のキューを維持する
+      let newQueue = this.hostQueue.filter(p => !playersOut.includes(p));
+      for (let p of playersIn) {
+        newQueue.push(p);
+      }
+
+      if (this.validateNewQueue(newQueue)) {
+        this.logger.info("modified host queue.");
+        this.hostQueue = newQueue;
+        this.SkipTo(this.lobby.host);
+      } else {
+        this.logger.warn("failed to modified the host queue.");
+        this.orderBySlotBase(result);
+      }
+    }
     this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
+  }
+
+  private orderBySlotBase(result: MpSettingsResult): void {
+    this.logger.info("reordered slot base order.");
+    this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.id));
+    if (this.lobby.host != null) {
+      this.SkipTo(this.lobby.host);
+    } else {
+      // hostがいない場合は先頭へ
+      this.changeHost();
+    }
   }
 
   private onCustomCommand(player: Player, command: string, param: string): void {
     if (command.startsWith("!q")) {
       this.showHostQueue();
+    } else if (player.isAuthorized) {
+      if (command == "*reorder") {
+        if (param != "") {
+          this.Reorder(param);
+        }
+      }
     }
   }
 
   private showHostQueue(): void {
     this.lobby.SendMessageWithCoolTime(() => {
-      let m = this.hostQueue.map(c => this.escapeUserId(c.id)).join(", ");
+      let m = this.hostQueue.map(c => this.disguiseUserId(c.id)).join(", ");
       this.logger.trace(m);
       if (this.option.show_queue_chars_limit < m.length) {
         m = m.substring(0, this.option.show_queue_chars_limit) + "...";
@@ -159,43 +198,95 @@ export class AutoHostSelector extends LobbyPlugin {
   // 別のプラグインからskipの要請があった場合に実行する
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
     if (type == "skip") {
-      this.doSkip();
+      this.Skip();
     } else if (type == "skipto") {
-      this.doSkipTo(args);
+      this.logger.trace("recieved plugin message skipto");
+      if (args.length != 1) {
+        this.logger.error("skipto invalid arguments length");
+        return;
+      }
+      const to = this.lobby.GetOrMakePlayer(args[0]);
+      if (!this.lobby.players.has(to)) {
+        this.logger.error("skipto target dosent exist");
+        return;
+      }
+      this.SkipTo(to);
     }
   }
 
-  private doSkip(): void {
+  Skip(): void {
     this.logger.trace("recieved plugin message skip");
     this.rotateQueue();
     this.changeHost();
   }
 
-  private doSkipTo(args: string[]): void {
-    this.logger.trace("recieved plugin message skipto");
-    if (args.length != 1) {
-      this.logger.error("skipto invalid arguments length");
-      return;
-    }
-    const to = escapeUserId(args[0]);
-    if (!this.lobby.Includes(to)) {
-      this.logger.error("skipto target dosent exist");
-      return;
+  SkipTo(to: string | Player): void {
+    let trg: Player;
+    if (typeof to == "string") {
+      trg = this.lobby.GetOrMakePlayer(to);
+    } else {
+      trg = to;
     }
     let c = 0;
-    while (this.hostQueue[0].escaped_id != to) {
-      this.rotateQueue();
+    while (this.hostQueue[0] != trg) {
+      this.rotateQueue(false);
       if (c++ > 16) {
         this.logger.error("infinity loop detected");
         return;
       }
     }
+    if (this.logger.isTraceEnabled) {
+      this.logger.trace("skipto: %s", this.hostQueue.map(p => p.id).join(", "));
+    }
     this.changeHost();
   }
 
+  Reorder(order: Player[] | string): void {
+    if (typeof (order) == "string") {
+      const players = order.split(",").map(t => this.lobby.GetPlayer(this.revealUserId(t.trim()))).filter(p => p != null) as Player[];
+      if (players.length == 0) {
+        this.logger.info("Faild reorder, invalid order string : %s", order);
+      } else {
+        this.Reorder(players);
+      }
+    } else {
+      const nq = order.filter(p => this.lobby.players.has(p));
+      for (let p of this.hostQueue) {
+        if (!nq.includes(p)) {
+          nq.push(p);
+        }
+      }
+      if (this.validateNewQueue(nq)) {
+        this.logger.info("reordered host queue.");
+        this.hostQueue = nq;
+        this.changeHost();
+      } else {
+        this.logger.info("failed to reorder.");
+      }
+    }
+  }
+
+  private validateNewQueue(que: Player[]): boolean {
+    let isValid = this.lobby.players.size == que.length;
+    for (let p of que) {
+      isValid = isValid && this.lobby.players.has(p);
+    }
+
+    this.logger.trace("validate queue.");
+    this.logger.trace("  old: %s", Array.from(this.lobby.players).map(p => p.id).join(", "));
+    this.logger.trace("  new: %s", que.map(p => p.id).join(", "));
+
+    return isValid;
+  }
+
   // ユーザーIDを表示するときhighlightされないように名前を変更する
-  private escapeUserId(userid: string): string {
+  private disguiseUserId(userid: string): string {
     return userid[0] + "\u{200B}" + userid.substring(1);
+  }
+
+  // disguiseUserIdで変更を加えた文字列をもとに戻す.
+  private revealUserId(disguisedId: string): string {
+    return disguisedId.replace(/\u200B/g, "");
   }
 
   // !mp host コマンドの発行
@@ -217,10 +308,10 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   // ホストキューの先頭を末尾に付け替える
-  private rotateQueue(): void {
+  private rotateQueue(showLog: boolean = true): void {
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
-    if (this.logger.isTraceEnabled) {
+    if (this.logger.isTraceEnabled && showLog) {
       this.logger.trace("rotated host queue: %s", this.hostQueue.map(p => p.id).join(", "));
     }
   }

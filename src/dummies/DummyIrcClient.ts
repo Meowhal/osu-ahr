@@ -3,6 +3,8 @@ import { EventEmitter } from "events";
 import { IIrcClient } from "..";
 import log4js from "log4js";
 import { parser, MpCommand } from "../parsers";
+import { MpSettingsCase } from "../tests/cases/MpSettingsCases";
+import { escapeUserId } from "../Player";
 const logger = log4js.getLogger("irc");
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
@@ -79,6 +81,10 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     }
   }
 
+  public emulateBanchoResponse(message: string): void {
+    this.emulateMessage("BanchoBot", this.channel, message);
+  }
+
   // メッセージイベントを非同期で発生させる
   public emulateMessageAsync(from: string, to: string, message: string): Promise<void> {
     return new Promise(resolve => {
@@ -97,16 +103,18 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // ロビーにプレイヤーが参加した際の動作をエミュレートする
   public async emulateAddPlayerAsync(name: string): Promise<void> {
-    if (!this.players.has(name)) {
-      this.players.add(name);
+    let ename = escapeUserId(name);
+    if (!this.players.has(ename)) {
+      this.players.add(ename);
     }
     await this.emulateMessageAsync("BanchoBot", this.channel, `${name} joined in slot ${this.players.size}.`);
   }
 
   // ロビーからプレイヤーが退出した際の動作をエミュレートする
   public async emulateRemovePlayerAsync(name: string): Promise<void> {
-    if (this.players.has(name)) {
-      this.players.delete(name);
+    let ename = escapeUserId(name);
+    if (this.players.has(ename)) {
+      this.players.delete(ename);
     }
     await this.emulateMessageAsync("BanchoBot", this.channel, `${name} left the game.`);
   }
@@ -180,6 +188,15 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     await this.emulateMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
   }
 
+  public async emulateMpSettings(testcase: MpSettingsCase): Promise<void> {
+    this.players.clear();
+    for (let p of testcase.result.players) {
+      this.players.add(escapeUserId(p.id));
+    }
+    for (let t of testcase.texts) {
+      this.emulateBanchoResponse(t);
+    }
+  }
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
@@ -218,7 +235,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     } else if (target == this.channel) {
       switch (mp.command) {
         case "host":
-          if (this.players.has(mp.arg)) {
+          if (this.players.has(escapeUserId(mp.arg))) {
             m(`${mp.arg} became the host.`);
           } else {
             m("User not found");

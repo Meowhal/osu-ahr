@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import { Lobby } from "..";
 import { DummyIrcClient } from '../dummies';
 import { AutoHostSelector } from "../plugins";
+import { MpSettingsCases } from "./cases/MpSettingsCases";
 import tu from "./TestUtils";
 
 describe("AutoHostSelectorTest", function () {
@@ -497,6 +498,193 @@ describe("AutoHostSelectorTest", function () {
       await ircClient.emulateChangeMapAsync(0);
       assertStateIs("hr", selector);
       tu.assertHost("c", lobby);
+    });
+  });
+
+  describe("mp settings tests", function () {
+    it("empty lobby case1_1", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const c = MpSettingsCases.case1_1;
+      const q = ["p1", "p2", "p3", "p4", "p5"];
+      ircClient.emulateMpSettings(c);
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q[i]);
+      }
+    });
+    it("empty lobby case1_2", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const c = MpSettingsCases.case1_2;
+      const q = ["p3", "p4", "p5", "p1", "p2"];
+      ircClient.emulateMpSettings(c);
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q[i]);
+      }
+    });
+    it("change host test", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const c = MpSettingsCases.case1_1;
+      const q1 = ["p1", "p2", "p3", "p4", "p5"];
+      const q2 = ["p3", "p4", "p5", "p1", "p2"];
+      ircClient.emulateMpSettings(c);
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q1[i]);
+      }
+      selector.SkipTo("p3");
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q2[i]);
+      }
+      if (lobby.host == null) return;
+      assert.isTrue(lobby.host.isHost);
+      assert.equal(lobby.host.id, "p3");
+      ircClient.emulateMpSettings(c);
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q1[i]);
+      }
+      assert.equal(lobby.host.id, "p1");
+    });
+    it("mod queue test", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const c1 = MpSettingsCases.case1_1;
+      const c3 = MpSettingsCases.case1_3;
+      const q1 = ["p1", "p2", "p3", "p4", "p5"];
+      const q2 = ["p4", "p5", "p6", "p7", "p2"];
+      ircClient.emulateMpSettings(c1);
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q1[i]);
+      }
+      ircClient.emulateMpSettings(c3);
+
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q2[i], `${i} a-${selector.hostQueue[i].id} e-${q2[i]}`);
+      }
+
+      if (lobby.host == null) assert.fail();
+      else assert.equal(lobby.host.id, "p4");
+    });
+    it("reset queue test", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const c1 = MpSettingsCases.case1_1;
+      const c3 = MpSettingsCases.case1_3;
+      const q1 = ["p1", "p2", "p3", "p4", "p5"];
+      const q2 = ["p4", "p5", "p6", "p7", "p2"];
+      ircClient.emulateMpSettings(c1);
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q1[i]);
+      }
+      ircClient.emulateRemovePlayerAsync("p1");
+      selector.SkipTo("p3");
+      ircClient.emulateMpSettings(c1);
+
+      for (let i = 0; i < selector.hostQueue.length; i++) {
+        assert.equal(selector.hostQueue[i].id, q1[i], `${i} a-${selector.hostQueue[i].id} e-${q2[i]}`);
+      }
+
+      if (lobby.host == null) assert.fail();
+      else assert.equal(lobby.host.id, "p1");
+    });
+  });
+  describe("reoder tests", function () {
+    before(function () {
+      tu.configMochaAsNoisy();
+    });
+    it("reaoder", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const od = ["p3", "p1", "p2", "p4", "p0"];
+      selector.Reorder(od.join(","));
+      await tu.delayAsync(1);
+      tu.assertHost("p3", lobby);
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+    });
+    it("disguised string", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const disguised = "p​0, p​1, p​2, p​3, p​4";
+      const od = ["p0", "p1", "p2", "p3", "p4"];
+      selector.SkipTo("p3");
+      await tu.delayAsync(1);
+      selector.Reorder(disguised);
+      await tu.delayAsync(1);
+      tu.assertHost("p0", lobby);
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+    });
+    it("no change", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const odtxt = "p​0, p​1, p​2, p​3, p​4";
+      const od = ["p0", "p1", "p2", "p3", "p4"];
+      selector.Reorder(odtxt);
+      await tu.delayAsync(1);
+      tu.assertHost("p0", lobby);
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+    });
+    it("partially specify", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const odtxt = "p​3, p​4, p2";
+      const od = ["p3", "p4", "p2", "p0", "p1"];
+      selector.Reorder(odtxt);
+      await tu.delayAsync(1);
+      tu.assertHost("p3", lobby);
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+    });
+    it("extra specify", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const odtxt = "p3, p6, p4, p2, p5, p0, p1";
+      const od = ["p3", "p4", "p2", "p0", "p1"];
+      selector.Reorder(odtxt);
+      await tu.delayAsync(1);
+      tu.assertHost("p3", lobby);
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+    });
+    it("from custom command", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      lobby.option.authorized_users = ["p0"];
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      const odtxt = "*reorder p​0, p​1, p​2, p​3, p​4";
+      const od = ["p0", "p1", "p2", "p3", "p4"];
+      selector.SkipTo("p3");
+      tu.assertHost("p3", lobby);
+      await tu.delayAsync(1);
+      await ircClient.emulateMessageAsync("p0", ircClient.channel, odtxt);
+
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+    });
+    it("invalid custom command", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      lobby.option.authorized_users = ["p0"];
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      let odtxt = "*reorder";
+      const od = ["p3", "p4", "p0", "p1", "p2"];
+      selector.SkipTo("p3");
+      tu.assertHost("p3", lobby);
+      await tu.delayAsync(1);
+      await ircClient.emulateMessageAsync("p0", ircClient.channel, odtxt);
+
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
+
+      odtxt = "*reorder asdfsafasdf";
+      await tu.delayAsync(1);
+      await ircClient.emulateMessageAsync("p0", ircClient.channel, odtxt);
+
+      for (let i = 0; i < od.length; i++) {
+        assert.equal(selector.hostQueue[i].id, od[i]);
+      }
     });
   });
 });
