@@ -3,7 +3,7 @@ irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.
 The order of hosts is managed by queue. Added last when a player joins the lobby.
 
 ## chat commands
-|for player||
+|for player|desc|
 |:--|:--|
 |`!queue`| Shows host queue.|
 |`!skip `| Votes to skip current host.|
@@ -12,18 +12,19 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 |`!update`| Updates current selected map to the latest version. Use when has host old map.|
 
  
-|for host|||
+|for host|desc|ex|
 |:--|:--|:--|
 |`!skip`| Transfers host to next player.||
 |`!start [secs]`| Begins start timer.|`!start 30`|
 |`!stop`| Stops current start timer.||
 
-|for owner|||
+|for owner|desc|ex|
 |:--|:--|:--|
+|`*start`|Force start the match.||
+|`*skip`|Force skip current host.||
+|`*skipto [player]`|Force skip to specified player.|`*skipto p2`|
 |`*order [players list]`| Reorder the queue in specified order. |`*order p1, p2, p3`|
-|`*skip`|||
-|`*skipto [player]`|||
-|`*start`|||
+
 
 (I am looking for ppl who can correct my English mistakes..😖)
 
