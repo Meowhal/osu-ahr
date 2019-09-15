@@ -58,7 +58,7 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.RecievedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.MatchStarted: this.onMatchStarted(); break;
-        case BanchoResponseType.BeatmapChanged: this.onBeatmapChanging(); break;
+        case BanchoResponseType.BeatmapChanging: this.onBeatmapChanging(); break;
       }
     });
   }

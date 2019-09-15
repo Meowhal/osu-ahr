@@ -29,11 +29,11 @@ export class InOutLogger extends LobbyPlugin {
     const ctagOut = useColor ? "\x1b[31m" : "";
     const ctagEnd = useColor ? "\x1b[0m" : "";
     if (msgIn != "") {
-      msg = `+ ${ctagIn} ${msgIn} ${ctagEnd}`;
+      msg = `+${ctagIn} ${msgIn} ${ctagEnd}`;
     }
     if (msgOut != "") {
       if (msg != "") msg += ", "
-      msg += `+ ${ctagOut} ${msgOut} ${ctagEnd}`;
+      msg += `-${ctagOut} ${msgOut} ${ctagEnd}`;
     }
     return msg;
   }

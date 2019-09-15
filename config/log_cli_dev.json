@@ -4,7 +4,7 @@
       "type": "console",
       "layout": {
         "type": "pattern",
-        "pattern": "%[[%d{hh:mm:ss}] [%p] %c -%] %m"
+        "pattern": "%[[%d{hh:mm:ss.SSS}][%p] %c -%] %m"
       }
     },
     "console_f": {
@@ -12,16 +12,16 @@
       "level": "info",
       "appender": "console"
     },
-    "file_all": {
+    "file_app": {
       "type": "multiFile",
-      "base": "logs/all",
+      "base": "logs/app",
       "property": "channel",
       "extension": ".log"
     },
-    "file_all_f": {
+    "file_app_f": {
       "type": "logLevelFilter",
-      "level": "trace",
-      "appender": "file_all"
+      "level": "info",
+      "appender": "file_app"
     },
     "file_irc": {
       "type": "file",
@@ -51,7 +51,7 @@
     "default": {
       "appenders": [
         "console_f",
-        "file_all_f",
+        "file_app",
         "file_cli_f"
       ],
       "level": "all"
@@ -59,7 +59,7 @@
     "irc": {
       "appenders": [
         "console_f",
-        "file_all_f",
+        "file_app_f",
         "file_irc"
       ],
       "level": "all"
@@ -67,7 +67,14 @@
     "chat": {
       "appenders": [
         "console",
+        "file_app",
         "file_cli"
+      ],
+      "level": "all"
+    },
+    "inout": {
+      "appenders": [
+        "console"
       ],
       "level": "all"
     },

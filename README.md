@@ -32,16 +32,16 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 ## Usage
 + clone repo and install libs
 ```bash
-git clone https://github.com/Meowhal/osu-ahr.git
-npm install
+> git clone https://github.com/Meowhal/osu-ahr.git
+> npm install
 ```
 + get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
 + copy `./config/default.json` to `./config/development.json`
 + enter your account id and irc password to `./config/development.json`
 + launch the bot
 ```bash 
-npm start
-[m]ake, [e]nter, [q]uit > m lobby_name
+> npm start
+> [m]ake, [e]nter, [q]uit > m lobby_name
 ```
 
 ## Functions
