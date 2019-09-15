@@ -15,31 +15,39 @@ export class InOutLogger extends LobbyPlugin {
       case BanchoResponseType.MatchStarted:
       case BanchoResponseType.MatchFinished:
       case BanchoResponseType.AbortedMatch:
-        this.logInOutPlayers();
+        this.LogInOutPlayers();
         this.saveCurrentPlayers();
         break;
     }
   }
 
-  logInOutPlayers(): void {
+  GetInOutLog(useColor: boolean): string {
+    const msgOut = Array.from(this.players).filter(p => !this.lobby.players.has(p)).map(p => p.id).join(", ");
+    const msgIn = Array.from(this.lobby.players).filter(p => !this.players.has(p)).map(p => p.id).join(", ");
+    let msg = "";
+    const ctagIn = useColor ? "\x1b[32m" : "";
+    const ctagOut = useColor ? "\x1b[31m" : "";
+    const ctagEnd = useColor ? "\x1b[0m" : "";
+    if (msgIn != "") {
+      msg = `+ ${ctagIn} ${msgIn} ${ctagEnd}`;
+    }
+    if (msgOut != "") {
+      if (msg != "") msg += ", "
+      msg += `+ ${ctagOut} ${msgOut} ${ctagEnd}`;
+    }
+    return msg;
+  }
+
+  LogInOutPlayers(): void {
     if (this.logger.isInfoEnabled) {
-      const msgOut = Array.from(this.players).filter(p => !this.lobby.players.has(p)).map(p => p.id).join(", ");
-      const msgIn = Array.from(this.lobby.players).filter(p => !this.players.has(p)).map(p => p.id).join(", ");
-      let msg = "";
-      if (msgIn != "") {
-        msg = "+ \x1b[32m" + msgIn + "\x1b[0m";
-      }
-      if (msgOut != "") {
-        if (msg != "") msg += ", "
-        msg += "- \x1b[31m" + msgOut + "\x1b[0m";
-      }
+      const msg = this.GetInOutLog(true);
       if (msg != "") {
         this.logger.info(msg);
       }
     }
   }
 
-  saveCurrentPlayers(): void {
+  private saveCurrentPlayers(): void {
     this.players.clear();
     this.lobby.players.forEach(p => this.players.add(p));
   }

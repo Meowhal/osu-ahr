@@ -85,7 +85,7 @@ export class Recorder extends LobbyPlugin {
     });
   }
 
-  private onPlayerLeft(player: Player): any {
+  private onPlayerLeft(player: Player): void {
     if (this.hasError) return;
     const r = this.playerRecords.get(player.escaped_id);
     if (r == undefined) return;
@@ -93,7 +93,7 @@ export class Recorder extends LobbyPlugin {
     this.savePlayerRecordAsync(player);
   }
 
-  private onMatchStarted(mapId: number, mapTitle: string): any {
+  private onMatchStarted(mapId: number, mapTitle: string): void {
     if (this.hasError) return;
     this.playerRecords.forEach((r, id) => r.playCount++);
     if (this.mapChanger == null) return;

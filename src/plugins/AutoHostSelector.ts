@@ -27,15 +27,21 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
-    this.lobby.MatchStarted.on(() => this.onMatchStarted());
-    this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
-      if (a.response.type == BanchoResponseType.BeatmapChanging) {
-        this.onBeatmapChanging()
+      switch (a.response.type) {
+        case BanchoResponseType.BeatmapChanging:
+          this.onBeatmapChanging()
+          break;
+        case BanchoResponseType.MatchStarted:
+          this.onMatchStarted();
+          break;
+        case BanchoResponseType.MatchFinished:
+          this.onMatchFinished();
+          break;
       }
     });
   }
@@ -119,7 +125,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.changeHost();
   }
 
-  private onMatchAborted(playersFinished: number, playersInGame: number) {
+  private onMatchAborted(playersFinished: number, playersInGame: number):void {
     if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
       this.logger.info("The match was aborted after several players were Finished. call normal match finish process");
       this.onMatchFinished();
@@ -136,13 +142,13 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     if (this.lobby.host == null) {
       this.hostQueue = [];
     }
     if (this.hostQueue.length == 0 || this.lobby.host == null || !this.hostQueue.includes(this.lobby.host)) {
       // キューが空、ホストがいない、ホストが新しく入った人の場合はスロットベースで再構築する
-      this.orderBySlotBase(result);
+      this.OrderBySlotBase(result);
     } else {
       // 少人数が出入りしただけとみなし、現在のキューを維持する
       let newQueue = this.hostQueue.filter(p => !playersOut.includes(p));
@@ -156,44 +162,22 @@ export class AutoHostSelector extends LobbyPlugin {
         this.SkipTo(this.lobby.host);
       } else {
         this.logger.warn("failed to modified the host queue.");
-        this.orderBySlotBase(result);
+        this.OrderBySlotBase(result);
       }
     }
     this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
   }
 
-  private orderBySlotBase(result: MpSettingsResult): void {
-    this.logger.info("reordered slot base order.");
-    this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.id));
-    if (this.lobby.host != null) {
-      this.SkipTo(this.lobby.host);
-    } else {
-      // hostがいない場合は先頭へ
-      this.changeHost();
-    }
-  }
-
   private onCustomCommand(player: Player, command: string, param: string): void {
     if (command.startsWith("!q")) {
-      this.showHostQueue();
+      this.ShowHostQueue();
     } else if (player.isAuthorized) {
-      if (command == "*reorder") {
+      if (command == "*reorder" || command == "*order") {
         if (param != "") {
           this.Reorder(param);
         }
       }
     }
-  }
-
-  private showHostQueue(): void {
-    this.lobby.SendMessageWithCoolTime(() => {
-      let m = this.hostQueue.map(c => disguiseUserId(c.id)).join(", ");
-      this.logger.trace(m);
-      if (this.option.show_queue_chars_limit < m.length) {
-        m = m.substring(0, this.option.show_queue_chars_limit) + "...";
-      }
-      return "host queue : " + m;
-    }, "!queue", this.option.show_queue_cooltime_ms);
   }
 
   // 別のプラグインからskipの要請があった場合に実行する
@@ -213,6 +197,28 @@ export class AutoHostSelector extends LobbyPlugin {
       }
       this.SkipTo(to);
     }
+  }
+
+  OrderBySlotBase(result: MpSettingsResult): void {
+    this.logger.info("reordered slot base order.");
+    this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.id));
+    if (this.lobby.host != null) {
+      this.SkipTo(this.lobby.host);
+    } else {
+      // hostがいない場合は先頭へ
+      this.changeHost();
+    }
+  }
+
+  ShowHostQueue(): void {
+    this.lobby.SendMessageWithCoolTime(() => {
+      let m = this.hostQueue.map(c => disguiseUserId(c.id)).join(", ");
+      this.logger.trace(m);
+      if (this.option.show_queue_chars_limit < m.length) {
+        m = m.substring(0, this.option.show_queue_chars_limit) + "...";
+      }
+      return "host queue : " + m;
+    }, "!queue", this.option.show_queue_cooltime_ms);
   }
 
   Skip(): void {
@@ -321,7 +327,7 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     const m = this.hostQueue.map(p => p.id).join(", ");
     return `-- AutoHostSelector --
   current host queue
@@ -330,7 +336,7 @@ export class AutoHostSelector extends LobbyPlugin {
   needsRotate : ${this.needsRotate}`;
   }
 
-  getInfoMessage(): string[] {
+  GetInfoMessage(): string[] {
     return ["!queue => show host queue."]
   }
 }

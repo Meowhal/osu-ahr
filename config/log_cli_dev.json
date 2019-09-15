@@ -1,7 +1,11 @@
 {
   "appenders": {
     "console": {
-      "type": "console"
+      "type": "console",
+      "layout": {
+        "type": "pattern",
+        "pattern": "%[[%d{hh:mm:ss}] [%p] %c -%] %m"
+      }
     },
     "console_f": {
       "type": "logLevelFilter",

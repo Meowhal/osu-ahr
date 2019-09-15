@@ -19,15 +19,15 @@ export class LobbyPlugin {
    * @param type 
    * @param args 
    */
-  sendPluginMessage(type: string, args: string[] = []) {
+  SendPluginMessage(type: string, args: string[] = []): void {
     this.lobby.PluginMessage.emit({ type, args, src: this });
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     return "";
   }
 
-  getInfoMessage(): string[] {
+  GetInfoMessage(): string[] {
     return [];
   }
 }

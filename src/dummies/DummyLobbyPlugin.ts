@@ -7,7 +7,7 @@ export class DummyLobbyPlugin extends LobbyPlugin {
     super(lobby);
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     return `-- Dummy Lobby Plugin --
   this is dummy lobby info
     `;

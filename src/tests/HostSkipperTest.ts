@@ -115,7 +115,7 @@ describe("HostSkipperTest", function () {
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
       let test = async (waitTime: number) => {
         skipper.option.afk_timer_delay_ms = waitTime;
-        skipper.restart();
+        skipper.Reset();
         const startTime = await tu.changeHostAsync("p1", lobby);
         const endTime = await resolveSkipAsync(lobby);
         const elapsed = endTime - startTime;

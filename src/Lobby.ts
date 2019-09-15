@@ -720,7 +720,7 @@ export class Lobby {
       ;
 
     for (let p of this.plugins) {
-      const ps = p.getPluginStatus();
+      const ps = p.GetPluginStatus();
       if (ps != "") {
         s += "\n" + ps;
       }

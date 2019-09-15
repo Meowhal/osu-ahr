@@ -331,7 +331,7 @@ describe("AutoHostSelectorTest", function () {
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-      selector.sendPluginMessage("skip");
+      selector.SendPluginMessage("skip");
       await tu.delayAsync(5);
       tu.assertHost("player2", lobby);
     });
@@ -341,14 +341,14 @@ describe("AutoHostSelectorTest", function () {
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-      selector.sendPluginMessage("skipto", ["player3"]);
+      selector.SendPluginMessage("skipto", ["player3"]);
       await tu.delayAsync(5);
       tu.assertHost("player3", lobby);
       assert.equal(selector.hostQueue[0].id, "player3");
       assert.equal(selector.hostQueue[1].id, "player1");
       assert.equal(selector.hostQueue[2].id, "player2");
 
-      selector.sendPluginMessage("skipto", ["player3"]);
+      selector.SendPluginMessage("skipto", ["player3"]);
       await tu.delayAsync(5);
       tu.assertHost("player3", lobby);
       assert.equal(selector.hostQueue[0].id, "player3");

@@ -30,7 +30,7 @@ export class MapRecaster extends LobbyPlugin {
     });
   }
 
-  onReceivedCustomCommand(command: string, param: string, player: Player): any {
+  private onReceivedCustomCommand(command: string, param: string, player: Player): void {
     if (command == "!update") {
       if (this.canRecast) {
         this.canRecast = false;
@@ -39,7 +39,7 @@ export class MapRecaster extends LobbyPlugin {
     }
   }
 
-  getInfoMessage(): string[] {
+  GetInfoMessage(): string[] {
     return ["!update => update selected map. use when host has old map."]
   }
 

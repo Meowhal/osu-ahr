@@ -52,13 +52,13 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
-    this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
-      if (a.response.type == BanchoResponseType.BeatmapChanging) {
-        this.onBeatmapChanging()
+      switch (a.response.type) {
+        case BanchoResponseType.MatchStarted: this.onMatchStarted(); break;
+        case BanchoResponseType.BeatmapChanged: this.onBeatmapChanging(); break;
       }
     });
   }
@@ -83,7 +83,7 @@ export class HostSkipper extends LobbyPlugin {
 
   private onHostChanged(newhost: Player): void {
     if (this.lobby.isMatching) return;
-    this.restart();
+    this.Reset();
   }
 
   private onMatchStarted(): void {
@@ -97,13 +97,13 @@ export class HostSkipper extends LobbyPlugin {
     this.stopTimer();
   }
 
-  private onPlayerChated(player: Player) {
+  private onPlayerChated(player: Player): void {
     if (this.lobby.host == player) {
       this.stopTimer();
     }
   }
 
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     playersOut.forEach(p => this.voting.RemoveVoter(p));
     playersIn.forEach(p => this.voting.AddVoter(p));
     this.voting.Clear();
@@ -119,18 +119,14 @@ export class HostSkipper extends LobbyPlugin {
       this.vote(player);
     } else if (player.isAuthorized) {
       if (command == "*skip") {
-        this.doSkip();
-      } else if (command == "*stopSkipCounter") {
-        this.stopTimer();
-      } else if (command == "*restartSkip") {
-        this.restart();
+        this.Skip();
       } else if (command == "*skipto" && param != "") {
-        this.doSkipTo(param);
+        this.SkipTo(param);
       }
     }
   }
 
-  private vote(player: Player) {
+  private vote(player: Player): void {
     if (this.voting.passed) {
       this.logger.debug("vote from %s was ignored, already skipped", player.id);
     } else if (this.elapsedSinceVotePassed < this.option.vote_cooltime_ms) {
@@ -141,7 +137,7 @@ export class HostSkipper extends LobbyPlugin {
       }
     } else if (player.isHost) {
       this.logger.debug("host(%s) sent !skip command", player.id);
-      this.doSkip();
+      this.Skip();
     } else {
       if (this.voting.Vote(player)) {
         this.logger.trace("accept skip request from %s", player.id);
@@ -159,33 +155,33 @@ export class HostSkipper extends LobbyPlugin {
     }
     if (this.voting.passed) {
       this.lobby.DeferMessage(`bot : Passed skip vote: ${this.voting.toString()}`, "checkSkipCount", 100, true);
-      this.doSkip();
+      this.Skip();
     }
   }
 
-  private doSkip(): void {
+  Skip(): void {
     this.logger.info("do skip");
     this.stopTimer();
-    this.sendPluginMessage("skip");
+    this.SendPluginMessage("skip");
     this.timeVotePassed = Date.now();
   }
 
-  private doSkipTo(userid: string): void {
+  SkipTo(userid: string): void {
     if (!this.lobby.Includes(userid)) {
       this.logger.info("invalid userid @skipto : %s", userid);
       return;
     }
     this.logger.info("do skipTo : %s", userid);
     this.stopTimer();
-    this.sendPluginMessage("skipto", [userid]);
+    this.SendPluginMessage("skipto", [userid]);
   }
 
-  restart(): void {
+  Reset(): void {
     this.voting.Clear();
     this.startTimer();
   }
 
-  startTimer(): void {
+  private startTimer(): void {
     if (this.option.afk_timer_delay_ms == 0) return;
     this.stopTimer();
     this.logger.trace("start timer");
@@ -196,13 +192,13 @@ export class HostSkipper extends LobbyPlugin {
           this.lobby.SendMessage(this.option.afk_timer_message);
         }
         if (this.option.afk_timer_do_skip) {
-          this.doSkip();
+          this.Skip();
         }
       }
     }, this.option.afk_timer_delay_ms);
   }
 
-  stopTimer(): void {
+  private stopTimer(): void {
     if (this.afkTimer != undefined) {
       this.logger.trace("stop timer");
       clearTimeout(this.afkTimer);
@@ -210,13 +206,13 @@ export class HostSkipper extends LobbyPlugin {
     }
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     return `-- Host Skipper --
   timer : ${this.afkTimer != undefined ? "active" : "---"}
   skip_vote : ${this.voting.toString()}`;
   }
 
-  getInfoMessage(): string[] {
+  GetInfoMessage(): string[] {
     return ["!skip => skip current host."];
   }
 }

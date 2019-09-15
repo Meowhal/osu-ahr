@@ -38,18 +38,18 @@ export class MatchStarter extends LobbyPlugin {
     });
   }
 
-  private onPlayerJoined(player: Player) {
+  private onPlayerJoined(player: Player): void {
     this.voting.AddVoter(player);
   }
 
-  private onPlayerLeft(player: Player): any {
+  private onPlayerLeft(player: Player): void {
     this.voting.RemoveVoter(player);
     if (this.lobby.isMatching) return;
 
     this.checkVoteCount();
   }
 
-  private onHostChanged(player: Player): any {
+  private onHostChanged(player: Player): void {
     if (this.lobby.isMatching) return;
     this.voting.Clear();
     this.stopTimer();
@@ -61,13 +61,13 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     playersOut.forEach(p => this.voting.RemoveVoter(p));
     playersIn.forEach(p => this.voting.AddVoter(p));
     this.voting.Clear();
   }
 
-  private onCustomCommand(player: Player, command: string, param: string): any {
+  private onCustomCommand(player: Player, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
     switch (command) {
@@ -95,11 +95,11 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private onMatchStarted() {
+  private onMatchStarted(): void {
     this.isTimerActive = false;
   }
 
-  private vote(player: Player) {
+  private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
       this.logger.trace("accepted start request from %s", player.id);
@@ -120,7 +120,7 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private startTimer(count: number) {
+  private startTimer(count: number): void {
     if (count == 0) {
       this.start();
     } else {
@@ -129,24 +129,24 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private start() {
+  private start(): void {
     this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000);
   }
 
-  private stopTimer() {
+  private stopTimer(): void {
     if (this.isTimerActive) {
       this.lobby.SendMessage("!mp aborttimer");
       this.isTimerActive = false;
     }
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     return `-- MatchStarter --
   timer : ${this.isTimerActive ? "active" : "--"}
   vote : ${this.voting.toString()}`;
   }
 
-  getInfoMessage(): string[] {
+  GetInfoMessage(): string[] {
     return [
       "!start => Starts the match.",
       "!start [seconds] => Begins start timer. And can stop the timer with !stop."

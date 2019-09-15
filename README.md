@@ -5,18 +5,25 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 ## chat commands
 |for player||
 |:--|:--|
-|- `!queue`| Shows host queue.|
-|- `!skip `| Votes to skip current host.|
-|- `!start`| Votes to start the match.|
-|- `!abort`| Votes to abort the match. Use when the match is stuck.|
-|- `!update`| Updates current selected map to the latest version. Use when has host old map.|
+|`!queue`| Shows host queue.|
+|`!skip `| Votes to skip current host.|
+|`!start`| Votes to start the match.|
+|`!abort`| Votes to abort the match. Use when the match is stuck.|
+|`!update`| Updates current selected map to the latest version. Use when has host old map.|
 
  
-|for host||
-|:--|:--|
-|`!skip`| Transfers host to next player.|
-|`!start [secs]`| Begins start timer.|
-|`!stop`| Stops current start timer.|
+|for host|||
+|:--|:--|:--|
+|`!skip`| Transfers host to next player.||
+|`!start [secs]`| Begins start timer.|`!start 30`|
+|`!stop`| Stops current start timer.||
+
+|for owner|||
+|:--|:--|:--|
+|`*order [players list]`| Reorder the queue in specified order. |`*order p1, p2, p3`|
+|`*skip`|||
+|`*skipto [player]`|||
+|`*start`|||
 
 (I am looking for ppl who can correct my English mistakes..😖)
 

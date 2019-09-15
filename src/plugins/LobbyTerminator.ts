@@ -32,14 +32,16 @@ export class LobbyTerminator extends LobbyPlugin {
       });
     }
   }
-  onPlayerJoined(player: Player, slot: number): void {
+
+  private onPlayerJoined(player: Player, slot: number): void {
     if (this.terminateTimer) {
       clearTimeout(this.terminateTimer);
       this.terminateTimer = undefined;
       this.logger.trace("terminate_timer canceled");
     }
   }
-  onPlayerLeft(p: Player): void {
+
+  private onPlayerLeft(p: Player): void {
     if (this.lobby.players.size == 0) {
       if (this.terminateTimer) {
         clearTimeout(this.terminateTimer);

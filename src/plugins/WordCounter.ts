@@ -102,7 +102,7 @@ export class WordCounter extends LobbyPlugin {
     return changedMax;
   }
 
-  private log(msg: string, important: boolean) {
+  private log(msg: string, important: boolean): void {
     let f = (important ? this.logger.info : this.logger.debug).bind(this.logger);
     f("msg:%s", msg);
     for (let p of this.periods) {
@@ -110,7 +110,7 @@ export class WordCounter extends LobbyPlugin {
     }
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     let m = "-- Word Counter --";
     for (let p of this.periods) {
       m +=

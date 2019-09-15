@@ -64,15 +64,15 @@ export class MatchAborter extends LobbyPlugin {
     }
   }
 
-  private onPlayerFinished(player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number) {
+  private onPlayerFinished(player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number): void {
     this.checkAutoAbort();
   }
 
-  private onMatchFinished() {
+  private onMatchFinished(): void {
     this.stopTimer();
   }
 
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): any {
+  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     this.voting.RemoveAllVoters();
   }
 
@@ -92,7 +92,7 @@ export class MatchAborter extends LobbyPlugin {
     }
   }
 
-  private vote(player: Player) {
+  private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
       this.logger.trace("accept abort request from %s (%s)", player.id, this.voting.toString());
@@ -172,13 +172,13 @@ export class MatchAborter extends LobbyPlugin {
     }
   }
 
-  getPluginStatus(): string {
+  GetPluginStatus(): string {
     return `-- Match Aborter --
   timer : ${this.abortTimer != null ? "active" : "---"}
   vote : ${this.voting.toString()}`;
   }
 
-  getInfoMessage(): string[] {
+  GetInfoMessage(): string[] {
     return ["!abort => abort the match. Use if the match stuck."];
   }
 }
