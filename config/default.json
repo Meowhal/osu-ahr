@@ -27,9 +27,8 @@
     "vote_min": 2,
     "vote_cooltime_ms": 10000,
     "vote_msg_defer_ms": 5000,
-    "afk_timer_delay_ms": 30000,
-    "afk_timer_message": "bot : you can skip afk host by !skip command.",
-    "afk_timer_do_skip": false
+    "afk_check_interval_ms": 45000,
+    "afk_check_do_skip": true
   },
   "LobbyTerminator": {
     "terminate_time_ms": 60000,

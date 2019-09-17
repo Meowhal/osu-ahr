@@ -91,7 +91,9 @@ export class AutoHostSelector extends LobbyPlugin {
     } else {
       // ホストがキューの先頭以外に変更された場合
       this.logger.trace("host may have manually changed by the host");
-      this.rotateQueue();
+      if (this.lobby.hostPending != this.hostQueue[0]) {
+        this.rotateQueue();
+      }
       this.changeHost();
     }
   }
@@ -125,7 +127,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.changeHost();
   }
 
-  private onMatchAborted(playersFinished: number, playersInGame: number):void {
+  private onMatchAborted(playersFinished: number, playersInGame: number): void {
     if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
       this.logger.info("The match was aborted after several players were Finished. call normal match finish process");
       this.onMatchFinished();
@@ -165,7 +167,7 @@ export class AutoHostSelector extends LobbyPlugin {
         this.OrderBySlotBase(result);
       }
     }
-    this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
+    // this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
   }
 
   private onCustomCommand(player: Player, command: string, param: string): void {

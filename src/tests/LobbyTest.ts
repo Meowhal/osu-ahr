@@ -635,7 +635,7 @@ describe("LobbyTest", function () {
       const { lobby, ircClient } = await tu.SetupLobbyAsync();
       await tu.AddPlayersAsync([ircClient.nick], ircClient);
       const players = await tu.AddPlayersAsync(5, ircClient);
-      const t = tu.assertEventNeverFire(lobby.ParsedStat, null, 10);
+      const t = tu.assertEventFire(lobby.ParsedStat, null, 10);
       ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Multiplayer));
       ircClient.emulateChatAsync(ircClient.nick, "!stats p1");
       await t;

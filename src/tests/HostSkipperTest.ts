@@ -4,6 +4,7 @@ import { Lobby, Player, Roles } from "..";
 import config from "config";
 import tu from "./TestUtils";
 import { HostSkipper, HostSkipperOption } from '../plugins';
+import { StatResult, StatStatuses } from '../parsers';
 
 describe("HostSkipperTest", function () {
   before(function () {
@@ -12,14 +13,14 @@ describe("HostSkipperTest", function () {
   async function prepare(timer_delay: number = 0, vote_delay: number = 0, logIrc: boolean = false):
     Promise<{ skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
     const li = await tu.SetupLobbyAsync();
-    const option: HostSkipperOption = {
+    const option = {
       vote_min: 2,
       vote_rate: 0.5,
       vote_msg_defer_ms: 10,
       vote_cooltime_ms: vote_delay,
-      afk_timer_delay_ms: timer_delay,
+      afk_check_interval_ms: timer_delay,
       afk_timer_message: "",
-      afk_timer_do_skip: true
+      afk_check_do_skip: true
     }
     const skipper = new HostSkipper(li.lobby, option)
     return { skipper, ...li };
@@ -61,14 +62,14 @@ describe("HostSkipperTest", function () {
       const ircClient = new DummyIrcClient("osu_irc_server", "creator");
       const lobby = new Lobby(ircClient);
       await lobby.MakeLobbyAsync("test");
-      const option: HostSkipperOption = {
+      const option = {
         vote_min: 1,
         vote_rate: 2,
         vote_cooltime_ms: 0,
         vote_msg_defer_ms: 10,
-        afk_timer_delay_ms: 3,
+        afk_check_interval_ms: 3,
         afk_timer_message: "hello",
-        afk_timer_do_skip: true
+        afk_check_do_skip: true
       }
       const skipper = new HostSkipper(lobby, option);
       assert.deepEqual(skipper.option, option);
@@ -85,7 +86,8 @@ describe("HostSkipperTest", function () {
       assert.equal(skipper.option.vote_min, defaultOption.vote_min);
       assert.notEqual(skipper.option.vote_rate, defaultOption.vote_rate);
       assert.equal(skipper.option.vote_rate, option.vote_rate);
-      assert.equal(skipper.option.afk_timer_delay_ms, defaultOption.afk_timer_delay_ms);
+      assert.equal(skipper.option.afk_check_interval_ms, defaultOption.afk_check_interval_ms);
+      skipper.StopTimer();
     });
     it("prepare function", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
@@ -93,18 +95,20 @@ describe("HostSkipperTest", function () {
       lobby.TransferHost(lobby.GetPlayer("p1") as Player);
       assert.isNotNull(lobby.host);
       tu.assertHost("p1", lobby);
+      skipper.StopTimer();
     });
   });
   describe("skip timer test", function () {
     it("skip 10ms", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
       assert.isUndefined(skipper.afkTimer);
       await tu.changeHostAsync("p1", lobby);
       assert.isDefined(skipper.afkTimer);
       assert.equal(skipper.voting.count, 0);
       await resolveSkipAsync(lobby);
-      assert.isUndefined(skipper.afkTimer);
+      skipper.StopTimer();
     });
 
     const dslow = this.slow();
@@ -113,13 +117,15 @@ describe("HostSkipperTest", function () {
     it("skip time check", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
       let test = async (waitTime: number) => {
-        skipper.option.afk_timer_delay_ms = waitTime;
+        skipper.option.afk_check_interval_ms = waitTime;
         skipper.Reset();
         const startTime = await tu.changeHostAsync("p1", lobby);
         const endTime = await resolveSkipAsync(lobby);
         const elapsed = endTime - startTime;
         assert.closeTo(elapsed, waitTime, 10);
+        skipper.StopTimer();
       }
       await test(10);
       await test(50);
@@ -128,6 +134,8 @@ describe("HostSkipperTest", function () {
     it("timer reset when host changed", async () => {
       const { skipper, lobby, ircClient } = await prepare(30);
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
+      ircClient.SetStat(new StatResult("p2", 0, StatStatuses.Afk));
       const startTime = await tu.changeHostAsync("p1", lobby);
       const rt = resolveSkipAsync(lobby);
       tu.assertHost("p1", lobby);
@@ -137,40 +145,66 @@ describe("HostSkipperTest", function () {
       tu.assertHost("p2", lobby);
       const elapsed = endTime - startTime;
       assert.closeTo(elapsed, 10 + 30, 5);
+      skipper.StopTimer();
     });
     it("timer reset when host changing map", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
       const startTime = await tu.changeHostAsync("p1", lobby);
+      const t = rejectSkipAsync(lobby, 10);
       await tu.delayAsync(5);
       assert.isDefined(skipper.afkTimer);
       ircClient.emulateChangeMapAsync(0);
-      await tu.delayAsync(10);
-      assert.isUndefined(skipper.afkTimer);
-      await rejectSkipAsync(lobby, 10);
-    });
-    it("if delay time is 0, timer dosent work", async () => {
-      const { skipper, lobby, ircClient } = await prepare(0);
-      await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-      await tu.changeHostAsync("p1", lobby);
-      assert.isUndefined(skipper.afkTimer);
-      await tu.delayAsync(10);
-      assert.isUndefined(skipper.afkTimer);
-      await rejectSkipAsync(lobby, 100);
-    });
-    it("dosent skip if option is false", async () => {
-      const { skipper, lobby, ircClient } = await prepare(10);
-      skipper.option.afk_timer_do_skip = false;
-      await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-      await tu.changeHostAsync("p1", lobby);
-      await rejectSkipAsync(lobby, 100);
+      await t;
+      await resolveSkipAsync(lobby);
+      skipper.StopTimer();
     });
     it("timer stop when host chated", async () => {
       const { skipper, lobby, ircClient } = await prepare(10);
       await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-      await tu.changeHostAsync("p1", lobby);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
+      const startTime = await tu.changeHostAsync("p1", lobby);
+      const t = rejectSkipAsync(lobby, 10);
+      await tu.delayAsync(5);
+      assert.isDefined(skipper.afkTimer);
       await ircClient.emulateMessageAsync("p1", ircClient.channel, "hello");
-      await rejectSkipAsync(lobby, 100);
+      await t;
+      await resolveSkipAsync(lobby);
+      skipper.StopTimer();
+    });
+    it("if delay time is 0, timer dosent work", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0);
+      await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
+      await tu.changeHostAsync("p1", lobby);
+      assert.isUndefined(skipper.afkTimer);
+      await tu.delayAsync(10);
+      assert.isUndefined(skipper.afkTimer);
+      await rejectSkipAsync(lobby, 30);
+      skipper.StopTimer();
+    });
+    it("dosent skip if option is false", async () => {
+      const { skipper, lobby, ircClient } = await prepare(10);
+      skipper.option.afk_check_do_skip = false;
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
+      await tu.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
+      await tu.changeHostAsync("p1", lobby);
+      await rejectSkipAsync(lobby, 15);
+      skipper.StopTimer();
+    });
+    it("skip afk host when a player join", async () => {
+      const { skipper, lobby, ircClient } = await prepare(10);
+      ircClient.SetStat(new StatResult("p1", 0, StatStatuses.Afk));
+      await tu.AddPlayersAsync(["p1"], ircClient);
+      await tu.changeHostAsync("p1", lobby);
+      await resolveSkipAsync(lobby);
+      const t = resolveSkipAsync(lobby);
+      let n = Date.now();
+      await tu.AddPlayersAsync(["p2"], ircClient);
+      n = (await t) - n;
+      assert.isBelow(n, 10);
+      skipper.StopTimer();
     });
     this.slow(dslow);
 

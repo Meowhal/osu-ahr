@@ -1,6 +1,6 @@
 import { IIrcClient } from "..";
 import * as irc from "../libs/irc";
-import { parser, MpCommand, StatResult } from "../parsers";
+import { parser, MpCommand, StatResult, StatStatuses } from "../parsers";
 import { escapeUserId } from "../Player";
 import { MpSettingsCase } from "../tests/cases/MpSettingsCases";
 import log4js from "log4js";
@@ -228,7 +228,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       if (mp != null) {
         this.processMpCommand(to, message, mp);
       }
-    } else if (message.startsWith("!stat")) {
+    }
+    if (message.startsWith("!stat")) {
       const m = message.match(/^!stats? (.+)/);
       if (m) {
         this.sendStat(m[1], to == "BanchoBot");
@@ -326,13 +327,17 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   private sendStat(arg: string, toPm: boolean) {
-    const s = this.stats.get(escapeUserId(arg));
+    const eid = escapeUserId(arg);
+    let stat = this.stats.get(eid);
     const to = toPm ? this.nick : this.channel;
-    if (s != null) {
-      s.toString().split("\n").forEach(t => {
-        this.emulateMessage("BanchoBot", to, t);
-      });
+    if (stat == undefined) {
+      let status = this.players.has(eid) ? StatStatuses.Multiplayer : StatStatuses.None;
+      stat = new StatResult(arg, 0, status);
+      this.stats.set(eid, stat);
     }
+    stat.toString().split("\n").forEach(t => {
+      this.emulateMessage("BanchoBot", to, t);
+    });
   }
 
 

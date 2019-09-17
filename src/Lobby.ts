@@ -1,5 +1,5 @@
 import { Player, escapeUserId, Roles, Teams, MpStatuses } from "./Player";
-import { parser, BanchoResponseType, BanchoResponse, StatResult, StatParser } from "./parsers";
+import { parser, BanchoResponseType, BanchoResponse, StatResult, StatParser, IsStatResponse } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent, DeferredAction } from "./libs";
 import { MpSettingsParser, MpSettingsResult } from "./parsers/MpSettingsParser";
@@ -71,6 +71,7 @@ export class Lobby {
   RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
   ParsedStat = new TypedEvent<{ result: StatResult, player: Player }>();
   ParsedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
+  Disconnected = new TypedEvent<void>();
 
   constructor(ircClient: IIrcClient, option: Partial<LobbyOption> = {}) {
     if (ircClient.conn == null) {
@@ -105,10 +106,17 @@ export class Lobby {
     this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
     });
+    this.ircClient.on("registered", () => {
+      if (this.status == LobbyStatus.Entered) {
+        this.logger.warn("network reconnection detected!");
+        this.LoadMpSettingsAsync();
+      }
+    });
     this.ircClient.once("part", (channel: string, nick: string) => {
       if (channel == this.channel) {
-        this.logger.info("part")
+        this.logger.info("part");
         this.status = LobbyStatus.Left;
+        this.Disconnected.emit();
       }
     });
     this.ircClient.on('pm', (nick, message) => {
@@ -261,18 +269,19 @@ export class Lobby {
     }
   }
 
-  async RequestStatAsync(player: Player, timeout: number = this.option.stat_timeout): Promise<StatResult> {
+  async RequestStatAsync(player: Player, byPm: boolean, timeout: number = this.option.stat_timeout): Promise<StatResult> {
     return new Promise<StatResult>((resolve, reject) => {
-      this.ircClient.say("BanchoBot", "!stat " + player.escaped_id);
       const tm = setTimeout(() => {
         reject("stat timeout");
       }, timeout);
-      this.ParsedStat.on(({ result }) => {
+      const d = this.ParsedStat.on(({ result }) => {
         if (escapeUserId(result.name) == player.escaped_id) {
           clearTimeout(tm);
+          d.dispose();
           resolve(result);
         }
       });
+      this.ircClient.say(byPm || this.channel == null ? "BanchoBot" : this.channel, "!stat " + player.escaped_id);
     });
   }
 
@@ -305,7 +314,11 @@ export class Lobby {
 
   private handlePrivateMessage(from: string, message: string): void {
     if (from == "BanchoBot") {
-      this.handleBanchoResponse(message);
+      if (IsStatResponse(message)) {
+        if (this.statParser.feedLine(message)) {
+          this.RaiseParsedStat();
+        }
+      }
     }
   }
 
@@ -412,6 +425,8 @@ export class Lobby {
     const player = this.GetOrMakePlayer(userid);
     if (this.addPlayer(player, slot, team)) {
       this.PlayerJoined.emit({ player, slot, team });
+    } else {
+      this.LoadMpSettingsAsync();
     }
   }
 
@@ -419,13 +434,18 @@ export class Lobby {
     const player = this.GetOrMakePlayer(userid);
     if (this.removePlayer(player)) {
       this.PlayerLeft.emit({ player });
+    } else {
+      this.LoadMpSettingsAsync();
     }
   }
 
   RaiseHostChanged(userid: string): void {
     const player = this.GetOrMakePlayer(userid);
-    this.setAsHost(player);
-    this.HostChanged.emit({ player });
+    if (this.setAsHost(player)) {
+      this.HostChanged.emit({ player });
+    } else {
+      this.LoadMpSettingsAsync();
+    }
   }
 
   RaiseMatchStarted(): void {
@@ -442,7 +462,7 @@ export class Lobby {
     this.PlayerFinished.emit({ player, score, isPassed, playersFinished: sc.finished, playersInGame: sc.inGame });
     if (!this.players.has(player)) {
       this.logger.warn("未参加のプレイヤーがゲームを終えた: %s", userid);
-      this.RaisePlayerJoined(userid, 0, Teams.None);
+      this.LoadMpSettingsAsync();
     }
   }
 
@@ -477,9 +497,6 @@ export class Lobby {
     for (let p of this.plugins) {
       p.logger.addContext("channel", this.channel);
     }
-    this.ircClient.on("registered", () => {
-      this.logger.warn("network reconnection detected!");
-    });
     this.assignCreatorRole();
     this.JoinedLobby.emit({ channel: this.channel, creator: this.GetOrMakePlayer(this.ircClient.nick) })
   }
@@ -593,21 +610,24 @@ export class Lobby {
     });
   }
 
-  LoadMpSettingsAsync(resetQueue: boolean): Promise<void> {
+  LoadMpSettingsAsync(): Promise<void> {
     if (this.status != LobbyStatus.Entered) {
       return Promise.reject("invalid lobby status @LoadMpSettingsAsync");
     }
-    this.logger.trace("start loadLobbySettings");
-    const p = new Promise<void>(resolve => {
-      this.ParsedSettings.once(() => {
-        this.SendMessage("!mp listrefs");
-        this.logger.trace("completed loadLobbySettings");
-        resolve();
+    if (this.SendMessageWithCoolTime("!mp settings", "mpsettings", 15000)) {
+      this.logger.trace("start loadLobbySettings");
+      const p = new Promise<void>(resolve => {
+        this.ParsedSettings.once(() => {
+          this.SendMessage("!mp listrefs");
+          this.logger.trace("completed loadLobbySettings");
+          resolve();
+        });
       });
-    });
-
-    this.SendMessage("!mp settings");
-    return p;
+      return p;
+    } else {
+      this.logger.trace("load mp settings skiped by cool time");
+      return Promise.resolve();
+    }
   }
 
   private addPlayer(player: Player, slot: number, team: Teams, asHost: boolean = false): boolean {
@@ -650,10 +670,10 @@ export class Lobby {
     }
   }
 
-  private setAsHost(player: Player): void {
+  private setAsHost(player: Player): boolean {
     if (!this.players.has(player)) {
       this.logger.warn("未参加のプレイヤーがホストになった: %s", player.id);
-      this.players.add(player);
+      return false;
     }
 
     if (this.hostPending == player) {
@@ -667,6 +687,7 @@ export class Lobby {
     }
     this.host = player;
     player.setRole(Roles.Host);
+    return true;
   }
 
   /**

@@ -10,7 +10,7 @@ describe("Integrated Plugins Tests", function () {
     tu.configMochaAsSilent();
   });
   describe("selector and skipper tests", function () {
-    async function setup(selectorOption: Partial<AutoHostSelectorOption> = {}, skipperOption: Partial<HostSkipperOption> = { afk_timer_delay_ms: 0 }):
+    async function setup(selectorOption: Partial<AutoHostSelectorOption> = {}, skipperOption: Partial<HostSkipperOption> = { afk_check_interval_ms: 0 }):
       Promise<{ selector: AutoHostSelector, skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
       const li = await tu.SetupLobbyAsync();
       const selector = new AutoHostSelector(li.lobby, selectorOption);
@@ -43,6 +43,7 @@ describe("Integrated Plugins Tests", function () {
       lobby.RaiseReceivedCustomCommand(owner, m);
       await tu.delayAsync(10);
       tu.assertHost(ownerId, lobby);
+      skipper.StopTimer();
     });
   });
 });

@@ -38,10 +38,10 @@ export class OahrBase {
     this.aborter = new MatchAborter(this.lobby);
     this.wordCounter = new WordCounter(this.lobby);
     this.inoutLogger = new InOutLogger(this.lobby);
-    
+
     if (this.option.use_recoder) {
       this.recorder = new Recorder(this.lobby, true);
-    }    
+    }
     this.recaster = new MapRecaster(this.lobby);
   }
 
@@ -83,7 +83,7 @@ export class OahrBase {
     const channel = parser.EnsureMpChannelId(id);
     logger.info("Entering lobby, channel : %s", channel);
     await this.lobby.EnterLobbyAsync(channel);
-    await this.lobby.LoadMpSettingsAsync(true);
+    await this.lobby.LoadMpSettingsAsync();
 
     logger.info(`Entered lobby : ${this.lobby.channel}`);
   }

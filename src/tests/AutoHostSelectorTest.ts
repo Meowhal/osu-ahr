@@ -323,6 +323,34 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       tu.assertHost("player2", lobby);
     });
+
+    it("conflict transfer host manually and plugin rotation test1", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      const t1 = ircClient.emulateMatchAsync(10);
+      ircClient.latency = 10;
+      await t1;
+      ircClient.latency = 0;
+      lobby.RaiseHostChanged("player3");
+      tu.delayAsync(10);
+      tu.assertHost("player2", lobby);
+    });
+
+    it("conflict transfer host manually and plugin rotation test2", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      const t1 = ircClient.emulateMatchAsync(10);
+      ircClient.latency = 10;
+      await t1;
+      ircClient.latency = 0;
+      lobby.RaiseHostChanged("player2");
+      tu.delayAsync(10);
+      tu.assertHost("player2", lobby);
+    });
   });
 
   describe("external operation tests", function () {
