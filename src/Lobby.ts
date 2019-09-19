@@ -1,5 +1,5 @@
 import { Player, escapeUserId, Roles, Teams, MpStatuses } from "./Player";
-import { parser, BanchoResponseType, BanchoResponse, StatResult, StatParser, IsStatResponse } from "./parsers";
+import { parser, BanchoResponseType, BanchoResponse, StatResult, StatParser, IsStatResponse, StatStatuses } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent, DeferredAction } from "./libs";
 import { MpSettingsParser, MpSettingsResult } from "./parsers/MpSettingsParser";
@@ -47,7 +47,7 @@ export class Lobby {
   mapTitle: string = "";
   mapId: number = 0;
   coolTimes: { [key: string]: number } = {};
-  defferedMessages: { [key: string]: DeferredAction<string> } = {}
+  deferredMessages: { [key: string]: DeferredAction<string> } = {}
   settingParser: MpSettingsParser;
   statParser: StatParser;
   logger: log4js.Logger;
@@ -69,7 +69,7 @@ export class Lobby {
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
   SentMessage = new TypedEvent<{ message: string }>();
   RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
-  ParsedStat = new TypedEvent<{ result: StatResult, player: Player }>();
+  ParsedStat = new TypedEvent<{ result: StatResult, player: Player, isPm: boolean }>();
   ParsedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
   Disconnected = new TypedEvent<void>();
 
@@ -256,12 +256,12 @@ export class Lobby {
   }
 
   DeferMessage(message: string, tag: string, delay: number, resetTimer: boolean = false): void {
-    if (!(tag in this.defferedMessages)) {
-      this.defferedMessages[tag] = new DeferredAction(msg => {
+    if (!(tag in this.deferredMessages)) {
+      this.deferredMessages[tag] = new DeferredAction(msg => {
         this.SendMessage(msg);
       });
     }
-    const d = this.defferedMessages[tag];
+    const d = this.deferredMessages[tag];
     if (message == "") {
       d.cancel();
     } else {
@@ -307,7 +307,11 @@ export class Lobby {
           this.RaiseReceivedCustomCommand(p, message);
         }
         this.PlayerChated.emit({ player: p, message });
-        this.chatlogger.trace("%s:%s", p.id, message);
+        if (IsStatResponse(message)) {
+          this.chatlogger.trace("%s:%s", p.id, message);
+        } else {
+          this.chatlogger.info("%s:%s", p.id, message);
+        }
       }
     }
   }
@@ -316,7 +320,7 @@ export class Lobby {
     if (from == "BanchoBot") {
       if (IsStatResponse(message)) {
         if (this.statParser.feedLine(message)) {
-          this.RaiseParsedStat();
+          this.RaiseParsedStat(true);
         }
       }
     }
@@ -381,7 +385,7 @@ export class Lobby {
         break;
       case BanchoResponseType.Stats:
         if (this.statParser.feedLine(message)) {
-          this.RaiseParsedStat();
+          this.RaiseParsedStat(false);
         }
         break;
       case BanchoResponseType.Unhandled:
@@ -513,13 +517,13 @@ export class Lobby {
     }
   }
 
-  RaiseParsedStat(): void {
+  RaiseParsedStat(isPm: boolean): void {
     if (!this.statParser.isParsing && this.statParser.result != null) {
       const p = this.GetPlayer(this.statParser.result.name);
       if (p != null) {
-        this.logger.info("parsed stat %s", p.id);
         p.laststat = this.statParser.result;
-        this.ParsedStat.emit({ result: this.statParser.result, player: p });
+        this.logger.info("parsed stat %s -> %s", p.id, StatStatuses[p.laststat.status]);
+        this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
       }
     }
   }

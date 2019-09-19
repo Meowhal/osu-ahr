@@ -1,17 +1,19 @@
 import { Lobby } from "..";
+import { LobbyStatus } from "../Lobby";
 import { Player, escapeUserId } from "../Player";
+import { BanchoResponseType, MpSettingsResult, StatStatuses, StatResult } from "../parsers";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
-import { BanchoResponseType, MpSettingsResult, StatStatuses } from "../parsers";
 import config from "config";
-import { LobbyStatus } from "../Lobby";
 
 export interface HostSkipperOption {
   vote_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
   vote_min: number;　// 最低投票数
   vote_cooltime_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
   vote_msg_defer_ms: number; // 投票メッセージの延期時間
-  afk_check_interval_ms: number; // ホストのAfkチェック間隔
+  afk_check_timeout_ms: number; // statcheckのタイムアウト時間
+  afk_check_interval_first_ms: number; // 初回のホストAfkチェックまでの時間
+  afk_check_interval_ms: number; // ホストAfkチェックの初回以降の間隔
   afk_check_do_skip: boolean; // 実際にスキップするか？
 }
 
@@ -21,12 +23,6 @@ const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
  * スキップ処理の受付部分を担当
  * スキップが受け付けられると、pluginMessageを介して他のプラグインに処理を依頼する。
  * 
- * 処理するコマンド
- * /skip スキップコマンド。hostなら即座にスキップ。それ以外なら投票でスキップ。
- * *skip 管理権限スキップ。botOwnerなら即座にスキップ。
- * *stopSkipCounter スキップカウンターの停止。
- * *restartSkip スキップ投票とカウンターの初期化。
- * 
  * デフォルトでのスキップに必要な人数 (ロビー人数 => 必要数)
  * 2 => 2(不可能), 3 ~ 4 => 2, 5 ~ 6 => 3, 7 ~ 8 => 4 ... n => n / 2
  */
@@ -35,6 +31,7 @@ export class HostSkipper extends LobbyPlugin {
   afkTimer: NodeJS.Timer | undefined;
   timeVotePassed: number = 0;
   voting: VoteCounter;
+  isMapChanged: boolean = false;
 
   // skip受付からの経過時間
   get elapsedSinceVotePassed(): number {
@@ -51,17 +48,28 @@ export class HostSkipper extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
-    this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
+    this.lobby.ParsedStat.on(a => this.onParsedStat(a.player, a.result, a.isPm));
     this.lobby.Disconnected.on(() => this.StopTimer());
     this.lobby.RecievedBanchoResponse.on(a => {
       switch (a.response.type) {
-        case BanchoResponseType.MatchStarted: this.onMatchStarted(); break;
+        case BanchoResponseType.MatchStarted:
+          this.isMapChanged = false;
+          this.voting.Clear();
+          this.StopTimer();
+          break;
+        case BanchoResponseType.HostChanged:
+          this.Reset();
+          break;
         case BanchoResponseType.BeatmapChanging:
+          this.StartTimer(false);
+          break;
         case BanchoResponseType.BeatmapChanged:
-          this.StartTimer(); break;
+          this.StartTimer(false);
+          this.isMapChanged = true;
+          break;
       }
     });
   }
@@ -93,20 +101,10 @@ export class HostSkipper extends LobbyPlugin {
     }
   }
 
-  private onHostChanged(newhost: Player): void {
-    if (this.lobby.isMatching) return;
-    this.Reset();
-  }
-
-  private onMatchStarted(): void {
-    this.voting.Clear();
-    this.StopTimer();
-  }
-
   private onPlayerChated(player: Player): void {
     if (this.lobby.host == player) {
       // reset current timer and restart
-      this.StartTimer();
+      this.StartTimer(false);
     }
   }
 
@@ -114,6 +112,18 @@ export class HostSkipper extends LobbyPlugin {
     playersOut.forEach(p => this.voting.RemoveVoter(p));
     playersIn.forEach(p => this.voting.AddVoter(p));
     this.voting.Clear();
+    this.StopTimer();
+  }
+
+  private onParsedStat(player: Player, result: StatResult, isPm: boolean): void {
+    if (!isPm && this.lobby.host == player && this.statIsAfk(result.status) && !this.lobby.isMatching) {
+      this.logger.trace("passed afk check %s -> %s", result.name, StatStatuses[result.status]);
+      if (this.option.afk_check_do_skip) {
+        this.Skip();
+      } else {
+        this.lobby.SendMessage("bot : you can skip afk host by !skip command.");
+      }
+    }
   }
 
   // スキップメッセージを処理
@@ -185,40 +195,30 @@ export class HostSkipper extends LobbyPlugin {
 
   Reset(): void {
     this.voting.Clear();
-    this.StartTimer();
+    this.StartTimer(true);
   }
 
-  StartTimer(): void {
-    if (this.option.afk_check_interval_ms == 0 || this.lobby.host == null || this.lobby.status != LobbyStatus.Entered) return;
+  StartTimer(isFirst: boolean): void {
+    if (this.option.afk_check_interval_ms == 0 || this.lobby.host == null || this.lobby.status != LobbyStatus.Entered || this.lobby.isMatching) return;
     this.StopTimer();
     this.logger.trace("start afk check fimer");
     const target = this.lobby.host;
     this.afkTimer = setTimeout(async () => {
       if (!this.lobby.isMatching && this.lobby.host == target) {
         try {
-          const stat1 = await this.lobby.RequestStatAsync(target, true, 1000);
+          const stat1 = await this.lobby.RequestStatAsync(target, true, this.option.afk_check_timeout_ms);
           this.logger.trace("stat check phase 1 %s -> %s", stat1.name, StatStatuses[stat1.status]);
           if (this.afkTimer != undefined && this.lobby.host == target && this.statIsAfk(stat1.status)) {
             // double check and show stat for players
-            const stat2 = await this.lobby.RequestStatAsync(target, false, 1000);
-            this.logger.trace("stat check phase 2 %s -> %s", stat2.name, StatStatuses[stat2.status]);
-            if (this.afkTimer != undefined && this.lobby.host == target && this.statIsAfk(stat2.status)) {
-              this.logger.trace("passed afk check");
-              if (this.option.afk_check_do_skip) {
-                this.Skip();
-                return;
-              } else {
-                this.lobby.SendMessage("bot : you can skip afk host by !skip command.");
-              }
-            }
+            this.lobby.RequestStatAsync(target, false, this.option.afk_check_timeout_ms);
           }
-          // restart timer
-          this.StartTimer();
         } catch {
           this.logger.warn("stat check timeout!");
         }
+
+        this.StartTimer(false);
       }
-    }, this.option.afk_check_interval_ms);
+    }, isFirst ? this.option.afk_check_interval_first_ms : this.option.afk_check_interval_ms);
   }
 
   StopTimer(): void {

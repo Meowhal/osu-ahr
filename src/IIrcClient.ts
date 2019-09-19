@@ -1,4 +1,5 @@
 import * as irc from "./libs/irc";
+import { IsStatResponse } from "./parsers";
 import { EventEmitter } from "events";
 import log4js from "log4js";
 const ircLogger = log4js.getLogger("irc");
@@ -52,7 +53,11 @@ export function logIrcEvent(client: IIrcClient) {
 export function logPrivateMessage(client: IIrcClient) {
   client.on("message", (from, to, message) => {
     if (to == client.nick) {
-      pmLogger.info(`pm ${from} -> ${message}`);
+      if (IsStatResponse(message)) {
+        pmLogger.trace(`pm ${from} -> ${message}`);
+      } else {
+        pmLogger.info(`pm ${from} -> ${message}`);
+      }
     }
   });
 }

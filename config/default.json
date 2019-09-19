@@ -16,7 +16,7 @@
     ],
     "info_message_interval": 500,
     "info_message_cooltime": 60000,
-    "stat_timeout": 1000
+    "stat_timeout": 5000
   },
   "AutoHostSelector": {
     "show_queue_chars_limit": 90,
@@ -27,7 +27,9 @@
     "vote_min": 2,
     "vote_cooltime_ms": 10000,
     "vote_msg_defer_ms": 5000,
-    "afk_check_interval_ms": 45000,
+    "afk_check_timeout_ms": 5000,
+    "afk_check_interval_first_ms": 45000,
+    "afk_check_interval_ms": 90000,
     "afk_check_do_skip": true
   },
   "LobbyTerminator": {
