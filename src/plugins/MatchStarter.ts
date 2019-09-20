@@ -28,7 +28,7 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
+    this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.RecievedBanchoResponse.on(a => {
@@ -67,7 +67,7 @@ export class MatchStarter extends LobbyPlugin {
     this.voting.Clear();
   }
 
-  private onCustomCommand(player: Player, command: string, param: string): void {
+  private onChatCommand(player: Player, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
     switch (command) {

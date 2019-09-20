@@ -22,7 +22,7 @@ export class MapRecaster extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.ReceivedCustomCommand.on(a => this.onReceivedCustomCommand(a.command, a.param, a.player))
+    this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player))
     this.lobby.RecievedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanged) {
         this.canRecast = true;
@@ -30,7 +30,7 @@ export class MapRecaster extends LobbyPlugin {
     });
   }
 
-  private onReceivedCustomCommand(command: string, param: string, player: Player): void {
+  private onReceivedChatCommand(command: string, param: string, player: Player): void {
     if (command == "!update") {
       if (this.canRecast) {
         this.canRecast = false;

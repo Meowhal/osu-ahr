@@ -14,7 +14,6 @@ export interface MatchAborterOption {
   auto_abort_do_abort: boolean; // 実際にアボートを実行するか
 }
 
-const defaultOption = config.get<MatchAborterOption>("MatchAborter");
 
 /**
  * Abort投票を受け付けるためのプラグイン
@@ -27,7 +26,8 @@ export class MatchAborter extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<MatchAborterOption> = {}) {
     super(lobby, "aborter");
-    this.option = { ...defaultOption, ...option } as MatchAborterOption;
+    const d = config.get<MatchAborterOption>("MatchAborter");
+    this.option = { ...d, ...option } as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }
@@ -38,7 +38,7 @@ export class MatchAborter extends LobbyPlugin {
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
+    this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
   }
 
   // 試合中に抜けた場合
@@ -76,7 +76,7 @@ export class MatchAborter extends LobbyPlugin {
     this.voting.RemoveAllVoters();
   }
 
-  private onCustomCommand(player: Player, command: string, param: string): void {
+  private onChatCommand(player: Player, command: string, param: string): void {
     if (!this.lobby.isMatching) return;
     if (command == "!abort") {
       if (player == this.lobby.host) {

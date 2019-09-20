@@ -401,76 +401,76 @@ describe("CommandParserTest", function () {
     assert.equal(v.arg, "");
   });
 
-  describe("parse custom command tests", function () {
-    it("IsCustomCommand?", () => {
+  describe("parse chat command tests", function () {
+    it("IsChatCommand?", () => {
       const valids = ["!aioie", "!a", "!123", "!a ", "!v x", "!vv x y[v]", "*abc"];
       const invalids = ["!", "*", "  !asa", "!!ss", "*!v", "abc", "abc !abc"];
       const used = ["!help", "!Help", "!info", "!skip", "!SKIP", "!queue", "!q", "*skip", "*stipto"];
       const reservedInvalid = ["!mp", "!roll", "!roll 100", "!where abc", "!faq", "!report", "!request", "!stat", "!stats"];
       const mpredirect = ["!mp x", "!mp start", "!mp start 20"];
-      valids.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
-      invalids.forEach(c => assert.isFalse(parser.IsCustomCommand(c), c));
-      used.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
-      reservedInvalid.forEach(c => assert.isFalse(parser.IsCustomCommand(c), c));
-      mpredirect.forEach(c => assert.isTrue(parser.IsCustomCommand(c), c));
+      valids.forEach(c => assert.isTrue(parser.IsChatCommand(c), c));
+      invalids.forEach(c => assert.isFalse(parser.IsChatCommand(c), c));
+      used.forEach(c => assert.isTrue(parser.IsChatCommand(c), c));
+      reservedInvalid.forEach(c => assert.isFalse(parser.IsChatCommand(c), c));
+      mpredirect.forEach(c => assert.isTrue(parser.IsChatCommand(c), c));
     });
-    it("ParseCustomCommand", () => {
-      let v = parser.ParseCustomCommand("!abc");
+    it("ParseChatCommand", () => {
+      let v = parser.ParseChatCommand("!abc");
       assert.equal(v.command, "!abc");
       assert.equal(v.param, "");
 
-      v = parser.ParseCustomCommand("!a a");
+      v = parser.ParseChatCommand("!a a");
       assert.equal(v.command, "!a");
       assert.equal(v.param, "a");
 
-      v = parser.ParseCustomCommand("!a  a ");
+      v = parser.ParseChatCommand("!a  a ");
       assert.equal(v.command, "!a");
       assert.equal(v.param, "a");
 
-      v = parser.ParseCustomCommand("!a a b");
+      v = parser.ParseChatCommand("!a a b");
       assert.equal(v.command, "!a");
       assert.equal(v.param, "a b");
 
-      v = parser.ParseCustomCommand("!a   a    b  ");
+      v = parser.ParseChatCommand("!a   a    b  ");
       assert.equal(v.command, "!a");
       assert.equal(v.param, "a    b");
     });
     it("Case insensitive check", () => {
-      assert.isTrue(parser.IsCustomCommand("!abc"));
-      let v = parser.ParseCustomCommand("!abc");
+      assert.isTrue(parser.IsChatCommand("!abc"));
+      let v = parser.ParseChatCommand("!abc");
       assert.equal(v.command, "!abc");
       assert.equal(v.param, "");
 
-      assert.isTrue(parser.IsCustomCommand("!Abc"));
-      v = parser.ParseCustomCommand("!Abc");
+      assert.isTrue(parser.IsChatCommand("!Abc"));
+      v = parser.ParseChatCommand("!Abc");
       assert.equal(v.command, "!abc");
       assert.equal(v.param, "");
 
-      assert.isTrue(parser.IsCustomCommand("!ABC"));
-      v = parser.ParseCustomCommand("!ABC");
+      assert.isTrue(parser.IsChatCommand("!ABC"));
+      v = parser.ParseChatCommand("!ABC");
       assert.equal(v.command, "!abc");
       assert.equal(v.param, "");
 
-      assert.isTrue(parser.IsCustomCommand("!AbC aiueo AIUEO"));
-      v = parser.ParseCustomCommand("!AbC aiueo AIUEO");
+      assert.isTrue(parser.IsChatCommand("!AbC aiueo AIUEO"));
+      v = parser.ParseChatCommand("!AbC aiueo AIUEO");
       assert.equal(v.command, "!abc");
       assert.equal(v.param, "aiueo AIUEO");
     });
     it("!mp redirect", () => {
-      assert.isFalse(parser.IsCustomCommand("!mp"));
-      assert.isFalse(parser.IsCustomCommand("!mp "));
-      assert.isTrue(parser.IsCustomCommand("!mp start"));
-      let v = parser.ParseCustomCommand("!mp start");
+      assert.isFalse(parser.IsChatCommand("!mp"));
+      assert.isFalse(parser.IsChatCommand("!mp "));
+      assert.isTrue(parser.IsChatCommand("!mp start"));
+      let v = parser.ParseChatCommand("!mp start");
       assert.equal(v.command, "!start");
       assert.equal(v.param, "");
 
-      assert.isTrue(parser.IsCustomCommand("!mp start 30"));
-      v = parser.ParseCustomCommand("!mp start 30");
+      assert.isTrue(parser.IsChatCommand("!mp start 30"));
+      v = parser.ParseChatCommand("!mp start 30");
       assert.equal(v.command, "!start");
       assert.equal(v.param, "30");
 
-      assert.isTrue(parser.IsCustomCommand("!mp start 30 xx "));
-      v = parser.ParseCustomCommand("!mp start 30 xx ");
+      assert.isTrue(parser.IsChatCommand("!mp start 30 xx "));
+      v = parser.ParseChatCommand("!mp start 30 xx ");
       assert.equal(v.command, "!start");
       assert.equal(v.param, "30 xx");
     });

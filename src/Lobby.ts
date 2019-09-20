@@ -65,7 +65,7 @@ export class Lobby {
   UnexpectedAction = new TypedEvent<Error>();
   NetError = new TypedEvent<Error>();
   PlayerChated = new TypedEvent<{ player: Player, message: string }>();
-  ReceivedCustomCommand = new TypedEvent<{ player: Player, command: string, param: string }>();
+  ReceivedChatCommand = new TypedEvent<{ player: Player, command: string, param: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
   SentMessage = new TypedEvent<{ message: string }>();
   RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
@@ -303,8 +303,8 @@ export class Lobby {
     } else {
       const p = this.GetPlayer(from);
       if (p != null) {
-        if (parser.IsCustomCommand(message)) {
-          this.RaiseReceivedCustomCommand(p, message);
+        if (parser.IsChatCommand(message)) {
+          this.RaiseReceivedChatCommand(p, message);
         }
         this.PlayerChated.emit({ player: p, message });
         if (IsStatResponse(message)) {
@@ -411,14 +411,14 @@ export class Lobby {
     return false;
   }
 
-  RaiseReceivedCustomCommand(player: Player, message: string): void {
+  RaiseReceivedChatCommand(player: Player, message: string): void {
     this.logger.trace("custom command %s:%s", player.id, message);
     if (player.isReferee && message.startsWith("!mp")) return;
-    const { command, param } = parser.ParseCustomCommand(message);
+    const { command, param } = parser.ParseChatCommand(message);
     if (command == "!info" || command == "!help") {
       this.showInfoMessage();
     }
-    this.ReceivedCustomCommand.emit({ player, command, param });
+    this.ReceivedChatCommand.emit({ player, command, param });
   }
 
   // #endregion

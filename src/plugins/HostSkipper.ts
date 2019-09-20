@@ -44,7 +44,7 @@ export class HostSkipper extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
+    this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ParsedStat.on(a => this.onParsedStat(a.player, a.result, a.isPm));
@@ -127,7 +127,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   // スキップメッセージを処理
-  private onCustomCommand(player: Player, command: string, param: string): void {
+  private onChatCommand(player: Player, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
     if (command == "!skip") {

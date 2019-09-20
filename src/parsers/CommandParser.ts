@@ -231,19 +231,19 @@ export class CommandParser {
   }
 
   /**
-   * CustomCommandかの判定
+   * ChatCommandかの判定
    * !か*で始まる、既存のコマンドではない、!mp単独ではない
    * !mp xxx は !xxx と解釈する
    * @param message 
    */
-  IsCustomCommand(message: string) {
+  IsChatCommand(message: string) {
     message = message.trimRight().toLowerCase();
     if (message[0] != "!" && message[0] != "*") return false;
     if (message == "!mp") return false;
     return message.match(/^[\!\*](?!roll|stats?|where|faq|report|request)\w+/) != null;
   }
 
-  ParseCustomCommand(message: string): { command: string, param: string } {
+  ParseChatCommand(message: string): { command: string, param: string } {
     message = message.trimRight();
     let m = message.match(/\!mp (\w+)\s*(.*)\s*/);
     if (m) {

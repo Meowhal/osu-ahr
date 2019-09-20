@@ -26,7 +26,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
-    this.lobby.ReceivedCustomCommand.on(a => this.onCustomCommand(a.player, a.command, a.param));
+    this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
@@ -192,7 +192,7 @@ export class AutoHostSelector extends LobbyPlugin {
     // this.lobby.SendMessage("The host queue was rearranged. You can check the current order with !queue command.");
   }
 
-  private onCustomCommand(player: Player, command: string, param: string): void {
+  private onChatCommand(player: Player, command: string, param: string): void {
     if (command.startsWith("!q")) {
       this.ShowHostQueue();
     } else if (player.isAuthorized) {

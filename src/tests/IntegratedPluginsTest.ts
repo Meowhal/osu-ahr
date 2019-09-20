@@ -33,14 +33,14 @@ describe("Integrated Plugins Tests", function () {
 
       tu.assertHost("p2", lobby);
       let m = "*skipto p4";
-      assert.isTrue(parser.IsCustomCommand(m));
-      lobby.RaiseReceivedCustomCommand(owner, m);
+      assert.isTrue(parser.IsChatCommand(m));
+      lobby.RaiseReceivedChatCommand(owner, m);
       await tu.delayAsync(10);
       tu.assertHost("p4", lobby);
 
       m = "*skipto " + owner.id;
-      assert.isTrue(parser.IsCustomCommand(m));
-      lobby.RaiseReceivedCustomCommand(owner, m);
+      assert.isTrue(parser.IsChatCommand(m));
+      lobby.RaiseReceivedChatCommand(owner, m);
       await tu.delayAsync(10);
       tu.assertHost(ownerId, lobby);
       skipper.StopTimer();

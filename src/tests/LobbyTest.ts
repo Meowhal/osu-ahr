@@ -466,7 +466,7 @@ describe("LobbyTest", function () {
         lobby.RecievedBanchoResponse.once(a => {
           assert.fail();
         });
-        lobby.ReceivedCustomCommand.once(a => {
+        lobby.ReceivedChatCommand.once(a => {
           assert.fail();
         });
         ircClient.emulateChatAsync(players[0].id, msg);
@@ -483,13 +483,13 @@ describe("LobbyTest", function () {
           assert.equal(a.message, msg);
           done();
         });
-        lobby.ReceivedCustomCommand.once(a => {
+        lobby.ReceivedChatCommand.once(a => {
           assert.fail();
         });
         ircClient.emulateBanchoResponse(msg);
       });
     });
-    it("ReceivedCustomCommand", async () => {
+    it("ReceivedChatCommand", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = 0;
       let msg = "!hello world";
@@ -500,7 +500,7 @@ describe("LobbyTest", function () {
       lobby.RecievedBanchoResponse.once(a => {
         assert.fail();
       });
-      lobby.ReceivedCustomCommand.once(a => {
+      lobby.ReceivedChatCommand.once(a => {
         assert.isFalse(a.player.isHost);
         assert.equal(a.command, "!hello");
         assert.equal(a.param, "world");
@@ -511,7 +511,7 @@ describe("LobbyTest", function () {
       await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
-    it("ReceivedCustomCommand", async () => {
+    it("ReceivedChatCommand", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       let ma = 0;
       lobby.TransferHost(players[0]);
@@ -519,7 +519,7 @@ describe("LobbyTest", function () {
       lobby.PlayerChated.once(a => {
         assert.equal(a.message, msg);
       });
-      lobby.ReceivedCustomCommand.once(a => {
+      lobby.ReceivedChatCommand.once(a => {
         assert.isTrue(a.player.isHost);
         assert.equal(a.command, "!hoge");
         assert.equal(a.param, "piyo");
@@ -536,7 +536,7 @@ describe("LobbyTest", function () {
     it.skip("showInfoMessage test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
       tu.configMochaAsNoisy();
-      lobby.RaiseReceivedCustomCommand(lobby.GetOrMakePlayer("tester"), "!info");
+      lobby.RaiseReceivedChatCommand(lobby.GetOrMakePlayer("tester"), "!info");
     });
     it.skip("SendMessageWithDelayAsync test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
