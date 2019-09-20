@@ -1,7 +1,5 @@
 # TODO TASK 一覧
 ## todo
-- aborterのstat対応
-- Claerhostやlock, moveの応答処理
 - Afk検知機能、複数試合で結果を残さない場合kickする。!statをbancho宛のPMにすればロビーのチャット欄を汚さずに行える。
 - 順番がどういう仕組なのか理解してもらえない？
 - 試合開始１０後くらいに誰かがチャットしたらabortの案内を出す
@@ -9,6 +7,8 @@
 - 試合中にEnterした場合正常に動作する？ => 試合中のhostsが変更されない。
 - request sleep時にロビーを終了する。
 ## wip
+- Claerhostやlock, moveの応答処理
+- aborterのstat対応
 - ホストの活動確認後はチェックの頻度を下げる
 - cliにstatの結果を載せない
 - afkhost がstat check timeout になってしまったときの対応 -> event handling

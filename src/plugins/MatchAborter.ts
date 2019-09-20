@@ -1,5 +1,5 @@
 import { Lobby } from "..";
-import { MpSettingsResult } from "../parsers";
+import { MpSettingsResult, StatStatuses } from "../parsers";
 import { Player, MpStatuses } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
@@ -17,7 +17,7 @@ export interface MatchAborterOption {
 
 /**
  * Abort投票を受け付けるためのプラグイン
- * 試合開始直後や終了時に止まってしまった際に復帰するため
+ * 試合中に進行が止まってしまった際に復帰するため
  */
 export class MatchAborter extends LobbyPlugin {
   option: MatchAborterOption;
@@ -144,24 +144,30 @@ export class MatchAborter extends LobbyPlugin {
     this.stopTimer();
     this.logger.trace("start timer");
     this.abortTimer = setTimeout(() => {
-      this.logger.trace("abort timer action");
-      if (this.abortTimer != null) {
-        this.doAutoAbort();
+      if (this.abortTimer != null && this.lobby.isMatching) {
+        this.logger.trace("abort timer action");
+        this.doAutoAbortAsync();
       }
     }, this.option.auto_abort_delay_ms);
   }
 
-  private doAutoAbort(): void {
+  private async doAutoAbortAsync(): Promise<void> {
     const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus == MpStatuses.Playing);
+    for (let p of playersStillPlaying) {
+      if (p.mpstatus == MpStatuses.Playing) {
+        const stat = await this.lobby.RequestStatAsync(p, true);
+        if(stat.status == StatStatuses.Multiplaying) {
+          this.startTimer();
+          return;
+        }
+      }
+    }
+    if (!this.lobby.isMatching) return;
     if (this.option.auto_abort_do_abort) {
       this.doAbort();
     } else {
       this.lobby.SendMessage("bot : if the game is stuck, abort the game with !abort vote.");
-    }
-
-    for (let p of playersStillPlaying) {
-      this.lobby.SendMessage(`!stat ${p.id}`);
-    }
+    }    
   }
 
   private stopTimer(): void {
