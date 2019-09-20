@@ -17,14 +17,9 @@ export interface HostSkipperOption {
   afk_check_do_skip: boolean; // 実際にスキップするか？
 }
 
-const HostSkipperDefaultOption = config.get<HostSkipperOption>("HostSkipper");
-
 /**
  * スキップ処理の受付部分を担当
  * スキップが受け付けられると、pluginMessageを介して他のプラグインに処理を依頼する。
- * 
- * デフォルトでのスキップに必要な人数 (ロビー人数 => 必要数)
- * 2 => 2(不可能), 3 ~ 4 => 2, 5 ~ 6 => 3, 7 ~ 8 => 4 ... n => n / 2
  */
 export class HostSkipper extends LobbyPlugin {
   option: HostSkipperOption;
@@ -40,7 +35,8 @@ export class HostSkipper extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<HostSkipperOption> = {}) {
     super(lobby, "skipper");
-    this.option = { ...HostSkipperDefaultOption, ...option } as HostSkipperOption;
+    const d = config.get<HostSkipperOption>("HostSkipper");
+    this.option = { ...d, ...option } as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }
@@ -121,7 +117,11 @@ export class HostSkipper extends LobbyPlugin {
       if (this.option.afk_check_do_skip) {
         this.Skip();
       } else {
-        this.lobby.SendMessage("bot : you can skip afk host by !skip command.");
+        if (this.isMapChanged) {
+          this.lobby.SendMessage("bot : players can start the match by !start vote.");
+        } else {
+          this.lobby.SendMessage("bot : players can skip afk host by !skip vote.");
+        }        
       }
     }
   }
@@ -240,6 +240,10 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   GetInfoMessage(): string[] {
-    return ["!skip => skip current host."];
+    return [
+      "!skip => skip current host.",
+      "*skip => Force skip current host.",
+      "*skipto [player] => 	Force skip to specified player."
+    ];
   }
 }

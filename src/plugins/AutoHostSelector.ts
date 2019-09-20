@@ -1,15 +1,13 @@
 import { Lobby } from "..";
+import { BanchoResponseType, MpSettingsResult } from "../parsers";
 import { Player, revealUserId, disguiseUserId } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import { BanchoResponseType, MpSettingsResult } from "../parsers";
 
 export interface AutoHostSelectorOption {
   show_queue_chars_limit: number;
   show_queue_cooltime_ms: number;
 }
-
-const DefaultOption = config.get<AutoHostSelectorOption>("AutoHostSelector");
 
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
@@ -19,7 +17,8 @@ export class AutoHostSelector extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "selector");
-    this.option = { ...DefaultOption, ...option } as AutoHostSelectorOption;
+    const d = config.get<AutoHostSelectorOption>("AutoHostSelector");
+    this.option = { ...d, ...option } as AutoHostSelectorOption;
     this.registerEvents();
   }
 
@@ -46,9 +45,12 @@ export class AutoHostSelector extends LobbyPlugin {
     });
   }
 
-  // プレイヤーが参加した際に実行される
-  // 参加したプレイヤーはホストの順番待ちキューに追加される
-  // 現在部屋に誰もいない場合はホストに任命
+  /**
+   * 参加したプレイヤーはホストの順番待ちキューに追加される
+   * 現在部屋に誰もいない場合はホストに任命
+   * @param player 
+   * @param slot 
+   */
   private onPlayerJoined(player: Player, slot: number): void {
     this.hostQueue.push(player);
     this.logger.trace("added %s to hostqueue", player.id);
@@ -58,11 +60,13 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  // プレイヤーが退室した際に実行される
-  // キューから削除
-  // 現在のホストなら次のホストを任命
-  // ホスト任命中に退出した場合も次のホストを任命
-  // 試合中なら次のホストは任命しない
+  /**
+   * キューから削除
+   * 現在のホストなら次のホストを任命
+   * ホスト任命中に退出した場合も次のホストを任命
+   * 試合中なら次のホストは任命しない
+   * @param player 
+   */
   private onPlayerLeft(player: Player): void {
     this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
     if (this.lobby.isMatching) return;
@@ -73,16 +77,18 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  // ホストが実際に変更された際に実行される
-  // !mphostで指定したホストならok
-  // ユーザーが自分でホストを変更した場合
-  // queueの次のホストならそのまま
-  // 順番を無視していたら任命し直す
+  /**
+   * !mphostで指定したホストなら受け入れる
+   * ユーザーが自分でホストを変更した場合
+   * queueの次のホストならそのまま
+   * 順番を無視していたら任命し直す
+   * @param newhost 
+   */
   private onHostChanged(newhost: Player): void {
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
     if (this.hostQueue[0] == newhost) {
-      this.logger.trace("A new host has been appointed:%s", newhost.id);
+      this.logger.trace("a new host has been appointed:%s", newhost.id);
 
       if (this.mapChanger != null && this.mapChanger != newhost) { // 前任のホストがマップを変更している
         this.needsRotate = false;
@@ -98,6 +104,9 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  /**
+   * マップ変更者の記録と!abort後にマップ変更しようとしたホストのスキップ
+   */
   private onBeatmapChanging(): void {
     if (this.hostQueue[0] != this.lobby.host) {
       // アボートで中断後にマップ変更しようとした場合は次のホストに変更
@@ -111,7 +120,9 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  // 試合が始まったらキューを回す
+  /**
+   * 試合が始まったらキューを回す
+   */
   private onMatchStarted(): void {
     if (this.needsRotate) {
       this.rotateQueue();
@@ -120,7 +131,9 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  // 試合が終了したら現在のキューの先頭をホストに任命
+  /**
+   * 試合が終了したら現在のキューの先頭をホストに任命
+   */
   private onMatchFinished(): void {
     this.needsRotate = true;
     this.mapChanger = null;
@@ -144,6 +157,15 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  /**
+   * mp settingsの結果をもとにキューを再構築する
+   * 現在のキューを維持しつつ、プレイヤーの出入りを反映させる
+   * 現在のキューに存在しないプレイヤーがホストになった場合、キューを１から再構築する
+   * @param result 
+   * @param playersIn 
+   * @param playersOut 
+   * @param hostChanged 
+   */
   private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     if (this.lobby.host == null) {
       this.hostQueue = [];
@@ -201,6 +223,10 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  /**
+   * MpSettingsの結果をもとに、ロビーのスロット順にキューを構成しなおす
+   * @param result 
+   */
   OrderBySlotBase(result: MpSettingsResult): void {
     this.logger.info("reordered slot base order.");
     this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.id));
@@ -212,6 +238,10 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  /**
+   * 現在のホストキューをロビーチャットに投稿する
+   * IDはチャットのhighlightに引っかからないように加工される
+   */
   ShowHostQueue(): void {
     this.lobby.SendMessageWithCoolTime(() => {
       let m = this.hostQueue.map(c => disguiseUserId(c.id)).join(", ");
@@ -223,12 +253,20 @@ export class AutoHostSelector extends LobbyPlugin {
     }, "!queue", this.option.show_queue_cooltime_ms);
   }
 
+  /**
+   * 強制ローテーション
+   */
   Skip(): void {
     this.logger.trace("recieved plugin message skip");
     this.rotateQueue();
     this.changeHost();
   }
 
+  /**
+   * 指定ユーザーまでスキップ
+   * 順番は維持される
+   * @param to 
+   */
   SkipTo(to: string | Player): void {
     let trg: Player;
     if (typeof to == "string") {
@@ -250,6 +288,10 @@ export class AutoHostSelector extends LobbyPlugin {
     this.changeHost();
   }
 
+  /**
+   * キューを指定した順番に並び替える
+   * @param order 
+   */
   Reorder(order: Player[] | string): void {
     if (typeof (order) == "string") {
       const players = order.split(",").map(t => this.lobby.GetPlayer(revealUserId(t.trim()))).filter(p => p != null) as Player[];
@@ -288,11 +330,13 @@ export class AutoHostSelector extends LobbyPlugin {
     return isValid;
   }
 
-  // !mp host コマンドの発行
-  // 現在のキューの先頭をホストに任命
-  // すでに先頭がホストの場合は何もしない
-  // 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
-  // キューの先頭を末尾に
+  /**
+   * !mp host コマンドの発行
+   * 現在のキューの先頭をホストに任命
+   * すでに先頭がホストの場合は何もしない
+   * 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
+   * キューの先頭を末尾に 
+   */
   private changeHost(): void {
     if (this.hostQueue.length == 0) {
       this.logger.warn("selectNextHost is called when host queue is empty");
@@ -306,7 +350,9 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  // ホストキューの先頭を末尾に付け替える
+  /**
+   * ホストキューの先頭を末尾に付け替える
+   */
   private rotateQueue(showLog: boolean = true): void {
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
@@ -315,8 +361,10 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
-  // 指定されたプレイヤーキューから削除する
-  // キューに存在しなかった場合はfalseを返す
+  /**
+   * 指定されたプレイヤーキューから削除する
+   * キューに存在しなかった場合はfalseを返す
+   */
   private removeFromQueue(player: Player): boolean {
     const i = this.hostQueue.indexOf(player);
     if (i != -1) {
@@ -339,6 +387,8 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   GetInfoMessage(): string[] {
-    return ["!queue => show host queue."]
+    return [
+      "!queue => 	Shows host queue.",
+      "*order [players list] => Reorder the queue in specified order. (*order p1, p2, p3)"]
   }
 }
