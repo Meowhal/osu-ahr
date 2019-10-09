@@ -23,7 +23,7 @@ export class MapRecaster extends LobbyPlugin {
 
   private registerEvents(): void {
     this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player))
-    this.lobby.RecievedBanchoResponse.on(a => {
+    this.lobby.ReceivedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanged) {
         this.canRecast = true;
       }

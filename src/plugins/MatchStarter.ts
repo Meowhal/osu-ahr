@@ -31,7 +31,7 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
-    this.lobby.RecievedBanchoResponse.on(a => {
+    this.lobby.ReceivedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.AllPlayerReady) {
         this.onAllPlayerReady()
       }

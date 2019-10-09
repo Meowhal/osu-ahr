@@ -30,7 +30,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
-    this.lobby.RecievedBanchoResponse.on(a => {
+    this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.BeatmapChanging:
           this.onBeatmapChanging()
@@ -209,7 +209,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (type == "skip") {
       this.Skip();
     } else if (type == "skipto") {
-      this.logger.trace("recieved plugin message skipto");
+      this.logger.trace("received plugin message skipto");
       if (args.length != 1) {
         this.logger.error("skipto invalid arguments length");
         return;
@@ -257,7 +257,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 強制ローテーション
    */
   Skip(): void {
-    this.logger.trace("recieved plugin message skip");
+    this.logger.trace("received plugin message skip");
     this.rotateQueue();
     this.changeHost();
   }

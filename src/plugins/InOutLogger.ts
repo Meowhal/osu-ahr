@@ -7,10 +7,10 @@ export class InOutLogger extends LobbyPlugin {
 
   constructor(lobby: Lobby) {
     super(lobby, "inout");
-    this.lobby.RecievedBanchoResponse.on(a => this.onRecievedBanchoResponse(a.message, a.response));
+    this.lobby.ReceivedBanchoResponse.on(a => this.onReceivedBanchoResponse(a.message, a.response));
   }
 
-  private onRecievedBanchoResponse(message: string, response: BanchoResponse): void {
+  private onReceivedBanchoResponse(message: string, response: BanchoResponse): void {
     switch (response.type) {
       case BanchoResponseType.MatchStarted:
       case BanchoResponseType.MatchFinished:

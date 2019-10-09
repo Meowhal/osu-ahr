@@ -68,7 +68,7 @@ export class Lobby {
   ReceivedChatCommand = new TypedEvent<{ player: Player, command: string, param: string }>();
   PluginMessage = new TypedEvent<{ type: string, args: string[], src: LobbyPlugin | null }>();
   SentMessage = new TypedEvent<{ message: string }>();
-  RecievedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
+  ReceivedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
   ParsedStat = new TypedEvent<{ result: StatResult, player: Player, isPm: boolean }>();
   ParsedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
   Disconnected = new TypedEvent<void>();
@@ -393,7 +393,7 @@ export class Lobby {
         this.logger.debug("unhandled bancho response : %s", message);
         break;
     }
-    this.RecievedBanchoResponse.emit({ message, response: c });
+    this.ReceivedBanchoResponse.emit({ message, response: c });
   }
 
   private checkListRef(message: string): boolean {

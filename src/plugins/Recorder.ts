@@ -53,7 +53,7 @@ export class Recorder extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
     this.lobby.MatchStarted.on(a => this.onMatchStarted(a.mapId, a.mapTitle));
 
-    this.lobby.RecievedBanchoResponse.on(a => {
+    this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.BeatmapChanged:
           this.mapChanger = this.lobby.host;

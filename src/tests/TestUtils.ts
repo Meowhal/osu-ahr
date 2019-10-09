@@ -136,7 +136,7 @@ class TestUtils {
           reject("the expected response was not returned.");
         }, timeout);
       }
-      const d = lobby.RecievedBanchoResponse.on(a => {
+      const d = lobby.ReceivedBanchoResponse.on(a => {
         if (a.response.type != expected) return;
         if (cb != null && cb(a.response) === false) return;
         d.dispose();
@@ -159,7 +159,7 @@ class TestUtils {
         d.dispose();
         resolve(Date.now());
       }, timeout);
-      const d = lobby.RecievedBanchoResponse.on(a => {
+      const d = lobby.ReceivedBanchoResponse.on(a => {
         if (a.response.type != notExpected) return;
         if (cb != null && cb(a.response) === false) return;
         clearTimeout(id);

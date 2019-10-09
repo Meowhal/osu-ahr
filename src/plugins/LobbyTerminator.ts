@@ -25,7 +25,7 @@ export class LobbyTerminator extends LobbyPlugin {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p.player));
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player, p.slot));
     if (this.option.terminate_when_sleep_msg) {
-      this.lobby.RecievedBanchoResponse.on(p => {
+      this.lobby.ReceivedBanchoResponse.on(p => {
         if (p.response.type == BanchoResponseType.RequestSleep) {
           this.CloseLobby();
         }

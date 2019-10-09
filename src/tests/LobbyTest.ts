@@ -463,7 +463,7 @@ describe("LobbyTest", function () {
           assert.equal(a.message, msg);
           done();
         });
-        lobby.RecievedBanchoResponse.once(a => {
+        lobby.ReceivedBanchoResponse.once(a => {
           assert.fail();
         });
         lobby.ReceivedChatCommand.once(a => {
@@ -479,7 +479,7 @@ describe("LobbyTest", function () {
         lobby.PlayerChated.once(a => {
           assert.fail();
         });
-        lobby.RecievedBanchoResponse.once(a => {
+        lobby.ReceivedBanchoResponse.once(a => {
           assert.equal(a.message, msg);
           done();
         });
@@ -497,7 +497,7 @@ describe("LobbyTest", function () {
       lobby.PlayerChated.once(a => {
         assert.equal(a.message, msg);
       });
-      lobby.RecievedBanchoResponse.once(a => {
+      lobby.ReceivedBanchoResponse.once(a => {
         assert.fail();
       });
       lobby.ReceivedChatCommand.once(a => {
