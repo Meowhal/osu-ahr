@@ -1,5 +1,6 @@
 export * from "./LobbyPlugin";
 export * from "./AutoHostSelector";
+export * from "./AutoStartTimer";
 export * from "./MatchStarter";
 export * from "./HostSkipper";
 export * from "./LobbyTerminator";

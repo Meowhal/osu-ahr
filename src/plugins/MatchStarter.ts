@@ -29,12 +29,21 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
-    this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedBanchoResponse.on(a => {
-      if (a.response.type == BanchoResponseType.AllPlayerReady) {
-        this.onAllPlayerReady()
+      switch (a.response.type) {
+        case BanchoResponseType.AllPlayerReady:
+          this.onAllPlayerReady();
+          break;
+        case BanchoResponseType.BeganStartTimer:
+          this.isTimerActive = true;
+          break;
+        case BanchoResponseType.AbortedStartTimer:
+        case BanchoResponseType.MatchStarted:
+          this.isTimerActive = false;
+          break;
       }
+
     });
   }
 
@@ -95,10 +104,6 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private onMatchStarted(): void {
-    this.isTimerActive = false;
-  }
-
   private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
@@ -125,7 +130,7 @@ export class MatchStarter extends LobbyPlugin {
       this.start();
     } else {
       this.lobby.SendMessage("!mp start " + count);
-      this.isTimerActive = true;
+
     }
   }
 
@@ -136,7 +141,6 @@ export class MatchStarter extends LobbyPlugin {
   private stopTimer(): void {
     if (this.isTimerActive) {
       this.lobby.SendMessage("!mp aborttimer");
-      this.isTimerActive = false;
     }
   }
 

@@ -315,6 +315,9 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             m("Invalid map ID provided");
           }
           break;
+        case "clearhost":
+          m("Cleared match host");
+          break;
         default:
           logger.warn("unhandled command", mp.command, mp.arg);
           break;

@@ -1,7 +1,7 @@
 import { Lobby, IIrcClient } from "..";
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger } from "../plugins";
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger, AutoStartTimer } from "../plugins";
 import { parser } from "../parsers";
 
 const logger = log4js.getLogger("cli");
@@ -26,6 +26,7 @@ export class OahrBase {
   recorder: Recorder | null = null;
   recaster: MapRecaster;
   inoutLogger: InOutLogger;
+  autoTimer: AutoStartTimer;
   option: OahrCliOption = OahrCliDefaultOption;
 
   constructor(client: IIrcClient) {
@@ -38,7 +39,7 @@ export class OahrBase {
     this.aborter = new MatchAborter(this.lobby);
     this.wordCounter = new WordCounter(this.lobby);
     this.inoutLogger = new InOutLogger(this.lobby);
-
+    this.autoTimer = new AutoStartTimer(this.lobby);
     if (this.option.use_recoder) {
       this.recorder = new Recorder(this.lobby, true);
     }

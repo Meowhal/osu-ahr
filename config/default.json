@@ -22,6 +22,11 @@
     "show_queue_chars_limit": 90,
     "show_queue_cooltime_ms": 15000
   },
+  "AutoStartTimer": {
+    "enabled": false,
+    "doClearHost": false,
+    "waitingTime": 60
+  },
   "HostSkipper": {
     "vote_rate": 0.5,
     "vote_min": 2,

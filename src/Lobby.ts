@@ -388,6 +388,10 @@ export class Lobby {
           this.RaiseParsedStat(false);
         }
         break;
+      case BanchoResponseType.ClearedHost:
+        this.logger.info("cleared host");
+        this.host = null;
+        break;
       case BanchoResponseType.Unhandled:
         if (this.checkListRef(message)) break;
         this.logger.debug("unhandled bancho response : %s", message);
