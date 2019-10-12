@@ -65,9 +65,7 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   private onAllPlayerReady(): void {
-    if (!this.isTimerActive) {
-      this.start();
-    }
+    this.start();
   }
 
   private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {

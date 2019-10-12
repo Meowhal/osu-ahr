@@ -62,6 +62,7 @@ export class AutoStartTimer extends LobbyPlugin {
 
     switch (response.type) {
       case BanchoResponseType.BeatmapChanged:
+        if (this.lobby.players.size == 1) break;
         this.lobby.SendMessage(`!mp start ${this.option.waitingTime}`);
         if (this.option.doClearHost) {
           this.lobby.SendMessage(`!mp clearhost`);

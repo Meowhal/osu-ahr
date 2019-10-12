@@ -14,10 +14,12 @@ export class AutoHostSelector extends LobbyPlugin {
   hostQueue: Player[] = [];
   needsRotate: boolean = true;
   mapChanger: Player | null = null;
+  doneClearHost : boolean;
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "selector");
     const d = config.get<AutoHostSelectorOption>("AutoHostSelector");
+    this.doneClearHost = false;
     this.option = { ...d, ...option } as AutoHostSelectorOption;
     this.registerEvents();
   }
@@ -37,9 +39,13 @@ export class AutoHostSelector extends LobbyPlugin {
           break;
         case BanchoResponseType.MatchStarted:
           this.onMatchStarted();
+          this.doneClearHost = false;
           break;
         case BanchoResponseType.MatchFinished:
           this.onMatchFinished();
+          break;
+        case BanchoResponseType.ClearedHost:
+          this.doneClearHost = true;
           break;
       }
     });
@@ -71,7 +77,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
     if (this.lobby.isMatching) return;
     if (this.hostQueue.length == 0) return;
-    if (this.lobby.host == null && this.lobby.hostPending == null) { // ホストがいない、かつ承認待ちのホストがいない
+    if (this.lobby.host == null && this.lobby.hostPending == null  && !this.doneClearHost) { // ホストがいない、かつ承認待ちのホストがいない、!mp clearhostが実行されていない
       this.logger.info("host has left");
       this.changeHost();
     }
