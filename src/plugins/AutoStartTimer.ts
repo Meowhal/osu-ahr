@@ -67,6 +67,7 @@ export class AutoStartTimer extends LobbyPlugin {
         }
         break;
       case BanchoResponseType.BeatmapChanging:
+      case BanchoResponseType.HostChanged:
         if (this.lobby.isStartTimerActive) {
           this.lobby.SendMessage("!mp aborttimer");
         }
