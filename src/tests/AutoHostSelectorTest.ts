@@ -711,4 +711,30 @@ describe("AutoHostSelectorTest", function () {
       }
     });
   });
+  
+  describe("cleared host tests", function() {
+    it("clearhost and match", async() => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      lobby.SendMessage("!mp clearhost");
+      assert.isTrue(lobby.isClearedHost);
+      assert.isNull(lobby.host);
+      await ircClient.emulateMatchAsync();
+      tu.assertHost("player2", lobby);
+    });
+    it("plugin skip test", async() => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      lobby.SendMessage("!mp clearhost");
+      assert.isTrue(lobby.isClearedHost);
+      assert.isNull(lobby.host);
+      selector.SendPluginMessage("skip");
+      await tu.delayAsync(5);
+      tu.assertHost("player2", lobby);
+    });
+  });
 });

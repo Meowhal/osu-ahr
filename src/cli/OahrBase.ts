@@ -44,6 +44,7 @@ export class OahrBase {
       this.recorder = new Recorder(this.lobby, true);
     }
     this.recaster = new MapRecaster(this.lobby);
+    this.lobby.RaisePluginsLoaded();
   }
 
   get isRegistered(): boolean {

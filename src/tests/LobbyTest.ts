@@ -575,6 +575,7 @@ describe("LobbyTest", function () {
       await tu.delayAsync(20);
     });
   });
+
   describe("mp settings load tests", function () {
     it("empty lobby", async () => {
       const { lobby, ircClient } = await tu.SetupLobbyAsync();
@@ -612,6 +613,7 @@ describe("LobbyTest", function () {
       tu.assertMpSettingsResult(lobby, c1_2.result);
     });
   });
+
   describe("stat tests", function () {
     it("send stat", async () => {
       const { lobby, ircClient } = await tu.SetupLobbyAsync();
@@ -646,7 +648,31 @@ describe("LobbyTest", function () {
     const lp = new DummyLobbyPlugin(lobby);
     console.log(lobby.GetLobbyStatus());
   });
-  describe("Reproduction of bug that occurred", function () {
+
+  // mpコマンドの実行状況に応じて変更される状態に関するテスト
+  describe("lobby commandflag tests", function () {
+    it("clear host test", async () => {
+      const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+      assert.isFalse(lobby.isClearedHost);
+      lobby.SendMessage("!mp clearhost");
+      await tu.delayAsync(1);
+      assert.isTrue(lobby.isClearedHost);
+      lobby.TransferHost(players[1]);
+      assert.isFalse(lobby.isClearedHost);
+    });
+    it("start timer test", async () => {
+      const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
+      assert.isFalse(lobby.isStartTimerActive);
+      lobby.SendMessage("!mp start 20");
+      await tu.delayAsync(1);
+      assert.isTrue(lobby.isStartTimerActive);
+      await ircClient.emulateMatchAsync(1);
+      assert.isFalse(lobby.isStartTimerActive);
+    });
+  });
+
+  // 実際に発生したバグを再現するテスト
+  describe("Bug reproduction tests", function () {
     it("some chat cant handle as chat", async () => {
       const { lobby, ircClient } = await tu.SetupLobbyAsync();
       await tu.AddPlayersAsync(5, ircClient);

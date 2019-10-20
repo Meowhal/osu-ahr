@@ -15,7 +15,6 @@ const defaultOption = config.get<MatchStarterOption>("MatchStarter");
 export class MatchStarter extends LobbyPlugin {
   option: MatchStarterOption;
   voting: VoteCounter;
-  isTimerActive: boolean = false;
 
   constructor(lobby: Lobby, option: Partial<MatchStarterOption> = {}) {
     super(lobby, "starter");
@@ -34,13 +33,6 @@ export class MatchStarter extends LobbyPlugin {
       switch (a.response.type) {
         case BanchoResponseType.AllPlayerReady:
           this.onAllPlayerReady();
-          break;
-        case BanchoResponseType.BeganStartTimer:
-          this.isTimerActive = true;
-          break;
-        case BanchoResponseType.AbortedStartTimer:
-        case BanchoResponseType.MatchStarted:
-          this.isTimerActive = false;
           break;
       }
 
@@ -137,14 +129,13 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   private stopTimer(): void {
-    if (this.isTimerActive) {
+    if (this.lobby.isStartTimerActive) {
       this.lobby.SendMessage("!mp aborttimer");
     }
   }
 
   GetPluginStatus(): string {
     return `-- MatchStarter --
-  timer : ${this.isTimerActive ? "active" : "--"}
   vote : ${this.voting.toString()}`;
   }
 

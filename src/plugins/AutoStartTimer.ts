@@ -14,10 +14,8 @@ const WAITINGTIME_MIN = 15;
 
 export class AutoStartTimer extends LobbyPlugin {
   option: AutoStartTimerOption;
-  timerIsActive: boolean;
   constructor(lobby: Lobby, option: Partial<AutoStartTimerOption> = {}) {
     super(lobby, "autostart");
-    this.timerIsActive = false;
     const d = config.get<AutoStartTimerOption>("AutoStartTimer");
     this.option = { ...d, ...option } as AutoStartTimerOption;
     this.registerEvents();
@@ -69,16 +67,9 @@ export class AutoStartTimer extends LobbyPlugin {
         }
         break;
       case BanchoResponseType.BeatmapChanging:
-        if (this.timerIsActive) {
+        if (this.lobby.isStartTimerActive) {
           this.lobby.SendMessage("!mp aborttimer");
         }
-        break;
-      case BanchoResponseType.MatchStarted:
-      case BanchoResponseType.AbortedStartTimer:
-        this.timerIsActive = false;
-        break;
-      case BanchoResponseType.BeganStartTimer:
-        this.timerIsActive = true;
         break;
     }
   }

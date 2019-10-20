@@ -429,5 +429,68 @@ describe("HostSkipperTest", function () {
       ircClient.emulateMessage("p1", ircClient.channel, "*skipto pvv3 asdv");
       await t;
     });
-  })
+  });
+
+  describe("cleared host tests", function () {
+    it("skip vote", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
+      await tu.AddPlayersAsync(5, ircClient);
+      await tu.changeHostAsync("p0", lobby);
+      let skipped = false;
+      const task = resolveSkipAsync(lobby, () => skipped = true);
+      lobby.SendMessage("!mp clearhost");
+      assert.isTrue(lobby.isClearedHost);
+      assert.isNull(lobby.host);
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
+      await tu.delayAsync(10);
+      assert.equal(skipper.voting.count, 1);
+      assert.isFalse(skipped);
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
+      await tu.delayAsync(10);
+      assert.equal(skipper.voting.count, 2);
+      assert.isFalse(skipped);
+
+      ircClient.emulateMessage("p3", ircClient.channel, "!skip");
+      await tu.delayAsync(10);
+      await task;
+      assert.equal(skipper.voting.count, 3);
+      assert.isTrue(skipped);
+    });
+    it("skip vote and clearhost on the way", async () => {
+      const { skipper, lobby, ircClient } = await prepare(0, 0);
+      await tu.AddPlayersAsync(5, ircClient);
+      await tu.changeHostAsync("p0", lobby);
+      let skipped = false;
+      const task = resolveSkipAsync(lobby, () => skipped = true);
+      ircClient.emulateMessage("p1", ircClient.channel, "!skip");
+      await tu.delayAsync(10);
+      assert.equal(skipper.voting.count, 1);
+      assert.isFalse(skipped);
+      lobby.SendMessage("!mp clearhost");
+      assert.isTrue(lobby.isClearedHost);
+      assert.isNull(lobby.host);
+      ircClient.emulateMessage("p2", ircClient.channel, "!skip");
+      await tu.delayAsync(10);
+      assert.equal(skipper.voting.count, 2);
+      assert.isFalse(skipped);
+
+      ircClient.emulateMessage("p3", ircClient.channel, "!skip");
+      await tu.delayAsync(10);
+      await task;
+      assert.equal(skipper.voting.count, 3);
+      assert.isTrue(skipped);
+    });
+    it("*skip by authorized user test", async () => {
+      const { skipper, lobby, ircClient } = await prepare();
+      lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
+      var t = resolveSkipAsync(lobby);
+      await tu.AddPlayersAsync(5, ircClient);
+      await tu.changeHostAsync("p0", lobby);
+      lobby.SendMessage("!mp clearhost");
+      assert.isTrue(lobby.isClearedHost);
+      assert.isNull(lobby.host);
+      ircClient.emulateMessage("p1", ircClient.channel, "*skip");
+      await t;
+    });
+  });
 });

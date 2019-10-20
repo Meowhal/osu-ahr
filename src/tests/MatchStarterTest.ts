@@ -193,7 +193,7 @@ describe("MatchStarterTest", function () {
       const t = assertBeginTimer(lobby, 30);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!start 30");
       assert.isFalse(lobby.isMatching);
-      assert.isTrue(starter.isTimerActive);
+      assert.isTrue(lobby.isStartTimerActive);
       await t;
     });
     it("!start timer 0 test", async () => {
@@ -203,7 +203,7 @@ describe("MatchStarterTest", function () {
       assert.isFalse(lobby.isMatching);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!start 0");
       assert.isTrue(lobby.isMatching);
-      assert.isFalse(starter.isTimerActive);
+      assert.isFalse(lobby.isStartTimerActive);
     });
     it("!start timer with negative | NaN test", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
@@ -227,7 +227,7 @@ describe("MatchStarterTest", function () {
       assert.isFalse(lobby.isMatching);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!start *231sd");
       assert.isFalse(lobby.isMatching);
-      assert.isFalse(starter.isTimerActive);
+      assert.isFalse(lobby.isStartTimerActive);
     });
     it("!start timer from player test", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
@@ -237,7 +237,7 @@ describe("MatchStarterTest", function () {
       const t = assertNeverBeginTimer(lobby, 10);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!start 100");
       assert.isFalse(lobby.isMatching);
-      assert.isFalse(starter.isTimerActive);
+      assert.isFalse(lobby.isStartTimerActive);
     });
     it("!start timer from auth player test", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
@@ -248,7 +248,7 @@ describe("MatchStarterTest", function () {
       const t = assertBeginTimer(lobby, 30);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!start 30");
       assert.isFalse(lobby.isMatching);
-      assert.isTrue(starter.isTimerActive);
+      assert.isTrue(lobby.isStartTimerActive);
       await t;
     });
     it("!stop test", async () => {
@@ -259,9 +259,9 @@ describe("MatchStarterTest", function () {
       const t = assertBeginTimer(lobby, 30);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!start 30");
       assert.isFalse(lobby.isMatching);
-      assert.isTrue(starter.isTimerActive);
+      assert.isTrue(lobby.isStartTimerActive);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!stop");
-      assert.isFalse(starter.isTimerActive);
+      assert.isFalse(lobby.isStartTimerActive);
       await t;
     });
     it("!stop from player test", async () => {
@@ -272,9 +272,9 @@ describe("MatchStarterTest", function () {
       const t = assertBeginTimer(lobby, 30);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!start 30");
       assert.isFalse(lobby.isMatching);
-      assert.isTrue(starter.isTimerActive);
+      assert.isTrue(lobby.isStartTimerActive);
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!stop");
-      assert.isTrue(starter.isTimerActive);
+      assert.isTrue(lobby.isStartTimerActive);
       await t;
     });
   });

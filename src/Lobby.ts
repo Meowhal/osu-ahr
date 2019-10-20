@@ -37,15 +37,17 @@ export class Lobby {
   lobbyId: string | undefined;
   channel: string | undefined;
   status: LobbyStatus;
+  mapTitle: string = "";
+  mapId: number = 0;
   host: Player | null = null;
   hostPending: Player | null = null;
   players: Set<Player> = new Set<Player>();
   playersMap: Map<string, Player> = new Map<string, Player>();
   isMatching: boolean = false;
-  plugins: LobbyPlugin[] = [];
+  isStartTimerActive: boolean = false;
+  isClearedHost: boolean = false;
   listRefStart: number = 0;
-  mapTitle: string = "";
-  mapId: number = 0;
+  plugins: LobbyPlugin[] = [];
   coolTimes: { [key: string]: number } = {};
   deferredMessages: { [key: string]: DeferredAction<string> } = {}
   settingParser: MpSettingsParser;
@@ -331,6 +333,7 @@ export class Lobby {
     switch (c.type) {
       case BanchoResponseType.HostChanged:
         this.RaiseHostChanged(c.params[0]);
+        this.isClearedHost = false;
         break;
       case BanchoResponseType.UserNotFound:
         this.OnUserNotFound();
@@ -339,7 +342,14 @@ export class Lobby {
         this.RaiseMatchFinished();
         break;
       case BanchoResponseType.MatchStarted:
+        this.isStartTimerActive = false;
         this.RaiseMatchStarted();
+        break;
+      case BanchoResponseType.BeganStartTimer:
+        this.isStartTimerActive = true;
+        break;
+      case BanchoResponseType.AbortedStartTimer:
+        this.isStartTimerActive = false;
         break;
       case BanchoResponseType.PlayerFinished:
         this.RaisePlayerFinished(c.params[0], c.params[1], c.params[2]);
@@ -390,7 +400,12 @@ export class Lobby {
         break;
       case BanchoResponseType.ClearedHost:
         this.logger.info("cleared host");
+        this.isClearedHost = true;
+        if (this.host != null) {
+          this.host.removeRole(Roles.Host);
+        }
         this.host = null;
+        this.hostPending = null;
         break;
       case BanchoResponseType.Unhandled:
         if (this.checkListRef(message)) break;
@@ -529,6 +544,15 @@ export class Lobby {
         this.logger.info("parsed stat %s -> %s", p.id, StatStatuses[p.laststat.status]);
         this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
       }
+    }
+  }
+
+  /**
+   * pluginに読み込み作業が完了したことを通知する
+   */
+  RaisePluginsLoaded(): void {
+    for (let p of this.plugins) {
+      p.OnLoaded();
     }
   }
 
@@ -745,6 +769,7 @@ export class Lobby {
   lobby id : ${this.lobbyId}, name : ${this.lobbyName},  status : ${LobbyStatus[this.status]}
   players : ${this.players.size}, inGame : ${pc.inGame} (playing : ${pc.playing})
   refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.id).join(",")}
+  timer : ${this.isStartTimerActive}, clearedhost : ${this.isClearedHost}
   host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
       ;
 

@@ -1,7 +1,3 @@
-import { assert } from 'chai';
-import { Lobby, Player } from "..";
-import { DummyIrcClient } from '../dummies';
-import { parser } from "../parsers";
 import { InOutLogger } from '../plugins';
 import tu from "./TestUtils";
 

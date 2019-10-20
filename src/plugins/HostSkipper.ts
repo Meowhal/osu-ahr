@@ -121,7 +121,7 @@ export class HostSkipper extends LobbyPlugin {
           this.lobby.SendMessage("bot : players can start the match by !start vote.");
         } else {
           this.lobby.SendMessage("bot : players can skip afk host by !skip vote.");
-        }        
+        }
       }
     }
   }
@@ -131,8 +131,7 @@ export class HostSkipper extends LobbyPlugin {
     if (this.lobby.isMatching) return;
 
     if (command == "!skip") {
-      if (this.lobby.host == null) return; // ホストがいないなら何もしない
-      if (param != "" && escapeUserId(param) != this.lobby.host.escaped_id) return; // 関係ないユーザーのスキップは無視
+      if (param != "" && this.lobby.host != null && escapeUserId(param) != this.lobby.host.escaped_id) return; // 関係ないユーザーのスキップは無視
       this.vote(player);
     } else if (player.isAuthorized) {
       if (command == "*skip") {
