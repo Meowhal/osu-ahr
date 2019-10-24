@@ -76,6 +76,33 @@ describe("AutoStartTimerTest", function () {
       await ircClient.emulateChangeMapAsync();
       assert.equal(c, 3);
     });
+    it("timer will cancel when host changed", async() => {
+      const { astimer, lobby, ircClient } = await prepare(true, true, 60);
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      let c = 0;
+      lobby.SentMessage.on(a => {
+        if (c == 0) {
+          assert.equal(a.message, "!mp start 60");
+        }
+        if (c == 1) {
+          assert.equal(a.message, "!mp clearhost");
+        }
+        if (c == 2) {
+          assert.equal(a.message, "!mp aborttimer");
+        }
+        if (c == 3) {
+          assert.equal(a.message, "!mp start 60");
+        }
+        if (c == 4) {
+          assert.equal(a.message, "!mp clearhost");
+        }
+        c++;
+      });
+      await ircClient.emulateChangeMapAsync();
+      lobby.RaiseHostChanged(players[1]);
+      await ircClient.emulateChangeMapAsync();
+      assert.equal(c, 5);
+    });
   });
   describe("option tests", function () {
     function assertOptions(astimer: AutoStartTimer, enabled: boolean, doClearHost: boolean, waitingTime: number): void {
