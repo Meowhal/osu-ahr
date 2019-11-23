@@ -28,6 +28,7 @@ export class OahrCli extends OahrBase {
         let l = parser.SplitCliCommand(line);
         switch (l.command) {
           case "m":
+          case "make":
             if (l.arg == "") {
               logger.info("m command needs lobby name. ex:m testlobby");
               return;
@@ -41,6 +42,7 @@ export class OahrCli extends OahrBase {
             }
             break;
           case "e":
+          case "enter":
             try {
               if (l.arg == "") {
                 logger.info("e command needs lobby id. ex:e 123456");
@@ -54,6 +56,7 @@ export class OahrCli extends OahrBase {
             }
             break;
           case "q":
+          case "quit":
             this.scene = this.scenes.exited;
             break;
           case "":
