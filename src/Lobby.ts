@@ -25,6 +25,8 @@ export interface LobbyOption {
   info_message_interval: number,
   info_message_cooltime: number,
   stat_timeout: number,
+  silent_mode: boolean,
+
 }
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
@@ -215,7 +217,7 @@ export class Lobby {
 
   TransferHost(user: Player): void {
     this.hostPending = user;
-    this.SendMessage("!mp host " + user.id);
+    this.SendMessage("!mp host " + user.id, true);
   }
 
   AbortMatch(): void {
@@ -224,16 +226,17 @@ export class Lobby {
     }
   }
 
-  SendMessage(message: string): void {
+  SendMessage(message: string, allowSilent: boolean = false): void {
     if (this.channel != undefined) {
-      this.ircClient.say(this.channel, message);
+      const target = allowSilent && this.option.silent_mode ? "BanchoBot" : this.channel;
+      this.ircClient.say(target, message);
       this.ircClient.emit("sentMessage", this.channel, message);
       this.SentMessage.emit({ message });
       this.chatlogger.trace("bot:%s", message);
     }
   }
 
-  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
+  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number,  allowSilent: boolean = false): boolean {
     const now = Date.now();
     if (tag in this.coolTimes) {
       if (now - this.coolTimes[tag] < cooltimeMs) {
@@ -244,7 +247,7 @@ export class Lobby {
     if (typeof message == "function") {
       message = message();
     }
-    this.SendMessage(message);
+    this.SendMessage(message, allowSilent);
     return true;
   }
 

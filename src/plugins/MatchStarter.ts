@@ -119,13 +119,13 @@ export class MatchStarter extends LobbyPlugin {
     if (count == 0) {
       this.start();
     } else {
-      this.lobby.SendMessage("!mp start " + count);
+      this.lobby.SendMessage("!mp start " + count, true);
 
     }
   }
 
   private start(): void {
-    this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000);
+    this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000, true);
   }
 
   private stopTimer(): void {

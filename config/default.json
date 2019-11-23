@@ -16,7 +16,8 @@
     ],
     "info_message_interval": 500,
     "info_message_cooltime": 60000,
-    "stat_timeout": 5000
+    "stat_timeout": 5000,
+    "silent_mode": true
   },
   "AutoHostSelector": {
     "show_queue_chars_limit": 90,
