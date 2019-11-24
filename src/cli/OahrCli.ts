@@ -6,6 +6,25 @@ import { OahrBase } from "./OahrBase";
 
 const logger = log4js.getLogger("cli");
 
+const mainMenuCommandsMessage = `
+MainMenu Commands 
+  [make <Lobby_name>] Make a lobby.  ex: 'make 5* auto host rotation'
+  [enter <LobbyID>]   Enter the lobby. ex: 'enter 123456' (It only works in a Tournament lobby ID.)
+  [help] Show this message.
+  [quit] Quit this application.
+`;
+
+const lobbyMenuCommandsMessage = `
+LobbyMenu Commands 
+  [say <Message>] Send Message to #multiplayer.
+  [info] Show current application's informations.
+  [close now] Close the lobby and Quit this application. ex: 'close now'
+  [close <num:seconds>] Close the lobby after num seconds. ex: 'close 30'
+  [close] Lock the lobby and close it when everyone leaves. ex: 'close'
+            DO NOT Quit application before close the lobby!
+  [quit]  Quit this application. (lobby won't close.)
+`;
+
 interface Scene {
   name: string;
   prompt: string;
@@ -23,19 +42,19 @@ export class OahrCli extends OahrBase {
   private scenes = {
     mainMenu: {
       name: "",
-      prompt: "[m]ake, [e]nter, [q]uit > ",
+      prompt: "> ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         switch (l.command) {
           case "m":
           case "make":
             if (l.arg == "") {
-              logger.info("m command needs lobby name. ex:m testlobby");
+              logger.info("make command needs lobby name. ex:make testlobby");
               return;
             }
             try {
               await this.makeLobbyAsync(l.arg);
-              this.scene = this.scenes.lobbyMenu;
+              this.transitionToLobbyMenu();
             } catch (e) {
               logger.info("faiiled to make lobby : %s", e);
               this.scene = this.scenes.exited;
@@ -45,11 +64,11 @@ export class OahrCli extends OahrBase {
           case "enter":
             try {
               if (l.arg == "") {
-                logger.info("e command needs lobby id. ex:e 123456");
+                logger.info("enter command needs lobby id. ex:enter 123456");
                 return;
               }
               await this.enterLobbyAsync(l.arg);
-              this.scene = this.scenes.lobbyMenu;
+              this.transitionToLobbyMenu();
             } catch (e) {
               logger.info("invalid channel : %s", e);
               this.scene = this.scenes.exited;
@@ -57,7 +76,17 @@ export class OahrCli extends OahrBase {
             break;
           case "q":
           case "quit":
+          case "exit":
             this.scene = this.scenes.exited;
+            break;
+          case "h":
+          case "help":
+          case "command":
+          case "commands":
+          case "/?":
+          case "-?":
+          case "?":
+            console.log(mainMenuCommandsMessage);
             break;
           case "":
             break;
@@ -69,7 +98,7 @@ export class OahrCli extends OahrBase {
     },
     lobbyMenu: {
       name: "lobbyMenu",
-      prompt: "[s]ay, [i]nfo, [c]lose, [q]quit > ",
+      prompt: "> ",
       reaction: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
@@ -91,7 +120,7 @@ export class OahrCli extends OahrBase {
             break;
           case "c":
           case "close":
-            if (l.arg == "") {
+            if (l.arg == "now") {
               // close now
               await this.lobby.CloseLobbyAsync();
               this.scene = this.scenes.exited;
@@ -104,8 +133,18 @@ export class OahrCli extends OahrBase {
             }
             break;
           case "q":
+          case "quit":
             logger.info("quit");
             this.scene = this.scenes.exited;
+            break;
+          case "h":
+          case "help":
+          case "command":
+          case "commands":
+          case "/?":
+          case "-?":
+          case "?":
+            console.log(lobbyMenuCommandsMessage);
             break;
           case "":
             break;
@@ -130,7 +169,7 @@ export class OahrCli extends OahrBase {
   get exited(): boolean {
     return this.scene === this.scenes.exited;
   }
-
+  
   startApp(rl: readline.Interface | null) {
     if (rl == null) {
       rl = readline.createInterface({
@@ -141,7 +180,11 @@ export class OahrCli extends OahrBase {
     let r = rl as readline.Interface;
 
     logger.trace("waiting for registration from bancho");
+    console.log("Connecting to Osu Bancho ...");
     this.client.once("registered", () => {
+      console.log("Connected :D");
+      console.log("\n=== Welcome to osu-ahr ===");
+      console.log(mainMenuCommandsMessage);
       r.setPrompt(this.prompt);
       r.prompt();
     });
@@ -172,5 +215,11 @@ export class OahrCli extends OahrBase {
         }
       }
     });
+  }
+
+  transitionToLobbyMenu() {
+    this.scene = this.scenes.lobbyMenu;
+    this.scene.prompt = (this.lobby.channel || "") + " > ";
+    console.log(lobbyMenuCommandsMessage);
   }
 }

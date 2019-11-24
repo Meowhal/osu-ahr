@@ -7,6 +7,8 @@ import log4js from "log4js";
 import { logPrivateMessage } from '../IIrcClient';
 const logger = log4js.getLogger("cli");
 
+console.log("starting up...");
+
 const config_path = (process.env.NODE_ENV === 'production')
   ? "./config/log_cli_prod.json"
   : "./config/log_cli_dev.json";
