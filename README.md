@@ -30,6 +30,12 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 
 
 ## Usage
+### Setup
+
+[Setup Guide Video](https://youtu.be/8kYbBWgMfIQ) (Special Thanks : [weebskinosu](https://github.com/weebskinosu))
++ Install Node.js and Git
+  + [Node.js](https://nodejs.org/)
+  + [Git](https://git-scm.com/)
 + clone repo and install libs
 ```bash
 > git clone https://github.com/Meowhal/osu-ahr.git
