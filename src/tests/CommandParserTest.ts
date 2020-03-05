@@ -272,34 +272,34 @@ describe("CommandParserTest", function () {
       assert.equal(v.type, BanchoResponseType.KickedPlayer);
       assert.equal(v.params[0], "damn");
     });
-    it("BeganStartTimer test", () => {
+    it("CountedTimer test", () => {
       let v = parser.ParseBanchoResponse("Match starts in 10 seconds");
-      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.CounteddownTimer);
       assert.equal(v.params[0], 10);
 
       v = parser.ParseBanchoResponse("Match starts in 2 minutes and 40 seconds");
-      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.CounteddownTimer);
       assert.equal(v.params[0], 160);
 
       v = parser.ParseBanchoResponse("Match starts in 2 minutes");
-      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.CounteddownTimer);
       assert.equal(v.params[0], 120);
 
       v = parser.ParseBanchoResponse("Match starts in 1 minute and 1 second");
-      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.CounteddownTimer);
       assert.equal(v.params[0], 61);
     });
-    it("MpBeganStartTimer test", () => {
+    it("BeganStartTimer test", () => {
       let v = parser.ParseBanchoResponse("Queued the match to start in 30 seconds");
-      assert.equal(v.type, BanchoResponseType.MpBeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 30);
 
       v = parser.ParseBanchoResponse("Queued the match to start in 1 second");
-      assert.equal(v.type, BanchoResponseType.MpBeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 1);
 
       v = parser.ParseBanchoResponse("Queued the match to start in 5 minutes and 40 seconds");
-      assert.equal(v.type, BanchoResponseType.MpBeganStartTimer);
+      assert.equal(v.type, BanchoResponseType.BeganStartTimer);
       assert.equal(v.params[0], 340);
     });
     it("FinishStartTimer test", () => {

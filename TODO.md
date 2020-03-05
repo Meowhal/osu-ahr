@@ -1,6 +1,6 @@
 # TODO TASK 一覧
 ## todo
-- タイマー起動をバンチョーレスポンスで判定する(match starter auto start timerなど)
+- タイマー起動後に手動で試合を開始した場合にタイマーがそのままカウントダウンを続けるが、それが次のロビーに持ち越されないか調べる。
 - Afk検知機能、複数試合で結果を残さない場合kickする。!statをbancho宛のPMにすればロビーのチャット欄を汚さずに行える。
 - 順番がどういう仕組なのか理解してもらえない？
 - 試合開始１０後くらいに誰かがチャットしたらabortの案内を出す
@@ -14,6 +14,7 @@
 - cliにstatの結果を載せない
 - afkhost がstat check timeout になってしまったときの対応 -> event handling
 ## done
+- タイマー起動をバンチョーレスポンスで判定する(match starter auto start timerなど)
 - 試合終了後ボットが変更する前に変更されるとループになる <- selectorでpendinghostに対する処理が抜けていた
 - 切断時に自動!mp settings
 - !mp settingsを任意のタイミングで解析する。cliのinfoにロビータイトルを表示
