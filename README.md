@@ -38,6 +38,7 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 + clone repo and install libs
 ```bash
 > git clone https://github.com/Meowhal/osu-ahr.git
+> cd osu-ahr
 > npm install
 ```
 + get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
