@@ -28,7 +28,7 @@ describe("MatchStarterTest", function () {
 
   function assertBeginTimer(lobby: Lobby, time: number) {
     return tu.assertEventFire(lobby.ReceivedBanchoResponse, a => {
-      if (a.response.type == BanchoResponseType.BeganStartTimer) {
+      if (a.response.type == BanchoResponseType.CounteddownTimer) {
         assert.equal(a.response.params[0], time);
         return true;
       }
@@ -38,7 +38,7 @@ describe("MatchStarterTest", function () {
 
   function assertNeverBeginTimer(lobby: Lobby, timeout: number) {
     return tu.assertEventNeverFire(lobby.ReceivedBanchoResponse, a => {
-      if (a.response.type == BanchoResponseType.BeganStartTimer) {
+      if (a.response.type == BanchoResponseType.CounteddownTimer) {
         return true;
       }
       return false;

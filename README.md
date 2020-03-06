@@ -29,8 +29,7 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 (I am looking for ppl who can correct my English mistakes..😖)
 
 
-## Usage
-### Setup
+## Setup
 
 [Setup Guide Video](https://youtu.be/8kYbBWgMfIQ) (Special Thanks : [weebskinosu](https://github.com/weebskinosu))
 + Install Node.js and Git
@@ -39,6 +38,7 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 + clone repo and install libs
 ```bash
 > git clone https://github.com/Meowhal/osu-ahr.git
+> cd osu-ahr
 > npm install
 ```
 + get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)

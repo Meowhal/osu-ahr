@@ -303,6 +303,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           } else {
             // カウントダウンや分表示は面倒なので省略
             m("Match starts in " + mp.arg + " seconds");
+            m("Queued the match to start in " + mp.arg + " seconds");
           }
           break;
         case "aborttimer":

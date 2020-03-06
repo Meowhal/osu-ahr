@@ -91,7 +91,7 @@ export namespace parser {
           if (m_min) {
             secs += parseInt(m_min[1]) * 60;
           }
-          return makeBanchoResponse(BanchoResponseType.BeganStartTimer, secs);
+          return makeBanchoResponse(BanchoResponseType.CounteddownTimer, secs);
         }
         break;
       case 78: // N
@@ -110,7 +110,7 @@ export namespace parser {
           if (m_min) {
             secs += parseInt(m_min[1]) * 60;
           }
-          return makeBanchoResponse(BanchoResponseType.MpBeganStartTimer, secs);
+          return makeBanchoResponse(BanchoResponseType.BeganStartTimer, secs);
         }
         break;
       case 82: // R
@@ -303,8 +303,8 @@ export enum BanchoResponseType {
   AddedReferee,
   RemovedReferee,
   KickedPlayer,
+  CounteddownTimer,
   BeganStartTimer,
-  MpBeganStartTimer,
   FinishStartTimer,
   AbortedStartTimer,
   Settings,
