@@ -1,3 +1,3 @@
 import {SocketTrial} from "./SocketTrial";
-
-SocketTrial();
+import {axiosGetTrial} from './WebApiTrial';
+axiosGetTrial();

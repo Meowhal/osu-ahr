@@ -16,6 +16,7 @@
   "author": "gnsksz",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.2",
     "config": "^3.1.0",
     "express": "^4.17.1",
     "irc-upd": "^0.10.0",

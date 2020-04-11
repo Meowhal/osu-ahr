@@ -188,3 +188,9 @@ sudo kill [PID]
 しかしこれではアボート時にマップを変更するとその次のユーザーまでスキップされてしまう。
 
 案３：誰がマップを変更したか保存する　採用
+
+## webapi
+webapi v2 がどの程度使えるか検証したい。
+
+[osu api v2 document](https://docs.ppy.sh/)
+OAuthの手順
