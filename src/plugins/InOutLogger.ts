@@ -39,7 +39,7 @@ export class InOutLogger extends LobbyPlugin {
   }
 
   LogInOutPlayers(): void {
-    if (this.logger.isInfoEnabled) {
+    if (this.logger.isInfoEnabled()) {
       const msg = this.GetInOutLog(true);
       if (msg != "") {
         this.logger.info(msg);

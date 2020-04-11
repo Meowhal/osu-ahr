@@ -282,7 +282,7 @@ export class AutoHostSelector extends LobbyPlugin {
         return;
       }
     }
-    if (this.logger.isTraceEnabled) {
+    if (this.logger.isTraceEnabled()) {
       this.logger.trace("skipto: %s", this.hostQueue.map(p => p.id).join(", "));
     }
     this.changeHost();
