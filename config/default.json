@@ -77,5 +77,10 @@
     "invite_users": [],
     "password": "",
     "use_recoder": false
+  },
+  "oAuthConfig": {
+    "client_id": 1,
+    "client_secret": "***",
+    "callback": ""
   }
 }
