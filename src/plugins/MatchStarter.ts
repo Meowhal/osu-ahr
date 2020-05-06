@@ -28,11 +28,15 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
+    this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.AllPlayerReady:
           this.onAllPlayerReady();
+          break;
+        case BanchoResponseType.MatchStarted:
+          this.stopTimer();
           break;
       }
 
@@ -94,6 +98,19 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
+  private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
+    if (type == "mp_start") {
+      if (args.length == 0) {
+        this.start();
+      } else {
+        const count = parseInt(args[0]);
+        this.startTimer(count);
+      }
+    } else if (type == "mp_abort_start") {
+      this.stopTimer();
+    }
+  }
+
   private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
@@ -119,19 +136,32 @@ export class MatchStarter extends LobbyPlugin {
     if (count == 0) {
       this.start();
     } else {
-      this.lobby.SendMessage("!mp start " + count, true);
-
+      this.lobby.SendMessage(`Queued the match to start in ${count} seconds`);
+      this.lobby.DeferMessage("!mp start", "mp_start", count * 1000, true);
+      if (10 < count) {
+        this.lobby.DeferMessage("Match starts in 5 seconds", "mp_start 5 sec", (count - 5) * 1000, true);
+      }
     }
   }
 
   private start(): void {
+    this.stopTimer();
     this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000, true);
   }
 
   private stopTimer(): void {
+    this.lobby.CancelDeferredMessage("mp_start");
+    this.lobby.CancelDeferredMessage("mp_start 5 sec");
     if (this.lobby.isStartTimerActive) {
       this.lobby.SendMessage("!mp aborttimer");
     }
+  }
+
+  get IsSelfStartTimerActive(): boolean {
+    if ("mp_start" in this.lobby.deferredMessages) {
+      return !this.lobby.deferredMessages["mp_start"].done
+    }
+    return false;
   }
 
   GetPluginStatus(): string {

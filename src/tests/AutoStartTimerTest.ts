@@ -10,46 +10,61 @@ describe("AutoStartTimerTest", function () {
   });
 
   async function prepare(enabled: boolean = true, doClearHost: boolean = true, waitingTime: number = 60):
-    Promise<{ astimer: AutoStartTimer, lobby: Lobby, ircClient: DummyIrcClient }> {
+    Promise<{ astimer: AutoStartTimer, players: string[], lobby: Lobby, ircClient: DummyIrcClient }> {
     const li = await tu.SetupLobbyAsync();
     const option: Partial<AutoStartTimerOption> = {
       enabled: enabled,
       doClearHost: doClearHost,
       waitingTime: waitingTime
     }
+    const players = await tu.AddPlayersAsync(3, li.ircClient);
     const astimer = new AutoStartTimer(li.lobby, option)
-    return { astimer, ...li };
+    return { astimer, players, ...li };
   }
 
   describe("auto start tests", function () {
     it("normal operation test", async () => {
-      const { astimer, lobby, ircClient } = await prepare(true, true, 60);
-      let c = 0;
+      const { lobby, ircClient } = await prepare(true, true, 60);
+      let c = 0, d = 0;
       lobby.SentMessage.on(a => {
-        if (c == 0) {
-          assert.equal(a.message, "!mp start 60");
-        } else if (c == 1) {
-          assert.equal(a.message, "!mp clearhost");
-        }
+        assert.equal(a.message, "!mp clearhost");
         c++;
       });
-      await ircClient.emulateChangeMapAsync();
-      assert.equal(c, 2);
-    });
-    it("no clearhost test", async () => {
-      const { astimer, lobby, ircClient } = await prepare(true, false, 60);
-      let c = 0;
-      lobby.SentMessage.on(a => {
-        if (c == 0) {
-          assert.equal(a.message, "!mp start 60");
+      lobby.PluginMessage.on(a => {
+        if (d == 0) {
+          assert.equal(a.type, "mp_abort_start");
+        } else if (d == 1) {
+          assert.equal(a.type, "mp_start");
+          assert.equal(a.args[0], "60");
         }
-        c++;
+        d++;
       });
       await ircClient.emulateChangeMapAsync();
       assert.equal(c, 1);
+      assert.equal(d, 2);
+    });
+    it("no clearhost test", async () => {
+      const { lobby, ircClient } = await prepare(true, false, 60);
+      let c = 0, d = 0;
+      lobby.SentMessage.on(a => {
+        assert.equal(a.message, "!mp clearhost");
+        c++;
+      });
+      lobby.PluginMessage.on(a => {
+        if (d == 0) {
+          assert.equal(a.type, "mp_abort_start");
+        } else if (d == 1) {
+          assert.equal(a.type, "mp_start");
+          assert.equal(a.args[0], "60");
+        }
+        d++;
+      });
+      await ircClient.emulateChangeMapAsync();
+      assert.equal(c, 0);
+      assert.equal(d, 2);
     });
     it("disabled test", async () => {
-      const { astimer, lobby, ircClient } = await prepare(false, false, 60);
+      const { lobby, ircClient } = await prepare(false, false, 60);
       let c = 0;
       lobby.SentMessage.on(a => {
         c++;
@@ -58,50 +73,43 @@ describe("AutoStartTimerTest", function () {
       assert.equal(c, 0);
     });
     it("timer cancel test", async () => {
-      const { astimer, lobby, ircClient } = await prepare(true, false, 60);
-      let c = 0;
-      lobby.SentMessage.on(a => {
-        if (c == 0) {
-          assert.equal(a.message, "!mp start 60");
+      const { lobby, ircClient } = await prepare(true, false, 60);
+      let d = 0;
+      lobby.PluginMessage.on(a => {
+        if (d == 0 || d == 2) {
+          assert.equal(a.type, "mp_abort_start");
+        } else if (d == 1 || d == 3) {
+          assert.equal(a.type, "mp_start");
+          assert.equal(a.args[0], "60");
         }
-        if (c == 1) {
-          assert.equal(a.message, "!mp aborttimer");
-        }
-        if (c == 2) {
-          assert.equal(a.message, "!mp start 60");
-        }
-        c++;
+        d++;
       });
       await ircClient.emulateChangeMapAsync();
       await ircClient.emulateChangeMapAsync();
-      assert.equal(c, 3);
+      assert.equal(d, 4);
     });
-    it("timer will cancel when host changed", async() => {
-      const { astimer, lobby, ircClient } = await prepare(true, true, 60);
-      const players = await tu.AddPlayersAsync(5, ircClient);
+    it("timer will cancel when host changed", async () => {
+      const { players, lobby, ircClient } = await prepare(true, true, 60);
       let c = 0;
       lobby.SentMessage.on(a => {
-        if (c == 0) {
-          assert.equal(a.message, "!mp start 60");
-        }
-        if (c == 1) {
+        if (c == 2 || c == 5) {
           assert.equal(a.message, "!mp clearhost");
         }
-        if (c == 2) {
-          assert.equal(a.message, "!mp aborttimer");
-        }
-        if (c == 3) {
-          assert.equal(a.message, "!mp start 60");
-        }
-        if (c == 4) {
-          assert.equal(a.message, "!mp clearhost");
+        c++;
+      });
+      lobby.PluginMessage.on(a => {
+        if (c == 0 || c == 3) {
+          assert.equal(a.type, "mp_abort_start");
+        } else if (c == 1 || c == 4) {
+          assert.equal(a.type, "mp_start");
+          assert.equal(a.args[0], "60");
         }
         c++;
       });
       await ircClient.emulateChangeMapAsync();
       lobby.RaiseHostChanged(players[1]);
       await ircClient.emulateChangeMapAsync();
-      assert.equal(c, 5);
+      assert.equal(c, 6);
     });
   });
   describe("option tests", function () {

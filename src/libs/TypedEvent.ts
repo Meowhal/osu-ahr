@@ -24,6 +24,14 @@ export class TypedEvent<T> {
     this.listenersOncer.push(listener);
   }
 
+  async(): Promise<T> {
+    return new Promise(resolve => {
+      this.listenersOncer.push(a => {
+        resolve(a);
+      });
+    });
+  }
+
   off(listener: Listener<T>): void {
     var callbackIndex = this.listeners.indexOf(listener);
     if (callbackIndex > -1) this.listeners.splice(callbackIndex, 1);

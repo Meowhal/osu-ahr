@@ -236,7 +236,7 @@ export class Lobby {
     }
   }
 
-  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number,  allowSilent: boolean = false): boolean {
+  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number, allowSilent: boolean = false): boolean {
     const now = Date.now();
     if (tag in this.coolTimes) {
       if (now - this.coolTimes[tag] < cooltimeMs) {
@@ -260,17 +260,22 @@ export class Lobby {
     });
   }
 
-  DeferMessage(message: string, tag: string, delay: number, resetTimer: boolean = false): void {
+  DeferMessage(message: string, tag: string, delayMs: number, resetTimer: boolean = false): void {
+    if (message == "") {
+      this.CancelDeferredMessage(tag);
+      return;
+    }
     if (!(tag in this.deferredMessages)) {
       this.deferredMessages[tag] = new DeferredAction(msg => {
         this.SendMessage(msg);
       });
     }
-    const d = this.deferredMessages[tag];
-    if (message == "") {
-      d.cancel();
-    } else {
-      d.start(delay, message, resetTimer);
+    this.deferredMessages[tag].start(delayMs, message, resetTimer);
+  }
+
+  CancelDeferredMessage(tag: string): void {
+    if (tag in this.deferredMessages) {
+      this.deferredMessages[tag].cancel();
     }
   }
 
@@ -786,13 +791,10 @@ export class Lobby {
   }
 
   private showInfoMessage(): void {
-    const msgs = [
-      `- Osu Auto Host Rotation Bot ver ${pkg.version} -`,
-      ...this.option.info_message
-    ];
-    if (!this.SendMultilineMessageWithInterval(msgs, this.option.info_message_interval, "infomessage", this.option.info_message_cooltime)) {
-      this.logger.trace("info cool time");
-    }
+    const msg
+      = `- Osu Auto Host Rotation Bot ver ${pkg.version} - \n`
+      + this.option.info_message.join("\n");
+    !this.SendMessageWithCoolTime(msg, "infomessage", this.option.info_message_cooltime);
   }
 
   // ircでログインしたユーザーに権限を与える

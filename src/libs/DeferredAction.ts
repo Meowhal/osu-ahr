@@ -13,7 +13,7 @@ export class DeferredAction<T> {
 
   /**
    * アクションの遅延実行を開始する
-   * @param delay 遅延時間
+   * @param delay 遅延時間 ms
    * @param param アクションに渡されるパラメータ
    * @param resetTimer 現在の遅延時間をリセットするか
    */

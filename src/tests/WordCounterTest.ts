@@ -35,8 +35,8 @@ describe("WordCounter Tests", function () {
       assertPeriod(p, 0, 0, 0, 0);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!info");
       await tu.delayAsync(10);
-      assert.isAbove(p.chatsPerPeriod, 1);
-      assert.isAbove(p.chatsPerPeriodMax, 1);
+      assert.equal(p.chatsPerPeriod, 1);
+      assert.equal(p.chatsPerPeriodMax, 1);
       assert.isAbove(p.wordsPerPeriod, 1);
       assert.isAbove(p.wordsPerPeriodMax, 1);
     });

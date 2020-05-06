@@ -249,7 +249,7 @@ export class AutoHostSelector extends LobbyPlugin {
       if (this.option.show_queue_chars_limit < m.length) {
         m = m.substring(0, this.option.show_queue_chars_limit) + "...";
       }
-      return "host queue : " + m;
+      return "host order : " + m;
     }, "!queue", this.option.show_queue_cooltime_ms);
   }
 
