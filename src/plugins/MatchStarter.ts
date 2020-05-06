@@ -88,7 +88,10 @@ export class MatchStarter extends LobbyPlugin {
       case "!stop":
       case "!abort":
         if (player.isHost || player.isAuthorized) {
-          this.stopTimer();
+          if (this.IsSelfStartTimerActive) {
+            this.lobby.SendMessage("Aborted the match start timer");
+            this.stopTimer();
+          }          
         }
         break;
       case "*start":
@@ -152,6 +155,7 @@ export class MatchStarter extends LobbyPlugin {
   private stopTimer(): void {
     this.lobby.CancelDeferredMessage("mp_start");
     this.lobby.CancelDeferredMessage("mp_start 5 sec");
+
     if (this.lobby.isStartTimerActive) {
       this.lobby.SendMessage("!mp aborttimer");
     }
