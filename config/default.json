@@ -81,6 +81,7 @@
   "oAuthConfig": {
     "client_id": 1,
     "client_secret": "***",
-    "callback": ""
+    "callback": "",
+    "code": ""
   }
 }

@@ -1,2 +1,2 @@
-import {fetchUpdateTrial} from './WebApiTrial';
-fetchUpdateTrial();
+import * as trial from './WebApiTrial';
+trial.getTokenTrial();
