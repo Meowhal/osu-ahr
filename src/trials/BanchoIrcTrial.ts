@@ -1,4 +1,4 @@
-import * as irc from 'irc';
+import * as irc from "../libs/irc";
 import { logIrcEvent } from "..";
 import { parser } from "../parsers"
 import { getIrcConfig } from "../TypedConfig";
