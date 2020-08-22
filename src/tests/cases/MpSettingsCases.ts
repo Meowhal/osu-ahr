@@ -27,11 +27,11 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "HeadToHead", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 5,
       players: [
-        { id: "p1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", profile: "https://osu.ppy.sh/u/111" },
-        { id: "p2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden, DoubleTime", profile: "https://osu.ppy.sh/u/222" },
-        { id: "p3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/333" },
-        { id: "p4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/444" },
-        { id: "p5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/555" },
+        { name: "p1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", id: 111, profile: "https://osu.ppy.sh/u/111" },
+        { name: "p2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden, DoubleTime", id: 222, profile: "https://osu.ppy.sh/u/222" },
+        { name: "p3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 333, profile: "https://osu.ppy.sh/u/333" },
+        { name: "p4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 444, profile: "https://osu.ppy.sh/u/444" },
+        { name: "p5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 555, profile: "https://osu.ppy.sh/u/555" },
       ]
     }
   },
@@ -54,11 +54,11 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "HeadToHead", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 5,
       players: [
-        { id: "p1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/111" },
-        { id: "p2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden, DoubleTime", profile: "https://osu.ppy.sh/u/222" },
-        { id: "p3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", profile: "https://osu.ppy.sh/u/333" },
-        { id: "p4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/444" },
-        { id: "p5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/555" },
+        { name: "p1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 111, profile: "https://osu.ppy.sh/u/111" },
+        { name: "p2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden, DoubleTime", id: 222, profile: "https://osu.ppy.sh/u/222" },
+        { name: "p3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", id: 333, profile: "https://osu.ppy.sh/u/333" },
+        { name: "p4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 444, profile: "https://osu.ppy.sh/u/444" },
+        { name: "p5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 555, profile: "https://osu.ppy.sh/u/555" },
       ]
     }
   },
@@ -81,11 +81,11 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "HeadToHead", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 5,
       players: [
-        { id: "p6", slot: 1, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/666" },
-        { id: "p2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden, DoubleTime", profile: "https://osu.ppy.sh/u/222" },
-        { id: "p4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", profile: "https://osu.ppy.sh/u/444" },
-        { id: "p5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/555" },
-        { id: "p7", slot: 6, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/777" },
+        { name: "p6", slot: 1, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 666, profile: "https://osu.ppy.sh/u/666" },
+        { name: "p2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden, DoubleTime", id: 222, profile: "https://osu.ppy.sh/u/222" },
+        { name: "p4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", id: 444, profile: "https://osu.ppy.sh/u/444" },
+        { name: "p5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 555, profile: "https://osu.ppy.sh/u/555" },
+        { name: "p7", slot: 6, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 777, profile: "https://osu.ppy.sh/u/777" },
       ]
     }
   },
@@ -108,11 +108,11 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "HeadToHead", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 5,
       players: [
-        { id: "aaaaaa", slot: 1, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", profile: "https://osu.ppy.sh/u/123" },
-        { id: "bbbbbb111", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/456" },
-        { id: "ccc 23", slot: 4, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host / Hidden", profile: "https://osu.ppy.sh/u/789" },
-        { id: "d", slot: 6, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", profile: "https://osu.ppy.sh/u/147" },
-        { id: "eee", slot: 7, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/258" }]
+        { name: "aaaaaa", slot: 1, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", id: 123, profile: "https://osu.ppy.sh/u/123" },
+        { name: "bbbbbb111", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 456, profile: "https://osu.ppy.sh/u/456" },
+        { name: "ccc 23", slot: 4, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host / Hidden", id: 789, profile: "https://osu.ppy.sh/u/789" },
+        { name: "d", slot: 6, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", id: 147, profile: "https://osu.ppy.sh/u/147" },
+        { name: "eee", slot: 7, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 258, profile: "https://osu.ppy.sh/u/258" }]
     }
   },
   case3: {
@@ -136,13 +136,13 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "HeadToHead", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 7,
       players: [
-        { id: "player1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host / Hidden, HardRock", profile: "https://osu.ppy.sh/u/1" },
-        { id: "player2[abc]", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/2" },
-        { id: "pl a ye r3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/3" },
-        { id: "pl_a[y]er4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/4" },
-        { id: "player5abcdefga", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/5" },
-        { id: "pla y e r 6efga", slot: 6, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", profile: "https://osu.ppy.sh/u/6" },
-        { id: "player7abc[fga]", slot: 16, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", profile: "https://osu.ppy.sh/u/7" },]
+        { name: "player1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host / Hidden, HardRock", id: 1, profile: "https://osu.ppy.sh/u/1" },
+        { name: "player2[abc]", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 2, profile: "https://osu.ppy.sh/u/2" },
+        { name: "pl a ye r3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 3, profile: "https://osu.ppy.sh/u/3" },
+        { name: "pl_a[y]er4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 4, profile: "https://osu.ppy.sh/u/4" },
+        { name: "player5abcdefga", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 5, profile: "https://osu.ppy.sh/u/5" },
+        { name: "pla y e r 6efga", slot: 6, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", id: 6, profile: "https://osu.ppy.sh/u/6" },
+        { name: "player7abc[fga]", slot: 16, ready: "Not Ready", team: Teams.None, isHost: false, options: "Hidden", id: 7, profile: "https://osu.ppy.sh/u/7" },]
     }
   },
   team: {
@@ -161,8 +161,8 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "TeamVs", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 2,
       players: [
-        { id: "p1", slot: 1, ready: "Ready", team: Teams.Blue, isHost: true, options: "Host / Team Blue", profile: "https://osu.ppy.sh/u/111" },
-        { id: "p2", slot: 2, ready: "No Map", team: Teams.Red, isHost: false, options: "Team Red", profile: "https://osu.ppy.sh/u/222" }
+        { name: "p1", slot: 1, ready: "Ready", team: Teams.Blue, isHost: true, options: "Host / Team Blue", id: 111, profile: "https://osu.ppy.sh/u/111" },
+        { name: "p2", slot: 2, ready: "No Map", team: Teams.Red, isHost: false, options: "Team Red", id: 222, profile: "https://osu.ppy.sh/u/222" }
       ]
     }
   },
@@ -185,11 +185,11 @@ export const MpSettingsCases: { [key: string]: MpSettingsCase } = {
       teamMode: "HeadToHead", winCondition: "Score", activeMods: "Freemod",
       numPlayers: 5,
       players: [
-        { id: "player1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", profile: "https://osu.ppy.sh/u/1" },
-        { id: "player2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/2" },
-        { id: "player3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/3" },
-        { id: "player4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/4" },
-        { id: "player5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", profile: "https://osu.ppy.sh/u/5" },
+        { name: "player1", slot: 1, ready: "Not Ready", team: Teams.None, isHost: true, options: "Host", id: 1, profile: "https://osu.ppy.sh/u/1" },
+        { name: "player2", slot: 2, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 2, profile: "https://osu.ppy.sh/u/2" },
+        { name: "player3", slot: 3, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 3, profile: "https://osu.ppy.sh/u/3" },
+        { name: "player4", slot: 4, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 4, profile: "https://osu.ppy.sh/u/4" },
+        { name: "player5", slot: 5, ready: "Not Ready", team: Teams.None, isHost: false, options: "", id: 5, profile: "https://osu.ppy.sh/u/5" },
       ]
     }
   }

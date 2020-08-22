@@ -10,8 +10,8 @@ export interface RecorderOption {
 }
 
 export interface PlayerRecord {
-  _id: string | undefined,
-  eid: string,
+  _name: string | undefined,
+  escaped_name: string,
   playCount: number,
   stayTime: number,
   lastVisit: number,
@@ -22,7 +22,7 @@ export interface PlayerRecord {
 export interface MapRecord {
   mapId: number,
   mapTitle: number,
-  selectorId: string,
+  selectorName: string,
   timeStamp: number,
 }
 
@@ -87,7 +87,7 @@ export class Recorder extends LobbyPlugin {
 
   private onPlayerLeft(player: Player): void {
     if (this.hasError) return;
-    const r = this.playerRecords.get(player.escaped_id);
+    const r = this.playerRecords.get(player.escaped_name);
     if (r == undefined) return;
     r.stayTime += Date.now() - r.lastVisit;
     this.savePlayerRecordAsync(player);
@@ -100,7 +100,7 @@ export class Recorder extends LobbyPlugin {
     const r = {
       mapId,
       mapTitle,
-      selectorId: this.mapChanger.escaped_id,
+      selectorName: this.mapChanger.escaped_name,
       timeStamp: Date.now(),
     }
     this.db.map.insert(r);
@@ -108,12 +108,12 @@ export class Recorder extends LobbyPlugin {
 
   private loadPlayerRecordAsync(player: Player): Promise<PlayerRecord> {
     return new Promise<PlayerRecord>((resolve, reject) => {
-      this.db.player.findOne({ eid: player.escaped_id }, (err: any, doc: PlayerRecord) => {
+      this.db.player.findOne({ escaped_name: player.escaped_name }, (err: any, doc: PlayerRecord) => {
         if (this.checkDbError(err)) return reject(err);
         if (!doc) {
           doc = {
-            _id: undefined,
-            eid: player.escaped_id,
+            _name: undefined,
+            escaped_name: player.escaped_name,
             playCount: 0,
             stayTime: 0,
             lastVisit: 0,
@@ -121,7 +121,7 @@ export class Recorder extends LobbyPlugin {
             seenInfo: false,
           }
         }
-        this.playerRecords.set(player.escaped_id, doc);
+        this.playerRecords.set(player.escaped_name, doc);
         resolve(doc);
       })
     });
@@ -129,16 +129,16 @@ export class Recorder extends LobbyPlugin {
 
   private savePlayerRecordAsync(player: Player): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const record = this.playerRecords.get(player.escaped_id);
+      const record = this.playerRecords.get(player.escaped_name);
       if (record == undefined) return resolve();
-      if (record._id == undefined) {
+      if (record._name == undefined) {
         this.db.player.insert(record, (err, doc) => {
           if (this.checkDbError(err)) return reject(err);
-          this.playerRecords.set(player.escaped_id, doc);
+          this.playerRecords.set(player.escaped_name, doc);
           resolve();
         });
       } else {
-        this.db.player.update({ _id: record._id }, record, {}, err => {
+        this.db.player.update({ _name: record._name }, record, {}, err => {
           if (this.checkDbError(err)) return reject(err);
           resolve();
         });

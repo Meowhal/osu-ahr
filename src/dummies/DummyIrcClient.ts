@@ -1,7 +1,7 @@
 import { IIrcClient } from "..";
 import * as irc from "../libs/irc";
 import { parser, MpCommand, StatResult, StatStatuses } from "../parsers";
-import { escapeUserId } from "../Player";
+import { escapeUserName } from "../Player";
 import { MpSettingsCase } from "../tests/cases/MpSettingsCases";
 import log4js from "log4js";
 import { EventEmitter } from "events";
@@ -118,7 +118,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // ロビーにプレイヤーが参加した際の動作をエミュレートする
   public async emulateAddPlayerAsync(name: string): Promise<void> {
-    let ename = escapeUserId(name);
+    let ename = escapeUserName(name);
     if (!this.players.has(ename)) {
       this.players.add(ename);
     }
@@ -127,7 +127,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // ロビーからプレイヤーが退出した際の動作をエミュレートする
   public async emulateRemovePlayerAsync(name: string): Promise<void> {
-    let ename = escapeUserId(name);
+    let ename = escapeUserName(name);
     if (this.players.has(ename)) {
       this.players.delete(ename);
     }
@@ -199,14 +199,14 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     await this.emulateMessageAsync("BanchoBot", this.channel, "Aborted the match");
   }
 
-  public async emulatePlayerFinishAsync(userid: string): Promise<void> {
-    await this.emulateMessageAsync("BanchoBot", this.channel, `${userid} finished playing (Score: 100000, PASSED).`)
+  public async emulatePlayerFinishAsync(username: string): Promise<void> {
+    await this.emulateMessageAsync("BanchoBot", this.channel, `${username} finished playing (Score: 100000, PASSED).`)
   }
 
   public async emulateMpSettings(testcase: MpSettingsCase): Promise<void> {
     this.players.clear();
     for (let p of testcase.result.players) {
-      this.players.add(escapeUserId(p.id));
+      this.players.add(escapeUserName(p.name));
     }
     for (let t of testcase.texts) {
       this.emulateBanchoResponse(t);
@@ -259,7 +259,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     } else if (target == this.channel) {
       switch (mp.command) {
         case "host":
-          if (this.players.has(escapeUserId(mp.arg))) {
+          if (this.players.has(escapeUserName(mp.arg))) {
             m(`${mp.arg} became the host.`);
           } else {
             m("User not found");
@@ -333,17 +333,17 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   SetStat(stat: StatResult) {
-    this.stats.set(escapeUserId(stat.name), stat);
+    this.stats.set(escapeUserName(stat.name), stat);
   }
 
   private sendStat(arg: string, toPm: boolean) {
-    const eid = escapeUserId(arg);
-    let stat = this.stats.get(eid);
+    const ename = escapeUserName(arg);
+    let stat = this.stats.get(ename);
     const to = toPm ? this.nick : this.channel;
     if (stat == undefined) {
-      let status = this.players.has(eid) ? StatStatuses.Multiplayer : StatStatuses.None;
+      let status = this.players.has(ename) ? StatStatuses.Multiplayer : StatStatuses.None;
       stat = new StatResult(arg, 0, status);
-      this.stats.set(eid, stat);
+      this.stats.set(ename, stat);
     }
     stat.toString().split("\n").forEach(t => {
       this.emulateMessage("BanchoBot", to, t);

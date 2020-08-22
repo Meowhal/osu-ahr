@@ -22,8 +22,8 @@ export class InOutLogger extends LobbyPlugin {
   }
 
   GetInOutLog(useColor: boolean): string {
-    const msgOut = Array.from(this.players).filter(p => !this.lobby.players.has(p)).map(p => p.id).join(", ");
-    const msgIn = Array.from(this.lobby.players).filter(p => !this.players.has(p)).map(p => p.id).join(", ");
+    const msgOut = Array.from(this.players).filter(p => !this.lobby.players.has(p)).map(p => p.name).join(", ");
+    const msgIn = Array.from(this.lobby.players).filter(p => !this.players.has(p)).map(p => p.name).join(", ");
     let msg = "";
     const ctagIn = useColor ? "\x1b[32m" : "";
     const ctagOut = useColor ? "\x1b[31m" : "";

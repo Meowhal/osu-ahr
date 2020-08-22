@@ -80,7 +80,7 @@ export class MatchAborter extends LobbyPlugin {
     if (!this.lobby.isMatching) return;
     if (command == "!abort") {
       if (player == this.lobby.host) {
-        this.logger.trace("host(%s) sent !abort command", player.id);
+        this.logger.trace("host(%s) sent !abort command", player.name);
         this.doAbort();
       } else {
         this.vote(player);
@@ -95,10 +95,10 @@ export class MatchAborter extends LobbyPlugin {
   private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
-      this.logger.trace("accept abort request from %s (%s)", player.id, this.voting.toString());
+      this.logger.trace("accept abort request from %s (%s)", player.name, this.voting.toString());
       this.checkVoteCount(true);
     } else {
-      this.logger.trace("vote from %s was ignored", player.id);
+      this.logger.trace("vote from %s was ignored", player.name);
     }
   }
 

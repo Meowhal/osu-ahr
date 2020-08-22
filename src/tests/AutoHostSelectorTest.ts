@@ -65,7 +65,7 @@ describe("AutoHostSelectorTest", function () {
       ircClient.latency = 1;
       let s1checked = false;
       lobby.PlayerJoined.once(({ player, slot }) => {
-        assert.equal(player.id, "player1");
+        assert.equal(player.name, "player1");
         assertStateIs("s1", selector);
         s1checked = true;
       });
@@ -372,16 +372,16 @@ describe("AutoHostSelectorTest", function () {
       selector.SendPluginMessage("skipto", ["player3"]);
       await tu.delayAsync(5);
       tu.assertHost("player3", lobby);
-      assert.equal(selector.hostQueue[0].id, "player3");
-      assert.equal(selector.hostQueue[1].id, "player1");
-      assert.equal(selector.hostQueue[2].id, "player2");
+      assert.equal(selector.hostQueue[0].name, "player3");
+      assert.equal(selector.hostQueue[1].name, "player1");
+      assert.equal(selector.hostQueue[2].name, "player2");
 
       selector.SendPluginMessage("skipto", ["player3"]);
       await tu.delayAsync(5);
       tu.assertHost("player3", lobby);
-      assert.equal(selector.hostQueue[0].id, "player3");
-      assert.equal(selector.hostQueue[1].id, "player1");
-      assert.equal(selector.hostQueue[2].id, "player2");
+      assert.equal(selector.hostQueue[0].name, "player3");
+      assert.equal(selector.hostQueue[1].name, "player1");
+      assert.equal(selector.hostQueue[2].name, "player2");
     });
   });
 
@@ -536,7 +536,7 @@ describe("AutoHostSelectorTest", function () {
       const q = ["p1", "p2", "p3", "p4", "p5"];
       ircClient.emulateMpSettings(c);
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q[i]);
+        assert.equal(selector.hostQueue[i].name, q[i]);
       }
     });
     it("empty lobby case1_2", async () => {
@@ -545,7 +545,7 @@ describe("AutoHostSelectorTest", function () {
       const q = ["p3", "p4", "p5", "p1", "p2"];
       ircClient.emulateMpSettings(c);
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q[i]);
+        assert.equal(selector.hostQueue[i].name, q[i]);
       }
     });
     it("change host test", async () => {
@@ -555,20 +555,20 @@ describe("AutoHostSelectorTest", function () {
       const q2 = ["p3", "p4", "p5", "p1", "p2"];
       ircClient.emulateMpSettings(c);
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q1[i]);
+        assert.equal(selector.hostQueue[i].name, q1[i]);
       }
       selector.SkipTo("p3");
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q2[i]);
+        assert.equal(selector.hostQueue[i].name, q2[i]);
       }
       if (lobby.host == null) return;
       assert.isTrue(lobby.host.isHost);
-      assert.equal(lobby.host.id, "p3");
+      assert.equal(lobby.host.name, "p3");
       ircClient.emulateMpSettings(c);
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q1[i]);
+        assert.equal(selector.hostQueue[i].name, q1[i]);
       }
-      assert.equal(lobby.host.id, "p1");
+      assert.equal(lobby.host.name, "p1");
     });
     it("mod queue test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
@@ -578,16 +578,16 @@ describe("AutoHostSelectorTest", function () {
       const q2 = ["p4", "p5", "p6", "p7", "p2"];
       ircClient.emulateMpSettings(c1);
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q1[i]);
+        assert.equal(selector.hostQueue[i].name, q1[i]);
       }
       ircClient.emulateMpSettings(c3);
 
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q2[i], `${i} a-${selector.hostQueue[i].id} e-${q2[i]}`);
+        assert.equal(selector.hostQueue[i].name, q2[i], `${i} a-${selector.hostQueue[i].name} e-${q2[i]}`);
       }
 
       if (lobby.host == null) assert.fail();
-      else assert.equal(lobby.host.id, "p4");
+      else assert.equal(lobby.host.name, "p4");
     });
     it("reset queue test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
@@ -596,18 +596,18 @@ describe("AutoHostSelectorTest", function () {
       const q2 = ["p4", "p5", "p6", "p7", "p2"];
       ircClient.emulateMpSettings(c1);
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q1[i]);
+        assert.equal(selector.hostQueue[i].name, q1[i]);
       }
       ircClient.emulateRemovePlayerAsync("p1");
       selector.SkipTo("p3");
       ircClient.emulateMpSettings(c1);
 
       for (let i = 0; i < selector.hostQueue.length; i++) {
-        assert.equal(selector.hostQueue[i].id, q1[i], `${i} a-${selector.hostQueue[i].id} e-${q2[i]}`);
+        assert.equal(selector.hostQueue[i].name, q1[i], `${i} a-${selector.hostQueue[i].name} e-${q2[i]}`);
       }
 
       if (lobby.host == null) assert.fail();
-      else assert.equal(lobby.host.id, "p1");
+      else assert.equal(lobby.host.name, "p1");
     });
   });
   describe("reoder tests", function () {
@@ -619,7 +619,7 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       tu.assertHost("p3", lobby);
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
     it("disguised string", async () => {
@@ -633,7 +633,7 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       tu.assertHost("p0", lobby);
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
     it("no change", async () => {
@@ -645,7 +645,7 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       tu.assertHost("p0", lobby);
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
     it("partially specify", async () => {
@@ -657,7 +657,7 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       tu.assertHost("p3", lobby);
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
     it("extra specify", async () => {
@@ -669,7 +669,7 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(1);
       tu.assertHost("p3", lobby);
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
     it("from custom command", async () => {
@@ -684,7 +684,7 @@ describe("AutoHostSelectorTest", function () {
       await ircClient.emulateMessageAsync("p0", ircClient.channel, odtxt);
 
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
     it("invalid custom command", async () => {
@@ -699,7 +699,7 @@ describe("AutoHostSelectorTest", function () {
       await ircClient.emulateMessageAsync("p0", ircClient.channel, odtxt);
 
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
 
       odtxt = "*reorder asdfsafasdf";
@@ -707,7 +707,7 @@ describe("AutoHostSelectorTest", function () {
       await ircClient.emulateMessageAsync("p0", ircClient.channel, odtxt);
 
       for (let i = 0; i < od.length; i++) {
-        assert.equal(selector.hostQueue[i].id, od[i]);
+        assert.equal(selector.hostQueue[i].name, od[i]);
       }
     });
   });

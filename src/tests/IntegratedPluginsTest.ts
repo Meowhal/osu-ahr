@@ -38,7 +38,7 @@ describe("Integrated Plugins Tests", function () {
       await tu.delayAsync(10);
       tu.assertHost("p4", lobby);
 
-      m = "*skipto " + owner.id;
+      m = "*skipto " + owner.name;
       assert.isTrue(parser.IsChatCommand(m));
       lobby.RaiseReceivedChatCommand(owner, m);
       await tu.delayAsync(10);

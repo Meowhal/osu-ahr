@@ -1,6 +1,6 @@
 import { Lobby } from "..";
 import { LobbyStatus } from "../Lobby";
-import { Player, escapeUserId } from "../Player";
+import { Player, escapeUserName } from "../Player";
 import { BanchoResponseType, MpSettingsResult, StatStatuses, StatResult } from "../parsers";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { VoteCounter } from "./VoteCounter";
@@ -131,7 +131,7 @@ export class HostSkipper extends LobbyPlugin {
     if (this.lobby.isMatching) return;
 
     if (command == "!skip") {
-      if (param != "" && this.lobby.host != null && escapeUserId(param) != this.lobby.host.escaped_id) return; // 関係ないユーザーのスキップは無視
+      if (param != "" && this.lobby.host != null && escapeUserName(param) != this.lobby.host.escaped_name) return; // 関係ないユーザーのスキップは無視
       this.vote(player);
     } else if (player.isAuthorized) {
       if (command == "*skip") {
@@ -144,22 +144,22 @@ export class HostSkipper extends LobbyPlugin {
 
   private vote(player: Player): void {
     if (this.voting.passed) {
-      this.logger.debug("vote from %s was ignored, already skipped", player.id);
+      this.logger.debug("vote from %s was ignored, already skipped", player.name);
     } else if (this.elapsedSinceVotePassed < this.option.vote_cooltime_ms) {
-      this.logger.debug("vote from %s was ignored, at cool time.", player.id);
+      this.logger.debug("vote from %s was ignored, at cool time.", player.name);
       if (player.isHost) {
         const secs = (this.option.vote_cooltime_ms - this.elapsedSinceVotePassed) / 1000;
         this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
-      this.logger.debug("host(%s) sent !skip command", player.id);
+      this.logger.debug("host(%s) sent !skip command", player.name);
       this.Skip();
     } else {
       if (this.voting.Vote(player)) {
-        this.logger.trace("accept skip request from %s", player.id);
+        this.logger.trace("accept skip request from %s", player.name);
         this.checkSkipCount(true);
       } else {
-        this.logger.debug("vote from %s was ignored, double vote", player.id);
+        this.logger.debug("vote from %s was ignored, double vote", player.name);
       }
     }
   }
@@ -182,14 +182,14 @@ export class HostSkipper extends LobbyPlugin {
     this.timeVotePassed = Date.now();
   }
 
-  SkipTo(userid: string): void {
-    if (!this.lobby.Includes(userid)) {
-      this.logger.info("invalid userid @skipto : %s", userid);
+  SkipTo(username: string): void {
+    if (!this.lobby.Includes(username)) {
+      this.logger.info("invalid username @skipto : %s", username);
       return;
     }
-    this.logger.info("do skipTo : %s", userid);
+    this.logger.info("do skipTo : %s", username);
     this.StopTimer();
-    this.SendPluginMessage("skipto", [userid]);
+    this.SendPluginMessage("skipto", [username]);
   }
 
   Reset(): void {

@@ -1,4 +1,4 @@
-import { Player, escapeUserId, Roles, Teams, MpStatuses } from "./Player";
+import { Player, escapeUserName, Roles, Teams, MpStatuses } from "./Player";
 import { parser, BanchoResponseType, BanchoResponse, StatResult, StatParser, IsStatResponse, StatStatuses } from "./parsers";
 import { IIrcClient } from "./IIrcClient";
 import { TypedEvent, DeferredAction } from "./libs";
@@ -173,20 +173,20 @@ export class Lobby {
   }
 
   /**
-   * useridからプレイヤーオブジェクトを取得または作成する
-   * IDに対してPlayerは一意のインスタンスで直接比較可能
+   * usernameからプレイヤーオブジェクトを取得または作成する
+   * nameに対してPlayerは一意のインスタンスで直接比較可能
    * この関数以外でPlayerを作成してはならない
    * 再入室してきたユーザーの情報を参照したい場合に備えてプレイヤーをマップで保持しておく
-   * @param userid 
+   * @param username 
    */
-  GetOrMakePlayer(userid: string): Player {
-    const eid = escapeUserId(userid);
-    if (this.playersMap.has(eid)) {
-      return this.playersMap.get(eid) as Player;
+  GetOrMakePlayer(username: string): Player {
+    const ename = escapeUserName(username);
+    if (this.playersMap.has(ename)) {
+      return this.playersMap.get(ename) as Player;
     } else {
-      const nu = new Player(userid);
-      this.playersMap.set(eid, nu);
-      if (this.option.authorized_users.includes(userid)) {
+      const nu = new Player(username);
+      this.playersMap.set(ename, nu);
+      if (this.option.authorized_users.includes(username)) {
         nu.setRole(Roles.Authorized);
       }
       return nu;
@@ -194,30 +194,30 @@ export class Lobby {
   }
 
   /**
-   * useridからプレイヤーオブジェクトを取得する
+   * username からプレイヤーオブジェクトを取得する
    * まだ作成されていないプレイヤーだった場合nullを返す
-   * @param userid 
+   * @param username 
    */
-  GetPlayer(userid: string): Player | null {
-    const eid = escapeUserId(userid);
-    if (this.playersMap.has(eid)) {
-      return this.playersMap.get(eid) as Player;
+  GetPlayer(username: string): Player | null {
+    const ename = escapeUserName(username);
+    if (this.playersMap.has(ename)) {
+      return this.playersMap.get(ename) as Player;
     } else {
       return null;
     }
   }
 
-  // userid のプレイヤーがゲームに参加しているか調べる
-  Includes(userid: string): boolean {
-    const eid = escapeUserId(userid);
-    let p = this.playersMap.get(eid);
+  // username のプレイヤーがゲームに参加しているか調べる
+  Includes(username: string): boolean {
+    const ename = escapeUserName(username);
+    let p = this.playersMap.get(ename);
     if (p === undefined) return false;
     return this.players.has(p);
   }
 
   TransferHost(user: Player): void {
     this.hostPending = user;
-    this.SendMessage("!mp host " + user.id, true);
+    this.SendMessage("!mp host " + user.name, true);
   }
 
   AbortMatch(): void {
@@ -285,13 +285,13 @@ export class Lobby {
         reject("stat timeout");
       }, timeout);
       const d = this.ParsedStat.on(({ result }) => {
-        if (escapeUserId(result.name) == player.escaped_id) {
+        if (escapeUserName(result.name) == player.escaped_name) {
           clearTimeout(tm);
           d.dispose();
           resolve(result);
         }
       });
-      this.ircClient.say(byPm || this.channel == null ? "BanchoBot" : this.channel, "!stat " + player.escaped_id);
+      this.ircClient.say(byPm || this.channel == null ? "BanchoBot" : this.channel, "!stat " + player.escaped_name);
     });
   }
 
@@ -318,9 +318,9 @@ export class Lobby {
         }
         this.PlayerChated.emit({ player: p, message });
         if (IsStatResponse(message)) {
-          this.chatlogger.trace("%s:%s", p.id, message);
+          this.chatlogger.trace("%s:%s", p.name, message);
         } else {
-          this.chatlogger.info("%s:%s", p.id, message);
+          this.chatlogger.info("%s:%s", p.name, message);
         }
       }
     }
@@ -428,7 +428,7 @@ export class Lobby {
       if (Date.now() < this.listRefStart + this.option.listref_duration) {
         const p = this.GetOrMakePlayer(message);
         p.setRole(Roles.Referee);
-        this.logger.trace("AddedReferee : %s", p.escaped_id);
+        this.logger.trace("AddedReferee : %s", p.escaped_name);
         return true;
       } else {
         this.listRefStart = 0;
@@ -439,7 +439,7 @@ export class Lobby {
   }
 
   RaiseReceivedChatCommand(player: Player, message: string): void {
-    this.logger.trace("custom command %s:%s", player.id, message);
+    this.logger.trace("custom command %s:%s", player.name, message);
     if (player.isReferee && message.startsWith("!mp")) return;
     const { command, param } = parser.ParseChatCommand(message);
     if (command == "!info" || command == "!help") {
@@ -452,8 +452,8 @@ export class Lobby {
 
   // #region event handling
 
-  RaisePlayerJoined(userid: string, slot: number, team: Teams, asHost: boolean = false): void {
-    const player = this.GetOrMakePlayer(userid);
+  RaisePlayerJoined(username: string, slot: number, team: Teams, asHost: boolean = false): void {
+    const player = this.GetOrMakePlayer(username);
     if (this.addPlayer(player, slot, team)) {
       this.PlayerJoined.emit({ player, slot, team });
     } else {
@@ -461,8 +461,8 @@ export class Lobby {
     }
   }
 
-  RaisePlayerLeft(userid: string): void {
-    const player = this.GetOrMakePlayer(userid);
+  RaisePlayerLeft(username: string): void {
+    const player = this.GetOrMakePlayer(username);
     if (this.removePlayer(player)) {
       this.PlayerLeft.emit({ player });
     } else {
@@ -470,8 +470,8 @@ export class Lobby {
     }
   }
 
-  RaiseHostChanged(userid: string): void {
-    const player = this.GetOrMakePlayer(userid);
+  RaiseHostChanged(username: string): void {
+    const player = this.GetOrMakePlayer(username);
     if (this.setAsHost(player)) {
       this.HostChanged.emit({ player });
     } else {
@@ -486,13 +486,13 @@ export class Lobby {
     this.MatchStarted.emit({ mapId: this.mapId, mapTitle: this.mapTitle });
   }
 
-  RaisePlayerFinished(userid: string, score: number, isPassed: boolean): void {
-    const player = this.GetOrMakePlayer(userid);
+  RaisePlayerFinished(username: string, score: number, isPassed: boolean): void {
+    const player = this.GetOrMakePlayer(username);
     player.mpstatus = MpStatuses.Finished;
     const sc = this.CountPlayersStatus();
     this.PlayerFinished.emit({ player, score, isPassed, playersFinished: sc.finished, playersInGame: sc.inGame });
     if (!this.players.has(player)) {
-      this.logger.warn("未参加のプレイヤーがゲームを終えた: %s", userid);
+      this.logger.warn("未参加のプレイヤーがゲームを終えた: %s", username);
       this.LoadMpSettingsAsync();
     }
   }
@@ -549,7 +549,7 @@ export class Lobby {
       const p = this.GetPlayer(this.statParser.result.name);
       if (p != null) {
         p.laststat = this.statParser.result;
-        this.logger.info("parsed stat %s -> %s", p.id, StatStatuses[p.laststat.status]);
+        this.logger.info("parsed stat %s -> %s", p.name, StatStatuses[p.laststat.status]);
         this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
       }
     }
@@ -567,7 +567,7 @@ export class Lobby {
   OnUserNotFound(): void {
     if (this.hostPending != null) {
       const p = this.hostPending;
-      this.logger.warn("occured OnUserNotFound : " + p.id);
+      this.logger.warn("occured OnUserNotFound : " + p.name);
       this.hostPending = null;
     }
   }
@@ -683,7 +683,7 @@ export class Lobby {
       }
       return true;
     } else {
-      this.logger.warn("参加済みのプレイヤーが再度参加した: %s", player.id);
+      this.logger.warn("参加済みのプレイヤーが再度参加した: %s", player.name);
       this.UnexpectedAction.emit(new Error("unexpected join"));
       return false;
     }
@@ -704,7 +704,7 @@ export class Lobby {
       }
       return true;
     } else {
-      this.logger.warn("未参加のプレイヤーが退出した: %s", player.id);
+      this.logger.warn("未参加のプレイヤーが退出した: %s", player.name);
       this.UnexpectedAction.emit(new Error("unexpected left"));
       return false;
     }
@@ -712,14 +712,14 @@ export class Lobby {
 
   private setAsHost(player: Player): boolean {
     if (!this.players.has(player)) {
-      this.logger.warn("未参加のプレイヤーがホストになった: %s", player.id);
+      this.logger.warn("未参加のプレイヤーがホストになった: %s", player.name);
       return false;
     }
 
     if (this.hostPending == player) {
       this.hostPending = null;
     } else if (this.hostPending != null) {
-      this.logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.id, player.id);
+      this.logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.name, player.name);
     } // pending == null は有効
 
     if (this.host != null) {
@@ -739,7 +739,7 @@ export class Lobby {
     this.mapId = result.beatmapId;
     this.mapTitle = result.beatmapTitle;
 
-    const mpPlayers = result.players.map(r => this.GetOrMakePlayer(r.id));
+    const mpPlayers = result.players.map(r => this.GetOrMakePlayer(r.name));
     const playersIn: Player[] = [];
     const playersOut: Player[] = [];
     let hostChanged = false;
@@ -752,7 +752,7 @@ export class Lobby {
     }
 
     for (let r of result.players) {
-      let p = this.GetOrMakePlayer(r.id);
+      let p = this.GetOrMakePlayer(r.name);
       if (!this.players.has(p)) {
         this.addPlayer(p, r.slot, r.team);
         playersIn.push(p);
@@ -776,9 +776,9 @@ export class Lobby {
     let s = `=== lobby status ===
   lobby id : ${this.lobbyId}, name : ${this.lobbyName},  status : ${LobbyStatus[this.status]}
   players : ${this.players.size}, inGame : ${pc.inGame} (playing : ${pc.playing})
-  refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.id).join(",")}
+  refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(",")}
   timer : ${this.isStartTimerActive}, clearedhost : ${this.isClearedHost}
-  host : ${this.host ? this.host.id : "null"}, pending : ${this.hostPending ? this.hostPending.id : "null"}`
+  host : ${this.host ? this.host.name : "null"}, pending : ${this.hostPending ? this.hostPending.name : "null"}`
       ;
 
     for (let p of this.plugins) {

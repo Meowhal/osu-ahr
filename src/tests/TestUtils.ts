@@ -20,18 +20,18 @@ class TestUtils {
     return { lobby, ircClient };
   }
 
-  async AddPlayersAsync(ids: string[] | number, client: DummyIrcClient): Promise<string[]> {
-    if (typeof ids == "number") {
+  async AddPlayersAsync(names: string[] | number, client: DummyIrcClient): Promise<string[]> {
+    if (typeof names == "number") {
       const start = client.players.size;
       const p = [];
-      for (let i = 0; i < ids; i++) {
+      for (let i = 0; i < names; i++) {
         p[i] = "p" + (i + start)
         await client.emulateAddPlayerAsync(p[i]);
       }
       return p;
     } else {
-      ids.forEach(async (id) => await client.emulateAddPlayerAsync(id));
-      return ids;
+      names.forEach(async (name) => await client.emulateAddPlayerAsync(name));
+      return names;
     }
   }
 
@@ -41,12 +41,12 @@ class TestUtils {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  assertHost(userid: string, lobby: Lobby): void {
+  assertHost(username: string, lobby: Lobby): void {
     const host = lobby.host;
     if (host == null) {
       assert.fail();
     } else {
-      assert.equal(host.id, userid);
+      assert.equal(host.name, username);
     }
     for (let p of lobby.players) {
       if (p == host) {
@@ -57,13 +57,13 @@ class TestUtils {
     }
   }
 
-  async changeHostAsync(id: string, lobby: Lobby): Promise<number> {
+  async changeHostAsync(name: string, lobby: Lobby): Promise<number> {
     const p = new Promise<number>(resolve => {
       lobby.HostChanged.once(async () => {
         resolve(Date.now());
       });
     });
-    lobby.TransferHost(lobby.GetPlayer(id) as Player);
+    lobby.TransferHost(lobby.GetPlayer(name) as Player);
     return p;
   }
 
@@ -172,7 +172,7 @@ class TestUtils {
   assertMpSettingsResult(lobby: Lobby, result: MpSettingsResult) {
     assert.equal(lobby.players.size, result.players.length);
     for (let r of result.players) {
-      const p = lobby.GetPlayer(r.id);
+      const p = lobby.GetPlayer(r.name);
       if (p == null) {
         assert.fail();
         return;

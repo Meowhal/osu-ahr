@@ -1,17 +1,17 @@
 import { StatResult } from "./parsers";
 
 export class Player {
-  id: string;
-  escaped_id: string;
+  name: string;
+  escaped_name: string;
   role: Roles = Roles.Player;
   team: Teams = Teams.None; // いつteammodeに変更されたか検知する方法がないので、正確な情報ではない
   slot: number = 0;
   mpstatus: MpStatuses = MpStatuses.None;
   laststat: StatResult | null = null;
 
-  constructor(id: string) {
-    this.id = id;
-    this.escaped_id = escapeUserId(id);
+  constructor(name: string) {
+    this.name = name;
+    this.escaped_name = escapeUserName(name);
   }
   is(r: Roles): boolean {
     return (this.role & r) != 0;
@@ -38,7 +38,7 @@ export class Player {
     this.role &= ~r;
   }
   toString(): string {
-    return `Player{id:${this.id}, slot:${this.slot}, role:${this.role}}`;
+    return `Player{id:${this.name}, slot:${this.slot}, role:${this.role}}`;
   }
 }
 
@@ -65,25 +65,25 @@ export enum MpStatuses {
 }
 
 /**
- * IDの表記ゆれを統一する
- * @param id 
+ * Nameの表記ゆれを統一する
+ * @param name 
  */
-export function escapeUserId(id: string): string {
-  return id.toLowerCase().replace(/ /g, '_');
+export function escapeUserName(name: string): string {
+  return name.toLowerCase().replace(/ /g, '_');
 }
 
 /**
- * ユーザーIDを表示するときhighlightされないように名前を変更する
- * @param userid 
+ * UserNameを表示するときhighlightされないように名前を変更する
+ * @param username 
  */
-export function disguiseUserId(userid: string): string {
-  return userid[0] + "\u{200B}" + userid.substring(1);
+export function disguiseUserName(username: string): string {
+  return username[0] + "\u{200B}" + username.substring(1);
 }
 
 /**
- *  disguiseUserIdで変更を加えた文字列をもとに戻す
- * @param disguisedId 
+ *  disguiseUserNameで変更を加えた文字列をもとに戻す
+ * @param disguisedName 
  */
-export function revealUserId(disguisedId: string): string {
-  return disguisedId.replace(/\u200B/g, "");
+export function revealUserName(disguisedName: string): string {
+  return disguisedName.replace(/\u200B/g, "");
 }

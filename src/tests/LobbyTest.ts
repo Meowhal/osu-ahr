@@ -98,8 +98,8 @@ describe("LobbyTest", function () {
       const joiningPlayers: Set<string> = new Set<string>(players);
       const jp = new Promise<void>(resolve => {
         lobby.PlayerJoined.on(({ player, slot }) => {
-          assert.isTrue(joiningPlayers.has(player.id));
-          joiningPlayers.delete(player.id);
+          assert.isTrue(joiningPlayers.has(player.name));
+          joiningPlayers.delete(player.name);
           if (joiningPlayers.size == 0) {
             resolve();
           }
@@ -115,7 +115,7 @@ describe("LobbyTest", function () {
 
       for (let p of lobby.players) {
         // 参加者が一致しているか調べる
-        assert.isTrue(players.includes(p.id));
+        assert.isTrue(players.includes(p.name));
 
         // プレイヤーの状態をチェック
         assert.equal(p.role, Roles.Player);
@@ -140,7 +140,7 @@ describe("LobbyTest", function () {
           resolve();
         });
       });
-      await ircClient.emulateRemovePlayerAsync(players[leftindex].id);
+      await ircClient.emulateRemovePlayerAsync(players[leftindex].name);
       await lp;
 
       // 参加人数を調べる
@@ -196,7 +196,7 @@ describe("LobbyTest", function () {
         return new Promise<Player>(resolve => {
           lobby.HostChanged.once(({ player }) => {
             assert.equal(player, next);
-            tu.assertHost(next.id, lobby);
+            tu.assertHost(next.name, lobby);
             assert.equal(lobby.hostPending, null);
             resolve(player);
           });
@@ -219,7 +219,7 @@ describe("LobbyTest", function () {
       const tr = tu.assertEventNeverFire(lobby.HostChanged, null, 10);
       //logIrcEvent(ircClient);
       let nexthost = players[0];
-      let taskLeft = ircClient.emulateRemovePlayerAsync(nexthost.id);
+      let taskLeft = ircClient.emulateRemovePlayerAsync(nexthost.name);
       lobby.TransferHost(nexthost);
       await taskLeft;
       await tr;
@@ -282,7 +282,7 @@ describe("LobbyTest", function () {
         assert.isFalse(finishedplayers.has(players[leftplayerindex]));
       });
       const p = ircClient.emulateMatchAsync(10);
-      await ircClient.emulateRemovePlayerAsync(players[leftplayerindex].id);
+      await ircClient.emulateRemovePlayerAsync(players[leftplayerindex].name);
       await p;
     });
 
@@ -469,7 +469,7 @@ describe("LobbyTest", function () {
         lobby.ReceivedChatCommand.once(a => {
           assert.fail();
         });
-        ircClient.emulateChatAsync(players[0].id, msg);
+        ircClient.emulateChatAsync(players[0].name, msg);
       });
     });
     it("BanchoChated event", done => {
@@ -507,7 +507,7 @@ describe("LobbyTest", function () {
         assert.equal(a.player, players[0]);
         ma = 1;
       });
-      ircClient.emulateChatAsync(players[0].id, msg);
+      ircClient.emulateChatAsync(players[0].name, msg);
       await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
@@ -526,7 +526,7 @@ describe("LobbyTest", function () {
         assert.equal(a.player, players[0]);
         ma = 1;
       });
-      ircClient.emulateChatAsync(players[0].id, msg);
+      ircClient.emulateChatAsync(players[0].name, msg);
       await tu.delayAsync(5);
       assert.equal(ma, 1);
     });
