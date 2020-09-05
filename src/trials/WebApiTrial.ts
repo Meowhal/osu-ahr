@@ -1,6 +1,7 @@
 import axios from 'axios';
 import config from "config";
-
+import { WebApiClient } from "../webapi/WebApiClient";
+import { UserProfile } from "../webapi/UserProfile";
 export interface WebApiTrialOption {
   client_id: number,
   client_secret: string,
@@ -8,18 +9,25 @@ export interface WebApiTrialOption {
   code: string,
 }
 
-const oAuthConfig = config.get<WebApiTrialOption>("oAuthConfig");
+const oAuthConfig = config.get<WebApiTrialOption>("WebApi");
 
-export async function getTokenTrialUrlEncoded(): Promise<void> {
+export async function webApiTrial() {
+  //getTokenTrial();
+
+  const client = new WebApiClient({ asGuest: true });
+
+  const user = await client.getUser("Yuri_Goggles");
+  console.log(user);
+}
+
+export async function getGuestTokenTrial(): Promise<void> {
   try {
-    const params = objectToURLSearchParams({
-      "grant_type" : "authorization_code",
-      "client_id" : "" + oAuthConfig.client_id,
-      "client_secret" : oAuthConfig.client_secret,
-      "redirect_uri" : oAuthConfig.callback,
-      "code" : oAuthConfig.code,
+    const response = await axios.post("https://osu.ppy.sh/oauth/token", {
+      "grant_type": "client_credentials",
+      "client_id": "" + oAuthConfig.client_id,
+      "client_secret": oAuthConfig.client_secret,
+      "scope": "public"
     });
-    const response = await axios.post("https://osu.ppy.sh/oauth/token", params);
     const c = response.data;
     console.log(c);
   } catch (e) {
@@ -30,11 +38,11 @@ export async function getTokenTrialUrlEncoded(): Promise<void> {
 export async function getTokenTrial(): Promise<void> {
   try {
     const response = await axios.post("https://osu.ppy.sh/oauth/token", {
-      "grant_type" : "authorization_code",
-      "client_id" : "" + oAuthConfig.client_id,
-      "client_secret" : oAuthConfig.client_secret,
-      "redirect_uri" : oAuthConfig.callback,
-      "code" : oAuthConfig.code,
+      "grant_type": "authorization_code",
+      "client_id": "" + oAuthConfig.client_id,
+      "client_secret": oAuthConfig.client_secret,
+      "code": oAuthConfig.code,
+      "redirect_uri": oAuthConfig.callback
     });
     const c = response.data;
     console.log(c);
@@ -45,7 +53,7 @@ export async function getTokenTrial(): Promise<void> {
 
 function objectToURLSearchParams(obj: any): URLSearchParams {
   const param = new URLSearchParams();
-  for(let key in obj) {
+  for (let key in obj) {
     param.append(key, obj[key]);
   }
   return obj;

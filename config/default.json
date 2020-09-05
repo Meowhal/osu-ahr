@@ -78,10 +78,15 @@
     "password": "",
     "use_recoder": false
   },
-  "oAuthConfig": {
+  "WebApi": {
     "client_id": 1,
     "client_secret": "***",
     "callback": "",
-    "code": ""
+    "token_store_dir": "data/tokens/",
+    "asGuest": true
+  },
+  "profile":{
+    "db_path": "data/profile.nedb",
+    "profile_expired_day": 7
   }
 }

@@ -32,6 +32,10 @@
     "file_counter": {
       "type": "file",
       "filename": "logs/ct.log"
+    },
+    "file_webapi": {
+      "type": "file",
+      "filename": "logs/webapi.log"
     }
   },
   "categories": {
@@ -67,6 +71,12 @@
     "wordCounter": {
       "appenders": [
         "file_counter"
+      ],
+      "level": "debug"
+    },
+    "webapi": {
+      "appenders": [
+        "file_webapi"
       ],
       "level": "debug"
     }

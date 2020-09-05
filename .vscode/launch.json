@@ -57,6 +57,25 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "trial debug",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "args": [
+          "${workspaceFolder}/src/trials/index.ts",
+          "e", 
+          "54450418"
+      ],
+      "sourceMaps": true,
+      "env": {
+        "NODE_ENV": "development",
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
     }
   ]
 }

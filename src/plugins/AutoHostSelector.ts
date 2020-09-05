@@ -138,6 +138,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.needsRotate = true;
     this.mapChanger = null;
     this.changeHost();
+    this.ShowHostQueue();
   }
 
   private onMatchAborted(playersFinished: number, playersInGame: number): void {

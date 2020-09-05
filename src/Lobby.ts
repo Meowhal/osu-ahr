@@ -217,7 +217,11 @@ export class Lobby {
 
   TransferHost(user: Player): void {
     this.hostPending = user;
-    this.SendMessage("!mp host " + user.name, true);
+    if (user.id != 0) {
+      this.SendMessage("!mp host #" + user.id, true);
+    } else {
+      this.SendMessage("!mp host " + user.name, true);
+    }
   }
 
   AbortMatch(): void {

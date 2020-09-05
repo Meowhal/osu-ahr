@@ -3,6 +3,7 @@ import config from "config";
 import log4js from "log4js";
 import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger, AutoStartTimer } from "../plugins";
 import { parser } from "../parsers";
+import { ProfileFecher } from "../plugins/ProfileFecher";
 
 const logger = log4js.getLogger("cli");
 
@@ -27,6 +28,7 @@ export class OahrBase {
   recaster: MapRecaster;
   inoutLogger: InOutLogger;
   autoTimer: AutoStartTimer;
+  profileFetcher: ProfileFecher;
   option: OahrCliOption = OahrCliDefaultOption;
 
   constructor(client: IIrcClient) {
@@ -44,6 +46,7 @@ export class OahrBase {
       this.recorder = new Recorder(this.lobby, true);
     }
     this.recaster = new MapRecaster(this.lobby);
+    this.profileFetcher = new ProfileFecher(this.lobby);
     this.lobby.RaisePluginsLoaded();
   }
 

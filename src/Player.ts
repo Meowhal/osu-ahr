@@ -1,6 +1,8 @@
 import { StatResult } from "./parsers";
+import { UserProfile } from "./webapi/UserProfile";
 
 export class Player {
+  id: number = 0;
   name: string;
   escaped_name: string;
   role: Roles = Roles.Player;
@@ -8,6 +10,7 @@ export class Player {
   slot: number = 0;
   mpstatus: MpStatuses = MpStatuses.None;
   laststat: StatResult | null = null;
+  profile: UserProfile | null = null;
 
   constructor(name: string) {
     this.name = name;

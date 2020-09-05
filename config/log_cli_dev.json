@@ -45,6 +45,10 @@
     "file_counter": {
       "type": "file",
       "filename": "logs/ct.log"
+    },
+    "file_webapi": {
+      "type": "file",
+      "filename": "logs/webapi.log"
     }
   },
   "categories": {
@@ -89,6 +93,12 @@
     "wcounter": {
       "appenders": [
         "file_counter"
+      ],
+      "level": "all"
+    },
+    "webapi": {
+      "appenders": [
+        "file_webapi"
       ],
       "level": "all"
     }

@@ -1,2 +1,4 @@
 import * as trial from './WebApiTrial';
-trial.getTokenTrial();
+import log4js from "log4js";
+log4js.configure("config/log_mocha.json");
+trial.webApiTrial();
