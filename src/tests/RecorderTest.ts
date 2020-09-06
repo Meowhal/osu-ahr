@@ -1,15 +1,17 @@
 import { assert } from 'chai';
 import { Lobby } from '..';
-import { Recorder } from "../plugins";
+import { Recorder, RecorderOption } from "../plugins";
 import { DummyIrcClient } from '../dummies';
 import fs from "fs";
 import Nedb from 'nedb';
 import tu from "./TestUtils";
 
 const DB_PATHS: { [key: string]: string } = {
-  test: "data/test.nedb",
-  player: "data/test_player.nedb",
-  map: "data/test_map.nedb"
+  test: "data/test/db.nedb",
+  player: "data/test/player.nedb",
+  map: "data/test/map.nedb",
+  player_v1: "data/test/player_v1.nedb",
+  player_v2: "data/test/player_v2.nedb"
 }
 
 function deleteDbfiles() {
@@ -21,31 +23,26 @@ function deleteDbfiles() {
   }
 }
 
-async function setupAsync(inMemory: boolean = false): Promise<{ recorder: Recorder, lobby: Lobby, ircClient: DummyIrcClient }> {
+async function setupAsync(option: Partial<RecorderOption> = {}): Promise<{ recorder: Recorder, lobby: Lobby, ircClient: DummyIrcClient }> {
   const { lobby, ircClient } = await tu.SetupLobbyAsync();
-  let option;
-  if (inMemory) {
-    option = {
-      path_player: "",
-      path_map: "",
-    }
-  } else {
-    option = {
-      path_player: DB_PATHS.player,
-      path_map: DB_PATHS.map,
-    }
-  }
+  let defaultOption = {
+    path_player: DB_PATHS.player,
+    path_map: DB_PATHS.map,
+  };
+
+  option = { ...defaultOption, ...option } as RecorderOption;
 
   const recorder = new Recorder(lobby, false, option);
   return { recorder, lobby, ircClient };
 }
 
-describe.skip("Recorder tests", function () {
+
+describe("Recorder tests", function () {
   before(function () {
     tu.configMochaAsSilent();
     deleteDbfiles();
   });
-  describe("nedb test", () => {
+  describe.skip("nedb test", () => {
     it("not found test", () => {
       const db = new Nedb();
       db.loadDatabase(err => {
@@ -80,12 +77,12 @@ describe.skip("Recorder tests", function () {
   describe("setup tests", function () {
     beforeEach(deleteDbfiles);
     it("constructor file test", async () => {
-      const { recorder, lobby, ircClient } = await setupAsync(false);
+      const { recorder, lobby, ircClient } = await setupAsync();
       await recorder.LoadDatabaseAsync();
       assert.isTrue(fs.existsSync(DB_PATHS.map));
     });
     it("constructor inmemory test", async () => {
-      const { recorder, lobby, ircClient } = await setupAsync(true);
+      const { recorder, lobby, ircClient } = await setupAsync({ path_map: "", path_player: "" });
       await recorder.LoadDatabaseAsync();
       assert.isFalse(fs.existsSync(DB_PATHS.map));
     });
@@ -93,35 +90,34 @@ describe.skip("Recorder tests", function () {
 
   describe("recording tests", function () {
     it("join and left test", async () => {
-      const { recorder, lobby, ircClient } = await setupAsync(false);
+      const { recorder, lobby, ircClient } = await setupAsync();
       await recorder.LoadDatabaseAsync();
       assert.isTrue(fs.existsSync(DB_PATHS.map));
       const players = await tu.AddPlayersAsync(5, ircClient);
-      await tu.delayAsync(10);
+      await recorder.task;
       for (let p of players) {
         await ircClient.emulateRemovePlayerAsync(p);
       }
-
-      await tu.delayAsync(10);
-
+      await recorder.task;
       const pd = recorder.db.player;
       await new Promise(resolve => {
-        pd.findOne({ eid: "p0" }, (err: any, doc: any) => {
+        pd.findOne({ escaped_name: "p0" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);
           assert.equal(doc.playCount, 0);
+          assert.equal(doc.visitCount, 1);
           resolve();
         })
       });
     });
 
     it("select map and match test", async () => {
-      const { recorder, lobby, ircClient } = await setupAsync(false);
+      const { recorder, lobby, ircClient } = await setupAsync();
       await recorder.LoadDatabaseAsync();
       assert.isTrue(fs.existsSync(DB_PATHS.map));
 
       const players = await tu.AddPlayersAsync(5, ircClient);
-      await tu.delayAsync(10);
+      await recorder.task;
       await tu.changeHostAsync(players[0], lobby);
       await ircClient.emulateChangeMapAsync(0);
       await ircClient.emulateMatchAsync(0);
@@ -129,24 +125,23 @@ describe.skip("Recorder tests", function () {
       for (let p of players) {
         await ircClient.emulateRemovePlayerAsync(p);
       }
-
-      await tu.delayAsync(10);
-
+      await recorder.task;
       const pd = recorder.db.player;
       const md = recorder.db.map;
 
       await Promise.all(
         [
           new Promise(resolve => {
-            pd.findOne({ eid: "p0" }, (err: any, doc: any) => {
+            pd.findOne({ escaped_name: "p0" }, (err: any, doc: any) => {
               assert.isNull(err);
               assert.isNotNull(doc);
               assert.equal(doc.playCount, 1);
+              assert.equal(doc.visitCount, 2);
               resolve();
             })
           }),
           new Promise(resolve => {
-            md.findOne({}, (err: any, doc: any) => {
+            md.findOne({ mapId: { $exists: true } }, (err: any, doc: any) => {
               assert.isNull(err);
               assert.isNotNull(doc);
               assert.equal(doc.mapId, lobby.mapId);
@@ -155,6 +150,80 @@ describe.skip("Recorder tests", function () {
           }),
         ]
       );
+    });
+
+    it("disconnect test", async () => {
+      const { recorder, lobby, ircClient } = await setupAsync();
+      await recorder.LoadDatabaseAsync();
+      const players = await tu.AddPlayersAsync(5, ircClient);
+      await recorder.task;
+      ircClient.raisePart(ircClient.channel, "");
+      await recorder.task;
+      const pd = recorder.db.player;
+      await new Promise(resolve => {
+        pd.findOne({ escaped_name: "p0" }, (err: any, doc: any) => {
+          assert.isNull(err);
+          assert.isNotNull(doc);
+          assert.equal(doc.visitCount, 3);
+          resolve();
+        })
+      });
+    });
+
+    it("PlayerDB Loading test", async () => {
+      const srcFile = "src/tests/cases/player_v2.nedb";
+      const dstFile = DB_PATHS.player_v2;
+      fs.copyFileSync(srcFile, dstFile);
+      const { recorder, lobby, ircClient } = await setupAsync({ path_player: dstFile });
+      await recorder.LoadDatabaseAsync();
+      const pd = recorder.db.player;
+      await new Promise(resolve => {
+        pd.findOne({ escaped_name: "p1" }, (err: any, doc: any) => {
+          assert.isNull(err);
+          assert.isNotNull(doc);
+          assert.equal(doc.visitCount, 1);
+          assert.equal(doc.playCount, 1);
+          resolve();
+        })
+      });
+      await new Promise(resolve => {
+        pd.findOne({ escaped_name: "p2" }, (err: any, doc: any) => {
+          assert.isNull(err);
+          assert.isNotNull(doc);
+          assert.equal(doc.visitCount, 5);
+          assert.equal(doc.playCount, 2);
+          resolve();
+        })
+      });
+    });
+  });
+
+  describe("migration tests", function () {
+    it("player from v1 to v2", async () => {
+      const srcFile = "src/tests/cases/player_v1.nedb";
+      const dstFile = DB_PATHS.player_v1;
+      fs.copyFileSync(srcFile, dstFile);
+      const { recorder, lobby, ircClient } = await setupAsync({ path_player: dstFile });
+      await recorder.LoadDatabaseAsync();
+      const pd = recorder.db.player;
+      await new Promise(resolve => {
+        pd.findOne({ escaped_name: "p1" }, (err: any, doc: any) => {
+          assert.isNull(err);
+          assert.isNotNull(doc);
+          assert.equal(doc.visitCount, 1);
+          assert.equal(doc.playCount, 1);
+          resolve();
+        })
+      });
+      await new Promise(resolve => {
+        pd.findOne({ escaped_name: "p2" }, (err: any, doc: any) => {
+          assert.isNull(err);
+          assert.isNotNull(doc);
+          assert.equal(doc.visitCount, 5);
+          assert.equal(doc.playCount, 2);
+          resolve();
+        })
+      });
     });
   });
 });
