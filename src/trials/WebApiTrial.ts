@@ -16,7 +16,7 @@ export async function webApiTrial() {
 
   const client = new WebApiClient({ asGuest: true });
 
-  const user = await client.getUser("Yuri_Goggles");
+  const user = await client.getUser("Yuri Goggles");
   console.log(user);
 }
 

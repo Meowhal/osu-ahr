@@ -64,6 +64,7 @@ export class ProfileFecher extends LobbyPlugin {
   }
 
   private addTaskQueueIfNeeded(player: Player): boolean {
+    
     if (player.id !== 0) return false;
     let profile = this.profileMap.get(player.name);
     if (profile && !this.isExpiredProfile(profile)) {
@@ -78,22 +79,27 @@ export class ProfileFecher extends LobbyPlugin {
     this.pendingNames.add(player.name);
 
     this.task = this.task.then(async () => {
-      let profile = await this.loadProfileFromDB(player);
-      if (profile == null) {
-        profile = await this.getProfileFromWebApi(player);
-        if (profile != null) {
-          await this.saveProfileToDB(profile); 
+      try {
+        let profile = await this.loadProfileFromDB(player);
+        if (profile == null) {
+          profile = await this.getProfileFromWebApi(player);
+          if (profile != null) {
+            await this.saveProfileToDB(profile); 
+          }
         }
+  
+        if (profile != null) {
+          player.id = profile.id;
+          player.profile = profile;
+          this.logger.info("fetch profile :" + player.name);
+        } else {
+          this.logger.warn("user not found! " + player.name);
+        }
+        this.pendingNames.delete(player.name);
+      } catch(e) {
+        this.logger.error("@addTaskQueueIfNeeded" + e);
       }
-
-      if (profile != null) {
-        player.id = profile.id;
-        player.profile = profile;
-        this.logger.info("fetch profile :" + player.name);
-      } else {
-        this.logger.warn("user not found! " + player.name);
-      }
-      this.pendingNames.delete(player.name);
+      
     });
 
     return true;
