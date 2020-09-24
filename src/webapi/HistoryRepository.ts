@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import log4js from "log4js";
-import { Event, History, Match, User } from './HistoryInterfaces';
+import { Event, History, Match, User } from './HistoryTypes';
 import { TypedEvent } from '../libs';
 
 interface FetchResult {

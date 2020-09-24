@@ -14,6 +14,7 @@ async function GetHistryTrial() {
   const url = `https://osu.ppy.sh/community/matches/${matchId}/history`;
   const params = {
     'limit': 20,
+    'after': 0
   }
 
   const response = await axios.get(url, { params })
@@ -22,5 +23,5 @@ async function GetHistryTrial() {
   console.log( JSON.stringify(response.data));
 
   
-  fs.writeFile("data/arc/history_67360792.json", JSON.stringify(response.data));
+  fs.writeFile("data/arc/history_67360792_first.json", JSON.stringify(response.data));
 }

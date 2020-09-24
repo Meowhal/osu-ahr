@@ -1,4 +1,4 @@
-export interface History {
+export type History = {
   "match": Match,
   "events": Event[],
   "users": User[],
@@ -6,28 +6,29 @@ export interface History {
   "current_game_id": number | null
 }
 
-export interface Match {
+export type Match = {
   "id": number,
   "start_time": string,
-  "end_time": string,
+  "end_time": string | null,
   "name": string
 }
 
-export interface Event {
+export type Event = {
   "id": number,
   "detail": {
-    "type":
-    "match-created" | "match-disbanded" |
-    "host-changed" | "player-joined" | "player-left" | "player-kicked" |
-    "other",
-    "text": string | undefined
+    "type": EventType,
+    "text"?: string
   },
-  "game": any | null,
+  "game"?: any,
   "timestamp": string,
   "user_id": number | null
 }
 
-export interface User {
+export type EventType = "match-created" | "match-disbanded" |
+"host-changed" | "player-joined" | "player-left" | "player-kicked" |
+"other";
+
+export type User = {
   "avatar_url": string | null,
   "country_code": string,
   "default_group": string,
