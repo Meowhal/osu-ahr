@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { promises as fs } from 'fs';
+import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function HistryTrial() {
-  await GetHistryTrial();
+  await GetOrderTrial();
 }
 
 async function GetHistryTrial() {
@@ -18,10 +19,18 @@ async function GetHistryTrial() {
   }
 
   const response = await axios.get(url, { params })
-  .catch(err =>{
-    return err.response;});
-  console.log( JSON.stringify(response.data));
+    .catch(err => {
+      return err.response;
+    });
+  console.log(JSON.stringify(response.data));
 
-  
+
   fs.writeFile("data/arc/history_67360792_first.json", JSON.stringify(response.data));
+}
+
+async function GetOrderTrial() {
+  const matchId = 67510335;
+  const repo = new HistoryRepository(matchId);
+  const res = await repo.calcCurrentOrderAsName()
+  console.log(res);
 }

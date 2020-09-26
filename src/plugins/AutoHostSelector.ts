@@ -221,6 +221,9 @@ export class AutoHostSelector extends LobbyPlugin {
         return;
       }
       this.SkipTo(to);
+    } else if (type == "reorder") {
+      this.logger.trace("received plugin message reorder");
+      this.Reorder(args[0]);
     }
   }
 

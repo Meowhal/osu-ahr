@@ -88,5 +88,8 @@
   "profile":{
     "db_path": "data/profile.nedb",
     "profile_expired_day": 7
+  },
+  "history": {
+
   }
 }

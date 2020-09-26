@@ -18,6 +18,7 @@ const lobbyMenuCommandsMessage = `
 LobbyMenu Commands 
   [say <Message>] Send Message to #multiplayer.
   [info] Show current application's informations.
+  [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
   [close now] Close the lobby and Quit this application. ex: 'close now'
   [close <num:seconds>] Close the lobby after num seconds. ex: 'close 30'
   [close] Lock the lobby and close it when everyone leaves. ex: 'close'
@@ -117,6 +118,9 @@ export class OahrCli extends OahrBase {
           case "i":
           case "info":
             this.displayInfo();
+            break;
+          case "reorder":
+            this.selector.Reorder(l.arg);
             break;
           case "c":
           case "close":
