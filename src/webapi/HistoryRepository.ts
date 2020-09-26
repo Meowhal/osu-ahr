@@ -22,6 +22,7 @@ interface FetchResult {
 export class HistoryRepository {
   matchId: number;
   matchInfo: Match | null = null;
+  lobbyName: string = "";
   latestEventId: number = 0;
   oldestEventId: number = Number.MAX_VALUE;
   logger: log4js.Logger;
@@ -31,6 +32,8 @@ export class HistoryRepository {
   changedLobbyName = new TypedEvent<{ newName: string, oldName: string }>();
   hasError: boolean = false;
   fetcher: IHistoryFetcher;
+  static ESC_CRITERIA: number = 2; // プレイヤー存在確認に利用する試合数
+  static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
 
   constructor(matchId: number, fetcher: IHistoryFetcher | null = null) {
     this.matchId = matchId;
@@ -93,6 +96,11 @@ export class HistoryRepository {
   private loadHistory(data: History, isRewind: boolean): FetchResult {
     if (!data || !data.events || !data.events.length) return { count: 0, filled: true, isRewind };
 
+    if (!this.matchInfo) {
+      this.matchInfo = data.match;
+      this.lobbyName = data.match.name;
+    }
+
     if (this.events.length == 0) {
       this.events = data.events;
       this.oldestEventId = data.events[0].id;
@@ -115,13 +123,13 @@ export class HistoryRepository {
       }
     });
 
-    if (!this.matchInfo) {
-      this.matchInfo = data.match;
-    } else {
-      if (this.matchInfo.name != data.match.name) {
-        const oldName = this.matchInfo.name;
-        this.matchInfo = data.match;
-        this.changedLobbyName.emit({ oldName, newName: this.matchInfo.name });
+    for (let i = data.events.length - 1; 0 <= i; i--) {
+      let ev = data.events[i];
+      if (ev.detail.type == "other" && ev.detail.text != null && ev.detail.text != this.lobbyName) {
+        const newName = ev.detail.text;
+        const oldName = this.lobbyName;
+        this.lobbyName = newName;
+        this.changedLobbyName.emit({ oldName, newName });
       }
     }
 
@@ -137,7 +145,7 @@ export class HistoryRepository {
   }
 
   /**
-   * 
+   * プレイヤーのホスト順を計算し、結果を名前で出力する。
    */
   async calcCurrentOrderAsName(): Promise<string[]> {
     return (await this.calcCurrentOrderAsID()).filter(id => id in this.users).map(id => this.users[id].username);
@@ -145,21 +153,21 @@ export class HistoryRepository {
 
   /**
    * プレイヤーのホスト順を計算し、結果をIDで出力する。
-   * 
    */
   async calcCurrentOrderAsID(): Promise<number[]> {
     await this.updateToLatest();
-    const map: { [id: number]: boolean } = {};
+    const map: { [id: number]: boolean } = {}; // 確認されたプレイヤー一覧、ロビー離席済みはtrue
     const result: { age: number, id: number }[] = [];
 
     if (this.events.length == 0) return [];
 
     let i = this.events.length;
-    let eaCount = 0; // ゲーム参加者が全員発見済みのプレイヤーだった回数
     let exCount = 0; // 現在プレイ中のプレイヤー発見数
     let loopCount = 0;
-    const LOOP_LIMIT = 10000; // 検索イベント数の上限
-    const ESC_CRITERIA = 2; // 全員発見と見做す試合回数
+    let hostAge = -1;  // 現在のホスト
+    let gameCount = 0; // 現在までの試合数
+    let unresolvedPlayers = new Set<number>(); // 試合に参加したがまだ順番が確定していないプレイヤー
+
     while (true) {
       i--;
       loopCount++;
@@ -170,47 +178,57 @@ export class HistoryRepository {
         i = r.count - 1;
       }
       let ev = this.events[i];
-      if (ev.user_id == null) continue;
-      switch (ev.detail.type) {
-        case "match-created":
-        case "host-changed":
-        case "player-joined":
-          if (!(ev.user_id in map)) {
-            map[ev.user_id] = false;
-            result.push({ age: ev.id, id: ev.user_id });
-            exCount++;
+
+      if (ev.user_id != null) {
+        switch (ev.detail.type) {
+          case "host-changed":
+            if (!(ev.user_id in map)) {
+              map[ev.user_id] = false;
+              result.push({ age: hostAge, id: ev.user_id }); // 一番最初のホストは age -1になる
+              exCount++;
+            }
+            hostAge = ev.id;
+            unresolvedPlayers.delete(ev.user_id);
+            break;
+          case "match-created":
+          case "player-joined":
+            if (!(ev.user_id in map)) {
+              map[ev.user_id] = false;
+              result.push({ age: ev.id, id: ev.user_id });
+              exCount++;
+              unresolvedPlayers.delete(ev.user_id);
+            }
+            break;
+          case "player-left":
+          case "player-kicked":
+            if (!(ev.user_id in map)) {
+              map[ev.user_id] = true;
+              unresolvedPlayers.delete(ev.user_id);
+            }
+            break;
+          default:
+            this.logger.warn("unknown event type! " + JSON.stringify(ev));
+            break;
+        }
+      } else if (ev.detail.type == "other" && ev.game && ev.game.scores && gameCount < HistoryRepository.ESC_CRITERIA) {
+        gameCount++;
+        for (let s of ev.game.scores) {
+          if (!(s.user_id in map)) {
+            unresolvedPlayers.add(s.user_id);
           }
-          break;
-        case "player-left":
-        case "player-kicked":
-          if (!(ev.user_id in map)) {
-            map[ev.user_id] = true;
-          }
-          break;
-        case "other":
-          if (ev.game && this.isAllPlayerJoinedGame(map, ev.game)) {
-            // 現在見つかったすべてのプレイヤーが試合に参加している
-            // 未発見のプレイヤーがマップ未所持で開始した場合でもtrueになるためこの結果により全員発見とすることはできない
-            eaCount++;
-          } else {
-            eaCount = 0;
-          }
-          break;
-        default:
-          this.logger.warn("unknown event type! " + JSON.stringify(ev));
-          break;
+        }
       }
 
       // 次の条件で全員発見したこととする
       //  参加人数が16人になった
-      //  発見済みプレイヤー全員参加試合が{ESC_CRITERIA}回以上続いた
+      //  直近{ESC_CRITERIA}回の試合参加メンバーすべての存在が確認された
       //  ロビー作成イベントまで到達
       // ループリミットを超過
       if (16 <= exCount) {
         this.logger.info(`found ${exCount} players in ${loopCount} events. full lobby`);
         break;
       }
-      if (ESC_CRITERIA <= eaCount) {
+      if (HistoryRepository.ESC_CRITERIA <= gameCount && unresolvedPlayers.size === 0) {
         this.logger.info(`found ${exCount} players in ${loopCount} events. estimated`);
         break;
       }
@@ -218,26 +236,14 @@ export class HistoryRepository {
         this.logger.info(`found ${exCount} players in ${loopCount} events. reached begin of events`);
         break;
       }
-      if (LOOP_LIMIT < loopCount) {
-        this.logger.warn("loop limit exceeded! " + LOOP_LIMIT);
+      if (HistoryRepository.LOOP_LIMIT < loopCount) {
+        this.logger.warn("loop limit exceeded! " + HistoryRepository.LOOP_LIMIT);
         break;
       }
     }
 
     result.sort((a, b) => a.age - b.age);
     return result.map(a => a.id);
-  }
-
-  /**
-   * ゲームに現在確認されたプレイヤーが全員参加しているか確認する
-   * @param map 現在までに存在が確認されたプレイヤーの一覧
-   */
-  private isAllPlayerJoinedGame(map: { [id: number]: boolean }, game: any): boolean {
-    if (!game || !game.scores || !game.scores.length) return false;
-    for (let s of game.scores) {
-      if (!(s.user_id in map)) return false;
-    }
-    return true;
   }
 }
 
