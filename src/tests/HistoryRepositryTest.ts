@@ -321,6 +321,55 @@ describe("History repositry Tests", () => {
         assert.isBelow(hr.events.length, 300);
       }
     });
+    it("gotUserProfile event test", async() => {
+      const df = buildJoinEventFetcher(16);
+      const hr = new HistoryRepository(1, df);
+      let count = 0;
+      let t = tu.assertEventFire(hr.gotUserProfile, (e) => {
+        count++;
+        return count == 15;
+      }, 100);
+      await hr.updateToLatest();
+      await t;
+    });
+    it("changedLobbyName event test", async() => {
+      const df = buildJoinEventFetcher(16);
+      const hr = new HistoryRepository(1, df);
+      let a = 0; // aが0の間はイベント発生しない
+      let b = 0; // 終了時にbが1でなければいけない
+      hr.changedLobbyName.on(e => {
+        switch(a) {
+          case 0: 
+            assert.fail();
+          case 1:
+            b++;
+            assert.equal(e.newName, "newname 1");
+            assert.equal(e.oldName, hr.matchInfo?.name);
+            break;
+          case 2: 
+            assert.fail();
+          case 3:
+            b++;
+            assert.equal(e.newName, "newname 2");
+            assert.equal(e.oldName, "newname 1");
+            break;
+        }
+      });
+      
+      df.addGameEvent([1,2,3]);
+      await hr.updateToLatest();
+      a = 1;
+      df.addGameEvent([1,2,3], "newname 1");
+      await hr.updateToLatest();
+      assert.equal(b, 1);
+      a = 2;
+      df.addGameEvent([1,2,3], "newname 1");
+      await hr.updateToLatest();
+      a = 3;
+      df.addGameEvent([1,2,3], "newname 2");
+      await hr.updateToLatest();
+      assert.equal(b, 2);
+    });
   });
 
 });

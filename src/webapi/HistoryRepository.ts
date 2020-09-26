@@ -53,7 +53,8 @@ export class HistoryRepository {
     try {
       while (!(await this.fetch(false)).filled) {
       }
-    } catch {
+    } catch (e){
+      this.logger.error(e.message);
       this.hasError = true;
     }
   }
@@ -130,6 +131,7 @@ export class HistoryRepository {
         const oldName = this.lobbyName;
         this.lobbyName = newName;
         this.changedLobbyName.emit({ oldName, newName });
+        break;
       }
     }
 
