@@ -1,10 +1,12 @@
 import { assert } from 'chai';
-import { DummyHistoryFecher } from "../dummies/DummyHistoryFetcher";
+import { DummyHistoryFecher as DummyHistoryFetcher } from "../dummies/DummyHistoryFetcher";
+import { HistoryRepository } from '../webapi/HistoryRepository';
+import { EventType } from '../webapi/HistoryTypes';
 
-describe.only("History repositry Tests", () => {
+describe("History repositry Tests", () => {
   describe("dummy fetcher test", () => {
     it("simple fetch test", async () => {
-      const d = new DummyHistoryFecher(1);
+      const d = new DummyHistoryFetcher(1);
       let h1 = await d.fetchHistory(5, null, null);
       assert.equal(h1.events.length, 2);
       assert.equal(h1.users[0].id, 1);
@@ -25,7 +27,7 @@ describe.only("History repositry Tests", () => {
       assert.equal(h2.users[1].username, "user2");
     });
     it("before test", async () => {
-      const d = new DummyHistoryFecher(1);
+      const d = new DummyHistoryFetcher(1);
       d.addEvent("player-joined", 2); // event 2
       d.addEvent("player-joined", 3); // event 3
       d.addEvent("player-joined", 4); // event 4
@@ -39,7 +41,7 @@ describe.only("History repositry Tests", () => {
       assert.equal(h2.events[0].id, 2);
     });
     it("impolite before test", async () => {
-      const d = new DummyHistoryFecher(1);
+      const d = new DummyHistoryFetcher(1);
       d.addEvent("player-joined", 2); // event 2
       d.addEvent("player-joined", 3); // event 3
       d.addEvent("player-joined", 4); // event 4
@@ -54,9 +56,16 @@ describe.only("History repositry Tests", () => {
 
       let h3 = await d.fetchHistory(10, -100, null, 0);
       assert.equal(h3.events.length, 0);
+
+      let h4 = await d.fetchHistory(2, 100, null, 0);
+      assert.equal(h4.events.length, 2);
+      assert.equal(h4.events[0].id, 3);
+
+      let h5 = await d.fetchHistory(2, -100, null, 0);
+      assert.equal(h5.events.length, 0);
     });
     it("after test", async () => {
-      const d = new DummyHistoryFecher(1);
+      const d = new DummyHistoryFetcher(1);
       d.addEvent("player-joined", 2); // event 2
       d.addEvent("player-joined", 3); // event 3
       d.addEvent("player-joined", 4); // event 4
@@ -70,7 +79,7 @@ describe.only("History repositry Tests", () => {
       assert.equal(h2.events[0].id, 4);
     });
     it("impolite after test", async () => {
-      const d = new DummyHistoryFecher(1);
+      const d = new DummyHistoryFetcher(1);
       d.addEvent("player-joined", 2); // event 2
       d.addEvent("player-joined", 3); // event 3
       d.addEvent("player-joined", 4); // event 4
@@ -85,9 +94,16 @@ describe.only("History repositry Tests", () => {
       let h3 = await d.fetchHistory(2, null, -100, 0);
       assert.equal(h3.events.length, 2);
       assert.equal(h3.events[0].id, 0);
+
+      let h4 = await d.fetchHistory(100, null, 100, 0);
+      assert.equal(h4.events.length, 0);
+
+      let h5 = await d.fetchHistory(100, null, -100, 0);
+      assert.equal(h5.events.length, 5);
+      assert.equal(h5.events[0].id, 0);
     });
     it("add game test", async () => {
-      const d = new DummyHistoryFecher(1);
+      const d = new DummyHistoryFetcher(1);
       for (let i = 0; i < 5; i++) {
         d.addEvent("player-joined", i + 2);
       }
@@ -101,6 +117,100 @@ describe.only("History repositry Tests", () => {
       assert.equal(ge.detail.type, "other");
       assert.equal(ge.game.scores[0].user_id, 1);
     });
-  })
+  });
 
+  function buildJoinEventFetcher(count: number): DummyHistoryFetcher {
+    const df = new DummyHistoryFetcher(1);
+    for(let i = 2; i < count; i++) {
+      df.addEvent("player-joined", i);
+    }
+    return df;
+  }
+
+  describe("HistoryRepository with dummyfetcher tests", () => {
+    it("basic updateToLatest test", async() =>{ 
+      const df = buildJoinEventFetcher(16);
+      const hr = new HistoryRepository(1, df);
+      await hr.updateToLatest();
+      assert.isTrue(1 in hr.users);
+      assert.equal(hr.users[1].id, 1);
+      assert.isTrue(15 in hr.users);
+      assert.isFalse(16 in hr.users);
+      assert.equal(hr.events.length, 16);
+      assert.equal<EventType>(hr.events[0].detail.type, "match-created");
+      assert.equal<EventType>(hr.events[15].detail.type, "player-joined");
+      assert.equal(hr.events[15].user_id, 15);
+    });
+
+    it("size limited updateToLatest test", async() =>{ 
+      const df = buildJoinEventFetcher(16);
+      df.limit = 3;
+      const hr = new HistoryRepository(1, df);
+      await hr.updateToLatest();
+      assert.equal(hr.events.length, 3);
+      assert.equal<EventType>(hr.events[0].detail.type, "player-joined");
+      assert.equal(hr.events[0].id, 13);
+      assert.equal<EventType>(hr.events[1].detail.type, "player-joined");
+      assert.equal(hr.events[1].id, 14);
+      assert.equal<EventType>(hr.events[2].detail.type, "player-joined");
+      assert.equal(hr.events[2].id, 15);
+      assert.equal<EventType>(hr.events[2].detail.type, "player-joined");
+
+      for (let i = 0; i < 16; i++){
+        df.addEvent("host-changed", i);
+      }
+      await hr.updateToLatest();
+      assert.equal(hr.events.length, 19);
+      assert.equal<EventType>(hr.events[18].detail.type, "host-changed");
+      assert.equal(hr.events[18].id, 31);
+      assert.equal(hr.latestEventId, 31);
+    });
+    it("fetch test", async() =>{ 
+      const df = buildJoinEventFetcher(16);
+      df.limit = 3;
+      const hr = new HistoryRepository(1, df);
+      let r = await hr.fetch();
+      assert.equal(r.count, 3);
+      assert.equal(r.filled, true);
+      assert.equal(r.isRewind, false);
+      assert.equal(hr.events.length, 3);
+      assert.equal(hr.events[0].id, 13);
+    });
+    it("rewind fetch test", async() =>{ 
+      const df = buildJoinEventFetcher(16);
+      df.limit = 3;
+      const hr = new HistoryRepository(1, df);
+      let r = await hr.fetch(true);
+      assert.equal(r.count, 3);
+      assert.equal(r.filled, false);
+      assert.equal(r.isRewind, true);
+      assert.equal(hr.events.length, 3);
+      assert.equal(hr.events[0].id, 13);
+
+      r = await hr.fetch(true);
+      assert.equal(r.count, 3);
+      assert.equal(r.filled, false);
+      assert.equal(r.isRewind, true);
+      assert.equal(hr.events.length, 6);
+      assert.equal(hr.events[0].id, 10);
+    });
+    it("back and go test", async() =>{ 
+      const df = buildJoinEventFetcher(16);
+      df.limit = 3;
+      const hr = new HistoryRepository(1, df);
+      let r = await hr.fetch(true);
+      assert.equal(r.count, 3);
+      assert.equal(r.filled, false);
+      assert.equal(r.isRewind, true);
+      assert.equal(hr.events.length, 3);
+      assert.equal(hr.events[0].id, 13);
+
+      r = await hr.fetch(false);
+      assert.equal(r.count, 0);
+      assert.equal(r.filled, true);
+      assert.equal(r.isRewind, false);
+      assert.equal(hr.events.length, 3);
+      assert.equal(hr.events[0].id, 13);
+    });
+  });
 });

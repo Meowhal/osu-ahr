@@ -1,8 +1,7 @@
 import { History, Match, User, Event, EventType } from "../webapi/HistoryTypes";
-import { IHistoryFecher } from "../webapi/HistoryRepository";
-import { exception } from "console";
+import { IHistoryFetcher } from "../webapi/HistoryFetcher";
 
-export class DummyHistoryFecher implements IHistoryFecher {
+export class DummyHistoryFecher implements IHistoryFetcher {
   match: Match;
   events: Event[];
   users: User[];

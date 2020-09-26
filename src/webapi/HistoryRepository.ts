@@ -1,7 +1,8 @@
-import axios, { AxiosResponse } from 'axios';
+
 import log4js from "log4js";
 import { Event, History, Match, User } from './HistoryTypes';
 import { TypedEvent } from '../libs';
+import { HistoryFecher as HistoryFetcher, IHistoryFetcher as IHistoryFetcher } from "./HistoryFetcher";
 
 interface FetchResult {
   /**
@@ -18,36 +19,6 @@ interface FetchResult {
   isRewind: boolean;
 }
 
-export interface IHistoryFecher {
-  /**
-   * パラメータに沿ったヒストリーを取得する
-   * 通信エラーの場合は例外が発生する
-   * @param limit 
-   * @param before 
-   * @param after 
-   * @param matchId 
-   */
-  fetchHistory(limit: number, before: number | null, after: number | null, matchId: number): Promise<History>;
-}
-
-class HistoryFecher implements IHistoryFecher {
-  async fetchHistory(limit: number, before: number | null, after: number | null, matchId: number): Promise<History> {
-    const url = `https://osu.ppy.sh/community/matches/${matchId}/history`;
-    const params: any = {
-      'limit': limit,
-    }
-    if (before) {
-      params.before = before;
-    }
-
-    if (after) {
-      params.after = after;
-    }
-
-    return (await axios.get(url, { params })).data;
-  }
-}
-
 export class HistoryRepository {
   matchId: number;
   matchInfo: Match | null = null;
@@ -59,14 +30,14 @@ export class HistoryRepository {
   gotUserProfile = new TypedEvent<{ user: User }>();
   changedLobbyName = new TypedEvent<{ newName: string, oldName: string }>();
   hasError: boolean = false;
-  fetcher: IHistoryFecher;
+  fetcher: IHistoryFetcher;
 
-  constructor(matchId: number) {
+  constructor(matchId: number, fetcher: IHistoryFetcher | null = null) {
     this.matchId = matchId;
     this.logger = log4js.getLogger("history");
     this.users = {};
     this.events = [];
-    this.fetcher = new HistoryFecher();
+    this.fetcher = fetcher ?? new HistoryFetcher();
   }
 
   /**
@@ -82,9 +53,7 @@ export class HistoryRepository {
     } catch {
       this.hasError = true;
     }
-
   }
-
 
   async fetch(isRewind: boolean = false): Promise<FetchResult> {
     let limit = 100;
@@ -97,8 +66,6 @@ export class HistoryRepository {
       } else {
         after = this.latestEventId;
       }
-    } else {
-      isRewind = false;
     }
 
     let data: History | null = null;
@@ -123,7 +90,7 @@ export class HistoryRepository {
    * @param data ヒストリーデータ
    * @param isRewind 取り込み済みより前のデータを取り込むかどうか
    */
-  loadHistory(data: History, isRewind: boolean): FetchResult {
+  private loadHistory(data: History, isRewind: boolean): FetchResult {
     if (!data || !data.events || !data.events.length) return { count: 0, filled: true, isRewind };
 
     if (this.events.length == 0) {
