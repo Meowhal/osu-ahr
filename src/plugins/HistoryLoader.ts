@@ -52,12 +52,18 @@ export class HistoryLoader extends LobbyPlugin {
     if (this.lobby.lobbyId) {
       this.repository = new HistoryRepository(parseInt(this.lobby.lobbyId));
       this.repository.gotUserProfile.on(a => this.onGotUserProfile(a.user));
+      this.repository.changedLobbyName.on(a => this.onChangedLobbyName(a.newName, a.oldName));
     }
   }
-
+  
   onGotUserProfile(user: User): any {
     let p = this.lobby.GetOrMakePlayer(user.username);
     p.id = user.id;
+  }
+
+  onChangedLobbyName(newName: string, oldName: string): any {
+    this.lobby.lobbyName = newName;
+    this.logger.trace(`lobbyname changed ; ${newName} -> ${oldName}`);
   }
 
   queueTask(): Promise<void> {
