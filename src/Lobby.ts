@@ -398,7 +398,8 @@ export class Lobby {
       case BanchoResponseType.MpBeatmapChanged:
         this.mapId = c.params[0];
         this.mapTitle = c.params[1];
-        this.logger.info(`beatmap changed : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
+        const changer = this.host ? `(by ${this.host.name})` : ""
+        this.logger.info(`beatmap changed${changer} : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
         break;
       case BanchoResponseType.Settings:
         if (this.settingParser.feedLine(message)) {
@@ -502,7 +503,8 @@ export class Lobby {
   }
 
   RaiseMatchFinished(): void {
-    this.logger.info("match finished");
+    let count = this.players.size;
+    this.logger.info(`match finished (${count} players)`);
     this.isMatching = false;
     this.players.forEach(p => p.mpstatus = MpStatuses.InLobby);
     this.MatchFinished.emit();
@@ -527,10 +529,10 @@ export class Lobby {
     this.channel = channel;
     this.lobbyId = channel.replace("#mp_", "");
     this.status = LobbyStatus.Entered;
-    this.logger.addContext("channel", this.channel);
-    this.chatlogger.addContext("channel", this.channel);
+    this.logger.addContext("channel", this.lobbyId);
+    this.chatlogger.addContext("channel", this.lobbyId);
     for (let p of this.plugins) {
-      p.logger.addContext("channel", this.channel);
+      p.logger.addContext("channel", this.lobbyId);
     }
     this.assignCreatorRole();
     this.JoinedLobby.emit({ channel: this.channel, creator: this.GetOrMakePlayer(this.ircClient.nick) })

@@ -35,6 +35,7 @@ export class HistoryLoader extends LobbyPlugin {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.JoinedLobby.on(a => this.onJoinedLobby(a.channel));
+    this.lobby.MatchStarted.on(a => this.onMatchStarted(a.mapId, a.mapTitle));
   }
 
   async onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): Promise<void> {
@@ -55,6 +56,10 @@ export class HistoryLoader extends LobbyPlugin {
       this.repository.changedLobbyName.on(a => this.onChangedLobbyName(a.newName, a.oldName));
     }
   }
+
+  onMatchStarted(mapId: number, mapTitle: string): any {
+    this.queueTask();
+  }
   
   onGotUserProfile(user: User): any {
     let p = this.lobby.GetOrMakePlayer(user.username);
@@ -63,7 +68,7 @@ export class HistoryLoader extends LobbyPlugin {
 
   onChangedLobbyName(newName: string, oldName: string): any {
     this.lobby.lobbyName = newName;
-    this.logger.trace(`lobbyname changed ; ${newName} -> ${oldName}`);
+    this.logger.trace(`lobbyname changed : ${newName} -> ${oldName}, host : ${this.lobby.host?.name}`);
   }
 
   queueTask(): Promise<void> {
