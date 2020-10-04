@@ -12,7 +12,7 @@ export interface ApiToken {
   token_type: string,
   expires_in: number,
   access_token: string,
-  asGuest: boolean
+  isGuest: boolean
 }
 
 function isExpired(token: ApiToken | undefined): boolean {
@@ -66,7 +66,7 @@ export class WebApiClient {
   private async storeToken(token: ApiToken): Promise<boolean> {
     if (this.option.token_store_dir == "") return false;
     try {
-      const p = this.getTokenPath(token.asGuest);
+      const p = this.getTokenPath(token.isGuest);
       await fs.mkdir(path.dirname(p), { recursive: true });
       await fs.writeFile(p, JSON.stringify(token), { encoding: "utf8", flag: "w" });
       this.logger.info("stored token to : " + p);
@@ -217,8 +217,9 @@ export class WebApiClient {
             this.logger.info(`api access failed, delete current token.`);
             this.deleteStoredToken(this.option.asGuest);
             this.token = undefined;
-            break;
+            break;          
           default:
+            console.error(`${e.response.status} ${e.response.statusText}`);
             throw e;
         }
       }
@@ -238,7 +239,7 @@ export class WebApiClient {
 
   async getChannels() {
     const data = await this.accessApi("https://osu.ppy.sh/api/v2/chat/channels", {
-      method: "HEAD"
+      method: "GET"
     });
     return data;
   }
