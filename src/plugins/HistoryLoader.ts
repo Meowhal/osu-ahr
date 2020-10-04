@@ -68,7 +68,7 @@ export class HistoryLoader extends LobbyPlugin {
 
   onChangedLobbyName(newName: string, oldName: string): any {
     this.lobby.lobbyName = newName;
-    this.logger.trace(`lobbyname changed : ${newName} -> ${oldName}, host : ${this.lobby.host?.name}`);
+    this.logger.info(`lobbyname changed : ${newName} -> ${oldName}, host : ${this.lobby.host?.name}`);
   }
 
   queueTask(): Promise<void> {

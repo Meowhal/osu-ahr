@@ -91,5 +91,10 @@
   },
   "history": {
 
+  },
+  "OahrWeb" :{
+    "port": 3112,
+    "staticDir": "src/web/statics",
+    "hostname": "127.0.0.1"
   }
 }

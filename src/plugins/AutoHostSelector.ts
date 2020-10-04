@@ -3,17 +3,21 @@ import { BanchoResponseType, MpSettingsResult } from "../parsers";
 import { Player, revealUserName, disguiseUserName } from "../Player";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
+import { TypedEvent } from "../libs";
 
 export interface AutoHostSelectorOption {
   show_queue_chars_limit: number;
   show_queue_cooltime_ms: number;
 }
 
+export type OderChangeType = "added" | "removed" | "rotated" | "orderd";
+
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
   needsRotate: boolean = true;
   mapChanger: Player | null = null;
+  orderChanged = new TypedEvent<{ type: OderChangeType }>();
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "selector");
@@ -58,6 +62,7 @@ export class AutoHostSelector extends LobbyPlugin {
       this.logger.trace("appoint first player to host");
       this.changeHost();
     }
+    this.raiseOrderChanged("added");
   }
 
   /**
@@ -239,6 +244,7 @@ export class AutoHostSelector extends LobbyPlugin {
     } else {
       // hostがいない場合は先頭へ
       this.changeHost();
+      this.raiseOrderChanged("orderd");
     }
   }
 
@@ -289,6 +295,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.logger.isTraceEnabled()) {
       this.logger.trace("skipto: %s", this.hostQueue.map(p => p.name).join(", "));
     }
+    this.raiseOrderChanged("rotated");
     this.changeHost();
   }
 
@@ -314,6 +321,7 @@ export class AutoHostSelector extends LobbyPlugin {
       if (this.validateNewQueue(nq)) {
         this.logger.info("reordered host queue.");
         this.hostQueue = nq;
+        this.raiseOrderChanged("orderd");
         this.changeHost();
       } else {
         this.logger.info("failed to reorder.");
@@ -363,6 +371,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.logger.isTraceEnabled && showLog) {
       this.logger.trace("rotated host queue: %s", this.hostQueue.map(p => p.name).join(", "));
     }
+    this.raiseOrderChanged("rotated");
   }
 
   /**
@@ -374,6 +383,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (i != -1) {
       this.hostQueue.splice(i, 1);
       this.logger.trace("removed %s from host queue", player.name);
+      this.raiseOrderChanged("removed");
       return true;
     } else {
       this.logger.error("removed ghost player");
@@ -394,5 +404,9 @@ export class AutoHostSelector extends LobbyPlugin {
     return [
       "!queue => 	Shows host queue.",
       "*order [players list] => Reorder the queue in specified order. (*order p1, p2, p3)"]
+  }
+
+  private raiseOrderChanged(type: OderChangeType) {
+    this.orderChanged.emit({ type });
   }
 }
