@@ -2,7 +2,7 @@ import axios from 'axios';
 import { promises as fs } from 'fs';
 import { HistoryRepository } from '../webapi/HistoryRepository';
 
-export async function HistryTrial() {
+export async function trial() {
   await GetOrderTrial();
 }
 

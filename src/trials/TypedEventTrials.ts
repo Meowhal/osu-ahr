@@ -1,6 +1,6 @@
 import { TypedEvent } from "../libs";
 
-export function TypedEventTrials() {
+export function trial() {
   let e1 = new TypedEvent<number>();
   e1.once(n => console.log(`fired e1 arg = ${n}`));
   e1.emit(1);

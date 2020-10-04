@@ -1,7 +1,7 @@
 import http from "http";
 import io from "socket.io";
 import fs from "fs";
-export function SocketTrial() {
+export function trial() {
   console.log("create server ");
   const x = http.createServer((req, res) => {
     res.writeHead(200, { "Content-Type": "text/html" });

@@ -3,7 +3,7 @@ import { logIrcEvent } from "..";
 import { parser } from "../parsers"
 import { getIrcConfig } from "../TypedConfig";
 
-export function MakeLobbyTrial() {
+export function trial() {
   const c = getIrcConfig();
   const bot = new irc.Client(c.server, c.nick, c.opt);
 

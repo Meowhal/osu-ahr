@@ -1,4 +1,8 @@
-import * as trial from './HistryTrial';
 import log4js from "log4js";
 log4js.configure("config/log_mocha.json");
-trial.HistryTrial();
+
+//import * as trial from './WebServerTrial';
+//trial.webServerTrial();
+
+import {trial} from './BeatmapsetTrial';
+trial();

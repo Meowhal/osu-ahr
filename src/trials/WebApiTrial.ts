@@ -11,12 +11,12 @@ export interface WebApiTrialOption {
 
 const oAuthConfig = config.get<WebApiTrialOption>("WebApi");
 
-export async function webApiTrial() {
+export async function trial() {
   //getTokenTrial();
 
   const client = new WebApiClient({ asGuest: true });
 
-  const user = await client.getUser("Yuri Goggles");
+  const user = await client.getChannels();
   console.log(user);
 }
 
