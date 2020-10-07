@@ -60,7 +60,7 @@ export class HistoryLoader extends LobbyPlugin {
   onMatchStarted(mapId: number, mapTitle: string): any {
     this.queueTask();
   }
-  
+
   onGotUserProfile(user: User): any {
     let p = this.lobby.GetOrMakePlayer(user.username);
     p.id = user.id;
@@ -68,7 +68,7 @@ export class HistoryLoader extends LobbyPlugin {
 
   onChangedLobbyName(newName: string, oldName: string): any {
     this.lobby.lobbyName = newName;
-    this.logger.info(`lobbyname changed : ${newName} -> ${oldName}, host : ${this.lobby.host?.name}`);
+    this.logger.info(`lobbyname changed : ${oldName} -> ${newName}, host : ${this.lobby.host?.name}`);
   }
 
   queueTask(): Promise<void> {

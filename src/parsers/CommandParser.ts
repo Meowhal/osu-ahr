@@ -150,60 +150,60 @@ export namespace parser {
         }
         break;
     }
-  
+
     const m_joined = message.match(/(.+) joined in slot (\d+)( for team (blue|red))?\./);
     if (m_joined) {
       const team = m_joined[4] == undefined ? Teams.None : m_joined[4] == "blue" ? Teams.Blue : Teams.Red
       return makeBanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1], parseInt(m_joined[2]), team);
     }
-  
+
     const m_left = message.match(/(.+) left the game\./);
     if (m_left) {
       return makeBanchoResponse(BanchoResponseType.PlayerLeft, m_left[1]);
     }
-  
+
     const m_host = message.match(/(.+) became the host\./);
     if (m_host) {
       return makeBanchoResponse(BanchoResponseType.HostChanged, m_host[1]);
     }
-  
+
     const m_moved = message.match(/(.+) moved to slot (\d+)/);
     if (m_moved) {
       return makeBanchoResponse(BanchoResponseType.PlayerMovedSlot, m_moved[1], parseInt(m_moved[2]));
     }
-  
+
     const m_finish = message.match(/(.+) finished playing \(Score: (\d+), (PASSED|FAILED)\)\./);
     if (m_finish) {
       return makeBanchoResponse(BanchoResponseType.PlayerFinished,
         m_finish[1], parseInt(m_finish[2]), m_finish[3] == "PASSED");
     }
-  
+
     const m_roll = message.match(/(.+) rolls (\d+) point\(s\)/);
     if (m_roll) {
       return makeBanchoResponse(BanchoResponseType.Rolled, m_roll[1], parseInt(m_roll[2]));
     }
-  
+
     const m_team_change = message.match(/(.+) changed to (Blue|Red)/);
     if (m_team_change) {
       return makeBanchoResponse(BanchoResponseType.TeamChanged, m_team_change[1], (m_team_change[2] == "Blue" ? Teams.Blue : Teams.Red));
     }
-  
+
     const m_stat = message.match(/(Stats for \(|Score:\s+\d|Plays:\s+\d|Accuracy:\s+\d)/);
     if (m_stat) {
       return makeBanchoResponse(BanchoResponseType.Stats, message);
     }
-  
+
     if (message.match(/^(Room name:|Beatmap:|Team mode:|Active mods:|Players:|Slot \d+)/)) {
       return makeBanchoResponse(BanchoResponseType.Settings, message);
     }
-  
+
     if (message.match(/Don't let osu! keep you up until 4 AM./)) {
       return makeBanchoResponse(BanchoResponseType.RequestSleep);
     }
-  
+
     return makeBanchoResponse(BanchoResponseType.Unhandled);
   }
-  
+
   export function ParseMpMakeResponse(nick: string, message: string): { id: string, title: string } | null {
     if (nick != "BanchoBot") return null;
     const reg = /Created the tournament match https:\/\/osu.ppy.sh\/mp\/(\d+) (.+)/;
@@ -213,7 +213,7 @@ export namespace parser {
     }
     return null;
   }
-  
+
   export function ParseMPCommand(message: string): MpCommand | null {
     const res = message.match(/^!mp (\w+)\s*(.*)\s*/i);
     if (res) {
@@ -221,7 +221,7 @@ export namespace parser {
     }
     return null;
   }
-  
+
   export function SplitCliCommand(line: string): { command: string, arg: string } {
     const l = line.match(/(\w+) (.*)/);
     if (l == null) {
@@ -233,17 +233,17 @@ export namespace parser {
       }
     }
   }
-  
+
   export function EnsureMpChannelId(id: string): string {
     if (id == null || id == "") return "";
     if (id.match(/^#mp_\d+$/)) return id;
     if (id.match(/^\d+$/)) return "#mp_" + id;
     let m = id.match(/^https:\/\/osu\.ppy\.sh\/mp\/(\d+)$/);
-  
+
     if (m) return "#mp_" + m[1];
     else return "";
   }
-  
+
   /**
    * ChatCommandかの判定
    * !か*で始まる、既存のコマンドではない、!mp単独ではない
@@ -256,7 +256,7 @@ export namespace parser {
     if (message == "!mp") return false;
     return message.match(/^[\!\*](?!roll|stats?|where|faq|report|request)\w+/) != null;
   }
-  
+
   export function ParseChatCommand(message: string): { command: string, param: string } {
     message = message.trimRight();
     let m = message.match(/\!mp (\w+)\s*(.*)\s*/);
@@ -269,7 +269,7 @@ export namespace parser {
     } else {
       throw new Error();
     }
-  }  
+  }
 }
 
 export interface MpCommand {
@@ -290,7 +290,7 @@ export enum BanchoResponseType {
   MpHostChanged,
   UserNotFound,
   MatchStarted,
-  MpMatchStarted,
+  MpMatchStarted, // response of !mp start
   MpMatchAlreadyStarted,
   PlayerFinished,
   MatchFinished,

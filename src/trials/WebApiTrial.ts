@@ -16,7 +16,7 @@ export async function trial() {
 
   const client = new WebApiClient({ asGuest: true });
 
-  const user = await client.getChannels();
+  const user = await client.lookupBeatmap(1795177);
   console.log(user);
 }
 

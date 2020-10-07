@@ -140,7 +140,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  mapidSeed: number = 0;
+  mapidSeed: number = 1000;
   // ホストがマップを変更する動作をエミュレートする
   public async emulateChangeMapAsync(delay: number = 0): Promise<void> {
     await this.emulateMessageAsync("BanchoBot", this.channel, "Host is changing map...");

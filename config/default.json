@@ -85,16 +85,21 @@
     "token_store_dir": "data/tokens/",
     "asGuest": true
   },
-  "profile":{
+  "profile": {
     "db_path": "data/profile.nedb",
     "profile_expired_day": 7
   },
-  "history": {
-
-  },
-  "OahrWeb" :{
+  "history": {},
+  "OahrWeb": {
     "port": 3112,
     "staticDir": "src/web/statics",
     "hostname": "127.0.0.1"
+  },
+  "mapChecker": {
+    "enabled": false,
+    "star_min": 0,
+    "star_max": 7.00,
+    "length_min": 0,
+    "length_max": 360
   }
 }

@@ -28,8 +28,8 @@ export class HistoryRepository {
   logger: log4js.Logger;
   users: { [id: number]: User };
   events: Event[];
-  gotUserProfile = new TypedEvent<{ user: User }>();
-  changedLobbyName = new TypedEvent<{ newName: string, oldName: string }>();
+  gotUserProfile = new TypedEvent<{ sender: HistoryRepository, user: User }>();
+  changedLobbyName = new TypedEvent<{ sender: HistoryRepository, index: number, newName: string, oldName: string }>();
   hasError: boolean = false;
   fetcher: IHistoryFetcher;
   static ESC_CRITERIA: number = 2; // プレイヤー存在確認に利用する試合数
@@ -53,7 +53,7 @@ export class HistoryRepository {
     try {
       while (!(await this.fetch(false)).filled) {
       }
-    } catch (e){
+    } catch (e) {
       this.logger.error(e.message);
       this.hasError = true;
     }
@@ -120,7 +120,7 @@ export class HistoryRepository {
       const isNewComer = !(u.id in this.users);
       this.users[u.id] = u; // データは毎回必ず更新する
       if (isNewComer) {
-        this.gotUserProfile.emit({ user: u });
+        this.gotUserProfile.emit({ sender: this, user: u });
       }
     });
 
@@ -130,7 +130,7 @@ export class HistoryRepository {
         const newName = ev.detail.text;
         const oldName = this.lobbyName;
         this.lobbyName = newName;
-        this.changedLobbyName.emit({ oldName, newName });
+        this.changedLobbyName.emit({ sender: this, index: i, oldName, newName });
         break;
       }
     }

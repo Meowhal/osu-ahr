@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { promises as fs } from 'fs';
+import { HistoryFecher } from '../webapi/HistoryFetcher';
 import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function trial() {
-  await GetOrderTrial();
+  await GetHistryTrial();
 }
 
 async function GetHistryTrial() {
@@ -33,4 +34,16 @@ async function GetOrderTrial() {
   const repo = new HistoryRepository(matchId);
   const res = await repo.calcCurrentOrderAsName()
   console.log(res);
+}
+
+async function GetLobbyNameChanger() {
+  let hr = new HistoryRepository(67719013, new HistoryFecher());
+  let ln = "";
+  hr.changedLobbyName.on(e => {
+    console.log(e.oldName + "->" + e.newName + " " + e.index);
+    ln = e.newName;
+  });
+  while(!ln.startsWith("4-5*")) {
+    await hr.fetch(true);
+  }
 }

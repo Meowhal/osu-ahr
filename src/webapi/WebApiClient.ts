@@ -3,10 +3,11 @@ import config from "config";
 import log4js from "log4js";
 import http from "http";
 import open from "open";
+import path from "path";
 import { URL } from 'url';
 import { promises as fs } from 'fs';
-import path from "path";
 import { UserProfile, trimProfile } from "./UserProfile";
+import { Beatmap } from "./Beatmapsets";
 
 export interface ApiToken {
   token_type: string,
@@ -217,7 +218,7 @@ export class WebApiClient {
             this.logger.info(`api access failed, delete current token.`);
             this.deleteStoredToken(this.option.asGuest);
             this.token = undefined;
-            break;          
+            break;
           default:
             console.error(`${e.response.status} ${e.response.statusText}`);
             throw e;
@@ -272,11 +273,26 @@ export class WebApiClient {
       });
       data.get_time = Date.now();
       return trimProfile(data);
-    } catch(e) {
+    } catch (e) {
       if (e?.response?.status == 404) {
         return null;
       }
       throw e;
+    }
+  }
+
+  async lookupBeatmap(mapid: number): Promise<Beatmap | undefined> {
+    try {
+      const data = await this.accessApi(`https://osu.ppy.sh/api/v2/beatmaps/lookup?id=${mapid}`, {
+        method: "GET"
+      });
+      data.get_time = Date.now();
+      return data;
+    } catch (e) {
+      if (e?.response?.status == 404) {
+      } else {
+        throw e;
+      }
     }
   }
 }

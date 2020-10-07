@@ -1,7 +1,28 @@
 import axios from 'axios';
 import cheerio from "cheerio";
 
-export async function fetchBeatmapsets(id:number) : Promise<Beatmapsets|undefined> {
+export function fetchBeatmapsets(id: number): Promise<Beatmapsets | undefined> {
+  return fetchFromBeatmapPage(id);
+}
+
+export async function fetchBeatmap(id: number): Promise<Beatmap | undefined> {
+  let set = await fetchFromBeatmapPage(id);
+  if (!set) return;
+  let q = set.beatmaps?.find(v => v.id == id);
+  if (!q) return;
+  q.beatmapset = set;
+  set.beatmaps = undefined;
+  return q;
+}
+
+async function fetchFromSearch(id: number): Promise<any> {
+  // needs account info
+  const target = "https://osu.ppy.sh/beatmapsets/search?s=any&q=" + id;
+  const res = await axios.get(target);
+  return res.data;
+}
+
+async function fetchFromBeatmapPage(id: number): Promise<Beatmapsets | undefined> {
   const target = "https://osu.ppy.sh/b/" + id;
   const res = await axios.get(target);
   const $ = cheerio.load(res.data);
@@ -52,7 +73,7 @@ export type Beatmapsets = {
   "submitted_date": string,
   "tags": string,
   "has_favourited": boolean,
-  "beatmaps": Beatmap[],
+  "beatmaps": Beatmap[] | undefined,
   "current_user_attributes": {
     "can_delete": false,
     "can_edit_metadata": false,
@@ -76,7 +97,6 @@ export type Beatmapsets = {
   },
   "ratings": number[],
   "recent_favourites": any[],
-  
 }
 
 export type Covers = {
@@ -120,5 +140,6 @@ export type Beatmap = {
     "fail": number[],
     "exit": number[]
   },
-  "max_combo": number
+  "max_combo": number,
+  "beatmapset": Beatmapsets | undefined
 }

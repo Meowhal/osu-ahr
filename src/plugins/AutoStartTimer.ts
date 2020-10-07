@@ -14,16 +14,20 @@ const WAITINGTIME_MIN = 15;
 
 export class AutoStartTimer extends LobbyPlugin {
   option: AutoStartTimerOption;
+  lastMapId: number;
+  useMapValidation: boolean = false;
   constructor(lobby: Lobby, option: Partial<AutoStartTimerOption> = {}) {
     super(lobby, "autostart");
     const d = config.get<AutoStartTimerOption>("AutoStartTimer");
     this.option = { ...d, ...option } as AutoStartTimerOption;
+    this.lastMapId = 0;
     this.registerEvents();
   }
 
   private registerEvents(): void {
     this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.player, a.command, a.param));
     this.lobby.ReceivedBanchoResponse.on(a => this.onReceivedBanchoResponse(a.message, a.response));
+    this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
   }
 
   private onReceivedChatCommand(player: Player, command: string, param: string): void {
@@ -60,11 +64,8 @@ export class AutoStartTimer extends LobbyPlugin {
 
     switch (response.type) {
       case BanchoResponseType.BeatmapChanged:
-        if (this.lobby.players.size == 1) break;
-        this.SendPluginMessage("mp_start", [this.option.waitingTime.toString()]);
-        if (this.option.doClearHost) {
-          this.lobby.SendMessage(`!mp clearhost`);
-        }
+        if (this.lobby.players.size == 1 || response.params[0] == this.lastMapId || this.useMapValidation) break;
+        this.startTimer();
         break;
       case BanchoResponseType.BeatmapChanging:
       case BanchoResponseType.HostChanged:
@@ -72,6 +73,30 @@ export class AutoStartTimer extends LobbyPlugin {
           this.lobby.SendMessage("!mp aborttimer");
         }
         this.SendPluginMessage("mp_abort_start");
+        break;
+      case BanchoResponseType.MatchStarted:
+        this.lastMapId = this.lobby.mapId;
+        break;
+    }
+  }
+
+  private startTimer() {
+    this.SendPluginMessage("mp_start", [this.option.waitingTime.toString()]);
+    if (this.option.doClearHost) {
+      this.lobby.SendMessage(`!mp clearhost`);
+    }
+  }
+
+  private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
+    switch (type) {
+      case "enabledMapChecker":
+        this.useMapValidation = true;
+        break;
+      case "disabledMapChecker":
+        this.useMapValidation = false;
+        break;
+      case "validatedMap":
+        this.startTimer();
         break;
     }
   }

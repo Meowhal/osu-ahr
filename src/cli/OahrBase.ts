@@ -3,6 +3,8 @@ import config from "config";
 import log4js from "log4js";
 import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader } from "../plugins";
 import { parser } from "../parsers";
+import { MapChecker } from "../plugins/MapChecker";
+import { WebApiClient } from "../webapi/WebApiClient";
 
 const logger = log4js.getLogger("cli");
 
@@ -28,6 +30,8 @@ export class OahrBase {
   inoutLogger: InOutLogger;
   autoTimer: AutoStartTimer;
   history: HistoryLoader;
+  checker: MapChecker;
+  webApiClient: WebApiClient;
   option: OahrCliOption = OahrCliDefaultOption;
 
   constructor(client: IIrcClient) {
@@ -46,6 +50,8 @@ export class OahrBase {
     }
     this.recaster = new MapRecaster(this.lobby);
     this.history = new HistoryLoader(this.lobby);
+    this.webApiClient = new WebApiClient();
+    this.checker = new MapChecker(this.lobby, this.webApiClient);
     this.lobby.RaisePluginsLoaded();
   }
 

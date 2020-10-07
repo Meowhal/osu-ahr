@@ -14,6 +14,9 @@
 - cliにstatの結果を載せない
 - afkhost がstat check timeout になってしまったときの対応 -> event handling
 ## done
+- MAPIDは編集アップロード時に変更される？
+  + 呼び込みくん normal:2346156, prototype:2345992,insane:2345991, extra 2345993, set:1122617
+  + 更新しても変わらない
 - タイマー起動をバンチョーレスポンスで判定する(match starter auto start timerなど)
 - 試合終了後ボットが変更する前に変更されるとループになる <- selectorでpendinghostに対する処理が抜けていた
 - 切断時に自動!mp settings
