@@ -107,6 +107,11 @@ export class Lobby {
         this.handleMessage(from, to, message);
       }
     });
+    this.ircClient.on("action", (from, to, message) => {
+      if (to == this.channel) {
+        this.handleAction(from, to, message);
+      }
+    });
     this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
     });
@@ -328,6 +333,10 @@ export class Lobby {
         }
       }
     }
+  }
+
+  private handleAction(from: string, to: string, message: string): void {
+    this.chatlogger.info("*%s %s", from, message);
   }
 
   private handlePrivateMessage(from: string, message: string): void {

@@ -48,6 +48,9 @@ export function logIrcEvent(client: IIrcClient) {
   client.on('notice', function (from, to, message) {
     ircLogger.debug('@notice  %s => %s: %s', from, to, message);
   });
+  client.on('action', function (from, to, text, message) {
+    ircLogger.debug('@action  %s => %s: %s', from, to, text);
+  });
 }
 
 export function logPrivateMessage(client: IIrcClient) {
