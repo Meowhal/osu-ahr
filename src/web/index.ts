@@ -1,3 +1,3 @@
-import {OahrWeb} from "./OahrWeb";
+import { startLogServer } from "./LogServer";
 
-let v = new OahrWeb();
+startLogServer(3112);

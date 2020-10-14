@@ -1,11 +1,8 @@
 import express, { Express, RequestHandler, Request, Response, NextFunction } from "express";
-import { Server } from "http";
 import historyData from "../../data/arc/history_67261609.json";
 import Nedb from 'nedb';
 import fs from 'fs';
 import readline from 'readline';
-import path from "path";
-import { timeout } from "async";
 
 export function trial() {
   startTestServer();
@@ -24,6 +21,7 @@ function startTestServer() {
   const port = 3112;
   const hostname = "127.0.0.1";
 
+  app.use("", express.static("src/trials/"));
   app.use("/logs", express.static("logs/cli"));
 
   app.get("/api/user/:id", (req, res, next) => {
@@ -34,9 +32,12 @@ function startTestServer() {
   });
 
   app.get("/api/clilog/:id", (req, res, next) => {
-    let p = `logs/cli/#mp_${req.params.id}.log`;
-    let frm = req.query.from ?? 0;
-    const stream = fs.createReadStream(p, { start: 0 });
+    let p = `logs/cli/${req.params.id}.log`;
+    let frm = 0;
+    if (req.query.from) {
+      frm = parseInt(req.query.from + "");
+    }
+    const stream = fs.createReadStream(p, { start: frm });
     const reader = readline.createInterface({ input: stream });
     const result: { lines: string[], end: number } = {
       lines: [],
@@ -46,7 +47,7 @@ function startTestServer() {
       result.lines.push(data);
     });
     reader.on("close", () => {
-      result.end = stream.bytesRead;
+      result.end = stream.bytesRead + frm;
       res.json(result);
     });
   });

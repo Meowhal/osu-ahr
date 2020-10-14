@@ -76,10 +76,12 @@
   "OahrCli": {
     "invite_users": [],
     "password": "",
-    "use_recoder": false
+    "use_recoder": false,
+    "use_log_server": false,
+    "log_server_port": 0
   },
   "WebApi": {
-    "client_id": 1,
+    "client_id": 0,
     "client_secret": "***",
     "callback": "",
     "token_store_dir": "data/tokens/",

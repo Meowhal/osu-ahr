@@ -225,5 +225,8 @@ export class OahrCli extends OahrBase {
     this.scene = this.scenes.lobbyMenu;
     this.scene.prompt = (this.lobby.channel || "") + " > ";
     console.log(lobbyMenuCommandsMessage);
+    if (this.logServer) {
+      logger.info(`log viewer => http://localhost:${this.option.log_server_port}/?mapid=${this.lobby.lobbyId}` );
+    }    
   }
 }
