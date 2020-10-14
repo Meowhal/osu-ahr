@@ -25,7 +25,10 @@ async function fetchFromSearch(id: number): Promise<any> {
 async function fetchFromBeatmapPage(id: number): Promise<Beatmapsets | undefined> {
   const target = "https://osu.ppy.sh/b/" + id;
   const res = await axios.get(target);
+  
   const $ = cheerio.load(res.data);
+  const jsonTag = $('#json-beatmapset');
+  if (jsonTag.length == 0) return;
   const src = $('#json-beatmapset')[0].children[0].data;
   if (src) {
     const json = JSON.parse(src);

@@ -7,15 +7,6 @@ import config from "config";
 import { Beatmap, fetchBeatmap } from "../webapi/Beatmapsets";
 import { Player } from "../Player";
 
-const ValidatorConstructors: { [id: string]: ValidatorConstructor } = {};
-
-export function RegisterValidatorConstructor(v: ValidatorConstructor, name: string) {
-  if (name in ValidatorConstructors) {
-    throw new Error("validator name conflict detected: " + name);
-  }
-  ValidatorConstructors[name] = v;
-}
-
 export type ValidatorConstructor = (paret: MapChecker) => IValidator;
 
 export interface IValidator {
@@ -60,7 +51,8 @@ export abstract class ValidatorBase implements IValidator {
     let m = re.exec(configuration);
     let r = false;
     while (m) {
-      r ||= this.SetConfiguration(m[1], m[2], parent);
+      const rs = this.SetConfiguration(m[1], m[2], parent);
+      r ||= rs;
       m = re.exec(configuration);
     }
     return r;
@@ -70,6 +62,13 @@ export abstract class ValidatorBase implements IValidator {
     let s = Math.round(sec - m * 60);
     return `${m}:${s.toString().padStart(2, "0")}`;
   }
+}
+
+export type DefaultRegulation = {
+  star_min: number;
+  star_max: number;
+  length_min: number;
+  length_max: number;
 }
 
 class DefaultValidator extends ValidatorBase {
@@ -86,6 +85,10 @@ class DefaultValidator extends ValidatorBase {
 
   RateBeatmap(map: Beatmap, parent: MapChecker): number {
     let r = 0;
+    if (map.mode != "osu") {
+      r += 1;
+    }
+
     if (map.difficulty_rating < this.star.min) {
       r += (this.star.min - map.difficulty_rating) * 0.5;
     }
@@ -103,10 +106,18 @@ class DefaultValidator extends ValidatorBase {
     }
 
     if (0.2 < r) {
-      parent.lobby.SendMessage("Violation of Regulation :( \n" + this.GetDescription());
-      return r;
-    } else if (0.01 < r) {
-      parent.lobby.SendMessage("The map is a bit out of regulation. you can skip this host with '!skip' voting command. ");
+      const msg
+        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${this.formatSec(map.total_length)}` + "\n"
+        + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
+      parent.lobby.SendMessage(msg);
+      return Math.max(r, 0.45);
+    } else if (0.001 < r) {
+      const msg
+        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${this.formatSec(map.total_length)}` + "\n"
+        + `Violation of Regulation : ${this.GetDescription()}` + "\n"
+        + `The map is a bit out of regulation. you can skip current host with '!skip' voting command.`
+        ;
+      parent.lobby.SendMessage(msg);
     }
     return 0;
   }
@@ -172,14 +183,16 @@ class DefaultValidator extends ValidatorBase {
   }
 }
 
-RegisterValidatorConstructor((parent: MapChecker) => new DefaultValidator(parent.option), "default_validator");
+const ValidatorConstructors: { [id: string]: ValidatorConstructor } = {};
 
-export type DefaultRegulation = {
-  star_min: number;
-  star_max: number;
-  length_min: number;
-  length_max: number;
+export function RegisterValidatorConstructor(v: ValidatorConstructor, name: string) {
+  if (name in ValidatorConstructors) {
+    throw new Error("validator name conflict detected: " + name);
+  }
+  ValidatorConstructors[name] = v;
 }
+
+RegisterValidatorConstructor((parent: MapChecker) => new DefaultValidator(parent.option), "default_validator");
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -216,9 +229,11 @@ export class MapChecker extends LobbyPlugin {
         case BanchoResponseType.BeatmapChanged:
           this.onBeatmapChanged(a.response.params[0], a.response.params[1]);
           break;
-        case BanchoResponseType.BeatmapChanging:
         case BanchoResponseType.HostChanged:
           this.cancelCheck();
+          break;
+        case BanchoResponseType.BeatmapChanging:
+          this.checkingMapId = 0;
           break;
         case BanchoResponseType.MatchStarted:
           this.onMatchStarted();
@@ -234,8 +249,8 @@ export class MapChecker extends LobbyPlugin {
   }
 
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
-    if (command == "!r") {
-      this.lobby.SendMessageWithCoolTime(this.validator.GetDescription(), "regulation", 30000);
+    if (command == "!r" || command == "!regulation") {
+      this.lobby.SendMessageWithCoolTime(this.validator.GetDescription(), "regulation", 10000);
     }
 
     if (!player.isAuthorized) {
@@ -261,8 +276,10 @@ export class MapChecker extends LobbyPlugin {
 
     if (v) {
       this.SendPluginMessage("enabledMapChecker");
+      this.lobby.SendMessage("mapChecker Enabled");
     } else {
       this.SendPluginMessage("disabledMapChecker");
+      this.lobby.SendMessage("mapChecker Disabled");
     }
     this.option.enabled = v;
   }
@@ -279,8 +296,10 @@ export class MapChecker extends LobbyPlugin {
   }
 
   private onBeatmapChanged(mapId: number, mapTitle: string) {
-    this.checkingMapId = mapId;
-    this.check(mapId, mapTitle);
+    if (this.option.enabled) {
+      this.checkingMapId = mapId;
+      this.check(mapId, mapTitle);
+    }
   }
 
   private async cancelCheck() {
@@ -296,26 +315,29 @@ export class MapChecker extends LobbyPlugin {
     }
     let p = this.validator.RateBeatmap(map, this);
     this.penaltyPoint += p;
-    if (1 < this.penaltyPoint) {
+    if (1 <= this.penaltyPoint) {
       this.punishHost();
     } else if (0 < p) {
       this.revertMap();
     } else {
       this.accpectMap();
     }
-
   }
 
   private punishHost(): void {
+    this.logger.info("punished " + this.lobby.host?.escaped_name);
+    this.lobby.SendMessage("!mp map " + this.lastMapId);
     this.SendPluginMessage("skip");
   }
 
   private revertMap(): void {
+    this.logger.info("revertMap " + this.lobby.host?.escaped_name);
     this.lobby.SendMessage("!mp map " + this.lastMapId);
   }
 
   private accpectMap(): void {
     this.SendPluginMessage("validatedMap");
+    this.lastMapId = this.lobby.mapId;
   }
 
   private async getBeatmap(mapId: number): Promise<Beatmap | undefined> {
@@ -327,14 +349,38 @@ export class MapChecker extends LobbyPlugin {
       }
     }
 
-    const q = await this.webApiClient?.lookupBeatmap(mapId) ?? await fetchBeatmap(mapId);
+    let q = null;
+    if (this.webApiClient) {
+      try {
+        q = await this.webApiClient.lookupBeatmap(mapId);
+      } catch(e) {
+        this.logger.error(e);
+        // トークンがない状態ならもう使わない。
+        // マップが存在しない可能性を考慮
+        if (!this.webApiClient.token) {
+          this.webApiClient = null;
+        }
+      }
+    }
+
+    if (!q) {
+      try {
+        q = await fetchBeatmap(mapId);
+      } catch(e) {
+        this.logger.error(e);
+      }
+    }
 
     if (q) {
       let v = { ...q, fetchedAt: Date.now() };
       this.maps[mapId] = v;
       return v;
     }
-    return;
+
   }
 
+  GetPluginStatus(): string {
+    return `-- Mapchecker --
+  current reg : ${this.validator.GetDescription()}`;
+  }
 }
