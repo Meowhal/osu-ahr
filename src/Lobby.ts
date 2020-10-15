@@ -336,7 +336,7 @@ export class Lobby {
   }
 
   private handleAction(from: string, to: string, message: string): void {
-    this.chatlogger.info("*%s %s", from, message);
+    this.chatlogger.info("*%s:%s", from, message);
   }
 
   private handlePrivateMessage(from: string, message: string): void {

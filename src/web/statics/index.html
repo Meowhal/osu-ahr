@@ -5,23 +5,25 @@
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <title>Osu! Auto Host Rotaion Log Viewer</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Inconsolata&family=Roboto+Mono&display=swap" rel="stylesheet">
-  <link href="main.css" rel="stylesheet" type="text/css"></head>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Inconsolata&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <link href="main.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
-  <div>
-    <div>
-      <h1>Osu! Auto Host Rotaion Log Viewer</h1>
-      <label for="mapid">mapid</label>
-      <input name="mapid" type="text" />
-      <button onclick="updateClicked()" >更新</button>
-    </div>
-    <ul id="list">
-
-    </ul>
-    <hr>
-    <button onclick="fetchLogsAsync()" >update</button>  </div>
+  <header>
+    <h1>Osu! Auto Host Rotaion Log Viewer</h1>
+    <label for="mapid">mapid</label>
+    <input name="mapid" type="text" />
+    <button onclick="updateClicked()">更新</button>
+  </header>
+  <section>
+    <ul id="list"></ul>
+  </section>
+  <hr>
+  <footer>
+    <button onclick="fetchLogsAsync()">update</button>
+  </footer>
 </body>
 
 <script src="main.js" type="text/javascript"></script>

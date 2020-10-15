@@ -78,7 +78,8 @@
     },
     "inout": {
       "appenders": [
-        "console"
+        "console",
+        "file_cli"
       ],
       "level": "all"
     },

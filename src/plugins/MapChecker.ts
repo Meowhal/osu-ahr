@@ -110,7 +110,7 @@ class DefaultValidator extends ValidatorBase {
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${this.formatSec(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
       parent.lobby.SendMessage(msg);
-      return Math.max(r, 0.45);
+      return Math.min(Math.max(r, 0.45), 0.9);
     } else if (0.001 < r) {
       const msg
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${this.formatSec(map.total_length)}` + "\n"

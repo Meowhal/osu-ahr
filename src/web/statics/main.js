@@ -29,15 +29,13 @@ function* filterLogs(logs) {
 function parseLogLine(line) {
   var m = line.match(/^\[(.+?)\] \[(\w+)\] (\w+) - (.*)/);
   if (m) {
-    let dt = new Date(m[1]);
-
     let d = {
-      date: formatDate(dt),
+      date: m[1],
       level: m[2],
       tag: m[3],
       message: m[4]
     };
-    
+
     return d;
   }
 }
@@ -53,23 +51,21 @@ function convertLink(log) {
 
 function decolateChat(log) {
   let sender = "system";
-  let message = log.message;
+  let message = "";
   let cl = "";
   if (log.tag == "chat") {
-    if (log.message.startsWith("*")) {
-      const m = log.message.match(/^\*([^\s]+)\s(.*)$/);
-      sender = m[1];
-      message = m[2];
-    } else {
-      const m = log.message.match(/^([^\:]+)\:(.*)$/);
-      sender = m[1];
-      message = m[2];
-    }
-
-    if (sender == "bot") {
-      cl = " bot";
-    } else {
-      cl = " user";
+    const m = log.message.match(/^(\*?[^\:]+)\:(.*)$/);
+    sender = m[1];
+    message = m[2];
+    cl = (sender == "bot") ? " bot" : " user";
+  } else if (log.tag == "inout") {
+    for (let v of log.message.split("\x1b")) {
+      const m = v.match(/^\[(\d+)m(.*)/);
+      if (m) {
+        message += `<span class='fg${m[1]}'>${m[2]}</span>`;
+      } else {
+        message += v;
+      }
     }
   } else {
     message = log.message;
@@ -87,13 +83,13 @@ function formatDate(date) {
   return `${M}/${d} ${h}:${m}:${s}`;
 }
 
-
 function AppendLog(log) {
   decolate(log);
   let li = document.createElement("li");
-  let spDate = document.createElement("span");
+  let spDate = document.createElement("time");
   spDate.className = "date";
-  spDate.innerText = log.date;
+  spDate.setAttribute("datetime", log.date);
+  spDate.innerText = formatDate(new Date(log.date));
   let spLevel = document.createElement("span");
   spLevel.className = "level";
   spLevel.innerText = log.level;
@@ -126,7 +122,9 @@ function test_static_data() {
     "      ",
     "[2020-10-14T01:50:32.279] [TRACE] chat - bot:Queued the match to start in 90 seconds",
     "[2020-10-14T01:50:51.570] [INFO] chat - bappojappo:is this a stream",
-    "[2020-10-14T01:50:53.941] [INFO] chat - bappojappo:map"
+    "[2020-10-14T01:50:53.941] [INFO] chat - bappojappo:map",
+    "[2020-10-15T02:58:35.191] [INFO] inout - -[31m mcclennys [0m",
+    "[2020-10-15T03:08:26.782] [INFO] inout - +[32m Tobymusen [0m, -[31m leon4chanel [0m"
   ];
 
   let al = parseLogs(logs);
