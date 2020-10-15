@@ -1,5 +1,4 @@
 import express from "express";
-import historyData from "../../data/arc/history_67261609.json";
 import fs from 'fs';
 import readline from 'readline';
 import { Server } from "http";
@@ -8,12 +7,6 @@ export function startLogServer(port:number): Server {
   const app = express();
   app.use("", express.static("src/web/statics"));
   app.use("/logs", express.static("logs/cli"));
-  app.get("/api/user/:id", (req, res, next) => {
-    let tid = parseInt(req.params.id);
-    if (isNaN(tid)) return res.json({});
-    let usr = historyData.users.find(v => v.id.toString() == req.params.id);
-    return res.json(usr);
-  });
 
   app.get("/api/clilog/:id", (req, res, next) => {
     let p = `logs/cli/${req.params.id}.log`;
