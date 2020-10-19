@@ -153,6 +153,7 @@ let cursor = 0;
 let timeid = 0;
 function fetchLogsAsync() {
   let mapId = document.getElementsByName("mapid")[0].value;
+  let autoScrollCheckBox = document.getElementsByName("autoScroll")[0];
   clearTimeout(timeid);
   return fetch(`/api/clilog/${mapId}?from=${cursor}`).then(res => {
     return res.json();
@@ -164,6 +165,9 @@ function fetchLogsAsync() {
 
     for (let l of bl) {
       AppendLog(l);
+    }
+    if (autoScrollCheckBox.checked) {
+      ScrollToBottom();
     }
     timeid = setTimeout(() => {
       timeid = 0;
@@ -178,6 +182,12 @@ function fetchLogSize(mapId) {
   }).then(data => {
     cursor = Math.max(0, data - 100000);
   });
+}
+
+function ScrollToBottom() {
+  let doc = document.documentElement;
+  let bottom = doc.scrollHeight - doc.clientHeight;
+  window.scroll(0, bottom);
 }
 
 function init() {
