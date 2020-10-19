@@ -16,8 +16,8 @@ export async function trial() {
 
   const client = new WebApiClient({ asGuest: true });
 
-  const user = await client.lookupBeatmap(1795177);
-  console.log(user);
+  const user = await client.lookupBeatmap(2647589);
+  console.log(JSON.stringify(user));
 }
 
 export async function getGuestTokenTrial(): Promise<void> {

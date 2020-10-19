@@ -71,7 +71,7 @@ export type DefaultRegulation = {
   length_max: number;
 }
 
-class DefaultValidator extends ValidatorBase {
+export class DefaultValidator extends ValidatorBase {
   star = { min: 0, max: 0 };
   length = { min: 0, max: 0 };
 

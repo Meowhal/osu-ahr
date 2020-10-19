@@ -25,7 +25,7 @@ async function fetchFromSearch(id: number): Promise<any> {
 async function fetchFromBeatmapPage(id: number): Promise<Beatmapsets | undefined> {
   const target = "https://osu.ppy.sh/b/" + id;
   const res = await axios.get(target);
-  
+
   const $ = cheerio.load(res.data);
   const jsonTag = $('#json-beatmapset');
   if (jsonTag.length == 0) return;
@@ -75,9 +75,9 @@ export type Beatmapsets = {
   "storyboard": boolean,
   "submitted_date": string,
   "tags": string,
-  "has_favourited": boolean,
-  "beatmaps": Beatmap[] | undefined,
-  "current_user_attributes": {
+  "has_favourited"?: boolean,
+  "beatmaps"?: Beatmap[],
+  "current_user_attributes"?: {
     "can_delete": false,
     "can_edit_metadata": false,
     "can_hype": true,
@@ -87,19 +87,19 @@ export type Beatmapsets = {
     "new_hype_time": null,
     "remaining_hype": 10
   },
-  "description": {
+  "description"?: {
     "description": string
   },
-  "genre": {
+  "genre"?: {
     "id": number,
     "name": string
   },
-  "language": {
+  "language"?: {
     "id": number,
     "name": string
   },
   "ratings": number[],
-  "recent_favourites": any[],
+  "recent_favourites"?: any[],
 }
 
 export type Covers = {
@@ -144,5 +144,5 @@ export type Beatmap = {
     "exit": number[]
   },
   "max_combo": number,
-  "beatmapset": Beatmapsets | undefined
+  "beatmapset"?: Beatmapsets
 }

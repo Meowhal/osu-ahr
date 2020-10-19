@@ -10,3 +10,4 @@ export * from "./Recorder";
 export * from "./MapRecaster";
 export * from "./InOutLogger";
 export * from "./HistoryLoader";
+export * from "./MapChecker";

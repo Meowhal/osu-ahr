@@ -1,9 +1,8 @@
 import { Lobby, IIrcClient } from "..";
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader } from "../plugins";
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker } from "../plugins";
 import { parser } from "../parsers";
-import { MapChecker } from "../plugins/MapChecker";
 import { WebApiClient } from "../webapi/WebApiClient";
 import { Server } from "http";
 import { startLogServer } from "../web/LogServer";
