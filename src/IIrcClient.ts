@@ -21,11 +21,11 @@ export interface IIrcClient extends EventEmitter {
 
 export function logIrcEvent(client: IIrcClient) {
   client.on('error', function (message) {
-    ircLogger.error('ERROR: %s: %s', message.command, message.args.join(' '));
+    ircLogger.error('ERROR: ' + JSON.stringify(message));
   });
   client.on('registered', function (message) {
     const args = message.args as string[];
-    ircLogger.debug('@reg %s', args.join(", "));
+    ircLogger.debug('@reg %s', args?.join(", "));
   });
   client.on('message', function (from, to, message) {
     ircLogger.debug('@msg  %s => %s: %s', from, to, message);
