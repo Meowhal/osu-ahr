@@ -16,7 +16,7 @@ describe.only("Map Checker Tests", function () {
   async function setupAsync():
     Promise<{ checker: MapChecker, lobby: Lobby, ircClient: DummyIrcClient }> {
     const li = await tu.SetupLobbyAsync();
-    const ma = new MapChecker(li.lobby, null, );
+    const ma = new MapChecker(li.lobby, null,);
     return { checker: ma, ...li };
   }
 
@@ -28,8 +28,8 @@ describe.only("Map Checker Tests", function () {
         length_min: 0,
         length_max: 300,
       }
-      const {checker, ircClient, lobby} = await setupAsync();
-      const map_star_5_55_length_93 : Beatmap = Object.assign(beatmap_sample, {});
+      const { checker, ircClient, lobby } = await setupAsync();
+      const map_star_5_55_length_93: Beatmap = Object.assign(beatmap_sample, {});
 
       const dr = new DefaultValidator(reg);
       const r = dr.RateBeatmap(map_star_5_55_length_93, checker);

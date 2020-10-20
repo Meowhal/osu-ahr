@@ -122,6 +122,9 @@ export class OahrCli extends OahrBase {
           case "reorder":
             this.selector.Reorder(l.arg);
             break;
+          case "regulation":
+            this.checker.SetConfig(l.arg);
+            break;
           case "c":
           case "close":
             if (l.arg == "now") {
@@ -173,7 +176,7 @@ export class OahrCli extends OahrBase {
   get exited(): boolean {
     return this.scene === this.scenes.exited;
   }
-  
+
   startApp(rl: readline.Interface | null) {
     if (rl == null) {
       rl = readline.createInterface({
@@ -226,7 +229,7 @@ export class OahrCli extends OahrBase {
     this.scene.prompt = (this.lobby.channel || "") + " > ";
     console.log(lobbyMenuCommandsMessage);
     if (this.logServer) {
-      logger.info(`log viewer => http://localhost:${this.option.log_server_port}/?mapid=${this.lobby.lobbyId}` );
-    }    
+      logger.info(`log viewer => http://localhost:${this.option.log_server_port}/?mapid=${this.lobby.lobbyId}`);
+    }
   }
 }
