@@ -2,7 +2,7 @@ import { Lobby } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import { WebApiClient } from "../webapi/WebApiClient";
-
+import log4js from "log4js";
 import config from "config";
 import { Beatmap, fetchBeatmap } from "../webapi/Beatmapsets";
 import { Player } from "../Player";
@@ -15,9 +15,8 @@ export interface IValidator {
    * 0 means accepted, above 0 means rejected.
    * Penalty points are accumulated and the host will be punished if the point reaches 1.
    * @param map target beatmap
-   * @param parent mapchecker plugin
    */
-  RateBeatmap(map: Beatmap, parent: MapChecker): number;
+  RateBeatmap(map: Beatmap): { rate: number, message: string };
 
   /**
    * Handles configuration change commands
@@ -27,9 +26,8 @@ export interface IValidator {
    * ex *regulation star_max = 5.99
    * configuration format depends on validator implementation
    * @param command 
-   * @param parent mapchecker plugin
    */
-  OnGotSettingCommand(configuration: string, parent: MapChecker): boolean;
+  OnGotSettingCommand(configuration: string): boolean;
 
   /**
    * returns a map regulation description for players
@@ -38,11 +36,11 @@ export interface IValidator {
 }
 
 export abstract class ValidatorBase implements IValidator {
-  abstract RateBeatmap(map: Beatmap, parent: MapChecker): number;
-  abstract SetConfiguration(name: string, value: string, parent: MapChecker): boolean;
+  abstract RateBeatmap(map: Beatmap): { rate: number, message: string };
+  abstract SetConfiguration(name: string, value: string): boolean;
   abstract GetDescription(): string;
 
-  OnGotSettingCommand(configuration: string, parent: MapChecker): boolean {
+  OnGotSettingCommand(configuration: string): boolean {
     // valid configuration samples
     //  star_max=1
     //  hello = world
@@ -51,17 +49,18 @@ export abstract class ValidatorBase implements IValidator {
     let m = re.exec(configuration);
     let r = false;
     while (m) {
-      const rs = this.SetConfiguration(m[1], m[2], parent);
+      const rs = this.SetConfiguration(m[1], m[2]);
       r ||= rs;
       m = re.exec(configuration);
     }
     return r;
   }
-  formatSec(sec: number): string {
-    let m = Math.floor(sec / 60);
-    let s = Math.round(sec - m * 60);
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }
+}
+
+export function secToTimeNotation(sec: number): string {
+  let m = Math.floor(sec / 60);
+  let s = Math.round(sec - m * 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 export type DefaultRegulation = {
@@ -72,18 +71,20 @@ export type DefaultRegulation = {
 }
 
 export class DefaultValidator extends ValidatorBase {
+  logger: log4js.Logger;
   star = { min: 0, max: 0 };
   length = { min: 0, max: 0 };
 
-  constructor(config: DefaultRegulation) {
+  constructor(config: DefaultRegulation, logger: log4js.Logger) {
     super();
     this.star.min = config.star_min;
     this.star.max = config.star_max;
     this.length.min = config.length_min;
     this.length.max = config.length_max;
+    this.logger = logger;
   }
 
-  RateBeatmap(map: Beatmap, parent: MapChecker): number {
+  RateBeatmap(map: Beatmap): { rate: number, message: string } {
     let r = 0;
     if (map.mode != "osu") {
       r += 1;
@@ -105,27 +106,28 @@ export class DefaultValidator extends ValidatorBase {
       r += (map.total_length - this.length.max) / 60.0;
     }
 
+    let rs = { rate: r, message: "" };
+
     if (0.2 < r) {
-      const msg
-        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${this.formatSec(map.total_length)}` + "\n"
+      rs.message
+        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
-      parent.lobby.SendMessage(msg);
-      return Math.min(Math.max(r, 0.45), 0.9);
+      rs.rate = Math.min(Math.max(r, 0.45), 0.9);
     } else if (0.001 < r) {
-      const msg
-        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${this.formatSec(map.total_length)}` + "\n"
+      rs.message
+        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}` + "\n"
         + `The map is a bit out of regulation. you can skip current host with '!skip' voting command.`
         ;
-      parent.lobby.SendMessage(msg);
     }
-    return 0;
+
+    return rs;
   }
 
-  SetConfiguration(name: string, value: string, parent: MapChecker): boolean {
+  SetConfiguration(name: string, value: string): boolean {
     let v = parseFloat(value);
     if (isNaN(v)) {
-      parent.logger.warn(`invalid regulation config : ${name} = ${value}`);
+      this.logger.warn(`invalid regulation config : ${name} = ${value}`);
       return false;
     }
 
@@ -149,7 +151,7 @@ export class DefaultValidator extends ValidatorBase {
       }
     }
 
-    parent.logger.warn(`invalid regulation config : ${name} = ${value}`);
+    this.logger.warn(`invalid regulation config : ${name} = ${value}`);
     return false;
   }
 
@@ -166,11 +168,11 @@ export class DefaultValidator extends ValidatorBase {
     }
 
     if (this.length.min != 0 && this.length.max != 0) {
-      d_length = `${this.formatSec(this.length.min)} <= length <= ${this.formatSec(this.length.max)}`;
+      d_length = `${secToTimeNotation(this.length.min)} <= length <= ${secToTimeNotation(this.length.max)}`;
     } else if (this.length.min != 0) {
-      d_length = `${this.formatSec(this.length.min)} <= length`;
+      d_length = `${secToTimeNotation(this.length.min)} <= length`;
     } else if (this.length.max != 0) {
-      d_length = `length <= ${this.formatSec(this.length.max)}`;
+      d_length = `length <= ${secToTimeNotation(this.length.max)}`;
     }
 
     if (d_star != "" && d_length != "") {
@@ -192,7 +194,7 @@ export function RegisterValidatorConstructor(v: ValidatorConstructor, name: stri
   ValidatorConstructors[name] = v;
 }
 
-RegisterValidatorConstructor((parent: MapChecker) => new DefaultValidator(parent.option), "default_validator");
+RegisterValidatorConstructor((parent: MapChecker) => new DefaultValidator(parent.option, parent.logger), "default_validator");
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -285,7 +287,10 @@ export class MapChecker extends LobbyPlugin {
   }
 
   SetConfig(config: string): void {
-    this.validator.OnGotSettingCommand(config, this);
+    const r = this.validator.OnGotSettingCommand(config);
+    if (r) {
+      this.lobby.SendMessage("new regulation: " + this.validator.GetDescription());
+    }
   }
 
   private onMatchStarted() {
@@ -313,11 +318,11 @@ export class MapChecker extends LobbyPlugin {
       this.logger.warn(`couldn't find map id:${mapId}, title:${mapTitle}`);
       return;
     }
-    let p = this.validator.RateBeatmap(map, this);
-    this.penaltyPoint += p;
+    let r = this.validator.RateBeatmap(map);
+    this.penaltyPoint += r.rate;
     if (1 <= this.penaltyPoint) {
       this.punishHost();
-    } else if (0 < p) {
+    } else if (0 < r.rate) {
       this.revertMap();
     } else {
       this.accpectMap();
@@ -353,7 +358,7 @@ export class MapChecker extends LobbyPlugin {
     if (this.webApiClient) {
       try {
         q = await this.webApiClient.lookupBeatmap(mapId);
-      } catch(e) {
+      } catch (e) {
         this.logger.error(e);
         // トークンがない状態ならもう使わない。
         // マップが存在しない可能性を考慮
@@ -366,7 +371,7 @@ export class MapChecker extends LobbyPlugin {
     if (!q) {
       try {
         q = await fetchBeatmap(mapId);
-      } catch(e) {
+      } catch (e) {
         this.logger.error(e);
       }
     }
