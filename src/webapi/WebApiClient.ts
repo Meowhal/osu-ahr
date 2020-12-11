@@ -156,8 +156,13 @@ export class WebApiClient {
         server.close(() => {
           console.log("closed callback");
         });
-        res.connection.end();
-        res.connection.destroy();
+        if (res.connection) {
+          res.connection.end();
+          res.connection.destroy();
+        } else {
+          reject("no connection");
+        }
+        
       });
       server.once("close", () => {
         console.log("closed event");

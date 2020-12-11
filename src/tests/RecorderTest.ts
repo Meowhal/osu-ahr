@@ -100,7 +100,7 @@ describe("Recorder tests", function () {
       }
       await recorder.task;
       const pd = recorder.db.player;
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         pd.findOne({ escaped_name: "p0" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);
@@ -131,7 +131,7 @@ describe("Recorder tests", function () {
 
       await Promise.all(
         [
-          new Promise(resolve => {
+          new Promise<void>(resolve => {
             pd.findOne({ escaped_name: "p0" }, (err: any, doc: any) => {
               assert.isNull(err);
               assert.isNotNull(doc);
@@ -140,7 +140,7 @@ describe("Recorder tests", function () {
               resolve();
             })
           }),
-          new Promise(resolve => {
+          new Promise<void>(resolve => {
             md.findOne({ mapId: { $exists: true } }, (err: any, doc: any) => {
               assert.isNull(err);
               assert.isNotNull(doc);
@@ -160,7 +160,7 @@ describe("Recorder tests", function () {
       ircClient.raisePart(ircClient.channel, "");
       await recorder.task;
       const pd = recorder.db.player;
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         pd.findOne({ escaped_name: "p0" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);
@@ -177,7 +177,7 @@ describe("Recorder tests", function () {
       const { recorder, lobby, ircClient } = await setupAsync({ path_player: dstFile });
       await recorder.LoadDatabaseAsync();
       const pd = recorder.db.player;
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         pd.findOne({ escaped_name: "p1" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);
@@ -186,7 +186,7 @@ describe("Recorder tests", function () {
           resolve();
         })
       });
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         pd.findOne({ escaped_name: "p2" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);
@@ -206,7 +206,7 @@ describe("Recorder tests", function () {
       const { recorder, lobby, ircClient } = await setupAsync({ path_player: dstFile });
       await recorder.LoadDatabaseAsync();
       const pd = recorder.db.player;
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         pd.findOne({ escaped_name: "p1" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);
@@ -215,7 +215,7 @@ describe("Recorder tests", function () {
           resolve();
         })
       });
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         pd.findOne({ escaped_name: "p2" }, (err: any, doc: any) => {
           assert.isNull(err);
           assert.isNotNull(doc);

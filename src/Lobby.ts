@@ -617,7 +617,12 @@ export class Lobby {
       this.JoinedLobby.once(a => {
         this.lobbyName = title;
         this.logger.trace("completed makeLobby");
-        resolve(this.lobbyId);
+        if (this.lobbyId) {
+          resolve(this.lobbyId);
+        } else {
+          reject("missing lobby id");
+        }
+
       });
       const trg = "BanchoBot";
       const msg = "!mp make " + title;
@@ -638,7 +643,11 @@ export class Lobby {
       this.ircClient.join(ch, () => {
         this.lobbyName = "__";
         this.logger.trace("completed EnterLobby");
-        resolve(this.lobbyId);
+        if (this.lobbyId) {
+          resolve(this.lobbyId);
+        } else {
+          reject("missing lobby id");
+        }
       });
     });
   }

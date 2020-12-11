@@ -9,7 +9,7 @@ import beatmap_sample_fuilts from "./cases/beatmap_fruits_2578171.json";
 import { Beatmap } from '../webapi/Beatmapsets';
 import { getLogger } from "log4js";
 
-describe.only("Map Checker Tests", function () {
+describe("Map Checker Tests", function () {
   before(function () {
     tu.configMochaAsSilent();
   });
