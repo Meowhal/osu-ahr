@@ -15,7 +15,10 @@
     <h1>Osu! Auto Host Rotaion Log Viewer</h1>
     <label for="mapid">mapid</label>
     <input name="mapid" type="text" />
-    <button onclick="updateClicked()">更新</button>
+    <button onclick="updateClicked()">update</button>
+    <a target="oahrhistory" id="history" href=".">*</a>
+    <button onclick="closeClicked()">close lobby</button>
+    <button onclick="quitClicked()">quit</button>
   </header>
   <section>
     <ul id="list"></ul>
@@ -28,4 +31,5 @@
 </body>
 
 <script src="main.js" type="text/javascript"></script>
+
 </html>

@@ -8,6 +8,10 @@ export class OahrHeadless extends OahrBase {
 
   constructor(client: IIrcClient) {
     super(client);
+    client.once("part", () => {
+      logger.info("detected part event. closing...");
+      process.exit(0);
+    });
   }
 
   startApp(command: string, arg: string): void {
@@ -21,7 +25,6 @@ export class OahrHeadless extends OahrBase {
           break;
         default:
           process.exit(1);
-          break;
       }
     } catch (e) {
       logger.error(e);

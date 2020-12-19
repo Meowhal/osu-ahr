@@ -60,7 +60,7 @@ export class OahrBase {
     }
     this.checker = new MapChecker(this.lobby, this.webApiClient);
     if (this.option.use_log_server) {
-      this.logServer = startLogServer(this.option.log_server_port);
+      this.logServer = startLogServer(this.option.log_server_port, this.lobby);
     }
     this.lobby.RaisePluginsLoaded();
   }

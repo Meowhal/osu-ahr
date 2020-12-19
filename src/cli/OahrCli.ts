@@ -19,6 +19,7 @@ LobbyMenu Commands
   [say <Message>] Send Message to #multiplayer.
   [info] Show current application's informations.
   [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
+  [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
   [close now] Close the lobby and Quit this application. ex: 'close now'
   [close <num:seconds>] Close the lobby after num seconds. ex: 'close 30'
   [close] Lock the lobby and close it when everyone leaves. ex: 'close'
@@ -29,7 +30,8 @@ LobbyMenu Commands
 interface Scene {
   name: string;
   prompt: string;
-  reaction: (line: string) => Promise<void>;
+  action: (line: string) => Promise<void>;
+  completer: readline.Completer
 }
 
 export class OahrCli extends OahrBase {
@@ -44,7 +46,7 @@ export class OahrCli extends OahrBase {
     mainMenu: {
       name: "",
       prompt: "> ",
-      reaction: async (line: string) => {
+      action: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         switch (l.command) {
           case "m":
@@ -95,12 +97,17 @@ export class OahrCli extends OahrBase {
             logger.info("invalid command : %s", line);
             break;
         }
+      },
+      completer: (line: string): readline.CompleterResult => {
+        const completions = ["make", "enter", "quit", "exit", "help"];
+        const hits = completions.filter(v => v.startsWith(line));
+        return [hits.length ? hits : ["make", "enter", "quit", "help"], line];
       }
     },
     lobbyMenu: {
       name: "lobbyMenu",
       prompt: "> ",
-      reaction: async (line: string) => {
+      action: async (line: string) => {
         let l = parser.SplitCliCommand(line);
         if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
           this.scene = this.scenes.exited;
@@ -159,13 +166,21 @@ export class OahrCli extends OahrBase {
             console.log("invalid command : %s", line);
             break;
         }
+      },
+      completer: (line: string): readline.CompleterResult => {
+        const completions = ["say", "info", "reorder", "regulation", "close", "quit", "help"];
+        const hits = completions.filter(v => v.startsWith(line));
+        return [hits.length ? hits : completions, line];
       }
     },
 
     exited: {
       name: "exited",
       prompt: "ended",
-      reaction: async (line: string) => { }
+      action: async (line: string) => { },
+      completer: (line: string): readline.CompleterResult => {
+        return [["exit"], line];
+      }
     }
   };
 
@@ -181,7 +196,10 @@ export class OahrCli extends OahrBase {
     if (rl == null) {
       rl = readline.createInterface({
         input: process.stdin,
-        output: process.stdout
+        output: process.stdout,
+        completer: (line: string) => {
+          return this.scene.completer(line);
+        }
       });
     }
     let r = rl as readline.Interface;
@@ -198,7 +216,7 @@ export class OahrCli extends OahrBase {
 
     r.on("line", line => {
       logger.trace("scene:%s, line:%s", this.scene.name, line);
-      this.scene.reaction(line).then(() => {
+      this.scene.action(line).then(() => {
         if (!this.exited) {
           r.setPrompt(this.prompt);
           r.prompt();

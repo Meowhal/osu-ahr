@@ -42,8 +42,8 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 > npm install
 ```
 + get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
-+ copy `./config/default.json` to `./config/development.json`
-+ enter your account id and irc password to `./config/development.json`
++ copy `./config/default.json` to `./config/local.json`
++ enter your account id and irc password to `./config/local.json`
 + launch the bot
 ```bash 
 > npm start

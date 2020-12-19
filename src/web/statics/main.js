@@ -149,6 +149,22 @@ function updateClicked() {
   document.location.search = "mapid=" + value;
 }
 
+function closeClicked() {
+  let mapId = document.getElementsByName("mapid")[0].value;
+  fetch(`/api/close/${mapId}`).then(async res => {
+    let r = await res.json();
+    alert(r.result);
+  })
+}
+
+function quitClicked() {
+  let mapId = document.getElementsByName("mapid")[0].value;
+  fetch(`/api/quit/${mapId}`).then(async res => {
+    let r = await res.json();
+    alert(r.result);
+  })
+}
+
 let cursor = 0;
 let timeid = 0;
 function fetchLogsAsync() {
@@ -198,6 +214,9 @@ function init() {
     fetchLogSize(mapId).then(() => {
       fetchLogsAsync(mapId);
     });
+    let his = document.getElementById("history");
+    his.href = "https://osu.ppy.sh/community/matches/" + mapId;
+    his.innerText = "history";
   }
 }
 

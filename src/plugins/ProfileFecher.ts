@@ -36,7 +36,7 @@ export class ProfileFecher extends LobbyPlugin {
 
   private async initializeAsync(): Promise<void> {
     return Promise.all([
-      new Promise((resolve, reject) => {
+      new Promise<void>((resolve, reject) => {
         this.profileDb.loadDatabase(err => {
           if (this.checkDbError(err)) { reject(err); }
           resolve();
@@ -64,7 +64,7 @@ export class ProfileFecher extends LobbyPlugin {
   }
 
   private addTaskQueueIfNeeded(player: Player): boolean {
-    
+
     if (player.id !== 0) return false;
     let profile = this.profileMap.get(player.name);
     if (profile && !this.isExpiredProfile(profile)) {
@@ -84,10 +84,10 @@ export class ProfileFecher extends LobbyPlugin {
         if (profile == null) {
           profile = await this.getProfileFromWebApi(player);
           if (profile != null) {
-            await this.saveProfileToDB(profile); 
+            await this.saveProfileToDB(profile);
           }
         }
-  
+
         if (profile != null) {
           player.id = profile.id;
           player.profile = profile;
@@ -96,10 +96,10 @@ export class ProfileFecher extends LobbyPlugin {
           this.logger.warn("user not found! " + player.name);
         }
         this.pendingNames.delete(player.name);
-      } catch(e) {
+      } catch (e) {
         this.logger.error("@addTaskQueueIfNeeded" + e);
       }
-      
+
     });
 
     return true;
@@ -130,11 +130,11 @@ export class ProfileFecher extends LobbyPlugin {
     });
   }
 
-  private saveProfileToDB(profile:UserProfile): Promise<void> {
+  private saveProfileToDB(profile: UserProfile): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.profileDb.remove({ name: profile.username }, (err: any, n: number) => {
         if (this.checkDbError(err)) return reject(err);
-        this.profileDb.insert(profile ,(err: any, newdoc:UserProfile) => {
+        this.profileDb.insert(profile, (err: any, newdoc: UserProfile) => {
           if (this.checkDbError(err)) return reject(err);
           resolve();
         });
@@ -142,7 +142,7 @@ export class ProfileFecher extends LobbyPlugin {
     });
   }
 
-  private getProfileFromWebApi(player: Player) : Promise<UserProfile | null> {
+  private getProfileFromWebApi(player: Player): Promise<UserProfile | null> {
     return this.webApiClient.getUser(player.name);
   }
 

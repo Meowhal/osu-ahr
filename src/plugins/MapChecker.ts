@@ -289,7 +289,9 @@ export class MapChecker extends LobbyPlugin {
   SetConfig(config: string): void {
     const r = this.validator.OnGotSettingCommand(config);
     if (r) {
-      this.lobby.SendMessage("new regulation: " + this.validator.GetDescription());
+      const m = "new regulation: " + this.validator.GetDescription();
+      this.lobby.SendMessage(m);
+      this.logger.info(m);
     }
   }
 

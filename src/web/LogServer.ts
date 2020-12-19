@@ -2,8 +2,9 @@ import express from "express";
 import fs from 'fs';
 import readline from 'readline';
 import { Server } from "http";
+import { Lobby } from "..";
 
-export function startLogServer(port:number): Server {
+export function startLogServer(port: number, lobby: Lobby): Server {
   const app = express();
   app.use("", express.static("src/web/statics"));
   app.use("/logs", express.static("logs/cli"));
@@ -46,6 +47,33 @@ export function startLogServer(port:number): Server {
         res.json(stats.size);
       }
     });
+  });
+
+  app.get("/api/close/:id", (req, res, next) => {
+    lobby.logger.info("called close");
+    if (lobby.lobbyId == req.params.id) {
+      lobby.CloseLobbyAsync();
+      res.json({ result: "done" });
+    } else {
+      res.json({ result: "invalid id" });
+    }
+  });
+
+  app.get("/api/quit/:id", (req, res, next) => {
+    if (lobby.lobbyId == req.params.id) {
+      if (lobby.ircClient.conn != null && !lobby.ircClient.conn.requestedDisconnect) {
+        lobby.ircClient.disconnect("goodby", () => {
+          lobby.logger.info("ircClient disconnected");
+          process.exit(0);
+        });
+      } else {
+        lobby.logger.info("quit");
+        process.exit(0);
+      }
+      res.json({ result: "done" });
+    } else {
+      res.json({ result: "invalid id" });
+    }
   });
 
   const server = app.listen(port, () => {
