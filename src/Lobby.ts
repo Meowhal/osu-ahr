@@ -115,10 +115,12 @@ export class Lobby {
     this.ircClient.on("netError", (err: any) => {
       this.RaiseNetError(err);
     });
-    this.ircClient.on("registered", () => {
-      if (this.status == LobbyStatus.Entered) {
+    this.ircClient.on("registered", async () => {
+      if (this.status == LobbyStatus.Entered && this.channel) {
         this.logger.warn("network reconnection detected!");
-        this.LoadMpSettingsAsync();
+        this.status = LobbyStatus.Standby;
+        await this.EnterLobbyAsync(this.channel);
+        await this.LoadMpSettingsAsync();
       }
     });
     this.ircClient.once("part", (channel: string, nick: string) => {
