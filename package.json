@@ -31,7 +31,7 @@
     "log4js": "^6.3.0",
     "nedb": "^1.8.0",
     "open": "^7.2.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.4.0"
   },
   "devDependencies": {
     "@types/async": "^3.2.3",
