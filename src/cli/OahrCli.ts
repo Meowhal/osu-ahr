@@ -131,7 +131,7 @@ export class OahrCli extends OahrBase {
             break;
           case "regulation":
             if (!l.arg) {
-              console.log(this.checker.validator.GetDescription());
+              console.log(this.checker.getRegulationDescription());
             } else if (l.arg.startsWith("enable")) {
               this.checker.SetEnabled(true);
               console.log("Regulation check Enabled");

@@ -252,9 +252,17 @@ export class MapChecker extends LobbyPlugin {
     }
   }
 
+  getRegulationDescription(): string {
+    if (this.option.enabled) {
+      return this.validator.GetDescription();
+    } else {
+      return "disabled (" + this.validator.GetDescription() + ")";
+    }
+  }
+
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
     if (command == "!r" || command == "!regulation") {
-      this.lobby.SendMessageWithCoolTime(this.validator.GetDescription(), "regulation", 10000);
+      this.lobby.SendMessageWithCoolTime(this.getRegulationDescription(), "regulation", 10000);
     }
 
     if (!player.isAuthorized) {
