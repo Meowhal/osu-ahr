@@ -74,6 +74,7 @@ export class DefaultValidator extends ValidatorBase {
   logger: log4js.Logger;
   star = { min: 0, max: 0 };
   length = { min: 0, max: 0 };
+  doSkip = false;
 
   constructor(config: DefaultRegulation, logger: log4js.Logger) {
     super();
@@ -108,7 +109,7 @@ export class DefaultValidator extends ValidatorBase {
 
     let rs = { rate: r, message: "" };
 
-    if (0.2 < r) {
+    if (this.doSkip && 0.2 < r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
@@ -117,7 +118,7 @@ export class DefaultValidator extends ValidatorBase {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}` + "\n"
-        + `The map is a bit out of regulation. you can skip current host with '!skip' voting command.`
+        + `you can skip current host with '!skip' voting command.`
         ;
     }
 
@@ -213,6 +214,7 @@ export class MapChecker extends LobbyPlugin {
   penaltyPoint: number = 0; // if reached 1, host will skip
   maps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
   validator: IValidator;
+  doSkip: boolean = false;
 
   constructor(lobby: Lobby, client: WebApiClient | null = null, option: Partial<MapCheckerOption> = {}) {
     super(lobby, "mapChecker");
@@ -267,7 +269,14 @@ export class MapChecker extends LobbyPlugin {
         this.SetEnabled(false);
         break;
       case "*regulation":
-        this.SetConfig(param);
+        if (!param) break;
+        if (param.startsWith("enable")) {
+          this.SetEnabled(true);
+        } else if (param.startsWith("disable")) {
+          this.SetEnabled(false);
+        } else {
+          this.SetConfig(param);
+        }
         break;
 
     }
@@ -322,7 +331,7 @@ export class MapChecker extends LobbyPlugin {
     }
     let r = this.validator.RateBeatmap(map);
     this.penaltyPoint += r.rate;
-    if (1 <= this.penaltyPoint) {
+    if (1 <= this.penaltyPoint && this.doSkip) {
       this.punishHost();
     } else if (0 < r.rate) {
       this.revertMap();
