@@ -15,7 +15,7 @@ export interface IHistoryFetcher {
 
 export class HistoryFecher implements IHistoryFetcher {
   async fetchHistory(limit: number, before: number | null, after: number | null, matchId: number): Promise<History> {
-    const url = `https://osu.ppy.sh/community/matches/${matchId}/history`;
+    const url = `https://osu.ppy.sh/community/matches/${matchId}`;
     const params: any = {
       'limit': limit,
     }
