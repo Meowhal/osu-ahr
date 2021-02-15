@@ -74,7 +74,6 @@ export class DefaultValidator extends ValidatorBase {
   logger: log4js.Logger;
   star = { min: 0, max: 0 };
   length = { min: 0, max: 0 };
-  doSkip = false;
 
   constructor(config: DefaultRegulation, logger: log4js.Logger) {
     super();
@@ -109,7 +108,7 @@ export class DefaultValidator extends ValidatorBase {
 
     let rs = { rate: r, message: "" };
 
-    if (this.doSkip && 0.2 < r) {
+    if (0.05 < r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
@@ -120,6 +119,7 @@ export class DefaultValidator extends ValidatorBase {
         + `Violation of Regulation : ${this.GetDescription()}` + "\n"
         + `you can skip current host with '!skip' voting command.`
         ;
+      rs.rate = 0;
     }
 
     return rs;
@@ -343,6 +343,7 @@ export class MapChecker extends LobbyPlugin {
       this.punishHost();
     } else if (0 < r.rate) {
       this.revertMap();
+      this.lobby.SendMessage(r.message);
     } else {
       this.accpectMap();
     }
