@@ -144,8 +144,17 @@ export class OahrCli extends OahrBase {
             break;
           case "c":
           case "close":
-            await this.lobby.CloseLobbyAsync();
-            this.scene = this.scenes.exited;
+            if (l.arg == "now") {
+              // close now
+              await this.lobby.CloseLobbyAsync();
+              this.scene = this.scenes.exited;
+            } else if (l.arg.match(/\d+/)) {
+              // close after secs
+              this.terminator.CloseLobby(parseInt(l.arg) * 1000);
+            } else {
+              // close after everyone leaves
+              this.terminator.CloseLobby();
+            }
             break;
           case "q":
           case "quit":
