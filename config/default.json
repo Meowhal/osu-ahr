@@ -84,6 +84,7 @@
     "client_id": 0,
     "client_secret": "***",
     "callback": "",
+    "callback_port": 3000,
     "token_store_dir": "data/tokens/",
     "asGuest": true
   },

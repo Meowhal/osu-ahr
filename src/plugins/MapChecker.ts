@@ -111,7 +111,7 @@ export class DefaultValidator extends ValidatorBase {
     if (0.05 < r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
-        + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
+        + `Violation of Regulation : ${this.GetDescription()}`;
       rs.rate = Math.min(Math.max(r, 0.45), 0.9);
     } else if (0.001 < r) {
       rs.message
