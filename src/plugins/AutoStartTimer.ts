@@ -81,6 +81,7 @@ export class AutoStartTimer extends LobbyPlugin {
   }
 
   private startTimer() {
+    if (!this.option.enabled || this.option.waitingTime < WAITINGTIME_MIN) return;
     this.SendPluginMessage("mp_start", [this.option.waitingTime.toString()]);
     if (this.option.doClearHost) {
       this.lobby.SendMessage(`!mp clearhost`);
