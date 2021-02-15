@@ -13,7 +13,7 @@ async function GetHistryTrial() {
   // 67268731
   const matchId = 67360792;
   // https://osu.ppy.sh/community/matches/${matchId}/history?before=1509690736&limit=100
-  const url = `https://osu.ppy.sh/community/matches/${matchId}/history`;
+  const url = `https://osu.ppy.sh/community/matches/${matchId}/`;
   const params = {
     'limit': 20,
     'after': 0

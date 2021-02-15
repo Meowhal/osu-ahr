@@ -76,9 +76,6 @@ export class HistoryRepository {
     try {
       data = await this.fetcher.fetchHistory(limit, before, after, this.matchId);
     } catch (e) {
-      if (e.isAxiosError) {
-        this.logger.error(e.message);
-      }
       throw e;
     }
 
