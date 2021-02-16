@@ -96,9 +96,9 @@ export class Lobby {
 
   private registerEvents(): void {
     const onjoin = (channel: string, who: string) => {
-      if (who == this.ircClient.nick) {
+      this.logger.trace("raised join event");
+      if (who == this.ircClient.nick && this.status != LobbyStatus.Entered) {
         this.RaiseJoinedLobby(channel);
-        this.ircClient.off("join", onjoin);
       }
     };
     this.ircClient.on("join", onjoin);
