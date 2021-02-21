@@ -93,4 +93,4 @@ dist/
 irc-log/
 config/development.json
 config/production.json
-config/local.json
+config/local*
