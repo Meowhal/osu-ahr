@@ -101,7 +101,7 @@ export class Lobby {
         this.RaiseJoinedLobby(channel);
       }
     };
-    this.ircClient.on("join", onjoin);
+    this.ircClient.once("join", onjoin);
     this.ircClient.on("message", (from, to, message) => {
       if (to == this.channel) {
         this.handleMessage(from, to, message);
@@ -120,6 +120,7 @@ export class Lobby {
         this.logger.warn("network reconnection detected!");
         this.status = LobbyStatus.Standby;
         await this.EnterLobbyAsync(this.channel);
+        this.status = LobbyStatus.Entered;
         await this.LoadMpSettingsAsync();
       }
     });
