@@ -286,7 +286,11 @@ export class MapChecker extends LobbyPlugin {
           this.SetConfig(param);
         }
         break;
-
+      case "*no":
+        if (param == "regulation") {
+          this.SetEnabled(false);
+        }
+        break;
     }
   }
 
@@ -406,6 +410,6 @@ export class MapChecker extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- Mapchecker --
-  current reg : ${this.validator.GetDescription()}`;
+  current regulation : ${this.getRegulationDescription()}`;
   }
 }
