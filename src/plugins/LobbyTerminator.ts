@@ -56,12 +56,17 @@ export class LobbyTerminator extends LobbyPlugin {
 
   CloseLobby(time_ms: number = 0): void {
     if (time_ms == 0) {
-      this.lobby.SendMultilineMessageWithInterval([
-        "!mp password closed",
-        "This lobby will be closed after everyone leaves.",
-        "Thank you for playing with the auto host rotation lobby."
-      ], this.option.sleep_message_interval, "close lobby announcement", 100000);
-      this.option.terminate_time_ms = 1000;
+      if (this.lobby.players.size == 0) {
+        this.logger.info("terminated lobby");
+        this.lobby.CloseLobbyAsync();
+      } else {
+        this.lobby.SendMultilineMessageWithInterval([
+          "!mp password closed",
+          "This lobby will be closed after everyone leaves.",
+          "Thank you for playing with the auto host rotation lobby."
+        ], this.option.sleep_message_interval, "close lobby announcement", 100000);
+        this.option.terminate_time_ms = 1000;
+      }      
     } else {
       this.lobby.SendMultilineMessageWithInterval([
         "!mp password closed",
