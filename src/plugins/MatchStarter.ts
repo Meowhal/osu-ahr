@@ -150,6 +150,7 @@ export class MatchStarter extends LobbyPlugin {
   private start(): void {
     this.stopTimer();
     this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000, true);
+    this.voting.Clear();
   }
 
   private stopTimer(): void {
