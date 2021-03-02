@@ -85,8 +85,7 @@ describe("MatchStarterTest", function () {
       assert.equal(starter.voting.count, 3);
       await ircClient.emulateMessageAsync(players[4], ircClient.channel, "!start");
       assert.isTrue(lobby.isMatching);
-      assert.isTrue(starter.voting.passed);
-      assert.equal(starter.voting.count, 4);
+      assert.equal(starter.voting.count, 0);
     });
     it("sould ignore when player vote twice", async () => {
       const { starter, lobby, ircClient } = await setupAsync();
@@ -127,8 +126,6 @@ describe("MatchStarterTest", function () {
       // host vote
       await ircClient.emulateMessageAsync(players[1], ircClient.channel, "!start");
       assert.isTrue(lobby.isMatching);
-      assert.isFalse(starter.voting.passed);
-      assert.equal(starter.voting.count, 1);
     });
     it("shold ignore vote when matching", async () => {
       const { starter, lobby, ircClient } = await setupAsync();

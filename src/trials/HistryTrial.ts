@@ -4,14 +4,14 @@ import { HistoryFecher } from '../webapi/HistoryFetcher';
 import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function trial() {
-  await GetHistryTrial();
+  await GetOrderTrial();
 }
 
 async function GetHistryTrial() {
 
   // 67261609
   // 67268731
-  const matchId = 67360792;
+  const matchId = 76714773;
   // https://osu.ppy.sh/community/matches/${matchId}/history?before=1509690736&limit=100
   const url = `https://osu.ppy.sh/community/matches/${matchId}/`;
   const params = {
@@ -26,11 +26,11 @@ async function GetHistryTrial() {
   console.log(JSON.stringify(response.data));
 
 
-  fs.writeFile("data/arc/history_67360792_first.json", JSON.stringify(response.data));
+  fs.writeFile("data/arc/history_76714773_first.json", JSON.stringify(response.data));
 }
 
 async function GetOrderTrial() {
-  const matchId = 67510335;
+  const matchId = 76714773;
   const repo = new HistoryRepository(matchId);
   const res = await repo.calcCurrentOrderAsName()
   console.log(res);

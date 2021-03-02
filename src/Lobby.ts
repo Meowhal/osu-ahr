@@ -118,9 +118,6 @@ export class Lobby {
     this.ircClient.on("registered", async () => {
       if (this.status == LobbyStatus.Entered && this.channel) {
         this.logger.warn("network reconnection detected!");
-        this.status = LobbyStatus.Standby;
-        await this.EnterLobbyAsync(this.channel);
-        this.status = LobbyStatus.Entered;
         await this.LoadMpSettingsAsync();
       }
     });
