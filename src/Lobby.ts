@@ -96,12 +96,12 @@ export class Lobby {
 
   private registerEvents(): void {
     const onjoin = (channel: string, who: string) => {
-      if (who == this.ircClient.nick) {
+      this.logger.trace("raised join event");
+      if (who == this.ircClient.nick && this.status != LobbyStatus.Entered) {
         this.RaiseJoinedLobby(channel);
-        this.ircClient.off("join", onjoin);
       }
     };
-    this.ircClient.on("join", onjoin);
+    this.ircClient.once("join", onjoin);
     this.ircClient.on("message", (from, to, message) => {
       if (to == this.channel) {
         this.handleMessage(from, to, message);
@@ -118,8 +118,6 @@ export class Lobby {
     this.ircClient.on("registered", async () => {
       if (this.status == LobbyStatus.Entered && this.channel) {
         this.logger.warn("network reconnection detected!");
-        this.status = LobbyStatus.Standby;
-        await this.EnterLobbyAsync(this.channel);
         await this.LoadMpSettingsAsync();
       }
     });

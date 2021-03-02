@@ -20,9 +20,9 @@ LobbyMenu Commands
   [info] Show current application's informations.
   [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
   [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
-  [close now] Close the lobby and Quit this application. ex: 'close now'
-  [close <num:seconds>] Close the lobby after num seconds. ex: 'close 30'
-  [close] Lock the lobby and close it when everyone leaves. ex: 'close'
+  [regulation enable] Enable regulation checking 
+  [regulation disable] Disable regulation checking
+  [close] Close the lobby and Quit this application. ex: 'close now'
             DO NOT Quit application before close the lobby!
   [quit]  Quit this application. (lobby won't close.)
 `;
@@ -130,7 +130,17 @@ export class OahrCli extends OahrBase {
             this.selector.Reorder(l.arg);
             break;
           case "regulation":
-            this.checker.SetConfig(l.arg);
+            if (!l.arg) {
+              console.log(this.checker.getRegulationDescription());
+            } else if (l.arg.startsWith("enable")) {
+              this.checker.SetEnabled(true);
+              console.log("Regulation check Enabled");
+            } else if (l.arg.startsWith("disable")) {
+              this.checker.SetEnabled(false);
+              console.log("Regulation check Disabled");
+            } else {
+              this.checker.SetConfig(l.arg);
+            }
             break;
           case "c":
           case "close":

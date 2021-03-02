@@ -29,7 +29,8 @@ async function fetchFromBeatmapPage(id: number): Promise<Beatmapsets | undefined
   const $ = cheerio.load(res.data);
   const jsonTag = $('#json-beatmapset');
   if (jsonTag.length == 0) return;
-  const src = $('#json-beatmapset')[0].data;
+  const n : any = $('#json-beatmapset')[0].children[0];
+  const src = n.data;
   if (src) {
     const json = JSON.parse(src);
     return json as Beatmapsets;

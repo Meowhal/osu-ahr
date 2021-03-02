@@ -115,7 +115,7 @@ describe("HostSkipperTest", function () {
         const startTime = await tu.changeHostAsync("p1", lobby);
         const endTime = await resolveSkipAsync(lobby);
         const elapsed = endTime - startTime;
-        assert.closeTo(elapsed, waitTime, 10);
+        assert.closeTo(elapsed, waitTime, 20);
         skipper.StopTimer();
       }
       await test(10);
@@ -135,7 +135,7 @@ describe("HostSkipperTest", function () {
       const endTime = await rt;
       tu.assertHost("p2", lobby);
       const elapsed = endTime - startTime;
-      assert.closeTo(elapsed, 10 + 30, 5);
+      assert.closeTo(elapsed, 10 + 30, 20);
       skipper.StopTimer();
     });
     it("timer reset when host changing map", async () => {
@@ -268,13 +268,13 @@ describe("HostSkipperTest", function () {
       assert.isTrue(skipped);
     });
     it("ignored vote when cooltime", async () => {
-      const { skipper, lobby, ircClient } = await prepare(0, 10);
+      const { skipper, lobby, ircClient } = await prepare(0, 100);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
       const r = resolveSkipAsync(lobby);
       ircClient.emulateMessage("p0", ircClient.channel, "!skip");
       await r;
-      const task = rejectSkipAsync(lobby, 20);
+      const task = rejectSkipAsync(lobby, 100);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
       await tu.delayAsync(1);
       assert.equal(skipper.voting.count, 0);

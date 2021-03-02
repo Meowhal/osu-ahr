@@ -6,6 +6,7 @@ import { parser } from "../parsers";
 import { WebApiClient } from "../webapi/WebApiClient";
 import { Server } from "http";
 import { startLogServer } from "../web/LogServer";
+import { LobbyKeeper } from "../plugins/LobbyKeeper";
 
 const logger = log4js.getLogger("cli");
 
@@ -34,6 +35,7 @@ export class OahrBase {
   autoTimer: AutoStartTimer;
   history: HistoryLoader;
   checker: MapChecker;
+  keeper: LobbyKeeper;
   webApiClient: WebApiClient | null = null;
   logServer: Server | null = null;
   option: OahrCliOption = OahrCliDefaultOption;
@@ -62,6 +64,7 @@ export class OahrBase {
     if (this.option.use_log_server) {
       this.logServer = startLogServer(this.option.log_server_port, this.lobby);
     }
+    this.keeper = new LobbyKeeper(this.lobby);
     this.lobby.RaisePluginsLoaded();
   }
 

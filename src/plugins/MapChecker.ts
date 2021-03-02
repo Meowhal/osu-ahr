@@ -108,17 +108,18 @@ export class DefaultValidator extends ValidatorBase {
 
     let rs = { rate: r, message: "" };
 
-    if (0.2 < r) {
+    if (0.05 < r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
-        + `Violation of Regulation : ${this.GetDescription()}, penalty point: ${r * 100}`;
+        + `Violation of Regulation : ${this.GetDescription()}`;
       rs.rate = Math.min(Math.max(r, 0.45), 0.9);
     } else if (0.001 < r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}` + "\n"
-        + `The map is a bit out of regulation. you can skip current host with '!skip' voting command.`
+        + `you can skip current host with '!skip' voting command.`
         ;
+      rs.rate = 0;
     }
 
     return rs;
@@ -213,6 +214,7 @@ export class MapChecker extends LobbyPlugin {
   penaltyPoint: number = 0; // if reached 1, host will skip
   maps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
   validator: IValidator;
+  doSkip: boolean = false;
 
   constructor(lobby: Lobby, client: WebApiClient | null = null, option: Partial<MapCheckerOption> = {}) {
     super(lobby, "mapChecker");
@@ -250,9 +252,17 @@ export class MapChecker extends LobbyPlugin {
     }
   }
 
+  getRegulationDescription(): string {
+    if (this.option.enabled) {
+      return this.validator.GetDescription();
+    } else {
+      return "disabled (" + this.validator.GetDescription() + ")";
+    }
+  }
+
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
     if (command == "!r" || command == "!regulation") {
-      this.lobby.SendMessageWithCoolTime(this.validator.GetDescription(), "regulation", 10000);
+      this.lobby.SendMessageWithCoolTime(this.getRegulationDescription(), "regulation", 10000);
     }
 
     if (!player.isAuthorized) {
@@ -267,9 +277,20 @@ export class MapChecker extends LobbyPlugin {
         this.SetEnabled(false);
         break;
       case "*regulation":
-        this.SetConfig(param);
+        if (!param) break;
+        if (param.startsWith("enable")) {
+          this.SetEnabled(true);
+        } else if (param.startsWith("disable")) {
+          this.SetEnabled(false);
+        } else {
+          this.SetConfig(param);
+        }
         break;
-
+      case "*no":
+        if (param == "regulation") {
+          this.SetEnabled(false);
+        }
+        break;
     }
   }
 
@@ -322,10 +343,11 @@ export class MapChecker extends LobbyPlugin {
     }
     let r = this.validator.RateBeatmap(map);
     this.penaltyPoint += r.rate;
-    if (1 <= this.penaltyPoint) {
+    if (1 <= this.penaltyPoint && this.doSkip) {
       this.punishHost();
     } else if (0 < r.rate) {
       this.revertMap();
+      this.lobby.SendMessage(r.message);
     } else {
       this.accpectMap();
     }
@@ -388,6 +410,6 @@ export class MapChecker extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- Mapchecker --
-  current reg : ${this.validator.GetDescription()}`;
+  current regulation : ${this.getRegulationDescription()}`;
   }
 }

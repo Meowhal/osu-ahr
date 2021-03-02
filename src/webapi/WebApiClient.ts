@@ -25,6 +25,7 @@ export interface WebApiClientOption {
   client_id: number,
   client_secret: string,
   callback: string,
+  callback_port: number,
   asGuest: boolean,
   token_store_dir: string,
 }
@@ -162,7 +163,7 @@ export class WebApiClient {
         } else {
           reject("no connection");
         }
-        
+
       });
       server.once("close", () => {
         console.log("closed event");
@@ -173,7 +174,7 @@ export class WebApiClient {
           resoleve(code);
         }
       });
-      server.listen(3000);
+      server.listen(this.option.callback_port);
       const nurl = new URL("https://osu.ppy.sh/oauth/authorize");
       nurl.searchParams.set("client_id", this.option.client_id.toString());
       nurl.searchParams.set("redirect_uri", this.option.callback);

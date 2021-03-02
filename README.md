@@ -24,6 +24,8 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 |`*skip`|Force skip current host.||
 |`*skipto [player]`|Force skip to specified player.|`*skipto p2`|
 |`*order [players list]`| Reorder the queue in specified order. |`*order p1, p2, p3`|
+|`*keep size [1-16]` | Keep lobby Size. | `*keep size 8`| 
+|`*no keep size` | Disable Keeping lobby Size. | `*no keep size`|
 
 
 (I am looking for ppl who can correct my English mistakes..😖)
@@ -46,8 +48,20 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 + enter your account id and irc password to `./config/local.json`
 + launch the bot
 ```bash 
-> npm start
-> [m]ake, [e]nter, [q]uit > m lobby_name
+starting up...
+Connecting to Osu Bancho ...
+Server running at http://localhost:3116/
+Connected :D
+
+=== Welcome to osu-ahr ===
+
+MainMenu Commands
+  [make <Lobby_name>] Make a lobby.  ex: 'make 5* auto host rotation'
+  [enter <LobbyID>]   Enter the lobby. ex: 'enter 123456' (It only works in a Tournament lobby ID.)
+  [help] Show this message.
+  [quit] Quit this application.
+
+> make auto host rotation lobby
 ```
 
 ## Functions

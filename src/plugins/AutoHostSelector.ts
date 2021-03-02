@@ -10,14 +10,14 @@ export interface AutoHostSelectorOption {
   show_queue_cooltime_ms: number;
 }
 
-export type OderChangeType = "added" | "removed" | "rotated" | "orderd";
+export type OrderChangeType = "added" | "removed" | "rotated" | "orderd";
 
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
   hostQueue: Player[] = [];
   needsRotate: boolean = true;
   mapChanger: Player | null = null;
-  orderChanged = new TypedEvent<{ type: OderChangeType }>();
+  orderChanged = new TypedEvent<{ type: OrderChangeType }>();
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "selector");
@@ -406,7 +406,7 @@ export class AutoHostSelector extends LobbyPlugin {
       "*order [players list] => Reorder the queue in specified order. (*order p1, p2, p3)"]
   }
 
-  private raiseOrderChanged(type: OderChangeType) {
+  private raiseOrderChanged(type: OrderChangeType) {
     this.orderChanged.emit({ type });
   }
 }

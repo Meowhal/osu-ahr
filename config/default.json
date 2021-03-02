@@ -84,6 +84,7 @@
     "client_id": 0,
     "client_secret": "***",
     "callback": "",
+    "callback_port": 3000,
     "token_store_dir": "data/tokens/",
     "asGuest": true
   },
@@ -103,5 +104,11 @@
     "star_max": 7.00,
     "length_min": 0,
     "length_max": 360
+  },
+  "LobbyKeeper": {
+    "mode": null,
+    "size": null,
+    "password": null,
+    "mods": null
   }
 }
