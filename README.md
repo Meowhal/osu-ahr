@@ -10,7 +10,7 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 |`!start`| Votes to start the match.|
 |`!abort`| Votes to abort the match. Use when the match is stuck.|
 |`!update`| Updates current selected map to the latest version. Use when has host old map.|
-
+|`!regulation`| check current regulation.|
  
 |for host|desc|ex|
 |:--|:--|:--|
@@ -86,9 +86,9 @@ BOTはIRCを通してロビーを管理しますが、IRCで通信できるの�
 通常の方法で作成したロビーには入れません。
 
 ### IRC chat
-コンソール画面からロビーへチャットを送信できます。`s`につづけて送信したいメッセージを入力してください。
+コンソール画面からロビーへチャットを送信できます。`say`につづけて送信したいメッセージを入力してください。
 ```bash
-[s]ay, [i]nfo, [c]lose, [q]quit > s hello guys!
+#mp_10000 > say hello guys!
 ```
 
 ### Auto host rotation
@@ -96,12 +96,12 @@ BOTはIRCを通してロビーを管理しますが、IRCで通信できるの�
 退出したプレイヤーが再入室した場合でも、最後尾に追加されます。
 ホストキューは試合開始直後にローテーションされるため、試合中に参加したプレイヤーは現在のホストの後ろに追加されます。
 ホストがマップ選択後にロビーを退出した場合、次のホストはそのまま試合を開始するか、マップを選択し直すか選ぶことができます。そのまま試合を開始した場合、試合後も継続してホストになります。
-現在のキューを確認するにはコンソール画面上で`i`と入力してください。
+現在のキューを確認するにはコンソール画面上で`info`と入力してください。
 例：
 ```bash
-[s]ay, [i]nfo, [c]lose, [q]quit > i
+#mp_10000 > info
 === lobby status ===
-  lobby id : 123456
+  lobby id : 10000
   status : Entered
   players : 3, inGame : 0 (playing : 0)
   refs : xxxx
@@ -131,6 +131,6 @@ Hostは !start time でスタートタイマーを起動できます。
 ### Closing the lobby
 !mp makeで作ったロビーはプレイヤーが誰もいなくなっても一定時間経過するまで残り続けます。
 残存期間が長く、他のユーザーに迷惑を掛ける可能性がるので、ロビーに誰もいない状態が一定時間継続するとロビーが自動的に終了します。  
-コンソール画面から`c`を入力すると、`!mp close`コマンドが発行され即座にロビーが終了します。  
-`c 30`のように引数として秒数を指定すると、ロビーにパスワードが設定され、新しくプレイヤーが入れない状態になったあと、指定秒後にロビーが終了します。  
-`c p`とすると、ロビーにパスワードが設定され、全員が退出したあとにロビーが終了します。
+コンソール画面から`close now`を入力すると、`!mp close`コマンドが発行され即座にロビーが終了します。  
+`close 30`のように引数として秒数を指定すると、ロビーにパスワードが設定され、新しくプレイヤーが入れない状態になったあと、指定秒後にロビーが終了します。  
+`close`とすると、ロビーにパスワードが設定され、全員が退出したあとにロビーが終了します。
