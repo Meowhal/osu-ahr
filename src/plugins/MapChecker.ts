@@ -108,7 +108,7 @@ export class DefaultValidator extends ValidatorBase {
 
     let rs = { rate: r, message: "" };
 
-    if (0.05 < r) {
+    if (0.01 < r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}`;
@@ -336,7 +336,11 @@ export class MapChecker extends LobbyPlugin {
   }
 
   private async check(mapId: number, mapTitle: string): Promise<void> {
-    const map = await this.getBeatmap(mapId);
+    let map = await this.getBeatmap(mapId);
+    if (!map) {
+      this.logger.warn(`couldn't find map id:${mapId}, title:${mapTitle}, retrying...`);
+      map = await this.getBeatmap(mapId);
+    }
     if (!map || mapId != this.checkingMapId) {
       this.logger.warn(`couldn't find map id:${mapId}, title:${mapTitle}`);
       return;

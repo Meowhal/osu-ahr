@@ -32,7 +32,7 @@ export class HistoryRepository {
   changedLobbyName = new TypedEvent<{ sender: HistoryRepository, index: number, newName: string, oldName: string }>();
   hasError: boolean = false;
   fetcher: IHistoryFetcher;
-  static ESC_CRITERIA: number = 2; // プレイヤー存在確認に利用する試合数
+  static ESC_CRITERIA: number = 5; // プレイヤー存在確認に利用する試合数
   static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
 
   constructor(matchId: number, fetcher: IHistoryFetcher | null = null) {
@@ -152,6 +152,11 @@ export class HistoryRepository {
 
   /**
    * プレイヤーのホスト順を計算し、結果をIDで出力する。
+   * ヒストリーの新しい方から順番に解析していく。
+   * プレイヤーは参加時のイベントIDか自分がホストのときの試合開始時のイベントIDをageとして記録する
+   * ageが若いプレイヤーほど早くホスト順が回ってくる。
+   * 最初のhostchangeイベントを検知したとき、試合中なら試合開始イベントIDがageになり、試合外ならageは-1になる。
+   * 2回目以降のhostchangeイベントでは一つ前のhostchangeイベントIDか、一つ前の試合開始イベントのIDがageになる。
    */
   async calcCurrentOrderAsID(): Promise<number[]> {
     await this.updateToLatest();
@@ -183,7 +188,8 @@ export class HistoryRepository {
           case "host-changed":
             if (!(ev.user_id in map)) {
               map[ev.user_id] = false;
-              result.push({ age: hostAge, id: ev.user_id }); // 一番最初のホストは age -1になる
+              // -1、直前の試合開始ID、直前のhostchangeIDのいずれか
+              result.push({ age: hostAge, id: ev.user_id });
               exCount++;
             }
             hostAge = ev.id;
@@ -209,12 +215,16 @@ export class HistoryRepository {
             this.logger.warn("unknown event type! " + JSON.stringify(ev));
             break;
         }
-      } else if (ev.detail.type == "other" && ev.game && ev.game.scores && gameCount < HistoryRepository.ESC_CRITERIA) {
-        gameCount++;
-        for (let s of ev.game.scores) {
-          if (!(s.user_id in map)) {
-            unresolvedPlayers.add(s.user_id);
+      } else if (ev.detail.type == "other" && ev.game) {
+        if (ev.game.scores && gameCount < HistoryRepository.ESC_CRITERIA) {
+          gameCount++;
+          for (let s of ev.game.scores) {
+            if (!(s.user_id in map)) {
+              unresolvedPlayers.add(s.user_id);
+            }
           }
+        } else if (!ev.game.scores){
+          hostAge = ev.id;
         }
       }
 
