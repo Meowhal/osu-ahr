@@ -30,7 +30,6 @@ describe("WordCounter Tests", function () {
     it("info count", async () => {
       const { counter, lobby, ircClient } = await setup();
       const players = await tu.AddPlayersAsync(3, ircClient);
-      lobby.option.info_message_interval = 1;
       const p = counter.periods[0];
       assertPeriod(p, 0, 0, 0, 0);
       await ircClient.emulateMessageAsync(players[0], ircClient.channel, "!info");

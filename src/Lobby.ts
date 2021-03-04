@@ -22,11 +22,8 @@ export interface LobbyOption {
   authorized_users: string[], // 特権ユーザー
   listref_duration: number,
   info_message: string[],
-  info_message_interval: number,
   info_message_cooltime: number,
   stat_timeout: number,
-  silent_mode: boolean,
-
 }
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
@@ -223,9 +220,9 @@ export class Lobby {
   TransferHost(user: Player): void {
     this.hostPending = user;
     if (user.id != 0) {
-      this.SendMessage("!mp host #" + user.id, true);
+      this.SendMessage("!mp host #" + user.id);
     } else {
-      this.SendMessage("!mp host " + user.name, true);
+      this.SendMessage("!mp host " + user.name);
     }
   }
 
@@ -235,10 +232,9 @@ export class Lobby {
     }
   }
 
-  SendMessage(message: string, allowSilent: boolean = false): void {
+  SendMessage(message: string): void {
     if (this.channel != undefined) {
-      const target = allowSilent && this.option.silent_mode ? "BanchoBot" : this.channel;
-      this.ircClient.say(target, message);
+      this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
       this.SentMessage.emit({ message });
       this.chatlogger.trace("bot:%s", message);
@@ -256,7 +252,7 @@ export class Lobby {
     if (typeof message == "function") {
       message = message();
     }
-    this.SendMessage(message, allowSilent);
+    this.SendMessage(message);
     return true;
   }
 
