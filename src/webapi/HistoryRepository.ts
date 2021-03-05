@@ -189,17 +189,20 @@ export class HistoryRepository {
             if (!(ev.user_id in map)) {
               map[ev.user_id] = false;
               // -1、直前の試合開始ID、直前のhostchangeIDのいずれか
+              //this.logger.trace(`changed ${this.users[ev.user_id].username} ${hostAge}`);
               result.push({ age: hostAge, id: ev.user_id });
               exCount++;
             }
-            hostAge = ev.id;
+            hostAge = Date.parse(ev.timestamp);
             unresolvedPlayers.delete(ev.user_id);
             break;
           case "match-created":
           case "player-joined":
             if (!(ev.user_id in map)) {
+              const la = Date.parse(ev.timestamp);
               map[ev.user_id] = false;
-              result.push({ age: ev.id, id: ev.user_id });
+              //this.logger.trace(`joined ${this.users[ev.user_id].username} ${la}`);
+              result.push({ age: la, id: ev.user_id });
               exCount++;
               unresolvedPlayers.delete(ev.user_id);
             }
@@ -216,6 +219,8 @@ export class HistoryRepository {
             break;
         }
       } else if (ev.detail.type == "other" && ev.game) {
+        hostAge = Date.parse(ev.game.start_time);
+        //this.logger.trace(`set host age ${hostAge} bc game start`);
         if (ev.game.scores && gameCount < HistoryRepository.ESC_CRITERIA) {
           gameCount++;
           for (let s of ev.game.scores) {
@@ -223,8 +228,6 @@ export class HistoryRepository {
               unresolvedPlayers.add(s.user_id);
             }
           }
-        } else if (!ev.game.scores){
-          hostAge = ev.id;
         }
       }
 
