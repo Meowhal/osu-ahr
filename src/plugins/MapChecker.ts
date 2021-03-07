@@ -341,8 +341,12 @@ export class MapChecker extends LobbyPlugin {
       this.logger.warn(`couldn't find map id:${mapId}, title:${mapTitle}, retrying...`);
       map = await this.getBeatmap(mapId);
     }
-    if (!map || mapId != this.checkingMapId) {
-      this.logger.warn(`couldn't find map id:${mapId}, title:${mapTitle}`);
+    if (!map) {
+      this.logger.error(`couldn't find map id:${mapId}, title:${mapTitle}, skip checking`);
+      return;
+    }
+    if (mapId != this.checkingMapId) {
+      this.logger.info(`target map is changed. checked:${mapId}, current:${this.checkingMapId}`);
       return;
     }
     let r = this.validator.RateBeatmap(map);
