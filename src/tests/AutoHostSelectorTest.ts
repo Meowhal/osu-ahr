@@ -329,13 +329,13 @@ describe("AutoHostSelectorTest", function () {
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-      const t1 = ircClient.emulateMatchAsync(10);
-      ircClient.latency = 10;
+      const t1 = ircClient.emulateMatchAsync(1);
+      ircClient.latency = 1;
       await t1;
       ircClient.latency = 0;
       lobby.RaiseHostChanged("player3");
-      tu.delayAsync(10);
-      tu.assertHost("player2", lobby);
+      await tu.delayAsync(10);
+      tu.assertHost("player1", lobby);
     });
 
     it("conflict transfer host manually and plugin rotation test2", async () => {
@@ -343,12 +343,12 @@ describe("AutoHostSelectorTest", function () {
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-      const t1 = ircClient.emulateMatchAsync(10);
-      ircClient.latency = 10;
+      const t1 = ircClient.emulateMatchAsync(1);
+      ircClient.latency = 1;
       await t1;
       ircClient.latency = 0;
       lobby.RaiseHostChanged("player2");
-      tu.delayAsync(10);
+      await tu.delayAsync(10);
       tu.assertHost("player2", lobby);
     });
   });

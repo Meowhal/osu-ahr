@@ -6,13 +6,14 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   events: Event[];
   users: User[];
   limit: number = 100;
+  timestamp: number = Date.now();
 
   constructor(creatorId: number) {
     this.match = {
       end_time: null,
       id: 0,
       name: "dummy match",
-      start_time: (new Date()).toUTCString()
+      start_time: (new Date(this.timestamp)).toUTCString()
     };
     this.events = [];
     this.users = [];
@@ -49,18 +50,20 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   }
 
   addEvent(type: EventType, user_id: number) {
+    this.timestamp += 1000;
     this.events.push({
       id: this.events.length,
       detail: {
         type: type,
       },
-      timestamp: this.match.start_time,
+      timestamp: (new Date(this.timestamp)).toUTCString(),
       user_id
     });
     this.createDummyUserIfNotExist(user_id);
   }
 
   addGameEvent(member: number[], title?: string) {
+    this.timestamp += 1000;
     if (member.length == 0) return;
     const scores = member.map(m => ({
       user_id: m
@@ -73,7 +76,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
         type: "other",
         text: title
       },
-      timestamp: this.match.start_time,
+      timestamp: (new Date(this.timestamp)).toUTCString(),
       user_id: null,
       game: {
         id: 1,

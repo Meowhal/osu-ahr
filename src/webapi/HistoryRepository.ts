@@ -28,8 +28,12 @@ export class HistoryRepository {
   logger: log4js.Logger;
   users: { [id: number]: User };
   events: Event[];
+
+  // Events
   gotUserProfile = new TypedEvent<{ sender: HistoryRepository, user: User }>();
-  changedLobbyName = new TypedEvent<{ sender: HistoryRepository, index: number, newName: string, oldName: string }>();
+  changedLobbyName = new TypedEvent<{ sender: HistoryRepository, newName: string, oldName: string }>();
+  kickedUser = new TypedEvent<{ sender: HistoryRepository, kickedUser: User }>();
+
   hasError: boolean = false;
   fetcher: IHistoryFetcher;
   static ESC_CRITERIA: number = 5; // プレイヤー存在確認に利用する試合数
@@ -60,6 +64,8 @@ export class HistoryRepository {
   }
 
   async fetch(isRewind: boolean = false): Promise<FetchResult> {
+    if (this.matchId == 0) return { count: 0, filled: true, isRewind };
+
     let limit = 100;
     let after = null;
     let before = null;
@@ -123,12 +129,13 @@ export class HistoryRepository {
 
     for (let i = data.events.length - 1; 0 <= i; i--) {
       let ev = data.events[i];
-      if (ev.detail.type == "other" && ev.detail.text != null && ev.detail.text != this.lobbyName) {
-        const newName = ev.detail.text;
-        const oldName = this.lobbyName;
-        this.lobbyName = newName;
-        this.changedLobbyName.emit({ sender: this, index: i, oldName, newName });
-        break;
+      switch (ev.detail.type) {
+        case "other":
+          this.checkLobbyName(ev);
+          break;
+        case "player-kicked":
+          this.raiseKickedEvent(ev);
+          break;
       }
     }
 
@@ -141,6 +148,24 @@ export class HistoryRepository {
         ? this.events[0].detail.type == "match-created"
         : this.latestEventId == data.latest_event_id
     };
+  }
+
+  checkLobbyName(ev: Event) {
+    if (ev.detail.text != null && ev.detail.text != this.lobbyName) {
+      const newName = ev.detail.text;
+      const oldName = this.lobbyName;
+      this.lobbyName = newName;
+      this.changedLobbyName.emit({ sender: this, oldName, newName });
+    }
+  }
+
+  raiseKickedEvent(ev: Event) {
+    if (ev.user_id) {
+      const kickedUser = this.users[ev.user_id];
+      if (kickedUser) {
+        this.kickedUser.emit({ sender: this, kickedUser });
+      }
+    }
   }
 
   /**

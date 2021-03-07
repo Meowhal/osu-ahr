@@ -17,10 +17,14 @@ enum LoadingStatus {
 }
 
 const defaultOption = config.get<HistoryLoaderOption>("history");
+
+/**
+ * 定期的にhistoryを取得し、lobbyのhistoryrepositoryに保存する
+ */
 export class HistoryLoader extends LobbyPlugin {
   option: HistoryLoaderOption;
   task: Promise<void>;
-  repository: HistoryRepository | null = null;
+  repository: HistoryRepository;
   status: LoadingStatus = LoadingStatus.Idle;
   coolTime: number = 5 * 1000;
 
@@ -28,6 +32,7 @@ export class HistoryLoader extends LobbyPlugin {
     super(lobby, "history");
     this.option = { ...defaultOption, ...option } as HistoryLoaderOption;
     this.task = Promise.resolve();
+    this.repository = lobby.historyRepository;
     this.registerEvents();
   }
 

@@ -4,7 +4,7 @@ import { HistoryFecher } from '../webapi/HistoryFetcher';
 import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function trial() {
-  await GetOrderTrial();
+  await GetHistryTrial();
 }
 
 async function GetHistryTrial() {
@@ -15,7 +15,7 @@ async function GetHistryTrial() {
   // https://osu.ppy.sh/community/matches/${matchId}/history?before=1509690736&limit=100
   const url = `https://osu.ppy.sh/community/matches/${matchId}/`;
   const params = {
-    'limit': 20,
+    'limit': 100,
     'after': 0
   }
 
@@ -40,7 +40,7 @@ async function GetLobbyNameChanger() {
   let hr = new HistoryRepository(67719013, new HistoryFecher());
   let ln = "";
   hr.changedLobbyName.on(e => {
-    console.log(e.oldName + "->" + e.newName + " " + e.index);
+    console.log(e.oldName + "->" + e.newName + " ");
     ln = e.newName;
   });
   while(!ln.startsWith("4-5*")) {

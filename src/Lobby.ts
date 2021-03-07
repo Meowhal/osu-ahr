@@ -4,6 +4,7 @@ import { IIrcClient } from "./IIrcClient";
 import { TypedEvent, DeferredAction } from "./libs";
 import { MpSettingsParser, MpSettingsResult } from "./parsers/MpSettingsParser";
 import { LobbyPlugin } from "./plugins/LobbyPlugin";
+import { HistoryRepository } from "./webapi/HistoryRepository";
 import config from "config";
 import log4js from "log4js";
 import pkg from "../package.json";
@@ -53,6 +54,7 @@ export class Lobby {
   statParser: StatParser;
   logger: log4js.Logger;
   chatlogger: log4js.Logger;
+  historyRepository: HistoryRepository;
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
@@ -88,6 +90,7 @@ export class Lobby {
     this.logger.addContext("channel", "lobby");
     this.chatlogger = log4js.getLogger("chat");
     this.chatlogger.addContext("channel", "lobby");
+    this.historyRepository = new HistoryRepository(0);
     this.registerEvents();
   }
 
@@ -533,6 +536,7 @@ export class Lobby {
     this.players.clear();
     this.channel = channel;
     this.lobbyId = channel.replace("#mp_", "");
+    this.historyRepository.matchId = parseInt(this.lobbyId);
     this.status = LobbyStatus.Entered;
     this.logger.addContext("channel", this.lobbyId);
     this.chatlogger.addContext("channel", this.lobbyId);
@@ -740,6 +744,8 @@ export class Lobby {
       this.hostPending = null;
     } else if (this.hostPending != null) {
       this.logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.name, player.name);
+      this.hostPending = null;
+      this.LoadMpSettingsAsync(); // 退出イベントの見落としとして、mp settingにて状況をリセットする
     } // pending == null は有効
 
     if (this.host != null) {
