@@ -197,10 +197,6 @@ export namespace parser {
       return makeBanchoResponse(BanchoResponseType.Settings, message);
     }
 
-    if (message.match(/Don't let osu! keep you up until 4 AM./)) {
-      return makeBanchoResponse(BanchoResponseType.RequestSleep);
-    }
-
     return makeBanchoResponse(BanchoResponseType.Unhandled);
   }
 
@@ -312,7 +308,6 @@ export enum BanchoResponseType {
   Rolled,
   Stats,
   TeamChanged,
-  RequestSleep,
   LobbySizeChanged,
   ClearedHost,
   InvitedPlayer,

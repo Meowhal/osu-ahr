@@ -16,13 +16,6 @@ describe.skip("Lobby Terminator Tests", function () {
     }
     return { terminator: new LobbyTerminator(lobby, option), lobby, ircClient };
   }
-
-  it.skip("request sleep test", async () => {
-    const { terminator, lobby, ircClient } = await setupAsync();
-    const message = "[https://www.youtube.com/watch?v=y61v2QCHlpY Don't let osu! keep you up until 4 AM. Getting sleep is important too!]";
-    ircClient.emulateBanchoResponse(message);
-  });
-
   it("CloseLobby time", async () => {
     const { terminator, lobby, ircClient } = await setupAsync();
     terminator.CloseLobby(100);

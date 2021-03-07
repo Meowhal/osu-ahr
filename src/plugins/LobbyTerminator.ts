@@ -5,7 +5,6 @@ import config from "config";
 
 export interface LobbyTerminatorOption {
   terminate_time_ms: number;
-  terminate_when_sleep_msg: boolean;
   sleep_message_interval: number;
 }
 
@@ -24,13 +23,6 @@ export class LobbyTerminator extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p.player));
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player, p.slot));
-    if (this.option.terminate_when_sleep_msg) {
-      this.lobby.ReceivedBanchoResponse.on(p => {
-        if (p.response.type == BanchoResponseType.RequestSleep) {
-          this.CloseLobby();
-        }
-      });
-    }
   }
 
   private onPlayerJoined(player: Player, slot: number): void {

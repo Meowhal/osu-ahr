@@ -38,8 +38,7 @@
   },
   "LobbyTerminator": {
     "terminate_time_ms": 60000,
-    "sleep_message_interval": 1000,
-    "terminate_when_sleep_msg": false
+    "sleep_message_interval": 1000
   },
   "MatchStarter": {
     "vote_rate": 0.45,

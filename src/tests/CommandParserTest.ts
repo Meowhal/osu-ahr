@@ -361,10 +361,6 @@ describe("CommandParserTest", function () {
       assert.equal(v.params[0], "milisaurus");
       assert.equal(v.params[1], Teams.Blue);
     });
-    it("request sleep test", () => {
-      let v = parser.ParseBanchoResponse("[https://www.youtube.com/watch?v=y61v2QCHlpY Don't let osu! keep you up until 4 AM. Getting sleep is important too!]");
-      assert.equal(v.type, BanchoResponseType.RequestSleep);
-    });
     it("lobby size changed test", () => {
       let v = parser.ParseBanchoResponse("Changed match to size 8");
       assert.equal(v.type, BanchoResponseType.LobbySizeChanged);
