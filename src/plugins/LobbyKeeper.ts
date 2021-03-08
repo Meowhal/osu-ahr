@@ -169,9 +169,7 @@ export class LobbyKeeper extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- Lobby Keeper --
-  mode : ${this.option.mode === null ? "disabled" : TeamModes[this.option.mode.team] + ", " + ScoreModes[this.option.mode.score]};
-  size : ${this.option.size === null ? "disabled" : this.option.size}
-  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}
-  mods : ${this.option.mods === null ? "disabled" : this.option.mods}`;
+  mode : ${this.option.mode === null ? "disabled" : TeamModes[this.option.mode.team] + ", " + ScoreModes[this.option.mode.score]}, size : ${this.option.size === null ? "disabled" : this.option.size},
+  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}, mods : ${this.option.mods === null ? "disabled" : this.option.mods}`;
   }
 }

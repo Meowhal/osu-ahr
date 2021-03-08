@@ -368,7 +368,7 @@ export class AutoHostSelector extends LobbyPlugin {
   private rotateQueue(showLog: boolean = true): void {
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
-    if (this.logger.isTraceEnabled && showLog) {
+    if (this.logger.isTraceEnabled() && showLog) {
       this.logger.trace("rotated host queue: %s", this.hostQueue.map(p => p.name).join(", "));
     }
     this.raiseOrderChanged("rotated");
@@ -394,10 +394,8 @@ export class AutoHostSelector extends LobbyPlugin {
   GetPluginStatus(): string {
     const m = this.hostQueue.map(p => p.name).join(", ");
     return `-- AutoHostSelector --
-  current host queue
-    ${m}
-  map changer : ${this.mapChanger == null ? "null" : this.mapChanger.name}
-  needsRotate : ${this.needsRotate}`;
+  queue : ${m}
+  mapChanger : ${this.mapChanger == null ? "null" : this.mapChanger.name}, needsRotate : ${this.needsRotate}`;
   }
 
   GetInfoMessage(): string[] {

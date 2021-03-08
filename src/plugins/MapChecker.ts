@@ -417,7 +417,6 @@ export class MapChecker extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- Mapchecker --
-  current regulation : ${this.getRegulationDescription()}`;
+    return `-- Mapchecker -- regulation : ${this.getRegulationDescription()}`;
   }
 }

@@ -170,8 +170,7 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- MatchStarter --
-  vote : ${this.voting.toString()}`;
+    return `-- MatchStarter -- vote : ${this.voting.toString()}`;
   }
 
   GetInfoMessage(): string[] {

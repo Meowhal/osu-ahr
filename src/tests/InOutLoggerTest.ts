@@ -27,5 +27,6 @@ describe.skip("In Out Logger Tests", function () {
     await ircClient.emulateMatchAsync();
     await ircClient.emulateRemovePlayerAsync("e");
     await ircClient.emulateMatchAsync();
+    logger.logger.info(logger.GetPluginStatus());
   });
 });

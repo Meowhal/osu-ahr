@@ -104,10 +104,7 @@ export class HistoryLoader extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- HistoryLoader --
-  status : ${this.status.toString()}
-  hasError : ${this.repository?.hasError}
-  loaded events : ${this.repository?.events.length}`
+    return `-- HistoryLoader -- status : ${this.status.toString()}, hasError : ${this.repository?.hasError}, loaded events : ${this.repository?.events.length}`
   }
 }
 
