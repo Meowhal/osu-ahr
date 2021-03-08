@@ -2,13 +2,24 @@ import express from "express";
 import fs from 'fs';
 import readline from 'readline';
 import { Server } from "http";
-import { Lobby } from "..";
 
-export function startLogServer(port: number, lobby: Lobby): Server {
+export function startLogServer(port: number): Server {
   const app = express();
   app.use("", express.static("src/web/statics"));
   app.use("/logs", express.static("logs/cli"));
-
+  app.get("/api/clilog", (req, res, next) => {
+    fs.readdir("logs/cli", (err, files) => {
+      if (err) throw err;
+      const r = [];
+      for (let f of files) {
+        let m = f.match(/(\d+)\.log/);
+        if (m) {
+          r.push(parseInt(m[1]));
+        }
+      }
+      res.json(r);
+    })
+  });
   app.get("/api/clilog/:id", (req, res, next) => {
     let p = `logs/cli/${req.params.id}.log`;
     let frm = 0;
@@ -49,31 +60,8 @@ export function startLogServer(port: number, lobby: Lobby): Server {
     });
   });
 
-  app.get("/api/close/:id", (req, res, next) => {
-    lobby.logger.info("called close");
-    if (lobby.lobbyId == req.params.id) {
-      lobby.CloseLobbyAsync();
-      res.json({ result: "done" });
-    } else {
-      res.json({ result: "invalid id" });
-    }
-  });
-
-  app.get("/api/quit/:id", (req, res, next) => {
-    if (lobby.lobbyId == req.params.id) {
-      if (lobby.ircClient.conn != null && !lobby.ircClient.conn.requestedDisconnect) {
-        lobby.ircClient.disconnect("goodby", () => {
-          lobby.logger.info("ircClient disconnected");
-          process.exit(0);
-        });
-      } else {
-        lobby.logger.info("quit");
-        process.exit(0);
-      }
-      res.json({ result: "done" });
-    } else {
-      res.json({ result: "invalid id" });
-    }
+  app.get("/api/close", (req, res, next) => {
+    server.close();
   });
 
   const server = app.listen(port, () => {

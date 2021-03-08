@@ -14,11 +14,12 @@
   <header>
     <h1>Osu! Auto Host Rotaion Log Viewer</h1>
     <label for="mapid">mapid</label>
-    <input name="mapid" type="text" />
+    <input name="mapid" autocomplete="on" list="ids" type="text" />
+    <datalist id="ids">
+    </datalist>
     <button onclick="updateClicked()">update</button>
     <a target="oahrhistory" id="history" href=".">*</a>
-    <button onclick="closeClicked()">close lobby</button>
-    <button onclick="quitClicked()">quit</button>
+    <button onclick="closeClicked()">close server</button>
   </header>
   <section>
     <ul id="list"></ul>

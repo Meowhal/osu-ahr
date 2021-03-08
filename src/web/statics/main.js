@@ -150,16 +150,7 @@ function updateClicked() {
 }
 
 function closeClicked() {
-  let mapId = document.getElementsByName("mapid")[0].value;
-  fetch(`/api/close/${mapId}`).then(async res => {
-    let r = await res.json();
-    alert(r.result);
-  })
-}
-
-function quitClicked() {
-  let mapId = document.getElementsByName("mapid")[0].value;
-  fetch(`/api/quit/${mapId}`).then(async res => {
+  fetch(`/api/close`).then(async res => {
     let r = await res.json();
     alert(r.result);
   })
@@ -200,6 +191,19 @@ function fetchLogSize(mapId) {
   });
 }
 
+function fetchMapIds() {
+  return fetch(`/api/clilog`).then(res => {
+    return res.json();
+  }).then(data => {
+    let idElem = document.getElementById("ids");
+    for (let id of data) {
+      const c = document.createElement("option");
+      c.value = id;
+      idElem.appendChild(c);
+    }
+  });
+}
+
 function ScrollToBottom() {
   let doc = document.documentElement;
   let bottom = doc.scrollHeight - doc.clientHeight;
@@ -209,6 +213,7 @@ function ScrollToBottom() {
 function init() {
   let params = (new URL(document.location)).searchParams;
   let mapId = params.get("mapid");
+  fetchMapIds();
   if (mapId) {
     document.getElementsByName("mapid")[0].value = mapId;
     fetchLogSize(mapId).then(() => {
