@@ -35,13 +35,16 @@ export class HistoryRepository {
   kickedUser = new TypedEvent<{ sender: HistoryRepository, kickedUser: User }>();
 
   hasError: boolean = false;
+  errorCount: number = 0;
+  ERR_COUNT_LIMIT = 10;
   fetcher: IHistoryFetcher;
-  static ESC_CRITERIA: number = 5; // プレイヤー存在確認に利用する試合数
+  static ESC_CRITERIA: number = 16; // プレイヤー存在確認に利用する試合数
   static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
 
   constructor(matchId: number, fetcher: IHistoryFetcher | null = null) {
     this.matchId = matchId;
     this.logger = log4js.getLogger("history");
+    this.logger.addContext("channel", "lobby");
     this.users = {};
     this.events = [];
     this.fetcher = fetcher ?? new HistoryFetcher();
@@ -49,7 +52,7 @@ export class HistoryRepository {
 
   /**
    * 現在の最新イベントからサーバー上の最新イベントまで更新する。
-   * 初回実行時は100このイベントが取得される。
+   * 初回実行時は100個のイベントが取得される。
    */
   async updateToLatest(): Promise<void> {
     if (this.hasError) return;
@@ -60,6 +63,12 @@ export class HistoryRepository {
     } catch (e) {
       this.logger.error(e.message);
       this.hasError = true;
+      if (this.errorCount++ < this.ERR_COUNT_LIMIT) {
+        setTimeout(() =>{
+          this.hasError = false;
+          this.logger.info(`restart fetch count:${this.errorCount}`);
+        }, 30 * 1000);
+      }      
     }
   }
 
@@ -184,6 +193,7 @@ export class HistoryRepository {
    * 2回目以降のhostchangeイベントでは一つ前のhostchangeイベントIDか、一つ前の試合開始イベントのIDがageになる。
    */
   async calcCurrentOrderAsID(): Promise<number[]> {
+    this.hasError = false;
     await this.updateToLatest();
     const map: { [id: number]: boolean } = {}; // 確認されたプレイヤー一覧、ロビー離席済みはtrue
     const result: { age: number, id: number }[] = [];
@@ -191,7 +201,6 @@ export class HistoryRepository {
     if (this.events.length == 0) return [];
 
     let i = this.events.length;
-    let exCount = 0; // 現在プレイ中のプレイヤー発見数
     let loopCount = 0;
     let hostAge = -1;  // 現在のホスト
     let gameCount = 0; // 現在までの試合数
@@ -216,7 +225,6 @@ export class HistoryRepository {
               // -1、直前の試合開始ID、直前のhostchangeIDのいずれか
               //this.logger.trace(`changed ${this.users[ev.user_id].username} ${hostAge}`);
               result.push({ age: hostAge, id: ev.user_id });
-              exCount++;
             }
             hostAge = Date.parse(ev.timestamp);
             unresolvedPlayers.delete(ev.user_id);
@@ -228,7 +236,6 @@ export class HistoryRepository {
               map[ev.user_id] = false;
               //this.logger.trace(`joined ${this.users[ev.user_id].username} ${la}`);
               result.push({ age: la, id: ev.user_id });
-              exCount++;
               unresolvedPlayers.delete(ev.user_id);
             }
             break;
@@ -261,16 +268,16 @@ export class HistoryRepository {
       //  直近{ESC_CRITERIA}回の試合参加メンバーすべての存在が確認された
       //  ロビー作成イベントまで到達
       // ループリミットを超過
-      if (16 <= exCount) {
-        this.logger.info(`found ${exCount} players in ${loopCount} events. full lobby`);
+      if (16 <= result.length) {
+        this.logger.info(`found ${result.length} players in ${loopCount} events. full lobby`);
         break;
       }
       if (HistoryRepository.ESC_CRITERIA <= gameCount && unresolvedPlayers.size === 0) {
-        this.logger.info(`found ${exCount} players in ${loopCount} events. estimated`);
+        this.logger.info(`found ${result.length} players in ${loopCount} events. estimated`);
         break;
       }
       if (ev.detail.type == "match-created") {
-        this.logger.info(`found ${exCount} players in ${loopCount} events. reached begin of events`);
+        this.logger.info(`found ${result.length} players in ${loopCount} events. reached begin of events`);
         break;
       }
       if (HistoryRepository.LOOP_LIMIT < loopCount) {

@@ -86,6 +86,7 @@ export class InOutLogger extends LobbyPlugin {
       let num = this.players.get(p) || 0;
       return `${p.name}(${num})`;
     }).join(", ");
-    return `-- InOut -- ${m}`;
+    return `-- InOut -- 
+  players: ${m}`;
   }
 }

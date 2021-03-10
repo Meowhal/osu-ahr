@@ -4,7 +4,7 @@ import { HistoryFecher } from '../webapi/HistoryFetcher';
 import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function trial() {
-  await GetHistryTrial();
+  await promiseTrial();
 }
 
 async function GetHistryTrial() {
@@ -46,4 +46,31 @@ async function GetLobbyNameChanger() {
   while(!ln.startsWith("4-5*")) {
     await hr.fetch(true);
   }
+}
+
+async function promiseTrial() {
+  let task = delayAsync(100).then(() => 1);
+  setImmediate(async () => {
+    let n = await task;
+    console.log("i1 " + n);
+  });
+  setImmediate(async () => {
+    task = task.then(() => 2);
+    let n = await task;
+    console.log("i2 " + n);
+  });
+  setImmediate(async () => {
+    task = task.then(() => 3);
+    let n = await task;
+    console.log("i3 " + n);
+  });
+  setImmediate(async () => {
+    let n = await task;
+    console.log("i4 " + n);
+  });
+}
+
+async function delayAsync(ms: number): Promise<void> {
+  if (ms == 0) return Promise.resolve();
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

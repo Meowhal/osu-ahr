@@ -195,6 +195,7 @@ export class HostSkipper extends LobbyPlugin {
   Reset(): void {
     this.voting.Clear();
     this.StartTimer(true);
+    this.timeVotePassed = Date.now();
   }
 
   StartTimer(isFirst: boolean): void {
@@ -233,9 +234,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- Host Skipper --
-  timer : ${this.afkTimer != undefined ? "active" : "---"}
-  skip_vote : ${this.voting.toString()}`;
+    return `-- Host Skipper -- timer : ${this.afkTimer != undefined ? "active" : "###"}, skip_vote : ${this.voting.toString()}`;
   }
 
   GetInfoMessage(): string[] {

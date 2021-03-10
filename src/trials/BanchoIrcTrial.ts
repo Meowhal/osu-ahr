@@ -28,8 +28,8 @@ export function trial() {
     console.log('%s has joined %s', who, channel);
     if (!is_joined) {
       is_joined = true;
-      bot.say(channel, "!mp password");
-      bot.say(channel, "!mp invite gnsksz");
+      //bot.say(channel, "!mp password");
+      //bot.say(channel, "!mp invite gnsksz");
       setTimeout(() => {
         //bot.say(channel, "!mp close");
       }, 30000);
@@ -48,7 +48,8 @@ export function trial() {
 
   bot.addListener('registered', function (message) {
     console.log('registered %s', message);
-    bot.say("BanchoBot", "!mp make irc test lobby4");
+    //bot.say("BanchoBot", "!mp make irc test lobby4");
+    bot.join("#lobby");
   });
 }
 

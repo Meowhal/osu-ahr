@@ -131,6 +131,9 @@ export class Lobby {
     this.ircClient.on('pm', (nick, message) => {
       this.handlePrivateMessage(nick, message);
     });
+    this.ircClient.on('kick', (channel, who, by, reason) => {
+      this.logger.info('%s was kicked from %s by %s: %s', who, channel, by, reason);
+    });
   }
 
   /**
