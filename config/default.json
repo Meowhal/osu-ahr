@@ -106,6 +106,7 @@
     "mode": null,
     "size": null,
     "password": null,
-    "mods": null
+    "mods": null,
+    "hostkick_tolerance": 4
   }
 }

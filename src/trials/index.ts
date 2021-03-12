@@ -4,5 +4,5 @@ log4js.configure("config/log_mocha.json");
 //import * as trial from './WebServerTrial';
 //trial.webServerTrial();
 
-import { trial } from './HistryTrial';
+import { trial } from './NedbTrial';
 trial();
