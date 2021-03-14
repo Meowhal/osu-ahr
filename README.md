@@ -2,6 +2,10 @@
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
 The order of hosts is managed by queue. Added last when a player joins the lobby.
 
+# attention
+Many config items have renamed in version 1.4.
+Plz recreate local.json file.
+
 ## chat commands
 |for player|desc|
 |:--|:--|
