@@ -9,22 +9,27 @@
   },
   "Lobby": {
     "authorized_users": [],
-    "listref_duration": 1000,
+    "listref_duration_ms": 1000,
     "info_message": [
       "-  The order of hosts is managed by queue. Added last when a player joins the lobby.",
       "-  github|cmdRefs : [https://github.com/Meowhal/osu-ahr github/osu-ahr]"
     ],
-    "info_message_cooltime": 60000,
-    "stat_timeout": 5000
+    "info_message_cooltime_ms": 60000,
+    "stat_timeout_ms": 5000,
+    "info_message_announcement_interval_ms": 0
   },
   "AutoHostSelector": {
-    "show_queue_chars_limit": 90,
-    "show_queue_cooltime_ms": 15000
+    "show_host_order_every_after_match": true,
+    "host_order_chars_limit": 90,
+    "host_order_cooltime_ms": 15000
   },
   "AutoStartTimer": {
     "enabled": false,
     "doClearHost": false,
     "waitingTime": 60
+  },
+  "HistoryLoader": {
+    "fetch_interval_ms": 15000
   },
   "HostSkipper": {
     "vote_rate": 0.5,
@@ -36,21 +41,40 @@
     "afk_check_interval_ms": 90000,
     "afk_check_do_skip": true
   },
-  "LobbyTerminator": {
-    "terminate_time_ms": 60000,
-    "sleep_message_interval": 1000
+  "LobbyKeeper": {
+    "mode": null,
+    "size": null,
+    "password": null,
+    "mods": null,
+    "hostkick_tolerance": 4
   },
+  "LobbyTerminator": {
+    "terminate_time_ms": 60000
+  },
+  "MapChecker": {
+    "enabled": false,
+    "star_min": 0,
+    "star_max": 7.00,
+    "length_min": 0,
+    "length_max": 360
+  },
+  "MapRecaster": {},
   "MatchStarter": {
     "vote_rate": 0.45,
-    "vote_min": 2
+    "vote_min": 2,
+    "vote_msg_defer_ms": 5000
   },
   "MatchAborter": {
     "vote_rate": 0.3,
     "vote_min": 2,
-    "vote_msg_defer": 5000,
+    "vote_msg_defer_ms": 5000,
     "auto_abort_rate": 0.5,
     "auto_abort_delay_ms": 30000,
     "auto_abort_do_abort": false
+  },
+  "Recorder": {
+    "path_player": "data/player.nedb",
+    "path_map": "data/map.nedb"
   },
   "WordCounter": {
     "periods": [
@@ -65,48 +89,29 @@
     ],
     "log_interval_ms": 3600000
   },
-  "Recorder": {
-    "path_player": "data/player.nedb",
-    "path_map": "data/map.nedb"
-  },
-  "MapRecaster": {},
   "OahrCli": {
     "invite_users": [],
     "password": "",
-    "use_recoder": false,
-    "use_log_server": false,
-    "log_server_port": 0
+    "use_recoder": false
   },
   "WebApi": {
     "client_id": 0,
     "client_secret": "***",
-    "callback": "",
-    "callback_port": 3000,
     "token_store_dir": "data/tokens/",
-    "asGuest": true
+    "asGuest": true,
+    "callback": "",
+    "callback_port": 3000    
   },
   "profile": {
     "db_path": "data/profile.nedb",
     "profile_expired_day": 7
   },
-  "history": {},
   "OahrWeb": {
     "port": 3112,
     "staticDir": "src/web/statics",
     "hostname": "127.0.0.1"
   },
-  "mapChecker": {
-    "enabled": false,
-    "star_min": 0,
-    "star_max": 7.00,
-    "length_min": 0,
-    "length_max": 360
-  },
-  "LobbyKeeper": {
-    "mode": null,
-    "size": null,
-    "password": null,
-    "mods": null,
-    "hostkick_tolerance": 4
+  "LogServer": {
+    "port": 3115
   }
 }

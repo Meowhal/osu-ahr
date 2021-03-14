@@ -21,10 +21,11 @@ export enum LobbyStatus {
 
 export interface LobbyOption {
   authorized_users: string[], // 特権ユーザー
-  listref_duration: number,
+  listref_duration_ms: number,
   info_message: string[],
-  info_message_cooltime: number,
-  stat_timeout: number,
+  info_message_cooltime_ms: number,
+  stat_timeout_ms: number,
+  info_message_announcement_interval_ms: number,
 }
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
@@ -55,6 +56,7 @@ export class Lobby {
   logger: log4js.Logger;
   chatlogger: log4js.Logger;
   historyRepository: HistoryRepository;
+  infoMessageAnnouncementTimeId: NodeJS.Timeout | null = null;
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
@@ -122,6 +124,8 @@ export class Lobby {
       }
     });
     this.ircClient.once("part", (channel: string, nick: string) => {
+      this.stopInfoMessageAnnouncement();
+      this.CancelAllDeferredMessages();
       if (channel == this.channel) {
         this.logger.info("part");
         this.status = LobbyStatus.Left;
@@ -290,7 +294,13 @@ export class Lobby {
     }
   }
 
-  async RequestStatAsync(player: Player, byPm: boolean, timeout: number = this.option.stat_timeout): Promise<StatResult> {
+  CancelAllDeferredMessages(): void {
+    for (let tag in this.deferredMessages) {
+      this.deferredMessages[tag].cancel();
+    }
+  }
+
+  async RequestStatAsync(player: Player, byPm: boolean, timeout: number = this.option.stat_timeout_ms): Promise<StatResult> {
     return new Promise<StatResult>((resolve, reject) => {
       const tm = setTimeout(() => {
         reject("stat timeout");
@@ -441,7 +451,7 @@ export class Lobby {
 
   private checkListRef(message: string): boolean {
     if (this.listRefStart != 0) {
-      if (Date.now() < this.listRefStart + this.option.listref_duration) {
+      if (Date.now() < this.listRefStart + this.option.listref_duration_ms) {
         const p = this.GetOrMakePlayer(message);
         p.setRole(Roles.Referee);
         this.logger.trace("AddedReferee : %s", p.escaped_name);
@@ -539,7 +549,7 @@ export class Lobby {
     this.players.clear();
     this.channel = channel;
     this.lobbyId = channel.replace("#mp_", "");
-    this.historyRepository.matchId = parseInt(this.lobbyId);
+    this.historyRepository.setLobbyId(this.lobbyId);
     this.status = LobbyStatus.Entered;
     this.logger.addContext("channel", this.lobbyId);
     this.chatlogger.addContext("channel", this.lobbyId);
@@ -548,6 +558,7 @@ export class Lobby {
     }
     this.assignCreatorRole();
     this.JoinedLobby.emit({ channel: this.channel, creator: this.GetOrMakePlayer(this.ircClient.nick) })
+    this.startInfoMessageAnnouncement();
   }
 
   RaiseParsedSettings(): void {
@@ -823,7 +834,7 @@ export class Lobby {
     const msg
       = `- Osu Auto Host Rotation Bot ver ${pkg.version} - \n`
       + this.option.info_message.join("\n");
-    !this.SendMessageWithCoolTime(msg, "infomessage", this.option.info_message_cooltime);
+    !this.SendMessageWithCoolTime(msg, "infomessage", this.option.info_message_cooltime_ms);
   }
 
   // ircでログインしたユーザーに権限を与える
@@ -838,6 +849,28 @@ export class Lobby {
       c.setRole(Roles.Referee);
       c.setRole(Roles.Creator);
       this.logger.info("assigned %s creators role", this.ircClient.nick);
+    }
+  }
+
+  private startInfoMessageAnnouncement(): void {
+    // ensure time is stop
+    this.stopInfoMessageAnnouncement();
+    if (this.option.info_message_announcement_interval_ms > 3 * 60 * 1000) {
+      this.logger.trace("started InfoMessageAnnouncement. interval = " + this.option.info_message_announcement_interval_ms);
+      this.infoMessageAnnouncementTimeId = setInterval(() => {
+        this.showInfoMessage();
+        if (this.status != LobbyStatus.Entered) {
+          this.stopInfoMessageAnnouncement();
+        }
+      }, this.option.info_message_announcement_interval_ms);
+    }
+  }
+
+  private stopInfoMessageAnnouncement(): void {
+    if (this.infoMessageAnnouncementTimeId != null) {
+      this.logger.trace("stopped InfoMessageAnnouncement.");
+      clearInterval(this.infoMessageAnnouncementTimeId);
+      this.infoMessageAnnouncementTimeId = null;
     }
   }
 }

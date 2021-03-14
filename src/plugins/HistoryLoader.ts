@@ -7,63 +7,45 @@ import config from "config";
 import { User } from "../webapi/HistoryTypes";
 
 export interface HistoryLoaderOption {
+  fetch_interval_ms: number; // ヒストリー取得間隔
 }
 
-enum LoadingStatus {
-  Idle,
-  Loading,
-  Cooling,
-  Peinding,
-}
-
-const defaultOption = config.get<HistoryLoaderOption>("history");
+const defaultOption = config.get<HistoryLoaderOption>("HistoryLoader");
 
 /**
  * 定期的にhistoryを取得し、lobbyのhistoryrepositoryに保存する
  */
 export class HistoryLoader extends LobbyPlugin {
   option: HistoryLoaderOption;
-  task: Promise<void>;
   repository: HistoryRepository;
-  status: LoadingStatus = LoadingStatus.Idle;
-  coolTime: number = 5 * 1000;
+  fetchInvervalId: NodeJS.Timeout | null = null;
 
   constructor(lobby: Lobby, option: Partial<HistoryLoaderOption> = {}) {
     super(lobby, "history");
     this.option = { ...defaultOption, ...option } as HistoryLoaderOption;
-    this.task = Promise.resolve();
     this.repository = lobby.historyRepository;
     this.registerEvents();
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.JoinedLobby.on(a => this.onJoinedLobby(a.channel));
-    this.lobby.MatchStarted.on(a => this.onMatchStarted(a.mapId, a.mapTitle));
+    this.lobby.Disconnected.on(a => this.stopFetch());
   }
 
   async onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): Promise<void> {
-    await this.queueTask();
     if (!this.repository) return;
     let order = (await this.repository.calcCurrentOrderAsName()).join(",");
     this.SendPluginMessage("reorder", [order]);
   }
 
-  onPlayerJoined(player: Player): any {
-    this.queueTask();
-  }
-
   onJoinedLobby(channel: string): any {
     if (this.lobby.lobbyId) {
-      this.repository = new HistoryRepository(parseInt(this.lobby.lobbyId));
+      this.repository.lobbyId = parseInt(this.lobby.lobbyId);
       this.repository.gotUserProfile.on(a => this.onGotUserProfile(a.user));
       this.repository.changedLobbyName.on(a => this.onChangedLobbyName(a.newName, a.oldName));
+      this.startFetch();
     }
-  }
-
-  onMatchStarted(mapId: number, mapTitle: string): any {
-    this.queueTask();
   }
 
   onGotUserProfile(user: User): any {
@@ -76,38 +58,25 @@ export class HistoryLoader extends LobbyPlugin {
     this.logger.info(`lobbyname changed : ${oldName} -> ${newName}, host : ${this.lobby.host?.name}`);
   }
 
-  queueTask(): Promise<void> {
-    if (!this.repository) return this.task;
-    switch (this.status) {
-      case LoadingStatus.Idle:
-        this.status = LoadingStatus.Loading;
-        this.task = this.repository.updateToLatest()
-          .then(_ => {
-            this.status = LoadingStatus.Cooling;
-            return delay(this.coolTime);
-          }).then(_ => {
-            if (this.status == LoadingStatus.Peinding) {
-              this.status = LoadingStatus.Idle;
-              return this.queueTask();
-            } else {
-              this.status = LoadingStatus.Idle;
-            }
-          });
-        break;
-
-      case LoadingStatus.Cooling:
-        this.status = LoadingStatus.Peinding;
-        break;
+  startFetch(): void {
+    this.stopFetch();
+    if (this.option.fetch_interval_ms >= 5000) {
+      this.logger.trace("start fetching");
+      this.fetchInvervalId = setInterval(() => {
+        this.repository.updateToLatest();
+      }, this.option.fetch_interval_ms);
     }
+  }
 
-    return this.task;
+  stopFetch(): void {
+    if (this.fetchInvervalId) {
+      this.logger.trace("stop fetching");
+      clearInterval(this.fetchInvervalId);
+      this.fetchInvervalId = null;
+    }
   }
 
   GetPluginStatus(): string {
-    return `-- HistoryLoader -- status : ${this.status.toString()}, hasError : ${this.repository?.hasError}, loaded events : ${this.repository?.events.length}`
+    return `-- HistoryLoader -- hasError : ${this.repository?.hasError}, latest : ${this.repository?.latestEventId} loaded events : ${this.repository?.events.length}`
   }
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -1,8 +1,26 @@
 
 import log4js from "log4js";
-import { Event, History, Match, User } from './HistoryTypes';
+import { Event, History, Match, User, Game } from './HistoryTypes';
 import { TypedEvent } from '../libs';
 import { HistoryFecher as HistoryFetcher, IHistoryFetcher as IHistoryFetcher } from "./HistoryFetcher";
+
+/* メモ
+試合中のイベントはend_timeがnullになっている
+試合が終わったあとにそのイベントを再取得すると試合結果などが補足される
+試合終了後に新しいイベントが発生するわけではない 
+
+イベントのとり方として、
+試合中のイベントを最新として更新を待つか、試合のイベントだけを取るか
+
+進行中の試合を見つけたら、currentGameIdなどの変数に保存して、
+前進フェッチのafterをcurrentGameId - 1 に指定して取得
+取得重複分を取り除く処理を入れる
+また、試合中に100件以上のイベントを取得してしまった場合の処理も必要
+
+
+イベントは発生時から取得時までの経過時間を追加して、最近発生したイベント化判定できるようにする必要がある
+
+ */
 
 interface FetchResult {
   /**
@@ -18,36 +36,45 @@ interface FetchResult {
    */
   isRewind: boolean;
 }
-
 export class HistoryRepository {
-  matchId: number;
+  lobbyId: number;
   matchInfo: Match | null = null;
   lobbyName: string = "";
   latestEventId: number = 0;
   oldestEventId: number = Number.MAX_VALUE;
+  currentGameEventId: number = 0;
   logger: log4js.Logger;
   users: { [id: number]: User };
   events: Event[];
 
+  static ESC_CRITERIA: number = 6; // プレイヤー存在確認に利用する試合数
+  static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
+  static ERR_COUNT_LIMIT: number = 10;
+  static COOL_TIME: number = 100;
+
   // Events
   gotUserProfile = new TypedEvent<{ sender: HistoryRepository, user: User }>();
-  changedLobbyName = new TypedEvent<{ sender: HistoryRepository, newName: string, oldName: string }>();
-  kickedUser = new TypedEvent<{ sender: HistoryRepository, kickedUser: User }>();
+  changedLobbyName = new TypedEvent<{ sender: HistoryRepository, elapsedMs: number, newName: string, oldName: string }>();
+  kickedUser = new TypedEvent<{ sender: HistoryRepository, elapsedMs: number, kickedUser: User }>();
+  finishedGame = new TypedEvent<{ sender: HistoryRepository, elapsedMs: number, game: Game }>();
 
   hasError: boolean = false;
   errorCount: number = 0;
-  ERR_COUNT_LIMIT = 10;
+  fetchTask: Promise<FetchResult> = Promise.resolve({ count: 0, filled: true, isRewind: false });
   fetcher: IHistoryFetcher;
-  static ESC_CRITERIA: number = 16; // プレイヤー存在確認に利用する試合数
-  static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
 
-  constructor(matchId: number, fetcher: IHistoryFetcher | null = null) {
-    this.matchId = matchId;
-    this.logger = log4js.getLogger("history");
-    this.logger.addContext("channel", "lobby");
+  constructor(lobbyId: number, fetcher: IHistoryFetcher | null = null) {
+    this.lobbyId = lobbyId;
+    this.logger = log4js.getLogger("his_repo");
+    this.logger.addContext("channel", lobbyId);
     this.users = {};
     this.events = [];
     this.fetcher = fetcher ?? new HistoryFetcher();
+  }
+
+  setLobbyId(lobbyId: string) {
+    this.lobbyId = parseInt(lobbyId);
+    this.logger.addContext("channel", lobbyId);
   }
 
   /**
@@ -63,17 +90,36 @@ export class HistoryRepository {
     } catch (e) {
       this.logger.error(e.message);
       this.hasError = true;
-      if (this.errorCount++ < this.ERR_COUNT_LIMIT) {
-        setTimeout(() =>{
+      if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
+        setTimeout(() => {
           this.hasError = false;
           this.logger.info(`restart fetch count:${this.errorCount}`);
         }, 30 * 1000);
-      }      
+      }
     }
   }
 
-  async fetch(isRewind: boolean = false): Promise<FetchResult> {
-    if (this.matchId == 0) return { count: 0, filled: true, isRewind };
+  /**
+   * ヒストリーを取得する
+   * 現在の未取得分の
+   * すでに所得中の場合は、取得が完了するまで待ち、さらにクールタイム分待機したあとに次のタスクを実行する
+   * @param isRewind 取得済み分の過去イベントを取得する場合はtrue,未来イベントを取得する場合はfalse
+   * @returns 
+   */
+  fetch(isRewind: boolean = false): Promise<FetchResult> {
+    const p = this.fetchTask.then(() => this.fetch_(isRewind));
+    if (HistoryRepository.COOL_TIME) {
+      this.fetchTask = p.then(r => new Promise((resolve) => {
+        setTimeout(() => resolve(r), HistoryRepository.COOL_TIME);
+      }));
+    } else {
+      this.fetchTask = p;
+    }
+    return p;
+  }
+
+  private async fetch_(isRewind: boolean = false): Promise<FetchResult> {
+    if (this.lobbyId == 0) return { count: 0, filled: true, isRewind };
 
     let limit = 100;
     let after = null;
@@ -83,18 +129,17 @@ export class HistoryRepository {
       if (isRewind) {
         before = this.oldestEventId;
       } else {
-        after = this.latestEventId;
+        after = this.currentGameEventId ? (this.currentGameEventId - 1) : this.latestEventId;
       }
     }
-
     let data: History | null = null;
     try {
-      data = await this.fetcher.fetchHistory(limit, before, after, this.matchId);
+      data = await this.fetcher.fetchHistory(limit, before, after, this.lobbyId);
     } catch (e) {
       throw e;
     }
-
-    return this.loadHistory(data, isRewind);
+    const r = this.loadHistory(data, isRewind);
+    return r;
   }
 
   /**
@@ -113,7 +158,7 @@ export class HistoryRepository {
       this.matchInfo = data.match;
       this.lobbyName = data.match.name;
     }
-
+    let newEvents = data.events;
     if (this.events.length == 0) {
       this.events = data.events;
       this.oldestEventId = data.events[0].id;
@@ -122,7 +167,8 @@ export class HistoryRepository {
       this.oldestEventId = data.events[0].id;
       this.events = data.events.concat(this.events);
     } else {
-      data.events.forEach(e => {
+      newEvents = this.currentGameEventId ? data.events.filter(v => this.latestEventId < v.id) : data.events;
+      newEvents.forEach(e => {
         this.events.push(e);
       });
       this.latestEventId = data.events[data.events.length - 1].id;
@@ -136,17 +182,32 @@ export class HistoryRepository {
       }
     });
 
-    for (let i = data.events.length - 1; 0 <= i; i--) {
-      let ev = data.events[i];
+    for (let ev of newEvents) {
       switch (ev.detail.type) {
         case "other":
           this.checkLobbyName(ev);
+          if (ev.game) {
+            if (ev.game.end_time) {
+              this.raiseFinishedGame(ev);
+            } else {
+              this.currentGameEventId = ev.id;
+            }
+          }
           break;
         case "player-kicked":
           this.raiseKickedEvent(ev);
           break;
       }
     }
+
+    if (this.currentGameEventId) {
+      const matchEvt = data.events.find(v => v.id == this.currentGameEventId);
+      if (matchEvt?.game?.end_time) {
+        this.raiseFinishedGame(matchEvt);
+        this.currentGameEventId = 0;
+      }
+    }
+    //this.logger.trace(`loaded ${data.events.length} events`);
 
     // 巻き戻しなら部屋作成イベントでfalse,
     // 前進なら最新イベントと一致でfalse
@@ -164,7 +225,8 @@ export class HistoryRepository {
       const newName = ev.detail.text;
       const oldName = this.lobbyName;
       this.lobbyName = newName;
-      this.changedLobbyName.emit({ sender: this, oldName, newName });
+      const elapsedMs = Date.now() - Date.parse(ev.timestamp);
+      this.changedLobbyName.emit({ sender: this, elapsedMs, oldName, newName });
     }
   }
 
@@ -172,8 +234,16 @@ export class HistoryRepository {
     if (ev.user_id) {
       const kickedUser = this.users[ev.user_id];
       if (kickedUser) {
-        this.kickedUser.emit({ sender: this, kickedUser });
+        const elapsedMs = Date.now() - Date.parse(ev.timestamp);
+        this.kickedUser.emit({ sender: this, elapsedMs, kickedUser });
       }
+    }
+  }
+
+  raiseFinishedGame(ev: Event) {
+    if (ev.game && ev.game.end_time) {
+      const elapsedMs = Date.now() - Date.parse(ev.game.end_time);
+      this.finishedGame.emit({ sender: this, elapsedMs, game: ev.game });
     }
   }
 
@@ -191,6 +261,7 @@ export class HistoryRepository {
    * ageが若いプレイヤーほど早くホスト順が回ってくる。
    * 最初のhostchangeイベントを検知したとき、試合中なら試合開始イベントIDがageになり、試合外ならageは-1になる。
    * 2回目以降のhostchangeイベントでは一つ前のhostchangeイベントIDか、一つ前の試合開始イベントのIDがageになる。
+   * !! 1秒以内に発生したイベントは順番が保証されない模様
    */
   async calcCurrentOrderAsID(): Promise<number[]> {
     this.hasError = false;
@@ -268,8 +339,11 @@ export class HistoryRepository {
       //  直近{ESC_CRITERIA}回の試合参加メンバーすべての存在が確認された
       //  ロビー作成イベントまで到達
       // ループリミットを超過
-      if (16 <= result.length) {
+      if (16 <= result.length && unresolvedPlayers.size === 0) {
         this.logger.info(`found ${result.length} players in ${loopCount} events. full lobby`);
+        if (16 < result.length) {
+          this.logger.warn(`lots of players!!`);
+        }
         break;
       }
       if (HistoryRepository.ESC_CRITERIA <= gameCount && unresolvedPlayers.size === 0) {
@@ -290,4 +364,3 @@ export class HistoryRepository {
     return result.map(a => a.id);
   }
 }
-

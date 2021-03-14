@@ -24,13 +24,13 @@ export interface HostSkipperOption {
 export class HostSkipper extends LobbyPlugin {
   option: HostSkipperOption;
   afkTimer: NodeJS.Timer | undefined;
-  timeVotePassed: number = 0;
+  timeHostChanged: number = 0;
   voting: VoteCounter;
   isMapChanged: boolean = false;
 
   // skip受付からの経過時間
-  get elapsedSinceVotePassed(): number {
-    return Date.now() - this.timeVotePassed;
+  get elapsedSinceHostChanged(): number {
+    return Date.now() - this.timeHostChanged;
   }
 
   constructor(lobby: Lobby, option: Partial<HostSkipperOption> = {}) {
@@ -145,11 +145,11 @@ export class HostSkipper extends LobbyPlugin {
   private vote(player: Player): void {
     if (this.voting.passed) {
       this.logger.debug("vote from %s was ignored, already skipped", player.name);
-    } else if (this.elapsedSinceVotePassed < this.option.vote_cooltime_ms) {
+    } else if (this.elapsedSinceHostChanged < this.option.vote_cooltime_ms) {
       this.logger.debug("vote from %s was ignored, at cool time.", player.name);
       if (player.isHost) {
-        const secs = (this.option.vote_cooltime_ms - this.elapsedSinceVotePassed) / 1000;
-        this.lobby.SendMessage(`skip command during cool time was ignored. you'll be able to skip in ${secs.toFixed(2)} sec(s).`);
+        const secs = (this.option.vote_cooltime_ms - this.elapsedSinceHostChanged) / 1000;
+        this.lobby.SendMessage(`skip command is in cooltime. you have to wait ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
       this.logger.debug("host(%s) sent !skip command", player.name);
@@ -179,7 +179,7 @@ export class HostSkipper extends LobbyPlugin {
     this.logger.info("do skip");
     this.StopTimer();
     this.SendPluginMessage("skip");
-    this.timeVotePassed = Date.now();
+    this.timeHostChanged = Date.now();
   }
 
   SkipTo(username: string): void {
@@ -195,7 +195,7 @@ export class HostSkipper extends LobbyPlugin {
   Reset(): void {
     this.voting.Clear();
     this.StartTimer(true);
-    this.timeVotePassed = Date.now();
+    this.timeHostChanged = Date.now();
   }
 
   StartTimer(isFirst: boolean): void {

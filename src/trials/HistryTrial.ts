@@ -4,7 +4,7 @@ import { HistoryFecher } from '../webapi/HistoryFetcher';
 import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function trial() {
-  await promiseTrial();
+  await GetOrderTrial();
 }
 
 async function GetHistryTrial() {
@@ -16,7 +16,7 @@ async function GetHistryTrial() {
   const url = `https://osu.ppy.sh/community/matches/${matchId}/`;
   const params = {
     'limit': 100,
-    'after': 0
+    'before': 1695874063
   }
 
   const response = await axios.get(url, { params })
@@ -26,7 +26,7 @@ async function GetHistryTrial() {
   console.log(JSON.stringify(response.data));
 
 
-  fs.writeFile("data/arc/history_76714773_first.json", JSON.stringify(response.data));
+  fs.writeFile("data/arc/history_76714773_joinleftsametime.json", JSON.stringify(response.data));
 }
 
 async function GetOrderTrial() {
@@ -43,7 +43,7 @@ async function GetLobbyNameChanger() {
     console.log(e.oldName + "->" + e.newName + " ");
     ln = e.newName;
   });
-  while(!ln.startsWith("4-5*")) {
+  while (!ln.startsWith("4-5*")) {
     await hr.fetch(true);
   }
 }

@@ -2,7 +2,7 @@ import { Lobby, Player } from "..";
 import { BanchoResponseType } from "../parsers";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import { User } from "../webapi/HistoryTypes";
+import { Game, User } from "../webapi/HistoryTypes";
 
 const TeamModes = [
   "Head To Head",
@@ -28,7 +28,7 @@ export interface LobbyKeeperOption {
   /**
    * 1-16
    */
-  size: number | null;
+  size: number;
 
   password: string | null;
 
@@ -68,7 +68,8 @@ export class LobbyKeeper extends LobbyPlugin {
           break;
       }
     });
-    this.lobby.historyRepository.kickedUser.on(a => this.onKickedPlayer(a.kickedUser))
+    this.lobby.historyRepository.kickedUser.on(a => this.onKickedPlayer(a.kickedUser));
+    this.lobby.historyRepository.finishedGame.on(a => this.onFinishedGame(a.game));
   }
 
   private onMpKickedPlayer(name: string): void {
@@ -122,15 +123,19 @@ export class LobbyKeeper extends LobbyPlugin {
     this.fixMods();
   }
 
+  private onFinishedGame(game: Game): any {
+    this.logger.trace(`hev finished game -> mode:${game.mode}, mode_int:${game.mode_int}, score:${game.scoring_type}, team:${game.team_type}, mods:${game.mods}`);
+  }
+
   private fixLobbyModeAndSize(): void {
     if (this.option.mode != null) {
-      if (this.option.size != null) {
+      if (this.option.size) {
         this.lobby.SendMessage(`!mp set ${this.option.mode.team} ${this.option.mode.score} ${this.option.size}`);
       } else {
         this.lobby.SendMessage(`!mp set ${this.option.mode.team} ${this.option.mode.score}`);
       }
     } else {
-      if (this.option.size != null) {
+      if (this.option.size) {
         this.lobby.SendMessage(`!mp size ${this.option.size}`);
       }
     }
@@ -168,6 +173,9 @@ export class LobbyKeeper extends LobbyPlugin {
           this.option.size = size;
           this.fixLobbyModeAndSize();
           return `keep lobby size ${this.option.size}`;
+        } else {
+          this.option.size = 0;
+          return `no keep lobby size.`;
         }
       }
 
@@ -193,7 +201,7 @@ export class LobbyKeeper extends LobbyPlugin {
         return "disabled keeping teammode and scoremode";
       }
       if (param == "keep size" && this.option.size != null) {
-        this.option.size = null;
+        this.option.size = 0;
         return "disabled keeping lobby size";
       }
       if (param == "keep password" && this.option.password != null) {

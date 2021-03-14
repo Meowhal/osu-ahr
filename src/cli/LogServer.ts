@@ -1,7 +1,10 @@
 import { startLogServer } from "../web/LogServer";
 import config from "config";
-import {OahrCliOption} from "./OahrBase";
 
-const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
+export interface LogServerOption {
+  port: number;
+}
 
-startLogServer(OahrCliDefaultOption.log_server_port);
+const options = config.get<LogServerOption>("LogServer");
+
+startLogServer(options.port);

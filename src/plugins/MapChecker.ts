@@ -202,7 +202,7 @@ export type MapCheckerOption = {
   cache_expired_day: number;
 } & DefaultRegulation;
 
-const defaultOption = config.get<MapCheckerOption>("mapChecker");
+const defaultOption = config.get<MapCheckerOption>("MapChecker");
 
 export class MapChecker extends LobbyPlugin {
   option: MapCheckerOption;

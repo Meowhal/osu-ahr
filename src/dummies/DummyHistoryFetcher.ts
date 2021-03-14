@@ -1,4 +1,4 @@
-import { History, Match, User, Event, EventType } from "../webapi/HistoryTypes";
+import { History, Match, User, Event, EventType, Score, Game } from "../webapi/HistoryTypes";
 import { IHistoryFetcher } from "../webapi/HistoryFetcher";
 
 export class DummyHistoryFecher implements IHistoryFetcher {
@@ -65,9 +65,9 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   addGameEvent(member: number[], title?: string) {
     this.timestamp += 1000;
     if (member.length == 0) return;
-    const scores = member.map(m => ({
-      user_id: m
-    }));
+    const scores = this.createDummyScores(member);
+    const game = this.createDummyGame(1, true);
+    game.scores = scores;
     title = title ?? this.match.name;
 
     this.events.push({
@@ -78,10 +78,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
       },
       timestamp: (new Date(this.timestamp)).toUTCString(),
       user_id: null,
-      game: {
-        id: 1,
-        scores
-      }
+      game
     });
 
     member.forEach(m => {
@@ -89,6 +86,51 @@ export class DummyHistoryFecher implements IHistoryFetcher {
         throw new Error("unknown member joined game");
       }
     });
+  }
+
+  createDummyGame(id: number, ended: boolean): Game {
+    const n = (new Date()).toISOString();
+    return {
+      beatmap: {},
+      end_time: ended ? n : null,
+      id: id,
+      mode: "osu",
+      mode_int: 0,
+      mods: [],
+      scores: [],
+      scoring_type: "score",
+      start_time: n,
+      team_type: "head-to-head"
+    }
+  }
+
+  createDummyScores(nums: number[]): Score[] {
+    return nums.map<Score>(v => ({
+      id: null,
+      user_id: v,
+      accuracy: 0.95,
+      mods: [],
+      best_id: null,
+      created_at: null,
+      match: {
+        slot: v,
+        team: "none",
+        pass: 1
+      },
+      max_combo: 100,
+      perfect: 0,
+      pp: null,
+      rank: null,
+      score: 1000000,
+      statistics: {
+        count_100: 10,
+        count_300: 1000,
+        count_50: 1,
+        count_geki: 1,
+        count_katu: 1,
+        count_miss: 1
+      }
+    }));
   }
 
   createDummyUserIfNotExist(userId: number | null): void {

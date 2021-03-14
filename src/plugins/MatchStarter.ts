@@ -8,6 +8,7 @@ import config from "config";
 export interface MatchStarterOption {
   vote_rate: number; // 投票時の必要数/プレイヤー数
   vote_min: number;　// 最低投票数
+  vote_msg_defer_ms: number;
 }
 
 const defaultOption = config.get<MatchStarterOption>("MatchStarter");
@@ -91,7 +92,7 @@ export class MatchStarter extends LobbyPlugin {
           if (this.IsSelfStartTimerActive) {
             this.lobby.SendMessage("Aborted the match start timer");
             this.stopTimer();
-          }          
+          }
         }
         break;
       case "*start":
@@ -127,7 +128,7 @@ export class MatchStarter extends LobbyPlugin {
   // 投票状況を確認して、必要数に達している場合は試合を開始する
   private checkVoteCount(showMessage: boolean = false): void {
     if (this.voting.count != 0 && showMessage) {
-      this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, "match start vote", 5000, false);
+      this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, "match start vote", this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
       this.lobby.DeferMessage(`bot : passed start vote: ${this.voting.toString()}`, "match start vote", 100, true);

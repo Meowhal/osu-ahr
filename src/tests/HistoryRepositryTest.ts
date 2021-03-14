@@ -119,7 +119,7 @@ describe("History repositry Tests", () => {
       assert.equal(d.events.length, 8);
       const ge = d.events[7];
       assert.equal(ge.detail.type, "other");
-      assert.equal(ge.game.scores[0].user_id, 1);
+      assert.equal(ge.game?.scores[0].user_id, 1);
     });
   });
 
@@ -132,6 +132,9 @@ describe("History repositry Tests", () => {
   }
 
   describe("HistoryRepository tests with dummyfetcher", () => {
+    before(() => {
+      HistoryRepository.COOL_TIME = 0;
+    });
     it("basic updateToLatest test", async () => {
       const df = buildJoinEventFetcher(16);
       const hr = new HistoryRepository(1, df);
@@ -297,7 +300,6 @@ describe("History repositry Tests", () => {
     });
     it("lots of event and game test 2", async () => {
       const df = new DummyHistoryFetcher(1);
-
       for (let i = 2; i < 500; i++) {
         df.addEvent("player-joined", i);
         df.addEvent("player-left", i);
@@ -321,7 +323,7 @@ describe("History repositry Tests", () => {
         assert.isBelow(hr.events.length, 300);
       }
     });
-    it("gotUserProfile event test", async() => {
+    it("gotUserProfile event test", async () => {
       const df = buildJoinEventFetcher(16);
       const hr = new HistoryRepository(1, df);
       let count = 0;
@@ -332,21 +334,21 @@ describe("History repositry Tests", () => {
       await hr.updateToLatest();
       await t;
     });
-    it("changedLobbyName event test", async() => {
+    it("changedLobbyName event test", async () => {
       const df = buildJoinEventFetcher(16);
       const hr = new HistoryRepository(1, df);
       let a = 0; // aが0の間はイベント発生しない
       let b = 0; // 終了時にbが1でなければいけない
       hr.changedLobbyName.on(e => {
-        switch(a) {
-          case 0: 
+        switch (a) {
+          case 0:
             assert.fail();
           case 1:
             b++;
             assert.equal(e.newName, "newname 1");
             assert.equal(e.oldName, hr.matchInfo?.name);
             break;
-          case 2: 
+          case 2:
             assert.fail();
           case 3:
             b++;
@@ -355,18 +357,18 @@ describe("History repositry Tests", () => {
             break;
         }
       });
-      
-      df.addGameEvent([1,2,3]);
+
+      df.addGameEvent([1, 2, 3]);
       await hr.updateToLatest();
       a = 1;
-      df.addGameEvent([1,2,3], "newname 1");
+      df.addGameEvent([1, 2, 3], "newname 1");
       await hr.updateToLatest();
       assert.equal(b, 1);
       a = 2;
-      df.addGameEvent([1,2,3], "newname 1");
+      df.addGameEvent([1, 2, 3], "newname 1");
       await hr.updateToLatest();
       a = 3;
-      df.addGameEvent([1,2,3], "newname 2");
+      df.addGameEvent([1, 2, 3], "newname 2");
       await hr.updateToLatest();
       assert.equal(b, 2);
     });

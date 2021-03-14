@@ -5,7 +5,6 @@ import config from "config";
 
 export interface LobbyTerminatorOption {
   terminate_time_ms: number;
-  sleep_message_interval: number;
 }
 
 const LobbyTerminatorDefaultOption = config.get<LobbyTerminatorOption>("LobbyTerminator");
@@ -13,6 +12,7 @@ const LobbyTerminatorDefaultOption = config.get<LobbyTerminatorOption>("LobbyTer
 export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
   terminateTimer: NodeJS.Timer | undefined;
+  multilimeMessageInterval: number = 1000;
 
   constructor(lobby: Lobby, option: Partial<LobbyTerminatorOption> = {}) {
     super(lobby, "terminator");
@@ -23,6 +23,11 @@ export class LobbyTerminator extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p.player));
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player, p.slot));
+    this.lobby.Disconnected.on(p => {
+      if (this.terminateTimer) {
+        clearTimeout(this.terminateTimer);
+      }
+    });
   }
 
   private onPlayerJoined(player: Player, slot: number): void {
@@ -56,15 +61,15 @@ export class LobbyTerminator extends LobbyPlugin {
           "!mp password closed",
           "This lobby will be closed after everyone leaves.",
           "Thank you for playing with the auto host rotation lobby."
-        ], this.option.sleep_message_interval, "close lobby announcement", 100000);
+        ], this.multilimeMessageInterval, "close lobby announcement", 100000);
         this.option.terminate_time_ms = 1000;
-      }      
+      }
     } else {
       this.lobby.SendMultilineMessageWithInterval([
         "!mp password closed",
         `This lobby will be closed in ${(time_ms / 1000).toFixed(0)}sec(s).`,
         "Thank you for playing with the auto host rotation lobby."
-      ], this.option.sleep_message_interval, "close lobby announcement", 100000)
+      ], this.multilimeMessageInterval, "close lobby announcement", 100000)
         .then(() => this.sendMessageWithDelay("!mp close", time_ms));
     }
   }

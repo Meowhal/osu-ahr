@@ -26,10 +26,10 @@ describe("AutoHostSelectorTest", function () {
         assert.isTrue(l.host == null);
         break;
       case "hr": // has host and needs to rotate 
-        assert.isTrue(s.hostQueue.length > 0);
-        assert.isTrue(!l.isMatching);
-        assert.isTrue(s.needsRotate);
-        assert.isTrue(l.host != null);
+        assert.isTrue(s.hostQueue.length > 0, "s.hostQueue.length > 0");
+        assert.isTrue(!l.isMatching), "!l.isMatching";
+        assert.isTrue(s.needsRotate, "s.needsRotate");
+        assert.isTrue(l.host != null, "l.host != null");
         break;
       case "hn": // has host and no needs to rotate
         assert.isTrue(s.hostQueue.length > 0);
@@ -72,9 +72,11 @@ describe("AutoHostSelectorTest", function () {
       assertStateIs("s0", selector);
 
       await ircClient.emulateAddPlayerAsync("player1");
-      await tu.delayAsync(5);
-      assertStateIs("hr", selector);
-      assert.isTrue(s1checked);
+      tu.assertEventFire(lobby.HostChanged, (a) => {
+        assertStateIs("hr", selector);
+        assert.isTrue(s1checked);
+        return true;
+      });
     });
 
     it("s0 -> hr -> s0 test", async () => {
@@ -711,9 +713,9 @@ describe("AutoHostSelectorTest", function () {
       }
     });
   });
-  
-  describe("cleared host tests", function() {
-    it("clearhost and match", async() => {
+
+  describe("cleared host tests", function () {
+    it("clearhost and match", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);
@@ -724,7 +726,7 @@ describe("AutoHostSelectorTest", function () {
       await ircClient.emulateMatchAsync();
       tu.assertHost("player2", lobby);
     });
-    it("plugin skip test", async() => {
+    it("plugin skip test", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);

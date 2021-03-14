@@ -6,8 +6,9 @@ import config from "config";
 import { TypedEvent } from "../libs";
 
 export interface AutoHostSelectorOption {
-  show_queue_chars_limit: number;
-  show_queue_cooltime_ms: number;
+  show_host_order_every_after_match: boolean;
+  host_order_chars_limit: number;
+  host_order_cooltime_ms: number;
 }
 
 export type OrderChangeType = "added" | "removed" | "rotated" | "orderd";
@@ -143,7 +144,9 @@ export class AutoHostSelector extends LobbyPlugin {
     this.needsRotate = true;
     this.mapChanger = null;
     this.changeHost();
-    this.ShowHostQueue();
+    if (this.option.show_host_order_every_after_match) {
+      this.ShowHostQueue();
+    }
   }
 
   private onMatchAborted(playersFinished: number, playersInGame: number): void {
@@ -256,11 +259,11 @@ export class AutoHostSelector extends LobbyPlugin {
     this.lobby.SendMessageWithCoolTime(() => {
       let m = this.hostQueue.map(c => disguiseUserName(c.name)).join(", ");
       this.logger.trace(m);
-      if (this.option.show_queue_chars_limit < m.length) {
-        m = m.substring(0, this.option.show_queue_chars_limit) + "...";
+      if (this.option.host_order_chars_limit < m.length) {
+        m = m.substring(0, this.option.host_order_chars_limit) + "...";
       }
       return "host order : " + m;
-    }, "!queue", this.option.show_queue_cooltime_ms);
+    }, "!queue", this.option.host_order_cooltime_ms);
   }
 
   /**

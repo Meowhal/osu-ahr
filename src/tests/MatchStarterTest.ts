@@ -14,7 +14,8 @@ describe("MatchStarterTest", function () {
     const li = await tu.SetupLobbyAsync(false);
     const option: MatchStarterOption = {
       vote_min: min,
-      vote_rate: rate
+      vote_rate: rate,
+      vote_msg_defer_ms: 0
     }
     const starter = new MatchStarter(li.lobby, option)
     return { starter, ...li };

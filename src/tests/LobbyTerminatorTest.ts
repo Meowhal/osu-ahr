@@ -11,10 +11,9 @@ describe.skip("Lobby Terminator Tests", function () {
   });
   async function setupAsync(interval: number = 10): Promise<{ terminator: LobbyTerminator, lobby: Lobby, ircClient: DummyIrcClient }> {
     const { lobby, ircClient } = await tu.SetupLobbyAsync();
-    const option = {
-      sleep_message_interval: interval
-    }
-    return { terminator: new LobbyTerminator(lobby, option), lobby, ircClient };
+    const terminator = new LobbyTerminator(lobby);
+    terminator.multilimeMessageInterval = interval;
+    return { terminator, lobby, ircClient };
   }
   it("CloseLobby time", async () => {
     const { terminator, lobby, ircClient } = await setupAsync();

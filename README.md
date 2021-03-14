@@ -48,6 +48,7 @@ The order of hosts is managed by queue. Added last when a player joins the lobby
 + enter your account id and irc password to `./config/local.json`
 + launch the bot
 ```bash 
+> npm run start
 starting up...
 Connecting to Osu Bancho ...
 Server running at http://localhost:3116/
@@ -61,8 +62,112 @@ MainMenu Commands
   [help] Show this message.
   [quit] Quit this application.
 
-> make auto host rotation lobby
+> make 5-6* | auto host rotation
 ```
+## configulations
+### irc section
+- `server` : `string` domain name of osu irc server.
+- `nick` : `string` your osu account name
+- `opt.port` : `number` 
+- `opt.password` : `string` your irc password. you can get it from [https://osu.ppy.sh/p/irc](https://osu.ppy.sh/p/irc).
+```json
+"irc": {
+  "server": "irc.ppy.sh",
+  "nick": "gnsksz",
+  "opt": {
+    "port": 6667,
+    "password": "123456"
+  }
+}
+```
+### Lobby section
+- `authorized_users` : `string[]`
+  - Specify to Authorized user. They can use *commands(*skip, *start, *order).
+- `listref_duration_ms` : `number`
+  - waiting time for !mp listrefs results. you have to expand if you added lots of referees.
+- `info_message` : `string[]` the response message for !info or !help.
+- `info_message_cooltime_ms` : `number` cool time for !info (milli secs).
+- `stat_timeout_ms` : `number` waiting time for !stat command result.
+- `info_message_announcement_interval_ms` : `number` set above 180000 if you want to send info message periodically.
+```json
+"Lobby": {
+  "authorized_users": ["peppy", "abcedf"], 
+  "listref_duration_ms": 1000,
+  "info_message": [
+    "welcom to ahr lobby!",
+    "The second item is displayed on the second line.",
+    "Too many lines will result in a silent penalty"
+  ],
+  "info_message_cooltime_ms": 60000,
+  "stat_timeout_ms": 5000,
+  "info_message_announcement_interval_ms": 0
+}
+```
+### AutoHostSelector section 
+- `show_host_order_every_after_match` : `boolean` set true if you want to show them.
+- `host_order_chars_limit` : `number` Host-order messages are truncated to this length.
+- `host_order_cooltime_ms` : `number` cool time for Host-order messages.
+### AutoStartTimer section
+the match start timer will automatically activate after the host selects a map.
+- `enabled` : `boolean` set true if you want to start the timer automatically.
+- `doClearHost`: `boolean` do !mp clearhost after timer starts.
+- `waitingTime`: `number` seconds until start the match.
+### HistoryLoader section
+- `fetch_interval_ms`: `number` how often fetch the lobby history
+### HostSkipper section
+configs related to host-skip vote and automatic afk host skip.
+- `vote_rate` : `number(0.0 - 1.0)` rate of votes required to skip.
+  - if there are 16 players and the rate is 0.5, 8 players need to vote.
+- `vote_min`: `number` minimum required vote count .
+- `vote_cooltime_ms` : `number` cool time for the next vote to avoid involving the next host.
+- `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
+- `afk_check_timeout_ms"` : `number` waiting time for !stat command result.
+- `afk_check_interval_first_ms` : `number` time to first check if the host is afk.
+- `afk_check_interval_ms` : `number` interval to check if the host is afk.
+- `afk_check_do_skip` : `boolean` skip afk host automatically or not.
+### LobbyKeeper section
+- `mode`: `null | { team: number, score: number }` keep lobby mode.
+- `size`: `number` keep lobby size.
+- `password`: `null | string` keep password.
+- `mods`: `null | string` keep mods.
+- `hostkick_tolerance`:`number` when counter kick activated.
+### LobbyTerminator section
+- `terminate_time_ms` : `number` time to close the lobby after everyone has left the lobby.
+### MapChecker section
+- `enabled`: `boolean` use map checker or not.
+- `star_min`: `number` lower cap of dificullty. 0 means no cap.
+- `star_max`: `number` higher cap of dificullty. 0 means no cap.
+- `length_min`: `number` lower cap of length. specify in seconds. 0 means no cap.
+- `length_max`: `number` higher cap of length. 0 means no cap.
+### MatchStarter section
+!start vote configs
+- `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
+- `vote_min`: `number` minimum required vote count.
+- `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
+### MatchAborter section
+!abort vote and auto abort configs
+- `vote_rate` : `number(0.0 - 1.0)` rate of votes required to abort.
+- `vote_min`: `number` minimum required vote count.
+- `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
+- `auto_abort_rate`: `number` the rate of finished players to automatically abort the stuck game.
+- `auto_abort_delay_ms`: `number` the delay time of actually abort the stuck game.
+- `auto_abort_do_abort`: `boolean` do !mp abort or not.
+### Recorder section
+Config for taking statistics. 
+### WordCounter section
+Used to measure the amount of bot messages 
+### OahrCli section 
+- `invite_users` : `string[]` players are invited to the lobby when the bot make a new lobby.
+- `password` : `string` default lobby password. stay empty("") if you don't need password.
+- `use_recoder` : `boolean` take statistics or not
+### WebApi section
+- `client_id`: `number`, webapi client id. you can make client at [https://osu.ppy.sh/home/account/edit](https://osu.ppy.sh/home/account/edit)
+  - optional. the bot uses the WebApi instead of webpage to get the beatmap infos.
+- `client_secret`: `string` webapi client secret
+- `token_store_dir`: `string`, don't care
+- `asGuest`: `true` set true
+- `callback`: `string`,
+- `callback_port`: `number` ,
 
 ## Functions
 - Making Lobby

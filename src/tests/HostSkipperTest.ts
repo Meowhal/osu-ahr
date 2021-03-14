@@ -232,12 +232,9 @@ describe("HostSkipperTest", function () {
       const { skipper, lobby, ircClient } = await prepare(0, 10000);
       await tu.AddPlayersAsync(3, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      const r = resolveSkipAsync(lobby);
+      const r = rejectSkipAsync(lobby, 20);
       ircClient.emulateMessage("p0", ircClient.channel, "!skip");
       await r;
-      const rt = rejectSkipAsync(lobby, 20);
-      ircClient.emulateMessage("p0", ircClient.channel, "!skip");
-      await rt;
     });
     it("host invalid skip", async () => {
       const { skipper, lobby, ircClient } = await prepare(0, 0);
@@ -268,21 +265,13 @@ describe("HostSkipperTest", function () {
       assert.isTrue(skipped);
     });
     it("ignored vote when cooltime", async () => {
-      const { skipper, lobby, ircClient } = await prepare(0, 100);
+      const { skipper, lobby, ircClient } = await prepare(0, 30);
       await tu.AddPlayersAsync(5, ircClient);
       await tu.changeHostAsync("p0", lobby);
-      const r = resolveSkipAsync(lobby);
-      ircClient.emulateMessage("p0", ircClient.channel, "!skip");
-      await r;
-      const task = rejectSkipAsync(lobby, 100);
+      const task = rejectSkipAsync(lobby, 30);
       ircClient.emulateMessage("p1", ircClient.channel, "!skip");
-      await tu.delayAsync(1);
-      assert.equal(skipper.voting.count, 0);
       ircClient.emulateMessage("p2", ircClient.channel, "!skip");
-      await tu.delayAsync(1);
-      assert.equal(skipper.voting.count, 0);
       ircClient.emulateMessage("p3", ircClient.channel, "!skip");
-      await tu.delayAsync(1);
       await task;
       assert.equal(skipper.voting.count, 0);
 
