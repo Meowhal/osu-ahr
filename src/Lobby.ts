@@ -251,7 +251,14 @@ export class Lobby {
     }
   }
 
-  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number, allowSilent: boolean = false): boolean {
+  SendPrivateMessage(message: string, target: string): void {
+    this.ircClient.say(target, message);
+    this.ircClient.emit("sentPrivateMessage", target, message);
+    this.SentMessage.emit({ message });
+    this.chatlogger.trace("bot->%s:%s", target, message);
+  }
+
+  SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
     const now = Date.now();
     if (tag in this.coolTimes) {
       if (now - this.coolTimes[tag] < cooltimeMs) {
@@ -263,6 +270,21 @@ export class Lobby {
       message = message();
     }
     this.SendMessage(message);
+    return true;
+  }
+
+  SendPrivateMessageWithCoolTime(message: string | (() => string), target: string, tag: string, cooltimeMs: number): boolean {
+    const now = Date.now();
+    if (tag in this.coolTimes) {
+      if (now - this.coolTimes[tag] < cooltimeMs) {
+        return false;
+      }
+    }
+    this.coolTimes[tag] = now;
+    if (typeof message == "function") {
+      message = message();
+    }
+    this.SendPrivateMessage(message, target);
     return true;
   }
 
@@ -357,6 +379,12 @@ export class Lobby {
         if (this.statParser.feedLine(message)) {
           this.RaiseParsedStat(true);
         }
+      }
+    } else {
+      const user = this.GetPlayer(from);
+      if (!user) return;
+      if (message == "!info" || message == "!help") {
+        this.sendInfoMessagePM(user);
       }
     }
   }
@@ -831,10 +859,16 @@ export class Lobby {
   }
 
   private showInfoMessage(): void {
-    const msg
-      = `- Osu Auto Host Rotation Bot ver ${pkg.version} - \n`
+    !this.SendMessageWithCoolTime(this.getInfoMessage(), "infomessage", this.option.info_message_cooltime_ms);
+  }
+
+  private sendInfoMessagePM(player: Player): void {
+    this.SendPrivateMessageWithCoolTime(this.getInfoMessage(), player.name, "infomessage", this.option.info_message_cooltime_ms)
+  }
+
+  private getInfoMessage(): string {
+    return `- Osu Auto Host Rotation Bot ver ${pkg.version} - \n`
       + this.option.info_message.join("\n");
-    !this.SendMessageWithCoolTime(msg, "infomessage", this.option.info_message_cooltime_ms);
   }
 
   // ircでログインしたユーザーに権限を与える
