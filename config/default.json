@@ -29,7 +29,7 @@
     "waitingTime": 60
   },
   "HistoryLoader": {
-    "fetch_interval_ms": 15000
+    "fetch_interval_ms": 20000
   },
   "HostSkipper": {
     "vote_rate": 0.5,

@@ -51,6 +51,7 @@ export class HistoryRepository {
   static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
   static ERR_COUNT_LIMIT: number = 10;
   static COOL_TIME: number = 100;
+  static RETRY_TIME_MS : number = 10 * 60 * 1000; // 取得失敗からリトライまでの待ち時間
 
   // Events
   gotUserProfile = new TypedEvent<{ sender: HistoryRepository, user: User }>();
@@ -94,7 +95,7 @@ export class HistoryRepository {
         setTimeout(() => {
           this.hasError = false;
           this.logger.info(`restart fetch count:${this.errorCount}`);
-        }, 30 * 1000);
+        }, HistoryRepository.RETRY_TIME_MS);
       }
     }
   }

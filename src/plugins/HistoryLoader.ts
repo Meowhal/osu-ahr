@@ -63,7 +63,9 @@ export class HistoryLoader extends LobbyPlugin {
     if (this.option.fetch_interval_ms >= 5000) {
       this.logger.trace("start fetching");
       this.fetchInvervalId = setInterval(() => {
-        this.repository.updateToLatest();
+        if (!this.lobby.isMatching) {
+          this.repository.updateToLatest();
+        }        
       }, this.option.fetch_interval_ms);
     }
   }
