@@ -58,7 +58,7 @@ export class AutoHostSelector extends LobbyPlugin {
    */
   private onPlayerJoined(player: Player, slot: number): void {
     this.hostQueue.push(player);
-    this.logger.trace("added %s to hostqueue", player.name);
+    this.logger.trace("added %s", player.name);
     if (this.lobby.players.size == 1) {
       this.logger.trace("appoint first player to host");
       this.changeHost();
@@ -385,7 +385,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const i = this.hostQueue.indexOf(player);
     if (i != -1) {
       this.hostQueue.splice(i, 1);
-      this.logger.trace("removed %s from host queue", player.name);
+      this.logger.trace("removed %s", player.name);
       this.raiseOrderChanged("removed");
       return true;
     } else {

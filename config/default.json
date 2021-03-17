@@ -70,7 +70,7 @@
     "vote_msg_defer_ms": 5000,
     "auto_abort_rate": 0.5,
     "auto_abort_delay_ms": 30000,
-    "auto_abort_do_abort": false
+    "auto_abort_do_abort": true
   },
   "Recorder": {
     "path_player": "data/player.nedb",

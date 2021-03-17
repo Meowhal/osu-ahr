@@ -226,7 +226,7 @@ export class WebApiClient {
             this.token = undefined;
             break;
           default:
-            console.error(`${e.response.status} ${e.response.statusText}`);
+            console.error(`${e?.response?.status} ${e?.response?.statusText}`);
             throw e;
         }
       }

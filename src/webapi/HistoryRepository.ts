@@ -94,7 +94,7 @@ export class HistoryRepository {
       if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
         setTimeout(() => {
           this.hasError = false;
-          this.logger.info(`restart fetch count:${this.errorCount}`);
+          this.logger.info(`restart fetching. count:${this.errorCount}`);
         }, HistoryRepository.RETRY_TIME_MS);
       }
     }
