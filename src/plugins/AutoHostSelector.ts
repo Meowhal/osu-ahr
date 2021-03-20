@@ -102,8 +102,8 @@ export class AutoHostSelector extends LobbyPlugin {
       }
     } else {
       // ホストがキューの先頭以外に変更された場合
-      this.logger.trace("host may have manually changed by the host");
-      if (this.lobby.hostPending != this.hostQueue[0]) {
+      if (this.lobby.hostPending == null && this.lobby.hostPending != this.hostQueue[0]) {
+        this.logger.trace("the host may have manually changed by the previous host");
         this.rotateQueue();
       }
       this.changeHost();

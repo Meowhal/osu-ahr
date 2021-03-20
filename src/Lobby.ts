@@ -26,6 +26,7 @@ export interface LobbyOption {
   info_message_cooltime_ms: number,
   stat_timeout_ms: number,
   info_message_announcement_interval_ms: number,
+  transferhost_timeout_ms: number
 }
 
 const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
@@ -57,6 +58,7 @@ export class Lobby {
   chatlogger: log4js.Logger;
   historyRepository: HistoryRepository;
   infoMessageAnnouncementTimeId: NodeJS.Timeout | null = null;
+  transferHostTimeout: DeferredAction<void>;
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
@@ -93,6 +95,7 @@ export class Lobby {
     this.chatlogger = log4js.getLogger("chat");
     this.chatlogger.addContext("channel", "lobby");
     this.historyRepository = new HistoryRepository(0);
+    this.transferHostTimeout = new DeferredAction(() => this.onTimeoutedTransferHost());
     this.registerEvents();
   }
 
@@ -228,11 +231,22 @@ export class Lobby {
   }
 
   TransferHost(user: Player): void {
+    this.transferHostTimeout.cancel();
+
     this.hostPending = user;
+    this.transferHostTimeout.start(this.option.transferhost_timeout_ms);
     if (user.id != 0) {
       this.SendMessage("!mp host #" + user.id);
     } else {
       this.SendMessage("!mp host " + user.name);
+    }
+  }
+
+  onTimeoutedTransferHost(): void {
+    this.logger.warn("!mp host timeout");
+    if (this.hostPending) {
+      this.hostPending = null;
+      this.LoadMpSettingsAsync();
     }
   }
 
@@ -778,16 +792,16 @@ export class Lobby {
 
   private setAsHost(player: Player): boolean {
     if (!this.players.has(player)) {
+      this.transferHostTimeout.cancel();
       this.logger.warn("未参加のプレイヤーがホストになった: %s", player.name);
       return false;
     }
 
     if (this.hostPending == player) {
+      this.transferHostTimeout.cancel();
       this.hostPending = null;
     } else if (this.hostPending != null) {
       this.logger.warn("pending中に別のユーザーがホストになった pending: %s, host: %s", this.hostPending.name, player.name);
-      this.hostPending = null;
-      this.LoadMpSettingsAsync(); // 退出イベントの見落としとして、mp settingにて状況をリセットする
     } // pending == null は有効
 
     if (this.host != null) {

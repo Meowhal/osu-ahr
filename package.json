@@ -1,6 +1,6 @@
 {
   "name": "osu-ahr",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "irc bot for osu! multi lobby auto host rotation.",
   "main": "index.js",
   "homepage": "https://github.com/Meowhal/osu-ahr",

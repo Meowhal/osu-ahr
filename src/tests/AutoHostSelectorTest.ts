@@ -337,7 +337,7 @@ describe("AutoHostSelectorTest", function () {
       ircClient.latency = 0;
       lobby.RaiseHostChanged("player3");
       await tu.delayAsync(10);
-      tu.assertHost("player1", lobby);
+      tu.assertHost("player2", lobby);
     });
 
     it("conflict transfer host manually and plugin rotation test2", async () => {

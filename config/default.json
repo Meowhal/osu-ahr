@@ -16,7 +16,8 @@
     ],
     "info_message_cooltime_ms": 60000,
     "stat_timeout_ms": 5000,
-    "info_message_announcement_interval_ms": 0
+    "info_message_announcement_interval_ms": 0,
+    "transferhost_timeout_ms": 5000
   },
   "AutoHostSelector": {
     "show_host_order_every_after_match": true,
