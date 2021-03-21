@@ -129,6 +129,7 @@ export class Lobby {
     this.ircClient.once("part", (channel: string, nick: string) => {
       this.stopInfoMessageAnnouncement();
       this.CancelAllDeferredMessages();
+      this.historyRepository.lobbyClosed = true;
       if (channel == this.channel) {
         this.logger.info("part");
         this.status = LobbyStatus.Left;

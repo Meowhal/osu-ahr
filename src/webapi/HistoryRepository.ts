@@ -46,12 +46,12 @@ export class HistoryRepository {
   logger: log4js.Logger;
   users: { [id: number]: User };
   events: Event[];
-
+  lobbyClosed: boolean = false;
   static ESC_CRITERIA: number = 6; // プレイヤー存在確認に利用する試合数
   static LOOP_LIMIT: number = 10000; // 検索イベント数の上限
   static ERR_COUNT_LIMIT: number = 10;
   static COOL_TIME: number = 100;
-  static RETRY_TIME_MS : number = 10 * 60 * 1000; // 取得失敗からリトライまでの待ち時間
+  static RETRY_TIME_MS: number = 10 * 60 * 1000; // 取得失敗からリトライまでの待ち時間
 
   // Events
   gotUserProfile = new TypedEvent<{ sender: HistoryRepository, user: User }>();
@@ -86,10 +86,10 @@ export class HistoryRepository {
     if (this.hasError) return;
 
     try {
-      while (!(await this.fetch(false)).filled) {
+      while (!(await this.fetch(false)).filled && !this.lobbyClosed) {
       }
     } catch (e) {
-      this.logger.error(e.message);
+      this.logger.error("@updateToLatest : " + e.message);
       this.hasError = true;
       if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
         setTimeout(() => {
@@ -107,8 +107,9 @@ export class HistoryRepository {
    * @param isRewind 取得済み分の過去イベントを取得する場合はtrue,未来イベントを取得する場合はfalse
    * @returns 
    */
-  fetch(isRewind: boolean = false): Promise<FetchResult> {
-    const p = this.fetchTask.then(() => this.fetch_(isRewind));
+  async fetch(isRewind: boolean = false): Promise<FetchResult> {
+    await this.fetchTask;
+    const p = this.fetch_(isRewind);
     if (HistoryRepository.COOL_TIME) {
       this.fetchTask = p.then(r => new Promise((resolve) => {
         setTimeout(() => resolve(r), HistoryRepository.COOL_TIME);
@@ -283,9 +284,14 @@ export class HistoryRepository {
       loopCount++;
       if (i < 0) {
         // 巻き戻し
-        let r = await this.fetch(true);
-        if (r.count == 0) break; // 結果が空なら終わり
-        i = r.count - 1;
+        try {
+          let r = await this.fetch(true);
+          if (r.count == 0) break; // 結果が空なら終わり
+          i = r.count - 1;
+        } catch (e) {
+          this.logger.error("@calcCurrentOrderAsID - fetch : " + e);
+          throw e;
+        }
       }
       let ev = this.events[i];
 
@@ -357,6 +363,11 @@ export class HistoryRepository {
       }
       if (HistoryRepository.LOOP_LIMIT < loopCount) {
         this.logger.warn("loop limit exceeded! " + HistoryRepository.LOOP_LIMIT);
+        break;
+      }
+      if (this.lobbyClosed) {
+        this.logger.warn("lobby was closed in action");
+        result.length = 0;
         break;
       }
     }
