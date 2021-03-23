@@ -2,7 +2,7 @@
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
-# chat commands
+# Command List
 |for player|desc|
 |:--|:--|
 |`!queue`| Shows host queue.|
