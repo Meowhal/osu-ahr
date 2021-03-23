@@ -11,8 +11,8 @@
     "authorized_users": [],
     "listref_duration_ms": 1000,
     "info_message": [
-      "-  The order of hosts is managed by queue. Added last when a player joins the lobby.",
-      "-  github|cmdRefs : [https://github.com/Meowhal/osu-ahr github/osu-ahr]"
+      "-  The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.\n",
+      "-  Check the links > [https://github.com/Meowhal/osu-ahr/blob/master/CMDLIST.md Command List] | [https://github.com/Meowhal/osu-ahr Source Code]"
     ],
     "info_message_cooltime_ms": 60000,
     "stat_timeout_ms": 5000,

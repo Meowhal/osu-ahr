@@ -1,6 +1,6 @@
 # osu-ahr
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
-The order of hosts is managed by queue. Added last when a player joins the lobby.
+The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
 # attention
 Many config items have renamed in version 1.4.
@@ -10,10 +10,10 @@ please recreate local.json file.
 |for player|desc|
 |:--|:--|
 |`!queue`| Shows host queue.|
-|`!skip `| Votes to skip current host.|
-|`!start`| Votes to start the match.|
-|`!abort`| Votes to abort the match. Use when the match is stuck.|
-|`!update`| Updates current selected map to the latest version. Use when has host old map.|
+|`!skip `| Triggers vote to skip current host.|
+|`!start`| Triggers vote start the match.|
+|`!abort`| Triggers vote abort the match. Use when the match is stuck.|
+|`!update`| Updates current selected map to the latest version. Use when host pick an outdated map.|
 |`!regulation`| check current regulation.|
  
 |for host|desc|ex|
@@ -24,15 +24,13 @@ please recreate local.json file.
 
 |for owner|desc|ex|
 |:--|:--|:--|
-|`*start`|Force start the match.||
-|`*skip`|Force skip current host.||
-|`*skipto [player]`|Force skip to specified player.|`*skipto p2`|
-|`*order [players list]`| Reorder the queue in specified order. |`*order p1, p2, p3`|
-|`*keep size [1-16]` | Keep lobby Size. | `*keep size 8`| 
-|`*no keep size` | Disable Keeping lobby Size. | `*no keep size`|
+|`*start`|Forces the match to start.||
+|`*skip`|Forces current host to skip.||
+|`*order [players list]`| Reorders the queue in specified order. |`*order p1, p2, p3`|
+|`*keep size [1-16]` | Keeps the size of the lobby at specified number. | `*keep size 8`| 
+|`*no keep size` | Stops Keeping the size of the lobby at specified number. | `*no keep size`|
 
-
-(I am looking for ppl who can correct my English mistakes..😖)
+(proofread by [Meowhalfannumber1](https://github.com/Meowhalfannumber1) ❤) 
 
 
 ## Setup
