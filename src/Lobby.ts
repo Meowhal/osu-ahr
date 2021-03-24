@@ -762,6 +762,11 @@ export class Lobby {
       if (asHost) {
         this.setAsHost(player);
       }
+      if (16 < this.players.size) {
+        this.logger.warn("joined 17th players: %s", player.name);
+        this.UnexpectedAction.emit(new Error("unexpected join"));
+        return false;
+      }
       return true;
     } else {
       this.logger.warn("参加済みのプレイヤーが再度参加した: %s", player.name);
