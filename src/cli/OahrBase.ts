@@ -1,7 +1,7 @@
 import { Lobby, IIrcClient } from "..";
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, Recorder, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker } from "../plugins";
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker } from "../plugins";
 import { parser } from "../parsers";
 import { WebApiClient } from "../webapi/WebApiClient";
 import { LobbyKeeper } from "../plugins/LobbyKeeper";
@@ -11,7 +11,6 @@ const logger = log4js.getLogger("cli");
 export interface OahrCliOption {
   invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
   password: string;　// デフォルトのパスワード, 空文字でパスワードなし。
-  use_recoder: boolean; // プレイヤーの入退室記録や選択マップなどを保存するか
 }
 
 const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
@@ -25,7 +24,6 @@ export class OahrBase {
   terminator: LobbyTerminator;
   aborter: MatchAborter;
   wordCounter: WordCounter;
-  recorder: Recorder | null = null;
   recaster: MapRecaster;
   inoutLogger: InOutLogger;
   autoTimer: AutoStartTimer;
@@ -46,9 +44,6 @@ export class OahrBase {
     this.wordCounter = new WordCounter(this.lobby);
     this.inoutLogger = new InOutLogger(this.lobby);
     this.autoTimer = new AutoStartTimer(this.lobby);
-    if (this.option.use_recoder) {
-      this.recorder = new Recorder(this.lobby, true);
-    }
     this.recaster = new MapRecaster(this.lobby);
     this.history = new HistoryLoader(this.lobby);
     this.webApiClient = new WebApiClient();

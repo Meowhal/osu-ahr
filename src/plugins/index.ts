@@ -11,5 +11,4 @@ export * from "./MapChecker";
 export * from "./MapRecaster";
 export * from "./MatchAborter";
 export * from "./MatchStarter";
-export * from "./Recorder";
 export * from "./WordCounter";

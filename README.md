@@ -154,14 +154,11 @@ configs related to host-skip vote and automatic afk host skip.
 - `auto_abort_rate`: `number` the rate of finished players to automatically abort the stuck game.
 - `auto_abort_delay_ms`: `number` the delay time of actually abort the stuck game.
 - `auto_abort_do_abort`: `boolean` do !mp abort or not.
-### Recorder section
-Config for taking statistics. 
 ### WordCounter section
 Used to measure the amount of bot messages 
 ### OahrCli section 
 - `invite_users` : `string[]` players are invited to the lobby when the bot make a new lobby.
 - `password` : `string` default lobby password. stay empty("") if you don't need password.
-- `use_recoder` : `boolean` take statistics or not
 ### WebApi section
 - `client_id`: `number`, webapi client id. you can make client at [https://osu.ppy.sh/home/account/edit](https://osu.ppy.sh/home/account/edit)
   - optional. the bot uses the WebApi instead of webpage to get the beatmap infos.

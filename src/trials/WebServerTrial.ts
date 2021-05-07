@@ -1,6 +1,5 @@
 import express, { Express, RequestHandler, Request, Response, NextFunction } from "express";
 import historyData from "../../data/arc/history_67261609.json";
-import Nedb from 'nedb';
 import fs from 'fs';
 import readline from 'readline';
 
@@ -122,7 +121,7 @@ async function readlineTrial() {
   ws.write("test2\r\n");
   ws.write("test3x\r\n");
 
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     setTimeout(() => {
       ws.write("test4\r\n");
       resolve();
