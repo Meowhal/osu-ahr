@@ -100,7 +100,7 @@ export class DefaultValidator extends ValidatorBase {
     }
 
     if (map.difficulty_rating < this.star.min) {
-      r += (this.star.min - map.difficulty_rating) * 0.5;
+      r += parseFloat((this.star.min - map.difficulty_rating).toFixed(2));
     }
 
     if (this.star.max < map.difficulty_rating) {
