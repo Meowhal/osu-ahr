@@ -141,6 +141,7 @@ configs related to host-skip vote and automatic afk host skip.
 - `star_max`: `number` higher cap of dificullty. 0 means no cap.
 - `length_min`: `number` lower cap of length. specify in seconds. 0 means no cap.
 - `length_max`: `number` higher cap of length. 0 means no cap.
+- `gamemode`: `string` specify game mode in the room. "any" means no specific gamemode restriction.
 ### MatchStarter section
 !start vote configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
