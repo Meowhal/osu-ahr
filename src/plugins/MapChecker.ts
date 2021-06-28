@@ -68,12 +68,15 @@ export type DefaultRegulation = {
   star_max: number;
   length_min: number;
   length_max: number;
+  gamemode: string;
 }
 
 export class DefaultValidator extends ValidatorBase {
   logger: log4js.Logger;
   star = { min: 0, max: 0 };
   length = { min: 0, max: 0 };
+  gamemode = "";
+
 
   constructor(config: DefaultRegulation, logger: log4js.Logger) {
     super();
@@ -81,21 +84,27 @@ export class DefaultValidator extends ValidatorBase {
     this.star.max = config.star_max;
     this.length.min = config.length_min;
     this.length.max = config.length_max;
+    this.gamemode = config.gamemode;
     this.logger = logger;
   }
 
   RateBeatmap(map: Beatmap): { rate: number, message: string } {
     let r = 0;
-    if (map.mode != "osu") {
-      r += 1;
+    
+    let rs = { rate: r, message: "" };
+
+    if (map.mode != this.gamemode) {
+      if(this.gamemode != "any"){
+        r += 1;
+      }
     }
 
     if (map.difficulty_rating < this.star.min) {
-      r += (this.star.min - map.difficulty_rating) * 0.5;
+      r += parseFloat((this.star.min - map.difficulty_rating).toFixed(2));
     }
 
     if (this.star.max < map.difficulty_rating) {
-      r += map.difficulty_rating - this.star.max;
+      r += parseFloat((map.difficulty_rating - this.star.max).toFixed(2));
     }
 
     if (map.total_length < this.length.min) {
@@ -104,11 +113,9 @@ export class DefaultValidator extends ValidatorBase {
 
     if (this.length.max < map.total_length) {
       r += (map.total_length - this.length.max) / 60.0;
-    }
-
-    let rs = { rate: r, message: "" };
-
-    if (0.01 < r) {
+    } 
+    
+    if (0.01 <= r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
         + `Violation of Regulation : ${this.GetDescription()}`;
@@ -128,8 +135,14 @@ export class DefaultValidator extends ValidatorBase {
   SetConfiguration(name: string, value: string): boolean {
     let v = parseFloat(value);
     if (isNaN(v)) {
-      this.logger.warn(`invalid regulation config : ${name} = ${value}`);
-      return false;
+      if(name.includes("gamemode")){
+        this.gamemode = value;
+        return true;
+      }
+      else{
+        this.logger.warn(`invalid regulation config : ${name} = ${value}`);
+        return false;
+      }
     }
 
     name = name.toLowerCase();
@@ -159,6 +172,10 @@ export class DefaultValidator extends ValidatorBase {
   GetDescription(): string {
     let d_star = "";
     let d_length = "";
+    let d_gamemode = "";
+    if(this.gamemode != ""){
+      d_gamemode = `allowed game mode: ${this.gamemode}`;
+    }
 
     if (this.star.min != 0 && this.star.max != 0) {
       d_star = `${this.star.min.toFixed(2)} <= difficulty <= ${this.star.max.toFixed(2)}`;
@@ -177,11 +194,11 @@ export class DefaultValidator extends ValidatorBase {
     }
 
     if (d_star != "" && d_length != "") {
-      return `${d_star}, ${d_length}`;
+      return `${d_star}, ${d_length}, ${d_gamemode}`;
     } else if (d_star == "" && d_length == "") {
       return "no regulation";
     } else {
-      return d_star + d_length;
+      return d_star + d_length + d_gamemode;
     }
   }
 }
