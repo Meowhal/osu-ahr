@@ -71,6 +71,7 @@ ILobbyのイベントに対して処理を行う
 s0
 - PlayerJoined
   - キューに追加して、!mp hostを発行。s1へ遷移
+
 s1
 - PlayerJoined
   - キューに追加
