@@ -111,7 +111,7 @@ export class HistoryRepository {
     await this.fetchTask;
     const p = this.fetch_(isRewind);
     if (HistoryRepository.COOL_TIME) {
-      this.fetchTask = p.then(r => new Promise((resolve) => {
+      this.fetchTask = p.catch((e) => { return { isRewind, count: 0, filled: false } }).then(r => new Promise((resolve) => {
         setTimeout(() => resolve(r), HistoryRepository.COOL_TIME);
       }));
     } else {
