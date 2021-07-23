@@ -155,10 +155,14 @@ export class MatchAborter extends LobbyPlugin {
     const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus == MpStatuses.Playing);
     for (let p of playersStillPlaying) {
       if (p.mpstatus == MpStatuses.Playing) {
-        const stat = await this.lobby.RequestStatAsync(p, true);
-        if (stat.status == StatStatuses.Multiplaying) {
-          this.startTimer();
-          return;
+        try {
+          const stat = await this.lobby.RequestStatAsync(p, true);
+          if (stat.status == StatStatuses.Multiplaying) {
+            this.startTimer();
+            return;
+          }
+        } catch {
+          this.logger.warn("couldn't get players status. AutoAbortCheck was canceled.");
         }
       }
     }
