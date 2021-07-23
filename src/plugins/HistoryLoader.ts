@@ -30,6 +30,7 @@ export class HistoryLoader extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.JoinedLobby.on(a => this.onJoinedLobby(a.channel));
+    this.lobby.MatchStarted.on(a => this.onMatchStarted());
     this.lobby.Disconnected.on(a => this.stopFetch());
   }
 
@@ -45,6 +46,12 @@ export class HistoryLoader extends LobbyPlugin {
       this.repository.gotUserProfile.on(a => this.onGotUserProfile(a.user));
       this.repository.changedLobbyName.on(a => this.onChangedLobbyName(a.newName, a.oldName));
       this.startFetch();
+    }
+  }
+
+  onMatchStarted() {
+    if (this.fetchInvervalId == null) {
+      this.repository.updateToLatest();
     }
   }
 
