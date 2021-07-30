@@ -78,6 +78,7 @@ export class OahrBase {
   }
 
   async makeLobbyAsync(name: string): Promise<void> {
+    name = name.replace(/[^ -/:-@\[-~0-9a-zA-Z]/g, "");
     if (!this.isRegistered) await this.ensureRegisteredAsync();
     logger.info("Making lobby, name : " + name);
     await this.lobby.MakeLobbyAsync(name);
