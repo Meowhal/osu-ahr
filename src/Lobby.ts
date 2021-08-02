@@ -883,7 +883,7 @@ export class Lobby {
   }
 
   private sendInfoMessagePM(player: Player): void {
-    this.SendPrivateMessageWithCoolTime(this.getInfoMessage(), player.name, "infomessage", this.option.info_message_cooltime_ms)
+    this.SendPrivateMessageWithCoolTime(this.getInfoMessage(), player.escaped_name, "infomessage", this.option.info_message_cooltime_ms)
   }
 
   private getInfoMessage(): string {
