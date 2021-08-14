@@ -35,7 +35,7 @@
   "HostSkipper": {
     "vote_rate": 0.5,
     "vote_min": 2,
-    "vote_cooltime_ms": 10000,
+    "vote_cooltime_ms": 5000,
     "vote_msg_defer_ms": 5000,
     "afk_check_timeout_ms": 5000,
     "afk_check_interval_first_ms": 45000,
