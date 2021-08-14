@@ -180,29 +180,25 @@ Used to measure the amount of bot messages
 - Closing the lobby
 
 ### Making Lobby
-!mp make コマンドを発行し、新規のロビーを作成します。
-BOTはIRCを通してロビーを管理しますが、IRCで通信できるのは!mp make コマンドで作ったロビーだけです。
-通常の方法（osu!のマルチメニューの新規作成)で作ったロビーは管理できません。
-自分でチャット欄に!mp make したロビーはIDを使って管理対象にできます。
+Issue the `!mp make` command to create a new lobby. BOT manages lobbies via IRC, but only lobbies created with the `!mp make` command can be communicated with via IRC. Lobbies created using the normal method (creating a new lobby in the multi-menu of osu!) cannot be managed. Lobbies that you have created by yourself in the chat field can be managed by ID.
 
 ### Entering Lobby
-作成済みのロビーに入り、現在の設定や参加済みのプレイヤーを確認後、ロビー管理を行います。
-キューは現在のホストから始まり、スロット順に下に進んでいきます。
-通常の方法で作成したロビーには入れません。
+Enter the lobby you have already created, check the current settings and players who have joined, and then manage the lobby.
+The queue starts with the current host and moves down in slot order.
+You will not be able to enter a lobby created in the normal way.
 
 ### IRC chat
-コンソール画面からロビーへチャットを送信できます。`say`につづけて送信したいメッセージを入力してください。
+You can send a chat message to the lobby from the console screen. Type `say` followed by the message you want to send.
 ```bash
 #mp_10000 > say hello guys!
 ```
 
 ### Auto host rotation
-プレイヤーは入室時にホストキューの最後尾に追加され、ホストキューの先頭のプレイヤーがホストになります。
-退出したプレイヤーが再入室した場合でも、最後尾に追加されます。
-ホストキューは試合開始直後にローテーションされるため、試合中に参加したプレイヤーは現在のホストの後ろに追加されます。
-ホストがマップ選択後にロビーを退出した場合、次のホストはそのまま試合を開始するか、マップを選択し直すか選ぶことができます。そのまま試合を開始した場合、試合後も継続してホストになります。
-現在のキューを確認するにはコンソール画面上で`info`と入力してください。
-例：
+When a player enters a room, they are added to the end of the host queue, and the player at the beginning of the host queue becomes the host.
+The player at the head of the host queue becomes the host. Even if a player who has left the room re-enters, they will be added to the end of the queue.
+The host queue is rotated immediately after the game starts, so players who join during the game will be added behind the current host.
+If a host leaves the lobby after selecting a map, the next host can choose to start the game or re-select a map. If the host starts the game, they will continue to be the host after the game.
+To check the current queue, type `info` on the console screen.
 ```bash
 #mp_10000 > info
 === lobby status ===
@@ -218,24 +214,24 @@ BOTはIRCを通してロビーを管理しますが、IRCで通信できるの�
 ```
 
 ### Voting for skipping current host
-チャット欄に!skipと打ち込むとホストをスキップするための投票になります。ロビーの半数が投票するとホストが次に移ります。必要な投票率はコンフィグファイルから変更可能です。
-ホストが!skipした場合は即座に次の人に移ります。
-AFKになってしまったホストはこの機能で飛ばしてください。
+If `!skip` typed in the chat field, a vote will be held to skip the host. When half of the lobby has voted, the host will move on. The required percentage of votes can be changed in the config file.
+If a host skips, it will immediately move to the next person.
+Hosts that have been AFK can be skipped with this feature.
 
 ### Starting the match
-全員がready状態になると試合が自動で開始します。
-ユーザーが抜けたことにより全員がready状態になった場合、諸々の事情により自動開始しないのでご注意ください。
-プレイヤーは!startで試合開始投票を行えます。
-Hostは !start time でスタートタイマーを起動できます。
+The game will start automatically when everyone is in the ready state.
+Please note that the game will not start automatically when everyone is ready as a result of a user leaving the game.
+A player can vote for the start of the game with `!start`.
+The host can start the start timer with `!start <time>`.
 
 ### Voting for abort the match
-試合開始後に waiting for players などと表示され、試合が進まなくなってしまった場合、!abort投票で試合を中断できます。
-誰もマップをクリアしていない状態でabortが成立した場合、ホストは変更されません。そのまま試合を再開してください。この状態でマップを変更しようとするとホストが次に移ります。
-誰かがマップをクリアしていた場合、通常の試合終了時と同様の動作になります。
+If the game starts and the message "waiting for players" is displayed and the game cannot proceed, the game may be aborted by voting with `!abort`.
+If the abort is approved when no one has cleared the map, the host will not be changed. Please resume the game as is. If the map is changed through the console, the host will be rotated.
+If someone has cleared the map, the game will behave as if it had ended normally.
 
 ### Closing the lobby
-!mp makeで作ったロビーはプレイヤーが誰もいなくなっても一定時間経過するまで残り続けます。
-残存期間が長く、他のユーザーに迷惑を掛ける可能性がるので、ロビーに誰もいない状態が一定時間継続するとロビーが自動的に終了します。  
-コンソール画面から`close now`を入力すると、`!mp close`コマンドが発行され即座にロビーが終了します。  
-`close 30`のように引数として秒数を指定すると、ロビーにパスワードが設定され、新しくプレイヤーが入れない状態になったあと、指定秒後にロビーが終了します。  
-`close`とすると、ロビーにパスワードが設定され、全員が退出したあとにロビーが終了します。
+Lobbies created with `!mp make` will continue to exist until a certain amount of time has passed, even if there are no more players.
+Since this is a long time, and may cause problems for other users, the lobby will be automatically be closed if no one is in it for a certain period of time.
+If `close now` is issued in the console, the `!mp close` command will be issued and the lobby will be closed immediately.  
+If a number of seconds is specified as an argument, such as `close 30`, the lobby will wait until a password is set and for everyone to leave, then the lobby will close after the specified number of seconds has passed.
+If `close` is issued, the lobby will be closed after the password is set and everyone has left.
