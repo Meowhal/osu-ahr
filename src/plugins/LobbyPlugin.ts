@@ -7,11 +7,18 @@ import log4js from "log4js";
 export class LobbyPlugin {
   lobby: Lobby;
   logger: log4js.Logger;
-  constructor(lobby: Lobby, loggerTag: string = "default") {
+  pluginName: string;
+
+  constructor(lobby: Lobby, pluginName: string, loggerTag: string = "default") {
     this.lobby = lobby;
     this.lobby.plugins.push(this);
+    this.pluginName = pluginName;
     this.logger = log4js.getLogger(loggerTag);
     this.logger.addContext("channel", "lobby");
+  }
+
+  GetPluginName(): string {
+    return "";
   }
 
   /**
@@ -32,18 +39,11 @@ export class LobbyPlugin {
   }
 
   /**
-   * chatで!infoコマンドが実行された際に表示されるメッセージを取得する
-   * スパム認定を避けるため、現在この機能は無効化されている
-   */
-  GetInfoMessage(): string[] {
-    return [];
-  }
-
-  /**
    * すべてのプラグインが読み込まれたあとに実行される
    */
   OnLoaded(): void {
   }
 
-
+  OnConfig(target: string, name: string, value: string): void {
+  }
 }

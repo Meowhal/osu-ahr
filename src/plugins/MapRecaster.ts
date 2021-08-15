@@ -6,7 +6,7 @@ import config from "config";
 export interface MapRecasterOption {
 }
 
-const DefaultOption = config.get<MapRecasterOption>("MapRecaster");
+
 
 /**
  * ホストが古いバージョンのマップを選択した際に、コマンドでマップを貼り直して最新版にする。
@@ -16,8 +16,9 @@ export class MapRecaster extends LobbyPlugin {
   option: MapRecasterOption;
   canRecast: boolean = true;
   constructor(lobby: Lobby, option: Partial<MapRecasterOption> = {}) {
-    super(lobby, "recaster");
-    this.option = { ...DefaultOption, ...option } as MapRecasterOption;
+    super(lobby, "MapRecaster", "recaster");
+    const d = config.get<MapRecasterOption>(this.pluginName);
+    this.option = { ...d, ...option } as MapRecasterOption;
     this.registerEvents();
   }
 
@@ -38,9 +39,4 @@ export class MapRecaster extends LobbyPlugin {
       }
     }
   }
-
-  GetInfoMessage(): string[] {
-    return ["!update => update selected map. use when host has old map."]
-  }
-
 }

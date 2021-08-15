@@ -11,15 +11,14 @@ export interface MatchStarterOption {
   vote_msg_defer_ms: number;
 }
 
-const defaultOption = config.get<MatchStarterOption>("MatchStarter");
-
 export class MatchStarter extends LobbyPlugin {
   option: MatchStarterOption;
   voting: VoteCounter;
 
   constructor(lobby: Lobby, option: Partial<MatchStarterOption> = {}) {
-    super(lobby, "starter");
-    this.option = { ...defaultOption, ...option } as MatchStarterOption;
+    super(lobby, "MatchStarter", "starter");
+    const d = config.get<MatchStarterOption>(this.pluginName);
+    this.option = { ...d, ...option } as MatchStarterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }
@@ -40,7 +39,6 @@ export class MatchStarter extends LobbyPlugin {
           this.stopTimer();
           break;
       }
-
     });
   }
 
@@ -172,12 +170,5 @@ export class MatchStarter extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- MatchStarter -- vote : ${this.voting.toString()}`;
-  }
-
-  GetInfoMessage(): string[] {
-    return [
-      "!start => Starts the match.",
-      "!start [seconds] => Begins start timer. And can stop the timer with !stop."
-    ];
   }
 }
