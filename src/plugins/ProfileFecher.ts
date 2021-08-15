@@ -11,7 +11,7 @@ export interface ProfileFecherOption {
   profile_expired_day: number
 }
 
-const defaultOption = config.get<ProfileFecherOption>("profile");
+
 
 export class ProfileFecher extends LobbyPlugin {
   option: ProfileFecherOption;
@@ -22,8 +22,9 @@ export class ProfileFecher extends LobbyPlugin {
   task: Promise<void>;
 
   constructor(lobby: Lobby, option: Partial<ProfileFecherOption> = {}) {
-    super(lobby, "profile");
-    this.option = { ...defaultOption, ...option } as ProfileFecherOption;
+    super(lobby, "profile", "profile");
+    const d = config.get<ProfileFecherOption>(this.pluginName);
+    this.option = { ...d, ...option } as ProfileFecherOption;
     this.webApiClient = new WebApiClient();
     this.profileMap = new Map<string, UserProfile>();
     this.pendingNames = new Set<string>();

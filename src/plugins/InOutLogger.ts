@@ -6,7 +6,7 @@ export class InOutLogger extends LobbyPlugin {
   players: Map<Player, number> = new Map<Player, number>();
 
   constructor(lobby: Lobby) {
-    super(lobby, "inout");
+    super(lobby, "InOutLogger", "inout");
     this.lobby.ReceivedBanchoResponse.on(a => this.onReceivedBanchoResponse(a.message, a.response));
   }
 

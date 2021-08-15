@@ -49,8 +49,8 @@ export class LobbyKeeper extends LobbyPlugin {
   mpKickedUsers: Set<Player>;
 
   constructor(lobby: Lobby, option: Partial<LobbyKeeperOption> = {}) {
-    super(lobby, "keeper");
-    const d = config.get<LobbyKeeperOption>("LobbyKeeper");
+    super(lobby, "LobbyKeeper", "keeper");
+    const d = config.get<LobbyKeeperOption>(this.pluginName);
     this.option = { ...d, ...option } as LobbyKeeperOption;
     this.kickedUsers = new Set();
     this.mpKickedUsers = new Set();

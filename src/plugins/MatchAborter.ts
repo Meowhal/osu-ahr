@@ -24,8 +24,8 @@ export class MatchAborter extends LobbyPlugin {
   voting: VoteCounter;
 
   constructor(lobby: Lobby, option: Partial<MatchAborterOption> = {}) {
-    super(lobby, "aborter");
-    const d = config.get<MatchAborterOption>("MatchAborter");
+    super(lobby, "MatchAborter", "aborter");
+    const d = config.get<MatchAborterOption>(this.pluginName);
     this.option = { ...d, ...option } as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
@@ -184,9 +184,5 @@ export class MatchAborter extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- Match Aborter -- timer : ${this.abortTimer != null ? "active" : "###"}, vote : ${this.voting.toString()}`;
-  }
-
-  GetInfoMessage(): string[] {
-    return ["!abort => abort the match. Use if the match stuck."];
   }
 }

@@ -10,8 +10,6 @@ export interface HistoryLoaderOption {
   fetch_interval_ms: number; // ヒストリー取得間隔
 }
 
-const defaultOption = config.get<HistoryLoaderOption>("HistoryLoader");
-
 /**
  * 定期的にhistoryを取得し、lobbyのhistoryrepositoryに保存する
  */
@@ -21,8 +19,9 @@ export class HistoryLoader extends LobbyPlugin {
   fetchInvervalId: NodeJS.Timeout | null = null;
 
   constructor(lobby: Lobby, option: Partial<HistoryLoaderOption> = {}) {
-    super(lobby, "history");
-    this.option = { ...defaultOption, ...option } as HistoryLoaderOption;
+    super(lobby, "HistoryLoader", "history");
+    const d = config.get<HistoryLoaderOption>(this.pluginName);
+    this.option = { ...d, ...option } as HistoryLoaderOption;
     this.repository = lobby.historyRepository;
     this.registerEvents();
   }
@@ -72,7 +71,7 @@ export class HistoryLoader extends LobbyPlugin {
       this.fetchInvervalId = setInterval(() => {
         if (!this.lobby.isMatching) {
           this.repository.updateToLatest();
-        }        
+        }
       }, this.option.fetch_interval_ms);
     }
   }

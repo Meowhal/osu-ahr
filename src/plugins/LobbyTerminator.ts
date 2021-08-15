@@ -7,7 +7,7 @@ export interface LobbyTerminatorOption {
   terminate_time_ms: number;
 }
 
-const LobbyTerminatorDefaultOption = config.get<LobbyTerminatorOption>("LobbyTerminator");
+
 
 export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
@@ -15,8 +15,9 @@ export class LobbyTerminator extends LobbyPlugin {
   multilimeMessageInterval: number = 1000;
 
   constructor(lobby: Lobby, option: Partial<LobbyTerminatorOption> = {}) {
-    super(lobby, "terminator");
-    this.option = { ...LobbyTerminatorDefaultOption, ...option } as LobbyTerminatorOption;
+    super(lobby, "LobbyTerminator", "terminator");
+    const d = config.get<LobbyTerminatorOption>(this.pluginName);
+    this.option = { ...d, ...option } as LobbyTerminatorOption;
     this.registerEvents();
   }
 

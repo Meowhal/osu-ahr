@@ -90,11 +90,11 @@ export class DefaultValidator extends ValidatorBase {
 
   RateBeatmap(map: Beatmap): { rate: number, message: string } {
     let r = 0;
-    
+
     let rs = { rate: r, message: "" };
 
     if (map.mode != this.gamemode) {
-      if(this.gamemode != "any"){
+      if (this.gamemode != "any") {
         r += 1;
       }
     }
@@ -113,8 +113,8 @@ export class DefaultValidator extends ValidatorBase {
 
     if (this.length.max < map.total_length) {
       r += (map.total_length - this.length.max) / 60.0;
-    } 
-    
+    }
+
     if (0.01 <= r) {
       rs.message
         = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
@@ -135,11 +135,11 @@ export class DefaultValidator extends ValidatorBase {
   SetConfiguration(name: string, value: string): boolean {
     let v = parseFloat(value);
     if (isNaN(v)) {
-      if(name.includes("gamemode")){
+      if (name.includes("gamemode")) {
         this.gamemode = value;
         return true;
       }
-      else{
+      else {
         this.logger.warn(`invalid regulation config : ${name} = ${value}`);
         return false;
       }
@@ -173,7 +173,7 @@ export class DefaultValidator extends ValidatorBase {
     let d_star = "";
     let d_length = "";
     let d_gamemode = "";
-    if(this.gamemode != ""){
+    if (this.gamemode != "") {
       d_gamemode = `allowed game mode: ${this.gamemode}`;
     }
 
@@ -219,7 +219,7 @@ export type MapCheckerOption = {
   cache_expired_day: number;
 } & DefaultRegulation;
 
-const defaultOption = config.get<MapCheckerOption>("MapChecker");
+
 
 export class MapChecker extends LobbyPlugin {
   option: MapCheckerOption;
@@ -234,8 +234,9 @@ export class MapChecker extends LobbyPlugin {
   doSkip: boolean = false;
 
   constructor(lobby: Lobby, client: WebApiClient | null = null, option: Partial<MapCheckerOption> = {}) {
-    super(lobby, "mapChecker");
-    this.option = { ...defaultOption, ...option } as MapCheckerOption;
+    super(lobby, "MapChecker", "mapChecker");
+    const d = config.get<MapCheckerOption>(this.pluginName);
+    this.option = { ...d, ...option } as MapCheckerOption;
     this.task = Promise.resolve();
     this.webApiClient = client;
     this.validator = ValidatorConstructors["default_validator"](this);

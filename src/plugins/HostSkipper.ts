@@ -34,8 +34,8 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   constructor(lobby: Lobby, option: Partial<HostSkipperOption> = {}) {
-    super(lobby, "skipper");
-    const d = config.get<HostSkipperOption>("HostSkipper");
+    super(lobby, "HostSkipper", "skipper");
+    const d = config.get<HostSkipperOption>(this.pluginName);
     this.option = { ...d, ...option } as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
@@ -235,13 +235,5 @@ export class HostSkipper extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- Host Skipper -- timer : ${this.afkTimer != undefined ? "active" : "###"}, skip_vote : ${this.voting.toString()}`;
-  }
-
-  GetInfoMessage(): string[] {
-    return [
-      "!skip => skip current host.",
-      "*skip => Force skip current host.",
-      "*skipto [player] => 	Force skip to specified player."
-    ];
   }
 }

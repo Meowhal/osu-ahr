@@ -21,8 +21,8 @@ export class AutoHostSelector extends LobbyPlugin {
   orderChanged = new TypedEvent<{ type: OrderChangeType }>();
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
-    super(lobby, "selector");
-    const d = config.get<AutoHostSelectorOption>("AutoHostSelector");
+    super(lobby, "AutoHostSelector", "selector");
+    const d = config.get<AutoHostSelectorOption>(this.pluginName);
     this.option = { ...d, ...option } as AutoHostSelectorOption;
     this.registerEvents();
   }
@@ -399,12 +399,6 @@ export class AutoHostSelector extends LobbyPlugin {
     return `-- AutoHostSelector --
   queue : ${m}
   mapChanger : ${this.mapChanger == null ? "null" : this.mapChanger.name}, needsRotate : ${this.needsRotate}`;
-  }
-
-  GetInfoMessage(): string[] {
-    return [
-      "!queue => 	Shows host queue.",
-      "*order [players list] => Reorder the queue in specified order. (*order p1, p2, p3)"]
   }
 
   private raiseOrderChanged(type: OrderChangeType) {

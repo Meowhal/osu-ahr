@@ -17,8 +17,8 @@ export class AutoStartTimer extends LobbyPlugin {
   lastMapId: number;
   useMapValidation: boolean = false;
   constructor(lobby: Lobby, option: Partial<AutoStartTimerOption> = {}) {
-    super(lobby, "autostart");
-    const d = config.get<AutoStartTimerOption>("AutoStartTimer");
+    super(lobby, "AutoStartTimer", "autostart");
+    const d = config.get<AutoStartTimerOption>(this.pluginName);
     this.option = { ...d, ...option } as AutoStartTimerOption;
     this.lastMapId = 0;
     this.registerEvents();
