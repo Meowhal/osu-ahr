@@ -99,19 +99,19 @@ export class DefaultValidator extends ValidatorBase {
       }
     }
 
-    if (map.difficulty_rating < this.star.min) {
+    if (this.star.min != 0 && map.difficulty_rating < this.star.min) {
       r += parseFloat((this.star.min - map.difficulty_rating).toFixed(2));
     }
 
-    if (this.star.max < map.difficulty_rating) {
+    if (this.star.max != 0 && this.star.max < map.difficulty_rating) {
       r += parseFloat((map.difficulty_rating - this.star.max).toFixed(2));
     }
 
-    if (map.total_length < this.length.min) {
+    if (this.length.min != 0 && map.total_length < this.length.min) {
       r += (this.length.min - map.total_length) / 60.0;
     }
 
-    if (this.length.max < map.total_length) {
+    if (this.length.max != 0 && this.length.max < map.total_length) {
       r += (map.total_length - this.length.max) / 60.0;
     }
 
