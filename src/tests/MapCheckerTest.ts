@@ -30,10 +30,10 @@ describe("Map Checker Tests", function () {
         length_max: 300,
         gamemode: "any"
       }
-      const map_star_5_55_length_93: Beatmap = Object.assign(beatmap_sample, {});
+      const map: Beatmap = Object.assign({}, beatmap_sample);
 
       const dr = new DefaultValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map_star_5_55_length_93);
+      const r = dr.RateBeatmap(map);
       assert.equal(r.rate, 0);
     });
 
@@ -45,7 +45,7 @@ describe("Map Checker Tests", function () {
         length_max: 300,
         gamemode: "any"
       }
-      const map: Beatmap = Object.assign(beatmap_sample, {});
+      const map: Beatmap = Object.assign({}, beatmap_sample);
 
       const dr = new DefaultValidator(reg, getLogger("checker"));
       map.difficulty_rating = 10;
@@ -66,15 +66,42 @@ describe("Map Checker Tests", function () {
         length_max: 300,
         gamemode: "any"
       }
-      const { checker, ircClient, lobby } = await setupAsync();
-      const map: Beatmap = Object.assign(beatmap_sample, {});
+      const map: Beatmap = Object.assign({}, beatmap_sample);
 
       const dr = new DefaultValidator(reg, getLogger("checker"));
       map.total_length = 500;
       let r = dr.RateBeatmap(map);
       assert.notEqual(r.rate, 0);
+    });
 
+    it("star no cap", async () => {
+      const reg: DefaultRegulation = {
+        star_min: 3.00,
+        star_max: 0,
+        length_min: 0,
+        length_max: 300,
+        gamemode: "any"
+      }
+      const map: Beatmap = Object.assign({}, beatmap_sample);
 
+      const dr = new DefaultValidator(reg, getLogger("checker"));
+      let r = dr.RateBeatmap(map);
+      assert.equal(r.rate, 0);
+    });
+
+    it("length no cap", async () => {
+      const reg: DefaultRegulation = {
+        star_min: 3.00,
+        star_max: 0,
+        length_min: 0,
+        length_max: 0,
+        gamemode: "any"
+      }
+      const map: Beatmap = Object.assign({}, beatmap_sample);
+
+      const dr = new DefaultValidator(reg, getLogger("checker"));
+      let r = dr.RateBeatmap(map);
+      assert.equal(r.rate, 0);
     });
 
     it("gamemode accept test", async () => {
@@ -85,15 +112,15 @@ describe("Map Checker Tests", function () {
         length_max: 300,
         gamemode: "osu"
       }
-      const map_star_5_55_length_93: Beatmap = Object.assign(beatmap_sample, {});
+      const map: Beatmap = Object.assign({}, beatmap_sample);
 
       const dr = new DefaultValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map_star_5_55_length_93);
+      const r = dr.RateBeatmap(map);
       assert.equal(r.rate, 0);
 
     });
 
-    it("gamemode reject test", async () => {
+    it("gamemode reject test2", async () => {
       const reg: DefaultRegulation = {
         star_min: 5.00,
         star_max: 6.00,
@@ -101,11 +128,27 @@ describe("Map Checker Tests", function () {
         length_max: 300,
         gamemode: "mania"
       }
-      const map_star_5_55_length_93: Beatmap = Object.assign(beatmap_sample, {});
+      const map: Beatmap = Object.assign({}, beatmap_sample);
 
       const dr = new DefaultValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map_star_5_55_length_93);
+      const r = dr.RateBeatmap(map);
       assert.notEqual(r.rate, 0);
+
+    });
+
+    it("gamemode empty", async () => {
+      const reg: DefaultRegulation = {
+        star_min: 5.00,
+        star_max: 6.00,
+        length_min: 0,
+        length_max: 300,
+        gamemode: ""
+      }
+      const map: Beatmap = Object.assign({}, beatmap_sample);
+
+      const dr = new DefaultValidator(reg, getLogger("checker"));
+      const r = dr.RateBeatmap(map);
+      assert.equal(r.rate, 0);
 
     });
   });

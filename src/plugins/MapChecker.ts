@@ -94,7 +94,7 @@ export class DefaultValidator extends ValidatorBase {
     let rs = { rate: r, message: "" };
 
     if (map.mode != this.gamemode) {
-      if (this.gamemode != "any") {
+      if (this.gamemode != "" && this.gamemode != "any") {
         r += 1;
       }
     }
