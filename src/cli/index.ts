@@ -19,7 +19,7 @@ const c = getIrcConfig();
 if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
   logger.error("you must enter your account name and irc password in the config file. ");
   logger.error("you can get the password from 'https://osu.ppy.sh/p/irc' ");
-  logger.error("Copy config/default.json to %s, and enter your id and irc password.", config_path);
+  logger.error("Copy config/default.json to config/local.json, and enter your id and irc password.");
   process.exit(1);
 }
 
