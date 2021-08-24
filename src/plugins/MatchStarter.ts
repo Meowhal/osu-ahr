@@ -9,6 +9,7 @@ export interface MatchStarterOption {
   vote_rate: number; // 投票時の必要数/プレイヤー数
   vote_min: number;　// 最低投票数
   vote_msg_defer_ms: number;
+  start_when_all_player_ready: boolean; // 全員準備完了したら試合を始める
 }
 
 export class MatchStarter extends LobbyPlugin {
@@ -60,7 +61,9 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   private onAllPlayerReady(): void {
-    this.start();
+    if (this.option.start_when_all_player_ready) {
+      this.start();
+    }    
   }
 
   private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {

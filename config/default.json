@@ -64,7 +64,8 @@
   "MatchStarter": {
     "vote_rate": 0.45,
     "vote_min": 2,
-    "vote_msg_defer_ms": 5000
+    "vote_msg_defer_ms": 5000,
+    "start_when_all_player_ready": true
   },
   "MatchAborter": {
     "vote_rate": 0.3,

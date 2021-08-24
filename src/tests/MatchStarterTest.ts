@@ -15,7 +15,8 @@ describe("MatchStarterTest", function () {
     const option: MatchStarterOption = {
       vote_min: min,
       vote_rate: rate,
-      vote_msg_defer_ms: 0
+      vote_msg_defer_ms: 0,
+      start_when_all_player_ready: true
     }
     const starter = new MatchStarter(li.lobby, option)
     return { starter, ...li };
