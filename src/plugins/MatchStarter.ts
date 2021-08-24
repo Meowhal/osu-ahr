@@ -155,6 +155,7 @@ export class MatchStarter extends LobbyPlugin {
   private stopTimer(): void {
     this.lobby.CancelDeferredMessage("mp_start");
     this.lobby.CancelDeferredMessage("mp_start 10 sec");
+    this.lobby.CancelDeferredMessage("match start vote");
 
     if (this.lobby.isStartTimerActive) {
       this.lobby.SendMessage("!mp aborttimer");
