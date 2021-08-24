@@ -133,7 +133,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.needsRotate) {
       this.rotateQueue();
     } else {
-      this.logger.info("@onMatchStarted rotation skipped.");
+      this.logger.info("rotation skipped.");
     }
   }
 
@@ -151,16 +151,16 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private onMatchAborted(playersFinished: number, playersInGame: number): void {
     if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
-      this.logger.info("The match was aborted after several players were Finished. call normal match finish process");
+      this.logger.trace("The match was aborted after several players were Finished. call normal match finish process");
       this.onMatchFinished();
     } else {
       if (this.lobby.host != null) {
         // 誰も終了していない場合は試合再開許可モードへ
         this.needsRotate = false;
-        this.logger.info("The match was aborted before any Player Finished.");
+        this.logger.trace("The match was aborted before any Player Finished.");
       } else {
         // ホストがいない状態で試合が中断されたら
-        this.logger.info("The match was aborted after the host left.");
+        this.logger.trace("The match was aborted after the host left.");
         this.changeHost();
       }
     }

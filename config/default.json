@@ -97,7 +97,7 @@
     "token_store_dir": "data/tokens/",
     "asGuest": true,
     "callback": "",
-    "callback_port": 3000    
+    "callback_port": 3000
   },
   "profile": {
     "profile_expired_day": 7

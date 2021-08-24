@@ -22,6 +22,7 @@
   "author": "gnsksz",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/builders": "^0.5.0",
     "async": "^3.2.0",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.3",
