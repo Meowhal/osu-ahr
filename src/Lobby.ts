@@ -7,7 +7,6 @@ import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import { HistoryRepository } from "./webapi/HistoryRepository";
 import config from "config";
 import log4js from "log4js";
-import pkg from "../package.json";
 
 export enum LobbyStatus {
   Standby,
@@ -887,7 +886,8 @@ export class Lobby {
   }
 
   private getInfoMessage(): string {
-    return `- Osu Auto Host Rotation Bot ver ${pkg.version} - \n`
+    
+    return `- Osu Auto Host Rotation Bot ver ${process.env.npm_package_version} - \n`
       + this.option.info_message.join("\n");
   }
 

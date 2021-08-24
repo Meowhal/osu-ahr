@@ -147,6 +147,7 @@ configs related to host-skip vote and automatic afk host skip.
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
 - `vote_min`: `number` minimum required vote count.
 - `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
+- `start_when_all_player_ready` : `boolean` start the match when everyoen is ready.
 ### MatchAborter section
 !abort vote and auto abort configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to abort.

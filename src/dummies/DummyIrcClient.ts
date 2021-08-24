@@ -215,7 +215,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
-    setImmediate(this.raiseJoin, channel);
+    setImmediate(this.raiseJoin, channel, "");
   }
 
   // IRCClientのpart
