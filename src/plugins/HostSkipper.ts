@@ -210,7 +210,7 @@ export class HostSkipper extends LobbyPlugin {
           this.logger.trace("stat check phase 1 %s -> %s", stat1.name, StatStatuses[stat1.status]);
           if (this.afkTimer != undefined && this.lobby.host == target && this.statIsAfk(stat1.status)) {
             // double check and show stat for players
-            this.lobby.RequestStatAsync(target, false, this.option.afk_check_timeout_ms);
+            await this.lobby.RequestStatAsync(target, false, this.option.afk_check_timeout_ms);
           }
         } catch {
           this.logger.warn("stat check timeout!");
