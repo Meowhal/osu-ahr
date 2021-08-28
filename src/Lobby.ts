@@ -21,7 +21,7 @@ export enum LobbyStatus {
 export interface LobbyOption {
   authorized_users: string[], // 特権ユーザー
   listref_duration_ms: number,
-  info_message: string[],
+  info_message: string,
   info_message_cooltime_ms: number,
   stat_timeout_ms: number,
   info_message_announcement_interval_ms: number,
@@ -888,7 +888,7 @@ export class Lobby {
   private getInfoMessage(): string {
     
     return `- Osu Auto Host Rotation Bot ver ${process.env.npm_package_version} - \n`
-      + this.option.info_message.join("\n");
+      + this.option.info_message;
   }
 
   // ircでログインしたユーザーに権限を与える
