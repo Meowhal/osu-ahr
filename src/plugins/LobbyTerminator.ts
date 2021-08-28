@@ -7,8 +7,6 @@ export interface LobbyTerminatorOption {
   terminate_time_ms: number;
 }
 
-
-
 export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
   terminateTimer: NodeJS.Timer | undefined;
