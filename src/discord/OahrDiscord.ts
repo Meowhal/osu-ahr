@@ -3,39 +3,27 @@ import { IIrcClient, Lobby, LobbyStatus, Player } from "..";
 import log4js from "log4js";
 import { parser } from "../parsers";
 import { OahrBase } from "../cli/OahrBase";
-import { Client, Intents } from "discord.js";
+import { Client, Intents, Permissions, Guild } from "discord.js";
 import config from "config";
 
-const logger = log4js.getLogger("cli");
-
-export interface OahrDiscordConfig {
-    token: string; // ボットのトークン https://discord.com/developers/applications
-  }
+const logger = log4js.getLogger("discord");
 
 export class OahrDiscord extends OahrBase {
-  discordClient : Client;
-  cfg : OahrDiscordConfig;
-  lobbies: Map<string, Lobby>;
+  guildId: string = "";
+  channelId: string = "";
 
   constructor(client: IIrcClient) {
     super(client);
-    this.discordClient = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS] });
-    this.cfg = config.get<OahrDiscordConfig>("Discord");
-    this.lobbies = new Map();
+    this.inoutLogger.withColorTag = false;
   }
 
-  async start() {
-    this.discordClient.once('ready', async cl => {
-    });
+  setDiscordId(guildId: string, channelId: string) {
+    this.guildId = guildId;
+    this.channelId = channelId;
 
-    this.discordClient.login(this.cfg.token);
+    for (let l of this.lobby.plugins.map(p => p.logger).concat([logger, this.lobby.logger, this.lobby.chatlogger])) {
+      l.addContext("guildId", guildId);
+      l.addContext("channelId", channelId);
+    }
   }
-
 }
-/**
- * command
- * コマンドは全体コマンドとロビーコマンドの二種類
- * /make ロビーの作成
- * /enter 既存のロビーに入る
- * /list 現在稼働中のロビー一覧を表示
- */

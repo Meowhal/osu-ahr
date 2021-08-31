@@ -1,7 +1,5 @@
-import { ApplicationCommandData, Client, Collection, Intents, Message } from "discord.js";
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { ApplicationCommandData, Client, Intents } from "discord.js";
 import config from "config";
-import { executionAsyncResource } from "async_hooks";
 
 interface DiscordOption {
     token: string
@@ -48,7 +46,6 @@ export async function trial() {
 }
 
 function createPingCommand(): ApplicationCommandData {
-    
     return {
         name: "ping",
         description: "ping"

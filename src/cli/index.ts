@@ -1,6 +1,5 @@
 import { OahrCli } from './OahrCli';
 import { OahrHeadless } from "./OahrHeadless";
-import { OahrDiscord } from "../discord/OahrDiscord";
 import * as irc from '../libs/irc';
 import { logIrcEvent } from "..";
 import { getIrcConfig } from "../TypedConfig";
@@ -38,16 +37,9 @@ logPrivateMessage(client);
 
 if (process.argv.length > 2) {
   const command = process.argv[2];
-
-  if (command == "discord") {
-    const oahr = new OahrDiscord(client);
-    oahr.start();
-  } else {
-    const oahr = new OahrHeadless(client);  
-    const arg = process.argv.slice(3).join(" ");
-    oahr.start(command, arg);
-  }
-  
+  const oahr = new OahrHeadless(client);
+  const arg = process.argv.slice(3).join(" ");
+  oahr.start(command, arg);
 } else {
   const oahr = new OahrCli(client);
   oahr.start(null);
