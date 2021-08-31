@@ -52,6 +52,9 @@ export class MatchStarter extends LobbyPlugin {
     if (this.lobby.isMatching) return;
 
     this.checkVoteCount();
+    if (this.lobby.players.size == 0) {
+      this.stopTimer();
+    }
   }
 
   private onHostChanged(player: Player): void {

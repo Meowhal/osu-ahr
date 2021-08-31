@@ -30,7 +30,7 @@ export class HistoryLoader extends LobbyPlugin {
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.JoinedLobby.on(a => this.onJoinedLobby(a.channel));
     this.lobby.MatchStarted.on(a => this.onMatchStarted());
-    this.lobby.Disconnected.on(a => this.stopFetch());
+    this.lobby.LeftChannel.on(a => this.stopFetch());
   }
 
   async onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): Promise<void> {

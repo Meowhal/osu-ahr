@@ -95,11 +95,6 @@ export class AutoHostSelector extends LobbyPlugin {
 
     if (this.hostQueue[0] == newhost) {
       this.logger.trace("a new host has been appointed:%s", newhost.name);
-
-      if (this.mapChanger != null && this.mapChanger != newhost) { // 前任のホストがマップを変更している
-        this.needsRotate = false;
-        this.logger.info("host is appointed after map change");
-      }
     } else {
       // ホストがキューの先頭以外に変更された場合
       if (this.lobby.hostPending == null && this.lobby.hostPending != this.hostQueue[0]) {
@@ -107,6 +102,11 @@ export class AutoHostSelector extends LobbyPlugin {
         this.rotateQueue();
       }
       this.changeHost();
+    }
+
+    if (this.mapChanger != null && this.mapChanger != newhost) { // 前任のホストがマップを変更している
+      this.needsRotate = false;
+      this.logger.info("host is appointed after map change");
     }
   }
 

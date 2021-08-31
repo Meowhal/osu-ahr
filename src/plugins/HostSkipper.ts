@@ -48,7 +48,7 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ParsedStat.on(a => this.onParsedStat(a.player, a.result, a.isPm));
-    this.lobby.Disconnected.on(() => this.StopTimer());
+    this.lobby.LeftChannel.on(() => this.StopTimer());
     this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.MatchStarted:
