@@ -1,5 +1,5 @@
 import log4js from "log4js";
-import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction } from "discord.js";
+import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions } from "discord.js";
 import config from "config";
 
 import { IIrcClient } from "..";
@@ -8,11 +8,18 @@ import { setDiscordClient } from "./DiscordAppender";
 
 const logger = log4js.getLogger("discord");
 
+const ADMIN_ROLE: CreateRoleOptions = {
+  name: "ahr-admin",
+  color: "ORANGE",
+  reason: "ahr-bot administrator"
+};
+
 // coded by https://autocode.com/tools/discord/command-builder/
-const commands = [
+const COMMANDS: ApplicationCommandData[] = [
   {
     name: "make",
     description: "Make a tournament lobby",
+    defaultPermission: false,
     options: [
       {
         type: 3,
@@ -25,6 +32,7 @@ const commands = [
   {
     name: "enter",
     description: "Enter a lobby.",
+    defaultPermission: false,
     options: [
       {
         type: 4,
@@ -37,6 +45,7 @@ const commands = [
   {
     name: "say",
     description: "send a message",
+    defaultPermission: false,
     options: [
       {
         type: 3,
@@ -55,6 +64,7 @@ const commands = [
   {
     name: "config",
     description: "configure ahrbot",
+    defaultPermission: false,
     options: [
       {
         type: 3,
@@ -79,6 +89,7 @@ const commands = [
   {
     name: "close",
     description: "close the lobby",
+    defaultPermission: false,
     options: [
       {
         type: 4,
@@ -91,6 +102,7 @@ const commands = [
   {
     name: "quit",
     description: "quit managing the lobby",
+    defaultPermission: false,
     options: [
       {
         type: 4,
@@ -165,11 +177,31 @@ export class DiscordBot {
   }
 
   async registerCommands(guild: Guild) {
-    await guild.commands.set(commands);
+    let results = await guild.commands.set(COMMANDS);
+    let roleId = await this.registerRole(guild);
+    const permissions: ApplicationCommandPermissionData[] = [
+      {
+        id: roleId,
+        type: 'ROLE',
+        permission: true,
+      },
+    ];
+
+    results.forEach(c => {
+      c.permissions.add({ permissions });
+    });
+  }
+
+  async registerRole(guild: Guild) {
+    let role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+    if (!role) {
+      role = await guild.roles.create(ADMIN_ROLE);
+    }
+    return role.id;
   }
 
   async make(interaction: GuildCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     if (!interaction.guild) {
       logger.error("interaction.guild must not be null");
       await interaction.editReply("😫 interaction.guild must not be null");
@@ -204,7 +236,7 @@ export class DiscordBot {
   }
 
   async enter(interaction: GuildCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     let lobbyId = this.resolveLobbyId(interaction);
     if (!lobbyId) {
       await interaction.editReply("error lobby_id required.");
@@ -252,7 +284,7 @@ export class DiscordBot {
   }
 
   async say(interaction: GuildCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     let lobbyId = this.resolveLobbyId(interaction);
     if (!lobbyId) {
       await interaction.editReply("error lobby_id required.");
@@ -275,7 +307,7 @@ export class DiscordBot {
   }
 
   async close(interaction: GuildCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     let lobbyId = this.resolveLobbyId(interaction);
     if (!lobbyId) {
       await interaction.editReply("error lobby_id required.");
@@ -297,7 +329,7 @@ export class DiscordBot {
   }
 
   async quit(interaction: GuildCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     let lobbyId = this.resolveLobbyId(interaction);
     if (!lobbyId) {
       await interaction.editReply("error lobby_id required.");
@@ -371,7 +403,8 @@ export class DiscordBot {
     return this.discordClient.generateInvite({
       scopes: ['bot', 'applications.commands'],
       permissions: [
-        Permissions.FLAGS.MANAGE_CHANNELS
+        Permissions.FLAGS.MANAGE_CHANNELS,
+        Permissions.FLAGS.MANAGE_ROLES
       ]
     });
   }
