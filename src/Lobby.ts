@@ -125,6 +125,17 @@ export class Lobby {
       },
       kick: (channel: any, who: any, by: any, reason: any) => {
         this.logger.info('%s was kicked from %s by %s: %s', who, channel, by, reason);
+      },
+      part: (channel: string, nick: string) => {
+        if (channel == this.channel) {
+          this.stopInfoMessageAnnouncement();
+          this.CancelAllDeferredMessages();
+          this.historyRepository.lobbyClosed = true;
+  
+          this.logger.info("part");
+          this.status = LobbyStatus.Left;
+          this.destroy();
+        }
       }
     };
 
@@ -139,20 +150,7 @@ export class Lobby {
       }
     };
 
-    this.events.part = (channel: string, nick: string) => {
-      if (channel == this.channel) {
-        this.stopInfoMessageAnnouncement();
-        this.CancelAllDeferredMessages();
-        this.historyRepository.lobbyClosed = true;
-
-        this.logger.info("part");
-        this.status = LobbyStatus.Left;
-        this.destroy();
-      }
-    }
-
     this.ircClient.once("join", this.events.join);
-    this.ircClient.once("part", this.events.part);
   }
 
   destroy() {
