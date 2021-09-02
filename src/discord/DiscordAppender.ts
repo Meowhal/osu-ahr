@@ -1,6 +1,8 @@
-import { Channel, Client, GuildChannel, ThreadChannel } from "discord.js";
+import { Client, TextBasedChannels } from "discord.js";
+import log4js from "log4js";
 
 let discordClient: Client | undefined;
+const logger = log4js.getLogger("discord");
 
 export function setDiscordClient(client: Client) {
     discordClient = client;
@@ -23,25 +25,26 @@ export function configure(config: any, layouts: any) {
     return async (loggingEvent: any) => {
         if (discordClient) {
             try {
-                let ch = getDiscordChannel(loggingEvent.context) as any;
+
+                let ch = getDiscordChannel(loggingEvent.context);
                 if (ch) {
-                    ch.send(`${layout(loggingEvent, config.timezoneOffset)}`);
+                    await ch.send(`${layout(loggingEvent, config.timezoneOffset)}`);
                 }
             } catch (e) {
-                process.stderr.write(`Discord Error ${e}\n`);
+                logger.error(e.message);
             }
-        } else {
-            process.stdout.write(`${layout(loggingEvent, config.timezoneOffset)}\n`);
         }
     };
 }
 
-function getDiscordChannel(context: any): GuildChannel | ThreadChannel | undefined {
-
+function getDiscordChannel(context: any): TextBasedChannels | undefined {
     if (discordClient && context && context.guildId && context.channelId) {
         let guild = discordClient.guilds.cache.get(context.guildId);
-        return guild?.channels.cache.get(context.channelId);
-    } else {
-        return undefined;
+        let ch = guild?.channels.cache.get(context.channelId)
+        if (ch?.isText()) {
+            return ch;
+        }
     }
+    return undefined;
+
 }
