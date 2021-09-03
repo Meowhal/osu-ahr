@@ -43,6 +43,19 @@ const COMMANDS: ApplicationCommandData[] = [
     ]
   },
   {
+    name: "info",
+    description: "Print lobby status.",
+    defaultPermission: false,
+    options: [
+      {
+        type: 4,
+        name: "lobby_id",
+        description: " Tournament lobby ID",
+        required: false
+      }
+    ]
+  },
+  {
     name: "say",
     description: "send a message",
     defaultPermission: false,
@@ -159,6 +172,9 @@ export class DiscordBot {
         case "enter":
           await this.enter(interaction);
           break;
+        case "info":
+          await this.info(interaction);
+          break;
         case "say":
           await this.say(interaction);
           break;
@@ -216,7 +232,7 @@ export class DiscordBot {
       await ahr.makeLobbyAsync(name);
     } catch (e) {
       logger.error("couldn't make a tournament lobby. " + e);
-      await interaction.editReply("😫 couldn't make a tournament lobby. " + e);
+      await interaction.editReply("😫 couldn't make a tournament lobby. " + e.message);
       ahr?.lobby.destroy();
       return;
     }
@@ -231,7 +247,7 @@ export class DiscordBot {
       await interaction.editReply(`😀 Created the lobby https://osu.ppy.sh/mp/${lobbyId}`);
     } catch (e) {
       logger.error("couldn't make a discord channel. " + e);
-      await interaction.editReply("couldn't make a discord channel. " + e);
+      await interaction.editReply("couldn't make a discord channel. " + e.message);
     }
   }
 
@@ -280,6 +296,34 @@ export class DiscordBot {
     } catch (e) {
       logger.error("couldn't make a discord channel.  " + e);
       await interaction.editReply("😫 couldn't make a discord channel.  " + e);
+    }
+  }
+
+  async info(interaction: GuildCommandInteraction) {
+    await interaction.deferReply();
+    let lobbyId = this.resolveLobbyId(interaction);
+    if (!lobbyId) {
+      await interaction.editReply("error lobby_id required.");
+      return;
+    }
+
+    if (!interaction.guild) {
+      logger.error("interaction.guild must not be null");
+      await interaction.editReply("😫 interaction.guild must not be null");
+      return;
+    }
+
+    let ahr = this.ahrs[lobbyId];
+    if (!ahr) {
+      await interaction.editReply("Invalid lobby specified");
+      return;
+    }
+
+    try {
+      await interaction.editReply(ahr.lobby.GetLobbyStatus());
+    } catch (e) {
+      logger.error("@discordbot.info " + e);
+      await interaction.editReply("😫 error! " + e.message);
     }
   }
 
