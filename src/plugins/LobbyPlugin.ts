@@ -17,10 +17,6 @@ export class LobbyPlugin {
     this.logger.addContext("channel", "lobby");
   }
 
-  GetPluginName(): string {
-    return "";
-  }
-
   /**
    * 他のプラグインにメッセージを送信する。
    * @param type 

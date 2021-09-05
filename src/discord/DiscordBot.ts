@@ -1,10 +1,12 @@
 import log4js from "log4js";
-import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions } from "discord.js";
+import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton } from "discord.js";
 import config from "config";
 
-import { IIrcClient } from "..";
+import { IIrcClient, Player } from "..";
 import { OahrDiscord } from "./OahrDiscord";
 import { setDiscordClient } from "./DiscordAppender";
+import { Beatmap } from "../webapi/Beatmapsets";
+import { BotCommands } from "./BotCommand";
 
 const logger = log4js.getLogger("discord");
 
@@ -13,137 +15,30 @@ const ADMIN_ROLE: CreateRoleOptions = {
   color: "ORANGE",
   reason: "ahr-bot administrator"
 };
-
-// coded by https://autocode.com/tools/discord/command-builder/
-const COMMANDS: ApplicationCommandData[] = [
-  {
-    name: "make",
-    description: "Make a tournament lobby",
-    defaultPermission: false,
-    options: [
-      {
-        type: 3,
-        name: "lobby_name",
-        description: "Initial lobby Name e.g. \"4.00-5.99 auto host rotation\"",
-        required: true
-      }
-    ]
-  },
-  {
-    name: "enter",
-    description: "Enter a lobby.",
-    defaultPermission: false,
-    options: [
-      {
-        type: 4,
-        name: "lobby_id",
-        description: " Tournament lobby ID",
-        required: false
-      }
-    ]
-  },
-  {
-    name: "info",
-    description: "Print lobby status.",
-    defaultPermission: false,
-    options: [
-      {
-        type: 4,
-        name: "lobby_id",
-        description: " Tournament lobby ID",
-        required: false
-      }
-    ]
-  },
-  {
-    name: "say",
-    description: "send a message",
-    defaultPermission: false,
-    options: [
-      {
-        type: 3,
-        name: "message",
-        description: "message",
-        required: true
-      },
-      {
-        type: 4,
-        name: "lobby_id",
-        description: " Tournament lobby ID",
-        required: false
-      }
-    ]
-  },
-  {
-    name: "config",
-    description: "configure ahrbot",
-    defaultPermission: false,
-    options: [
-      {
-        type: 3,
-        name: "section",
-        description: "specify config section",
-        required: true
-      },
-      {
-        type: 3,
-        name: "name",
-        description: "option name",
-        required: true
-      },
-      {
-        type: 3,
-        name: "value",
-        description: "new value",
-        required: true
-      }
-    ]
-  },
-  {
-    name: "close",
-    description: "close the lobby",
-    defaultPermission: false,
-    options: [
-      {
-        type: 4,
-        name: "lobby_id",
-        description: " Tournament lobby ID",
-        required: false
-      }
-    ]
-  },
-  {
-    name: "quit",
-    description: "quit managing the lobby",
-    defaultPermission: false,
-    options: [
-      {
-        type: 4,
-        name: "lobby_id",
-        description: "Tournament lobby ID",
-        required: false
-      }
-    ]
-  }
-];
-
 export interface DiscordBotConfig {
   token: string; // ボットのトークン https://discord.com/developers/applications
 }
 
 type GuildCommandInteraction = CommandInteraction & { guildId: string; }
+export type OahrSharedObjects = {
+  maps: { [id: number]: Beatmap & { fetchedAt: number } }
+}
 
 export class DiscordBot {
   ircClient: IIrcClient;
   discordClient: Client;
   cfg: DiscordBotConfig;
   ahrs: { [index: string]: OahrDiscord };
+  sharedObjects: OahrSharedObjects;
 
   constructor(client: IIrcClient, discordClient: Client) {
     this.ircClient = client;
     this.discordClient = discordClient;
     this.cfg = config.get<DiscordBotConfig>("Discord");
     this.ahrs = {};
+    this.sharedObjects = {
+      maps: {}
+    }
   }
 
   async start() {
@@ -193,7 +88,7 @@ export class DiscordBot {
   }
 
   async registerCommands(guild: Guild) {
-    let results = await guild.commands.set(COMMANDS);
+    let results = await guild.commands.set(BotCommands);
     let roleId = await this.registerRole(guild);
     const permissions: ApplicationCommandPermissionData[] = [
       {
@@ -228,7 +123,7 @@ export class DiscordBot {
     let ahr;
 
     try {
-      ahr = new OahrDiscord(this.ircClient);
+      ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.makeLobbyAsync(name);
     } catch (e) {
       logger.error("couldn't make a tournament lobby. " + e);
@@ -238,13 +133,10 @@ export class DiscordBot {
     }
 
     try {
-      let lobbyId = ahr.lobby.lobbyId ?? "new_lobby";
-      let dc = await interaction.guild.channels.create(`mp_${lobbyId}`, {
-        type: "GUILD_TEXT",
-        topic: `created by ahr bot. #mp_${lobbyId}`
-      });
+      let lobbyNumber = ahr.lobby.lobbyId ?? "new_lobby";
+      let dc = await this.createChannel(interaction.guild, lobbyNumber);
       this.registeAhr(ahr, interaction, dc);
-      await interaction.editReply(`😀 Created the lobby https://osu.ppy.sh/mp/${lobbyId}`);
+      await interaction.editReply(`😀 Created the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber}) [#mp_${lobbyNumber}](https://discord.com/channels/${interaction.guildId}/${dc.id})`);
     } catch (e) {
       logger.error("couldn't make a discord channel. " + e);
       await interaction.editReply("couldn't make a discord channel. " + e.message);
@@ -253,8 +145,9 @@ export class DiscordBot {
 
   async enter(interaction: GuildCommandInteraction) {
     await interaction.deferReply();
-    let lobbyId = this.resolveLobbyId(interaction);
-    if (!lobbyId) {
+    let lobbyNumber = this.resolveLobbyId(interaction, true);
+    let lobbyId = "#mp_" + lobbyNumber;
+    if (!lobbyNumber) {
       await interaction.editReply("error lobby_id required.");
       return;
     }
@@ -274,7 +167,7 @@ export class DiscordBot {
     let ahr;
 
     try {
-      ahr = new OahrDiscord(this.ircClient);
+      ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.enterLobbyAsync(lobbyId);
     } catch (e) {
       logger.error("couldn't enter the tournament lobby. " + e);
@@ -286,13 +179,10 @@ export class DiscordBot {
     try {
       let dc = interaction.guild.channels.cache.find(c => `#${c.name}` == lobbyId);
       if (!dc) {
-        dc = await interaction.guild.channels.create(lobbyId.replace("#", ""), {
-          type: "GUILD_TEXT",
-          topic: `created by ahr bot. #mp_${lobbyId}`
-        });
+        dc = await this.createChannel(interaction.guild, lobbyNumber);
       }
       this.registeAhr(ahr, interaction, dc);
-      await interaction.editReply(`😀 Entered the lobby https://osu.ppy.sh/mp/${lobbyId}`);
+      await interaction.editReply(`😀 Entered the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber}) [#mp_${lobbyNumber}](https://discord.com/channels/${interaction.guildId}/${dc.id})`);
     } catch (e) {
       logger.error("couldn't make a discord channel.  " + e);
       await interaction.editReply("😫 couldn't make a discord channel.  " + e);
@@ -320,7 +210,7 @@ export class DiscordBot {
     }
 
     try {
-      await interaction.editReply(ahr.lobby.GetLobbyStatus());
+      await interaction.editReply({ embeds: [this.createInfoEmbed(ahr)] });
     } catch (e) {
       logger.error("@discordbot.info " + e);
       await interaction.editReply("😫 error! " + e.message);
@@ -365,7 +255,7 @@ export class DiscordBot {
 
     try {
       await ahr.lobby.CloseLobbyAsync();
-      await interaction.editReply("😀 Closed the lobby");
+      await interaction.editReply("Closed the lobby");
     } catch (e) {
       logger.error("@discordbot.close " + e);
       await interaction.editReply("😫 error! " + e);
@@ -387,12 +277,18 @@ export class DiscordBot {
 
     try {
       await ahr.lobby.QuitLobbyAsync();
-      await interaction.editReply("😀 Stopped managing the lobby");
+      await interaction.editReply("Stopped managing the lobby");
     } catch (e) {
       logger.error("@discordbot.quit " + e);
       await interaction.editReply("😫 error! " + e);
     }
+  }
 
+  async createChannel(guild: Guild, lobbyNumber: string) {
+    return await guild.channels.create("mp_" + lobbyNumber, {
+      type: "GUILD_TEXT",
+      topic: `created by ${this.discordClient.user?.username}. [history](https://osu.ppy.sh/community/matches/${lobbyNumber})`
+    });
   }
 
   registeAhr(ahr: OahrDiscord, interaction: GuildCommandInteraction, channel: GuildChannel | ThreadChannel) {
@@ -421,24 +317,37 @@ export class DiscordBot {
    * @param interaction 1
    * @returns 
    */
-  resolveLobbyId(interaction: CommandInteraction): string | undefined {
+  resolveLobbyId(interaction: CommandInteraction, asNumber: boolean = false): string | undefined {
     if (!interaction.inGuild()) return;
 
     let op = interaction.options.getInteger("lobby_id", false);
     if (op) {
-      return `#mp_${op}`;
+      if (asNumber) {
+        return op.toString();
+      } else {
+        return `#mp_${op}`;
+      }
     }
 
     let ahr = this.ahrs[interaction.channelId];
     if (ahr && ahr.lobby.channel) {
-      return ahr.lobby.channel;
+      if (asNumber) {
+        return ahr.lobby.lobbyId;
+      } else {
+        return ahr.lobby.channel;
+      }
     }
 
     let gc = interaction.guild?.channels.cache.get(interaction.channelId);
 
-    let m = gc?.name.match(/mp_\d+/);
+    let m = gc?.name.match(/mp_(\d+)/);
     if (m) {
-      return "#" + m[0];
+      if (asNumber) {
+        return m[1];
+      } else {
+        return "#" + m[0];
+      }
+
     }
     return undefined;
   }
@@ -453,17 +362,40 @@ export class DiscordBot {
     });
   }
 
+  createLinkButton(lobbyNumber: string) {
+    return new MessageActionRow().addComponents(
+      new MessageButton().setStyle("LINK").setLabel("Lobby Histroy").setURL(`https://osu.ppy.sh/community/matches/${lobbyNumber}`),
+      new MessageButton().setStyle("LINK").setLabel("Channel").setURL(``)
+    )
+  }
+
+  createInfoEmbed(ahr: OahrDiscord) {
+    let lobby = ahr.lobby;
+
+    let lid = lobby.lobbyId ?? "";
+    let name = lobby.lobbyName ?? "";
+    let host = lobby.host?.name ?? "none";
+    let embed = new MessageEmbed().setColor("BLURPLE").setTitle("Lobby Information - " + name).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
+    embed.addField("lobby", `id:${lid}, status:${lobby.status}, host:${host}, players:${lobby.players.size}, name:${name}`,);
+    let refs = Array.from(lobby.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(",");
+    if (refs) {
+      embed.addField("referee", refs, false);
+    }
+
+    let order = ahr.selector.hostQueue.map(p => p.name).join(", ");
+    embed.addField("selector", `order:${order}, changer:${ahr.selector.mapChanger?.name ?? "none"}, rflag:${ahr.selector.needsRotate ? "true" : "false"}`, false);
+
+    const playcounts = Array.from(ahr.inoutLogger.players.keys()).map(p => {
+      let num = ahr.inoutLogger?.players.get(p) || 0;
+      return `${p.name}(${num})`;
+    }).join(", ");
+    if (playcounts) {
+      embed.addField("playcount", playcounts, false);
+    }
+
+    embed.addField("history", `${ahr.history.repository.hasError ? "stopped" : "active"}, latest:${ahr.history.repository?.latestEventId.toString() ?? "0"}, loaded:${ahr.history.repository?.events.length.toString() ?? "0"}`, false);
+    embed.addField("regulation", ahr.checker.getRegulationDescription(), false);
+
+    return embed;
+  }
 }
-
-
-
-
-
-
-/**
- * command
- * コマンドは全体コマンドとロビーコマンドの二種類
- * /make ロビーの作成
- * /enter 既存のロビーに入る
- * /list 現在稼働中のロビー一覧を表示
- */

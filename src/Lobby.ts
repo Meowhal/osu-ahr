@@ -131,7 +131,7 @@ export class Lobby {
           this.stopInfoMessageAnnouncement();
           this.CancelAllDeferredMessages();
           this.historyRepository.lobbyClosed = true;
-  
+
           this.logger.info("part");
           this.status = LobbyStatus.Left;
           this.destroy();
@@ -282,7 +282,7 @@ export class Lobby {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
       this.SentMessage.emit({ message });
-      this.chatlogger.trace("bot:%s", message);
+      this.chatlogger.trace("%s:%s", "bot", message);
     }
   }
 
@@ -290,7 +290,7 @@ export class Lobby {
     this.ircClient.say(target, message);
     this.ircClient.emit("sentPrivateMessage", target, message);
     this.SentMessage.emit({ message });
-    this.chatlogger.trace("bot->%s:%s", target, message);
+    this.chatlogger.trace("%s:%s", "botbot->" + target, message);
   }
 
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
@@ -482,8 +482,8 @@ export class Lobby {
       case BanchoResponseType.MpBeatmapChanged:
         this.mapId = c.params[0];
         this.mapTitle = c.params[1];
-        const changer = this.host ? `(by ${this.host.name})` : ""
-        this.logger.info(`beatmap changed${changer} : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
+        const changer = this.host ? `(by ${this.host.name})` : "";
+        this.logger.info("beatmap changed%s : %s %s", changer, "https://osu.ppy.sh/b/" + this.mapId, this.mapTitle);
         break;
       case BanchoResponseType.Settings:
         if (this.settingParser.feedLine(message)) {

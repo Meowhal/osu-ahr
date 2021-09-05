@@ -1,10 +1,9 @@
-import { IIrcClient, Lobby, LobbyStatus, Player } from "..";
+import { IIrcClient } from "..";
 
 import log4js from "log4js";
-import { parser } from "../parsers";
 import { OahrBase } from "../cli/OahrBase";
-import { Client, Intents, Permissions, Guild } from "discord.js";
-import config from "config";
+import { OahrSharedObjects } from "./DiscordBot";
+
 
 const logger = log4js.getLogger("discord");
 
@@ -12,9 +11,9 @@ export class OahrDiscord extends OahrBase {
   guildId: string = "";
   channelId: string = "";
 
-  constructor(client: IIrcClient) {
+  constructor(client: IIrcClient, sh: OahrSharedObjects) {
     super(client);
-    this.inoutLogger.withColorTag = false;
+    this.checker.maps = sh.maps;
   }
 
   setDiscordId(guildId: string, channelId: string) {

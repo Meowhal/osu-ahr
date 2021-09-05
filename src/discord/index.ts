@@ -33,7 +33,7 @@ ircClient.on("error", err => {
 logIrcEvent(ircClient);
 logPrivateMessage(ircClient);
 
-let discordClient = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS] })
+let discordClient = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS] });
 
 const bot = new DiscordBot(ircClient, discordClient);
 bot.start();

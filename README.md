@@ -2,10 +2,6 @@
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
-# attention
-Many config items have renamed in version 1.4.
-please recreate local.json file.
-
 ## Command List
 |for player|desc|
 |:--|:--|
@@ -75,7 +71,7 @@ MainMenu Commands
 ```json
 "irc": {
   "server": "irc.ppy.sh",
-  "nick": "gnsksz",
+  "nick": "meowhal",
   "opt": {
     "port": 6667,
     "password": "123456"
@@ -236,3 +232,78 @@ Since this is a long time, and may cause problems for other users, the lobby wil
 If `close now` is issued in the console, the `!mp close` command will be issued and the lobby will be closed immediately.  
 If a number of seconds is specified as an argument, such as `close 30`, the lobby will wait until a password is set and for everyone to leave, then the lobby will close after the specified number of seconds has passed.
 If `close` is issued, the lobby will be closed after the password is set and everyone has left.
+
+# Discord Integration
+DiscordのBOTを介して、AHRロビーの制御を行えます。Discordのチャンネル上からゲーム内チャットにアクセスしたり、ロビーの制御コマンドを実行できます。
+
+## setup
+### Creating your bot
+
+[Setting up a bot application](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
+
+上記リンクに従ってボットを作成し、ボットのトークンを取得してください。
+取得したトークンは ./config/local.jsonに次のように書き込みます。
+
+```json
+{
+  "irc": {
+    "server": "irc.ppy.sh",
+    "nick": "------",
+    "opt": {
+      "port": 6667,
+      "password": "-------",
+    }
+  },
+  "Discord": {
+    "token": "THISiSsAMPLEtOKENasdfy.X-hvzA.Ovy4MCQywSkoMRRclStW4xAYK7I"
+  }
+}
+```
+
+### 起動
+以下のコマンドでボットを起動します。
+```sh
+npm run start:discord
+```
+起動に成功するとターミナルにDiscordBotの招待リンクが表示されます。これをクリックして、あなたのギルドに招待してください。
+```log
+[12:00:00.000][INFO] discord - discord bot is ready.
+[12:00:00.100][INFO] discord - invite link => https://discord.com/api/oauth2/authorize?client_id=123&scope=bot+applications.commands&permissions=268435472
+```
+
+**注意**
+
+セキュリティの観点から、ボットの招待リンクやボットを導入したギルドを一般公開しないでください。いかなる問題が発生してもすべてあなたの責任で対応してください。
+
+### ロール設定
+ギルドにボットが招待されると、`ahr-admin`ロールが作成されます。ロビーの管理はこのロールを持っているユーザーだけが行なえます。あなた自身のアカウントにこのロールを割当ててください。
+
+## ロビー作成
+![how to make a lobby](http://)
+
+ボットを招待したギルドの適当なチャンネルで、`/make` コマンドを実行することでロビーを作成できます。（このコマンドを実行するには`ahr-admin`ロールが必要です）
+このコマンドは作成するロビーの名前を必須オプションとして受け取ります。
+このコマンドが成功すると、osuにトーナメントロビーが作成され、ギルドに`mp_123456`のような名前の連携用チャンネルが作成されます。
+
+`/make`コマンドは何度でも実行でき、同時に複数のロビーを管理できます。ただしosuのボットにはチャット数制限が設けられているため、
+大量のロビーを作成するとアカウントがスパム判定される可能性があります。ロビーの数は２つまでにとどめておくことをおすすめします。
+
+## 既存ロビーへの参加
+ahrボットが不具合などで終了してしまった場合、再起動後に`/enter`コマンドを使うことでロビーの管理を再開することができます。
+連携用チャンネルが残っている場合はそのチャンネルではオプション無しで`/enter`コマンドを実行できます。(チャンネル名が`#mp_123456`のようにロビーID形式になっている必要があります。)
+lobbyIdをオプションとして渡せば任意のロビーに参加することができます。
+
+## チャット転送
+`/say`コマンドでゲーム内チャットにメッセージを転送できます。このコマンドは転送するメッセージとlobbyIdをオプションに取りますが、連携用チャンネル上ではlobbyIdを省略可能です。
+`/say`コマンドはゲーム内チャット同様に`!mp start`などのトーナメントコマンドや、`*regulation`などのオーナー用コマンドも利用可能です。
+
+## 利用可能なコマンド
+
+|command|desc|ex|
+|:--|:--|:--|
+|`/make [lobbyName]`| Make a tournament lobby. |`/make 4.00-5.99 auto host rotation`|
+|`/enter (lobbyId)`| Enter the lobby. ||
+|`/say [message] (lobbyId)`| Send a message.|`/say hello!`|
+|`/info (lobbyId)`| Shows the status of the lobby.||
+|`/quit (lobbyId)`| Quit managing the lobby. ||
+|`/close (lobbyId)`| Close the lobby. ||

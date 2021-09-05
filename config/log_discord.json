@@ -16,7 +16,7 @@
             "type": "src/discord/DiscordAppender",
             "layout": {
                 "type": "pattern",
-                "pattern": "`%c` %m"
+                "pattern": "%m"
             }
         },
         "discord_f": {
