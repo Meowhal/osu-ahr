@@ -279,7 +279,7 @@ npm run start:discord
 ギルドにボットが招待されると、`ahr-admin`ロールが作成されます。ロビーの管理はこのロールを持っているユーザーだけが行なえます。あなた自身のアカウントにこのロールを割当ててください。
 
 ## ロビー作成
-![how to make a lobby](http://)
+![how to make a lobby](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/make.png)
 
 ボットを招待したギルドの適当なチャンネルで、`/make` コマンドを実行することでロビーを作成できます。（このコマンドを実行するには`ahr-admin`ロールが必要です）
 このコマンドは作成するロビーの名前を必須オプションとして受け取ります。
