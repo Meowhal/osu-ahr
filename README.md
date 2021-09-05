@@ -234,15 +234,15 @@ If a number of seconds is specified as an argument, such as `close 30`, the lobb
 If `close` is issued, the lobby will be closed after the password is set and everyone has left.
 
 # Discord Integration
-DiscordのBOTを介して、AHRロビーの制御を行えます。Discordのチャンネル上からゲーム内チャットにアクセスしたり、ロビーの制御コマンドを実行できます。
+You can control AHR lobbies via a Discord Bot, which allows you to access in-game chat and execute lobby control commands from Discord channels.
 
-## setup
+## Setup
 ### Creating your bot
 
 [Setting up a bot application](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
 
-上記リンクに従ってボットを作成し、ボットのトークンを取得してください。
-取得したトークンは ./config/local.jsonに次のように書き込みます。
+Follow the link above to create a bot and obtain the token for the bot.
+The obtained token should be written in `./config/local.json` as follows:
 
 ```json
 {
@@ -260,50 +260,44 @@ DiscordのBOTを介して、AHRロビーの制御を行えます。Discordのチ
 }
 ```
 
-### 起動
-以下のコマンドでボットを起動します。
+### Startup
+Start the bot with the following command:
 ```sh
 npm run start:discord
 ```
-起動に成功するとターミナルにDiscordBotの招待リンクが表示されます。これをクリックして、あなたのギルドに招待してください。
+After successful activation, a Discord Bot invitation link will appear in the terminal. Click on it to invite it to your guild.
 ```log
 [12:00:00.000][INFO] discord - discord bot is ready.
 [12:00:00.100][INFO] discord - invite link => https://discord.com/api/oauth2/authorize?client_id=123&scope=bot+applications.commands&permissions=268435472
 ```
 
-**注意**
+[**Caution**] For security reasons please do not make bot invitation links or guilds with bots available to the public. Any problems that may arise are entirely under your responsibility.
 
-セキュリティの観点から、ボットの招待リンクやボットを導入したギルドを一般公開しないでください。いかなる問題が発生してもすべてあなたの責任で対応してください。
+### Role settings
+When a bot is invited to a guild, the `ahr-admin` role is created. Only users with this role will be able to manage the lobby. You should assign this role to your own account.
 
-### ロール設定
-ギルドにボットが招待されると、`ahr-admin`ロールが作成されます。ロビーの管理はこのロールを持っているユーザーだけが行なえます。あなた自身のアカウントにこのロールを割当ててください。
-
-## ロビー作成
+## Lobby creation
 ![how to make a lobby](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/make.png)
 
-ボットを招待したギルドの適当なチャンネルで、`/make` コマンドを実行することでロビーを作成できます。（このコマンドを実行するには`ahr-admin`ロールが必要です）
-このコマンドは作成するロビーの名前を必須オプションとして受け取ります。
-このコマンドが成功すると、osuにトーナメントロビーが作成され、ギルドに`mp_123456`のような名前の連携用チャンネルが作成されます。
+You can create a lobby by executing the `/make (lobby name)` command in the appropriate channel of the guild you have invited your bot to. (You need to have the `ahr-admin` role to run this command). If the command succeeds, a tournament lobby will be created in osu, and a bridge channel with a name similar to `mp_123456` will be created in the guild.
 
-`/make`コマンドは何度でも実行でき、同時に複数のロビーを管理できます。ただしosuのボットにはチャット数制限が設けられているため、
-大量のロビーを作成するとアカウントがスパム判定される可能性があります。ロビーの数は２つまでにとどめておくことをおすすめします。
+You can run the `/make` command as many times as you want and manage multiple lobbies at the same time, however, osu bots have a limit on the number of chats that can be created. If you create a large number of lobbies, your account may be flagged as spam. It is recommended that you limit the number of lobbies to two.
 
-## 既存ロビーへの参加
-ahrボットが不具合などで終了してしまった場合、再起動後に`/enter`コマンドを使うことでロビーの管理を再開することができます。
-連携用チャンネルが残っている場合はそのチャンネルではオプション無しで`/enter`コマンドを実行できます。(チャンネル名が`#mp_123456`のようにロビーID形式になっている必要があります。)
-lobbyIdをオプションとして渡せば任意のロビーに参加することができます。
+## Join an existing lobby
+If the ahr bot has been terminated due to a glitch or some other reason, you can use the `/enter` command after restarting to resume lobby management.
+If there is still a bridge channel in the guild you can run `/enter` within that channel. (The channel name must be in the form of a lobby ID, for example `#mp_123456`). You can join any lobby by passing the lobbyId as an option with `/enter (lobby id)`.
 
-## チャット転送
-`/say`コマンドでゲーム内チャットにメッセージを転送できます。このコマンドは転送するメッセージとlobbyIdをオプションに取りますが、連携用チャンネル上ではlobbyIdを省略可能です。
-`/say`コマンドはゲーム内チャット同様に`!mp start`などのトーナメントコマンドや、`*regulation`などのオーナー用コマンドも利用可能です。
+## Chat forwarding
+The `/say [message]` Discord command can be used to forward messages to the in-game chat. This command takes the message to be forwarded and the lobbyId as options, but you can omit the lobbyId if you are within an existing bridge channel. The `/say` command can also be used for tournament commands such as `!mp start` and owner commands such as `*regulation`.
 
-## 利用可能なコマンド
-
+## Discord Commands
 |command|desc|ex|
 |:--|:--|:--|
 |`/make [lobbyName]`| Make a tournament lobby. |`/make 4.00-5.99 auto host rotation`|
-|`/enter (lobbyId)`| Enter the lobby. ||
+|`/enter (lobbyId)`| Enter the lobby. |`/enter` or `/enter 12345`|
 |`/say [message] (lobbyId)`| Send a message.|`/say hello!`|
-|`/info (lobbyId)`| Shows the status of the lobby.||
-|`/quit (lobbyId)`| Quit managing the lobby. ||
-|`/close (lobbyId)`| Close the lobby. ||
+|`/info (lobbyId)`| Shows the status of the lobby.|`/info` or `/info 12345`|
+|`/quit (lobbyId)`| Quit managing the lobby. |`/quit` or `/quit 12345`|
+|`/close (lobbyId)`| Close the lobby. |`/close` or `/close 12345`|
+
+* Arguments with [] are required, while () are optional.
