@@ -2,6 +2,9 @@
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
+## Contributors
+
+
 ## Command List
 |for player|desc|
 |:--|:--|
@@ -27,7 +30,6 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`*no keep size` | Stops Keeping the size of the lobby at specified number. | `*no keep size`|
 
 (proofread by [Meowhalfannumber1](https://github.com/Meowhalfannumber1) ❤) 
-
 
 ## Setup
 
@@ -295,9 +297,11 @@ The `/say [message]` Discord command can be used to forward messages to the in-g
 |:--|:--|:--|
 |`/make [lobbyName]`| Make a tournament lobby. |`/make 4.00-5.99 auto host rotation`|
 |`/enter (lobbyId)`| Enter the lobby. |`/enter` or `/enter 12345`|
-|`/say [message] (lobbyId)`| Send a message.|`/say hello!`|
+|`/say [message] (lobbyId)`| Send a message.|`/say hello!` or `/say !mp start`|
 |`/info (lobbyId)`| Shows the status of the lobby.|`/info` or `/info 12345`|
 |`/quit (lobbyId)`| Quit managing the lobby. |`/quit` or `/quit 12345`|
 |`/close (lobbyId)`| Close the lobby. |`/close` or `/close 12345`|
 
 * Arguments with [] are required, while () are optional.
+
+(Translated by [GoodPro712](https://github.com/GoodPro712) ❤) 
