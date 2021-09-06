@@ -218,8 +218,8 @@ export class WebApiClient {
           this.logger.error(`accessApi error: ${url}, status: ${response.status}, msg: ${response.statusText}`);
         }
         return response.data;
-      } catch (e) {
-        switch (e?.response?.status) {
+      } catch (e: any) {
+        switch (e.response?.status) {
           case 401:
             this.logger.info(`api access failed, delete current token.`);
             this.deleteStoredToken(this.option.asGuest);
@@ -279,8 +279,8 @@ export class WebApiClient {
       });
       data.get_time = Date.now();
       return trimProfile(data);
-    } catch (e) {
-      if (e?.response?.status == 404) {
+    } catch (e: any) {
+      if (e.response?.status == 404) {
         return null;
       }
       throw e;
@@ -294,8 +294,8 @@ export class WebApiClient {
       });
       data.get_time = Date.now();
       return data;
-    } catch (e) {
-      if (e?.response?.status == 404) {
+    } catch (e: any) {
+      if (e.response?.status == 404) {
       } else {
         throw e;
       }

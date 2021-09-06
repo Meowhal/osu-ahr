@@ -409,7 +409,12 @@ export class MapChecker extends LobbyPlugin {
       try {
         q = await this.webApiClient.lookupBeatmap(mapId);
       } catch (e) {
-        this.logger.error(e.message);
+        if (e instanceof Error) {
+          this.logger.error(e.message);
+        } else {
+          this.logger.error(e);
+        }
+        
         // トークンがない状態ならもう使わない。
         // マップが存在しない可能性を考慮
         if (!this.webApiClient.token) {
@@ -422,7 +427,11 @@ export class MapChecker extends LobbyPlugin {
       try {
         q = await fetchBeatmap(mapId);
       } catch (e) {
-        this.logger.error(e.message);
+        if (e instanceof Error) {
+          this.logger.error(e.message);
+        } else {
+          this.logger.error(e);
+        }
       }
     }
 
