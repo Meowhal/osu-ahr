@@ -37,7 +37,7 @@ export function configure(config: any, layouts: any) {
                     let content = createContent(loggingEvent, msg);
                     await ch.send(content);
                 }
-            } catch (e) {
+            } catch (e:any) {
                 logger.error(e.message);
             }
         }

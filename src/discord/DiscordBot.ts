@@ -125,7 +125,7 @@ export class DiscordBot {
     try {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.makeLobbyAsync(name);
-    } catch (e) {
+    } catch (e:any) {
       logger.error("couldn't make a tournament lobby. " + e);
       await interaction.editReply("😫 couldn't make a tournament lobby. " + e.message);
       ahr?.lobby.destroy();
@@ -137,7 +137,7 @@ export class DiscordBot {
       let dc = await this.createChannel(interaction.guild, lobbyNumber);
       this.registeAhr(ahr, interaction, dc);
       await interaction.editReply(`😀 Created the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber}) [#mp_${lobbyNumber}](https://discord.com/channels/${interaction.guildId}/${dc.id})`);
-    } catch (e) {
+    } catch (e:any) {
       logger.error("couldn't make a discord channel. " + e);
       await interaction.editReply("couldn't make a discord channel. " + e.message);
     }
@@ -211,7 +211,7 @@ export class DiscordBot {
 
     try {
       await interaction.editReply({ embeds: [this.createInfoEmbed(ahr)] });
-    } catch (e) {
+    } catch (e:any) {
       logger.error("@discordbot.info " + e);
       await interaction.editReply("😫 error! " + e.message);
     }
