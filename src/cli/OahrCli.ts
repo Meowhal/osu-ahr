@@ -208,7 +208,7 @@ export class OahrCli extends OahrBase {
     return this.scene === this.scenes.exited;
   }
 
-  startApp(rl: readline.Interface | null) {
+  start(rl: readline.Interface | null) {
     if (rl == null) {
       rl = readline.createInterface({
         input: process.stdin,

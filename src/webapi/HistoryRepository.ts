@@ -88,8 +88,13 @@ export class HistoryRepository {
     try {
       while (!(await this.fetch(false)).filled && !this.lobbyClosed) {
       }
-    } catch (e) {
-      this.logger.error("@updateToLatest : " + e.message);
+    } catch (e: any) {
+      if (e instanceof Error) {
+        this.logger.error("@updateToLatest : " + e.message);
+      } else {
+        this.logger.error("@updateToLatest : " + e);
+      }
+      
       this.hasError = true;
       if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
         setTimeout(() => {

@@ -2,9 +2,8 @@
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
-# attention
-Many config items have renamed in version 1.4.
-please recreate local.json file.
+## Contributors
+
 
 ## Command List
 |for player|desc|
@@ -31,7 +30,6 @@ please recreate local.json file.
 |`*no keep size` | Stops Keeping the size of the lobby at specified number. | `*no keep size`|
 
 (proofread by [Meowhalfannumber1](https://github.com/Meowhalfannumber1) ❤) 
-
 
 ## Setup
 
@@ -66,7 +64,7 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
-## configulations
+
 ### irc section
 - `server` : `string` domain name of osu irc server.
 - `nick` : `string` your osu account name
@@ -75,7 +73,7 @@ MainMenu Commands
 ```json
 "irc": {
   "server": "irc.ppy.sh",
-  "nick": "gnsksz",
+  "nick": "meowhal",
   "opt": {
     "port": 6667,
     "password": "123456"
@@ -147,6 +145,7 @@ configs related to host-skip vote and automatic afk host skip.
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
 - `vote_min`: `number` minimum required vote count.
 - `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
+- `start_when_all_player_ready` : `boolean` start the match when everyoen is ready.
 ### MatchAborter section
 !abort vote and auto abort configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to abort.
@@ -235,3 +234,74 @@ Since this is a long time, and may cause problems for other users, the lobby wil
 If `close now` is issued in the console, the `!mp close` command will be issued and the lobby will be closed immediately.  
 If a number of seconds is specified as an argument, such as `close 30`, the lobby will wait until a password is set and for everyone to leave, then the lobby will close after the specified number of seconds has passed.
 If `close` is issued, the lobby will be closed after the password is set and everyone has left.
+
+# Discord Integration
+You can control AHR lobbies via a Discord Bot, which allows you to access in-game chat and execute lobby control commands from Discord channels.
+
+## Setup
+### Creating your bot
+
+[Setting up a bot application](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
+
+Follow the link above to create a bot and obtain the token for the bot.
+The obtained token should be written in `./config/local.json` as follows:
+
+```json
+{
+  "irc": {
+    "server": "irc.ppy.sh",
+    "nick": "------",
+    "opt": {
+      "port": 6667,
+      "password": "-------",
+    }
+  },
+  "Discord": {
+    "token": "THISiSsAMPLEtOKENasdfy.X-hvzA.Ovy4MCQywSkoMRRclStW4xAYK7I"
+  }
+}
+```
+
+### Startup
+Start the bot with the following command:
+```sh
+npm run start:discord
+```
+After successful activation, a Discord Bot invitation link will appear in the terminal. Click on it to invite it to your guild.
+```log
+[12:00:00.000][INFO] discord - discord bot is ready.
+[12:00:00.100][INFO] discord - invite link => https://discord.com/api/oauth2/authorize?client_id=123&scope=bot+applications.commands&permissions=268435472
+```
+
+[**Caution**] For security reasons please do not make bot invitation links or guilds with bots available to the public. Any problems that may arise are entirely under your responsibility.
+
+### Role settings
+When a bot is invited to a guild, the `ahr-admin` role is created. Only users with this role will be able to manage the lobby. You should assign this role to your own account.
+
+## Lobby creation
+![how to make a lobby](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/make.png)
+
+You can create a lobby by executing the `/make (lobby name)` command in the appropriate channel of the guild you have invited your bot to. (You need to have the `ahr-admin` role to run this command). If the command succeeds, a tournament lobby will be created in osu, and a bridge channel with a name similar to `mp_123456` will be created in the guild.
+
+You can run the `/make` command as many times as you want and manage multiple lobbies at the same time, however, osu bots have a limit on the number of chats that can be created. If you create a large number of lobbies, your account may be flagged as spam. It is recommended that you limit the number of lobbies to two.
+
+## Join an existing lobby
+If the ahr bot has been terminated due to a glitch or some other reason, you can use the `/enter` command after restarting to resume lobby management.
+If there is still a bridge channel in the guild you can run `/enter` within that channel. (The channel name must be in the form of a lobby ID, for example `#mp_123456`). You can join any lobby by passing the lobbyId as an option with `/enter (lobby id)`.
+
+## Chat forwarding
+The `/say [message]` Discord command can be used to forward messages to the in-game chat. This command takes the message to be forwarded and the lobbyId as options, but you can omit the lobbyId if you are within an existing bridge channel. The `/say` command can also be used for tournament commands such as `!mp start` and owner commands such as `*regulation`.
+
+## Discord Commands
+|command|desc|ex|
+|:--|:--|:--|
+|`/make [lobbyName]`| Make a tournament lobby. |`/make 4.00-5.99 auto host rotation`|
+|`/enter (lobbyId)`| Enter the lobby. |`/enter` or `/enter 12345`|
+|`/say [message] (lobbyId)`| Send a message.|`/say hello!` or `/say !mp start`|
+|`/info (lobbyId)`| Shows the status of the lobby.|`/info` or `/info 12345`|
+|`/quit (lobbyId)`| Quit managing the lobby. |`/quit` or `/quit 12345`|
+|`/close (lobbyId)`| Close the lobby. |`/close` or `/close 12345`|
+
+* Arguments with [] are required, while () are optional.
+
+(Translated by [GoodPro712](https://github.com/GoodPro712) ❤) 

@@ -10,10 +10,8 @@
   "Lobby": {
     "authorized_users": [],
     "listref_duration_ms": 1000,
-    "info_message": [
-      "-  The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.\n",
-      "-  Check the links > [https://github.com/Meowhal/osu-ahr/blob/master/CMDLIST.md Command List] | [https://github.com/Meowhal/osu-ahr Source Code]"
-    ],
+    "info_message": 
+      "-  The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.\n-  Check the links > [https://github.com/Meowhal/osu-ahr/blob/master/CMDLIST.md Command List] | [https://github.com/Meowhal/osu-ahr Source Code]",
     "info_message_cooltime_ms": 60000,
     "stat_timeout_ms": 5000,
     "info_message_announcement_interval_ms": 0,
@@ -64,7 +62,8 @@
   "MatchStarter": {
     "vote_rate": 0.45,
     "vote_min": 2,
-    "vote_msg_defer_ms": 5000
+    "vote_msg_defer_ms": 5000,
+    "start_when_all_player_ready": true
   },
   "MatchAborter": {
     "vote_rate": 0.3,
@@ -97,7 +96,7 @@
     "token_store_dir": "data/tokens/",
     "asGuest": true,
     "callback": "",
-    "callback_port": 3000    
+    "callback_port": 3000
   },
   "profile": {
     "profile_expired_day": 7

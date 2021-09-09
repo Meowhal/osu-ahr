@@ -213,9 +213,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     }
   }
 
+  public async emulateChangeHost(name: string): Promise<void> {
+    await this.emulateMessageAsync("BanchoBot", this.channel, `${name} became the host.`);
+  }
+
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
-    setImmediate(this.raiseJoin, channel);
+    setImmediate(this.raiseJoin, channel, "");
   }
 
   // IRCClientのpart

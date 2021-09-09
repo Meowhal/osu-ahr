@@ -14,7 +14,7 @@ export class OahrHeadless extends OahrBase {
     });
   }
 
-  startApp(command: string, arg: string): void {
+  start(command: string, arg: string): void {
     try {
       switch (command) {
         case "m":

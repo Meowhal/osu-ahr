@@ -7,8 +7,6 @@ export interface LobbyTerminatorOption {
   terminate_time_ms: number;
 }
 
-
-
 export class LobbyTerminator extends LobbyPlugin {
   option: LobbyTerminatorOption;
   terminateTimer: NodeJS.Timer | undefined;
@@ -24,7 +22,7 @@ export class LobbyTerminator extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.PlayerLeft.on(p => this.onPlayerLeft(p.player));
     this.lobby.PlayerJoined.on(p => this.onPlayerJoined(p.player, p.slot));
-    this.lobby.Disconnected.on(p => {
+    this.lobby.LeftChannel.on(p => {
       if (this.terminateTimer) {
         clearTimeout(this.terminateTimer);
       }

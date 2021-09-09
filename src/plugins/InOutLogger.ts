@@ -4,6 +4,7 @@ import { BanchoResponseType, BanchoResponse } from "../parsers";
 
 export class InOutLogger extends LobbyPlugin {
   players: Map<Player, number> = new Map<Player, number>();
+  withColorTag: boolean = true;
 
   constructor(lobby: Lobby) {
     super(lobby, "InOutLogger", "inout");
@@ -51,7 +52,7 @@ export class InOutLogger extends LobbyPlugin {
 
   LogInOutPlayers(): void {
     if (this.logger.isInfoEnabled()) {
-      const msg = this.GetInOutLog(true);
+      const msg = this.GetInOutLog(this.withColorTag);
       if (msg != "") {
         this.logger.info(msg);
       }

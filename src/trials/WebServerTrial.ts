@@ -1,5 +1,5 @@
 import express, { Express, RequestHandler, Request, Response, NextFunction } from "express";
-import historyData from "../../data/arc/history_67261609.json";
+import historyData from "./data/history_67261609.json";
 import fs from 'fs';
 import readline from 'readline';
 

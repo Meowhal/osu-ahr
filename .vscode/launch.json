@@ -39,6 +39,23 @@
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"
     },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "discord debug",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "args": [
+          "${workspaceFolder}/src/discord/index.ts",
+      ],
+      "sourceMaps": true,
+      "env": {
+        "NODE_ENV": "development",
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
+    },
     
     {
       "type": "node",

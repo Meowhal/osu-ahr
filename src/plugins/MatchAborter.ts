@@ -38,7 +38,7 @@ export class MatchAborter extends LobbyPlugin {
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
-    this.lobby.Disconnected.on(a => this.stopTimer());
+    this.lobby.LeftChannel.on(a => this.stopTimer());
   }
 
   // 試合中に抜けた場合

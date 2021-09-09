@@ -161,6 +161,22 @@ describe("AutoHostSelectorTest", function () {
       assertStateIs("hr", selector);
       tu.assertHost("player3", lobby);
     });
+    it("hr -[transfer]-> hn -[change map]-> hr -> m -> hr", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      await ircClient.emulateChangeHost("player2");
+      assertStateIs("hn", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateMatchAsync(0);
+      assertStateIs("hr", selector);
+      tu.assertHost("player3", lobby);
+    });
     it("hr -> m -[abort]-> hn", async () => {
       const { selector, lobby, ircClient } = await prepareSelector();
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
@@ -298,20 +314,20 @@ describe("AutoHostSelectorTest", function () {
       await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
       assertStateIs("hr", selector);
       tu.assertHost("player1", lobby);
-
-      lobby.RaiseHostChanged("player2");
+      
+      await ircClient.emulateChangeHost("player2");
       await tu.delayAsync(1);
       tu.assertHost("player2", lobby);
 
-      lobby.RaiseHostChanged("player1");
+      await ircClient.emulateChangeHost("player1");
       await tu.delayAsync(1);
       tu.assertHost("player3", lobby);
 
-      lobby.RaiseHostChanged("player3");
+      await ircClient.emulateChangeHost("player3");
       await tu.delayAsync(1);
       tu.assertHost("player3", lobby);
 
-      lobby.RaiseHostChanged("player2");
+      await ircClient.emulateChangeHost("player2");
       await tu.delayAsync(1);
       tu.assertHost("player1", lobby);
     });
@@ -335,7 +351,7 @@ describe("AutoHostSelectorTest", function () {
       ircClient.latency = 1;
       await t1;
       ircClient.latency = 0;
-      lobby.RaiseHostChanged("player3");
+      await ircClient.emulateChangeHost("player3");
       await tu.delayAsync(10);
       tu.assertHost("player2", lobby);
     });
@@ -349,7 +365,7 @@ describe("AutoHostSelectorTest", function () {
       ircClient.latency = 1;
       await t1;
       ircClient.latency = 0;
-      lobby.RaiseHostChanged("player2");
+      await ircClient.emulateChangeHost("player2");
       await tu.delayAsync(10);
       tu.assertHost("player2", lobby);
     });

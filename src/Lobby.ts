@@ -7,7 +7,6 @@ import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import { HistoryRepository } from "./webapi/HistoryRepository";
 import config from "config";
 import log4js from "log4js";
-import pkg from "../package.json";
 
 export enum LobbyStatus {
   Standby,
@@ -22,7 +21,7 @@ export enum LobbyStatus {
 export interface LobbyOption {
   authorized_users: string[], // 特権ユーザー
   listref_duration_ms: number,
-  info_message: string[],
+  info_message: string,
   info_message_cooltime_ms: number,
   stat_timeout_ms: number,
   info_message_announcement_interval_ms: number,
@@ -78,7 +77,8 @@ export class Lobby {
   ReceivedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
   ParsedStat = new TypedEvent<{ result: StatResult, player: Player, isPm: boolean }>();
   ParsedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
-  Disconnected = new TypedEvent<void>();
+  LeftChannel = new TypedEvent<void>();
+  events: { [eventtype: string]: any } = {};
 
   constructor(ircClient: IIrcClient, option: Partial<LobbyOption> = {}) {
     if (ircClient.conn == null) {
@@ -100,48 +100,68 @@ export class Lobby {
   }
 
   private registerEvents(): void {
-    const onjoin = (channel: string, who: string) => {
+    this.events = {
+      message: (from: any, to: any, message: any) => {
+        if (to == this.channel) {
+          this.handleMessage(from, to, message);
+        }
+      },
+      action: (from: any, to: any, message: any) => {
+        if (to == this.channel) {
+          this.handleAction(from, to, message);
+        }
+      },
+      netError: (err: any) => {
+        this.RaiseNetError(err);
+      },
+      registered: async () => {
+        if (this.status == LobbyStatus.Entered && this.channel) {
+          this.logger.warn("network reconnection detected!");
+          await this.LoadMpSettingsAsync();
+        }
+      },
+      pm: (nick: any, message: any) => {
+        this.handlePrivateMessage(nick, message);
+      },
+      kick: (channel: any, who: any, by: any, reason: any) => {
+        this.logger.info('%s was kicked from %s by %s: %s', who, channel, by, reason);
+      },
+      part: (channel: string, nick: string) => {
+        if (channel == this.channel) {
+          this.stopInfoMessageAnnouncement();
+          this.CancelAllDeferredMessages();
+          this.historyRepository.lobbyClosed = true;
+
+          this.logger.info("part");
+          this.status = LobbyStatus.Left;
+          this.destroy();
+        }
+      }
+    };
+
+    for (let key in this.events) {
+      this.ircClient.on(key, this.events[key]);
+    }
+
+    this.events.join = (channel: string, who: string) => {
       this.logger.trace("raised join event");
       if (who == this.ircClient.nick && this.status != LobbyStatus.Entered) {
         this.RaiseJoinedLobby(channel);
       }
     };
-    this.ircClient.once("join", onjoin);
-    this.ircClient.on("message", (from, to, message) => {
-      if (to == this.channel) {
-        this.handleMessage(from, to, message);
-      }
-    });
-    this.ircClient.on("action", (from, to, message) => {
-      if (to == this.channel) {
-        this.handleAction(from, to, message);
-      }
-    });
-    this.ircClient.on("netError", (err: any) => {
-      this.RaiseNetError(err);
-    });
-    this.ircClient.on("registered", async () => {
-      if (this.status == LobbyStatus.Entered && this.channel) {
-        this.logger.warn("network reconnection detected!");
-        await this.LoadMpSettingsAsync();
-      }
-    });
-    this.ircClient.once("part", (channel: string, nick: string) => {
-      this.stopInfoMessageAnnouncement();
-      this.CancelAllDeferredMessages();
-      this.historyRepository.lobbyClosed = true;
-      if (channel == this.channel) {
-        this.logger.info("part");
-        this.status = LobbyStatus.Left;
-        this.Disconnected.emit();
-      }
-    });
-    this.ircClient.on('pm', (nick, message) => {
-      this.handlePrivateMessage(nick, message);
-    });
-    this.ircClient.on('kick', (channel, who, by, reason) => {
-      this.logger.info('%s was kicked from %s by %s: %s', who, channel, by, reason);
-    });
+
+    this.ircClient.once("join", this.events.join);
+  }
+
+  destroy() {
+    this.LeftChannel.emit();
+    this.removeEvents();
+  }
+
+  private removeEvents() {
+    for (let key in this.events) {
+      this.ircClient.off(key, this.events[key] as any);
+    }
   }
 
   /**
@@ -262,7 +282,7 @@ export class Lobby {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
       this.SentMessage.emit({ message });
-      this.chatlogger.trace("bot:%s", message);
+      this.chatlogger.trace("%s:%s", "bot", message);
     }
   }
 
@@ -270,7 +290,7 @@ export class Lobby {
     this.ircClient.say(target, message);
     this.ircClient.emit("sentPrivateMessage", target, message);
     this.SentMessage.emit({ message });
-    this.chatlogger.trace("bot->%s:%s", target, message);
+    this.chatlogger.trace("%s:%s", "botbot->" + target, message);
   }
 
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
@@ -462,8 +482,8 @@ export class Lobby {
       case BanchoResponseType.MpBeatmapChanged:
         this.mapId = c.params[0];
         this.mapTitle = c.params[1];
-        const changer = this.host ? `(by ${this.host.name})` : ""
-        this.logger.info(`beatmap changed${changer} : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
+        const changer = this.host ? `(by ${this.host.name})` : "";
+        this.logger.info("beatmap changed%s : %s %s", changer, "https://osu.ppy.sh/b/" + this.mapId, this.mapTitle);
         break;
       case BanchoResponseType.Settings:
         if (this.settingParser.feedLine(message)) {
@@ -697,15 +717,25 @@ export class Lobby {
         reject("invalid channel");
         return;
       }
-      this.ircClient.join(ch, () => {
+      let joinhandler = () => {
+        this.ircClient.off('error', errhandler);
         this.lobbyName = "__";
         this.logger.trace("completed EnterLobby");
         if (this.lobbyId) {
           resolve(this.lobbyId);
         } else {
+          this.destroy();
           reject("missing lobby id");
         }
-      });
+      };
+      let errhandler = (message: any) => {
+        this.ircClient.off('join', joinhandler);
+        this.destroy();
+        reject(`${message.args[2]}`);
+      }
+      this.ircClient.once('error', errhandler);
+      this.ircClient.once('join', joinhandler);
+      this.ircClient.join(ch);
     });
   }
 
@@ -717,13 +747,29 @@ export class Lobby {
     }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once("part", (channel: string, nick: string) => {
-        this.ircClient.disconnect("goodby", () => {
-          this.logger.trace("completed CloseLobby");
-          resolve();
-        });
+        resolve();
       });
       if (this.channel != undefined) {
         this.SendMessage("!mp close");
+        this.status = LobbyStatus.Leaving;
+      } else {
+        reject();
+      }
+    });
+  }
+
+  QuitLobbyAsync(): Promise<void> {
+    this.logger.trace("start QuitLobby");
+    if (this.status != LobbyStatus.Entered) {
+      this.logger.error("無効な呼び出し:QuitLobbyAsync");
+      throw new Error("閉じるロビーがありません。");
+    }
+    return new Promise<void>((resolve, reject) => {
+      this.ircClient.once("part", (channel: string, nick: string) => {
+        resolve();
+      });
+      if (this.channel != undefined) {
+        this.ircClient.part(this.channel, "part", () => { });
         this.status = LobbyStatus.Leaving;
       } else {
         reject();
@@ -887,8 +933,9 @@ export class Lobby {
   }
 
   private getInfoMessage(): string {
-    return `- Osu Auto Host Rotation Bot ver ${pkg.version} - \n`
-      + this.option.info_message.join("\n");
+
+    return `- Osu Auto Host Rotation Bot ver ${process.env.npm_package_version} - \n`
+      + this.option.info_message;
   }
 
   // ircでログインしたユーザーに権限を与える

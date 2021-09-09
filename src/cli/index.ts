@@ -36,13 +36,13 @@ logIrcEvent(client);
 logPrivateMessage(client);
 
 if (process.argv.length > 2) {
-  const oahr = new OahrHeadless(client);
   const command = process.argv[2];
+  const oahr = new OahrHeadless(client);
   const arg = process.argv.slice(3).join(" ");
-  oahr.startApp(command, arg);
+  oahr.start(command, arg);
 } else {
   const oahr = new OahrCli(client);
-  oahr.startApp(null);
+  oahr.start(null);
 }
 
 
