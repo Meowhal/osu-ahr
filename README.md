@@ -64,7 +64,7 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
-## configulations
+
 ### irc section
 - `server` : `string` domain name of osu irc server.
 - `nick` : `string` your osu account name
