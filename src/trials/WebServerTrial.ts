@@ -1,5 +1,5 @@
 import express, { Express, RequestHandler, Request, Response, NextFunction } from "express";
-import historyData from "./data/history_67261609.json";
+import historyData from "./cases/history_84468237.json";
 import fs from 'fs';
 import readline from 'readline';
 
@@ -26,7 +26,7 @@ function startTestServer() {
   app.get("/api/user/:id", (req, res, next) => {
     let tid = parseInt(req.params.id);
     if (isNaN(tid)) return res.json({});
-    let usr = historyData.users.find(v => v.id.toString() == req.params.id);
+    let usr = historyData.users.find((v: any) => v.id.toString() == req.params.id);
     return res.json(usr);
   });
 

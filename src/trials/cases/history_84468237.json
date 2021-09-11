@@ -1,0 +1,836 @@
+{
+    "match": {
+      "id": 84468237,
+      "start_time": "2021-05-29T05:56:58+00:00",
+      "end_time": "2021-05-29T08:44:37+00:00",
+      "name": "5* techmaps OwO "
+    },
+    "events": [
+      {
+        "id": 1799792186,
+        "detail": {
+          "type": "match-created"
+        },
+        "timestamp": "2021-05-29T05:56:58+00:00",
+        "user_id": 11341284
+      },
+      {
+        "id": 1799792187,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T05:56:58+00:00",
+        "user_id": 11341284
+      },
+      {
+        "id": 1799793139,
+        "detail": {
+          "type": "player-joined"
+        },
+        "timestamp": "2021-05-29T05:58:14+00:00",
+        "user_id": 17267744
+      },
+      {
+        "id": 1799793749,
+        "detail": {
+          "type": "other",
+          "text": "5* techmaps OwO "
+        },
+        "timestamp": "2021-05-29T05:59:00+00:00",
+        "user_id": null,
+        "game": {
+          "id": 432547719,
+          "start_time": "2021-05-29T05:59:00+00:00",
+          "end_time": "2021-05-29T06:04:32+00:00",
+          "mode": "osu",
+          "mode_int": 0,
+          "scoring_type": "score",
+          "team_type": "head-to-head",
+          "mods": [],
+          "beatmap": {
+            "beatmapset_id": 1420993,
+            "difficulty_rating": 5.86,
+            "id": 2926947,
+            "mode": "osu",
+            "status": "ranked",
+            "total_length": 319,
+            "user_id": 8039342,
+            "version": "Vengeance",
+            "beatmapset": {
+              "artist": "Culprate & Zenji",
+              "artist_unicode": "Culprate & Zenji",
+              "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/cover.jpg?1631339285",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/cover@2x.jpg?1631339285",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/card.jpg?1631339285",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/card@2x.jpg?1631339285",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/list.jpg?1631339285",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/list@2x.jpg?1631339285",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/slimcover.jpg?1631339285",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1420993\/covers\/slimcover@2x.jpg?1631339285"
+              },
+              "creator": "elicz1",
+              "favourite_count": 270,
+              "hype": null,
+              "id": 1420993,
+              "nsfw": false,
+              "play_count": 47719,
+              "preview_url": "\/\/b.ppy.sh\/preview\/1420993.mp3",
+              "source": "",
+              "status": "ranked",
+              "title": "Ghostmachine",
+              "title_unicode": "Ghostmachine",
+              "track_id": 637,
+              "user_id": 8039342,
+              "video": false
+            }
+          },
+          "scores": [
+            {
+              "id": null,
+              "user_id": 11341284,
+              "accuracy": 0.8514409589390461,
+              "mods": [
+                "HD"
+              ],
+              "score": 2069882,
+              "max_combo": 162,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 13,
+                "count_100": 200,
+                "count_300": 1044,
+                "count_geki": 198,
+                "count_katu": 125,
+                "count_miss": 50
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 0,
+                "team": "none",
+                "pass": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1799794493,
+        "detail": {
+          "type": "player-left"
+        },
+        "timestamp": "2021-05-29T06:00:04+00:00",
+        "user_id": 17267744
+      },
+      {
+        "id": 1799795098,
+        "detail": {
+          "type": "player-joined"
+        },
+        "timestamp": "2021-05-29T06:00:58+00:00",
+        "user_id": 17267744
+      },
+      {
+        "id": 1799797990,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T06:04:50+00:00",
+        "user_id": 17267744
+      },
+      {
+        "id": 1799799576,
+        "detail": {
+          "type": "other",
+          "text": "5* techmaps OwO "
+        },
+        "timestamp": "2021-05-29T06:07:01+00:00",
+        "user_id": null,
+        "game": {
+          "id": 432549449,
+          "start_time": "2021-05-29T06:07:01+00:00",
+          "end_time": "2021-05-29T06:08:40+00:00",
+          "mode": "osu",
+          "mode_int": 0,
+          "scoring_type": "score",
+          "team_type": "head-to-head",
+          "mods": [],
+          "beatmap": {
+            "beatmapset_id": 371118,
+            "difficulty_rating": 6.06,
+            "id": 813164,
+            "mode": "osu",
+            "status": "ranked",
+            "total_length": 89,
+            "user_id": 3034880,
+            "version": "JUST WANNA HOLD YOUR HAND",
+            "beatmapset": {
+              "artist": "THE ORAL CIGARETTES",
+              "artist_unicode": "THE ORAL CIGARETTES",
+              "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/cover.jpg?1622095575",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/cover@2x.jpg?1622095575",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/card.jpg?1622095575",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/card@2x.jpg?1622095575",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/list.jpg?1622095575",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/list@2x.jpg?1622095575",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/slimcover.jpg?1622095575",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/371118\/covers\/slimcover@2x.jpg?1622095575"
+              },
+              "creator": "xxdeathx",
+              "favourite_count": 3569,
+              "hype": null,
+              "id": 371118,
+              "nsfw": false,
+              "play_count": 10036760,
+              "preview_url": "\/\/b.ppy.sh\/preview\/371118.mp3",
+              "source": "Noragami ARAGOTO",
+              "status": "ranked",
+              "title": "Kyouran Hey Kids!!",
+              "title_unicode": "\u72c2\u4e71 Hey Kids!!",
+              "track_id": null,
+              "user_id": 3034880,
+              "video": true
+            }
+          },
+          "scores": [
+            {
+              "id": null,
+              "user_id": 11341284,
+              "accuracy": 0.875886524822695,
+              "mods": [
+                "HD"
+              ],
+              "score": 816170,
+              "max_combo": 172,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 6,
+                "count_100": 40,
+                "count_300": 315,
+                "count_geki": 47,
+                "count_katu": 23,
+                "count_miss": 15
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 0,
+                "team": "none",
+                "pass": true
+              }
+            },
+            {
+              "id": null,
+              "user_id": 17267744,
+              "accuracy": 0.7225177304964538,
+              "mods": [],
+              "score": 265038,
+              "max_combo": 58,
+              "passed": false,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 10,
+                "count_100": 84,
+                "count_300": 242,
+                "count_geki": 18,
+                "count_katu": 35,
+                "count_miss": 40
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 1,
+                "team": "none",
+                "pass": false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1799800899,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T06:08:47+00:00",
+        "user_id": 11341284
+      },
+      {
+        "id": 1799801975,
+        "detail": {
+          "type": "other",
+          "text": "5* techmaps OwO "
+        },
+        "timestamp": "2021-05-29T06:10:16+00:00",
+        "user_id": null,
+        "game": {
+          "id": 432550165,
+          "start_time": "2021-05-29T06:10:16+00:00",
+          "end_time": "2021-05-29T06:11:33+00:00",
+          "mode": "osu",
+          "mode_int": 0,
+          "scoring_type": "score",
+          "team_type": "head-to-head",
+          "mods": [],
+          "beatmap": {
+            "beatmapset_id": 426542,
+            "difficulty_rating": 5.04,
+            "id": 920988,
+            "mode": "osu",
+            "status": "ranked",
+            "total_length": 77,
+            "user_id": 1686145,
+            "version": "Myon",
+            "beatmapset": {
+              "artist": "3L",
+              "artist_unicode": "3L",
+              "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/cover.jpg?1622100835",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/cover@2x.jpg?1622100835",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/card.jpg?1622100835",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/card@2x.jpg?1622100835",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/list.jpg?1622100835",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/list@2x.jpg?1622100835",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/slimcover.jpg?1622100835",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/426542\/covers\/slimcover@2x.jpg?1622100835"
+              },
+              "creator": "Len",
+              "favourite_count": 671,
+              "hype": null,
+              "id": 426542,
+              "nsfw": false,
+              "play_count": 1201999,
+              "preview_url": "\/\/b.ppy.sh\/preview\/426542.mp3",
+              "source": "\u6771\u65b9Project",
+              "status": "ranked",
+              "title": "MyonMyonMyonMyonMyonMyon!",
+              "title_unicode": "MyonMyonMyonMyonMyonMyon!",
+              "track_id": null,
+              "user_id": 1686145,
+              "video": false
+            }
+          },
+          "scores": [
+            {
+              "id": null,
+              "user_id": 11341284,
+              "accuracy": 0.9302325581395349,
+              "mods": [
+                "HD"
+              ],
+              "score": 812262,
+              "max_combo": 194,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 0,
+                "count_100": 18,
+                "count_300": 234,
+                "count_geki": 64,
+                "count_katu": 13,
+                "count_miss": 6
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 0,
+                "team": "none",
+                "pass": true
+              }
+            },
+            {
+              "id": null,
+              "user_id": 17267744,
+              "accuracy": 0.5051679586563308,
+              "mods": [],
+              "score": 170620,
+              "max_combo": 60,
+              "passed": false,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 4,
+                "count_100": 41,
+                "count_300": 116,
+                "count_geki": 17,
+                "count_katu": 25,
+                "count_miss": 97
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 1,
+                "team": "none",
+                "pass": false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1799804226,
+        "detail": {
+          "type": "other",
+          "text": "5* techmaps OwO "
+        },
+        "timestamp": "2021-05-29T06:13:15+00:00",
+        "user_id": null,
+        "game": {
+          "id": 432550818,
+          "start_time": "2021-05-29T06:13:15+00:00",
+          "end_time": "2021-05-29T06:16:01+00:00",
+          "mode": "osu",
+          "mode_int": 0,
+          "scoring_type": "score",
+          "team_type": "head-to-head",
+          "mods": [],
+          "beatmap": {
+            "beatmapset_id": 1234094,
+            "difficulty_rating": 5.49,
+            "id": 2622409,
+            "mode": "osu",
+            "status": "ranked",
+            "total_length": 162,
+            "user_id": 3906405,
+            "version": "Plaudible's Extra",
+            "beatmapset": {
+              "artist": "Pegboard Nerds",
+              "artist_unicode": "Pegboard Nerds",
+              "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/cover.jpg?1622195197",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/cover@2x.jpg?1622195197",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/card.jpg?1622195197",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/card@2x.jpg?1622195197",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/list.jpg?1622195197",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/list@2x.jpg?1622195197",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/slimcover.jpg?1622195197",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1234094\/covers\/slimcover@2x.jpg?1622195197"
+              },
+              "creator": "Sylas",
+              "favourite_count": 545,
+              "hype": null,
+              "id": 1234094,
+              "nsfw": false,
+              "play_count": 681260,
+              "preview_url": "\/\/b.ppy.sh\/preview\/1234094.mp3",
+              "source": "",
+              "status": "ranked",
+              "title": "Gunslinga (feat. MC Mota)",
+              "title_unicode": "Gunslinga (feat. MC Mota)",
+              "track_id": null,
+              "user_id": 3906405,
+              "video": false
+            }
+          },
+          "scores": [
+            {
+              "id": null,
+              "user_id": 11341284,
+              "accuracy": 0.900670794633643,
+              "mods": [
+                "HD"
+              ],
+              "score": 5634998,
+              "max_combo": 433,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 5,
+                "count_100": 57,
+                "count_300": 562,
+                "count_geki": 182,
+                "count_katu": 17,
+                "count_miss": 22
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 0,
+                "team": "none",
+                "pass": true
+              }
+            },
+            {
+              "id": null,
+              "user_id": 17267744,
+              "accuracy": 0.782765737874097,
+              "mods": [],
+              "score": 1400366,
+              "max_combo": 228,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 10,
+                "count_100": 141,
+                "count_300": 457,
+                "count_geki": 110,
+                "count_katu": 68,
+                "count_miss": 38
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 1,
+                "team": "none",
+                "pass": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1799806318,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T06:16:12+00:00",
+        "user_id": 17267744
+      },
+      {
+        "id": 1799807523,
+        "detail": {
+          "type": "other",
+          "text": "5* techmaps OwO "
+        },
+        "timestamp": "2021-05-29T06:17:51+00:00",
+        "user_id": null,
+        "game": {
+          "id": 432551783,
+          "start_time": "2021-05-29T06:17:51+00:00",
+          "end_time": "2021-05-29T06:20:45+00:00",
+          "mode": "osu",
+          "mode_int": 0,
+          "scoring_type": "score",
+          "team_type": "head-to-head",
+          "mods": [],
+          "beatmap": {
+            "beatmapset_id": 112651,
+            "difficulty_rating": 5.3,
+            "id": 292576,
+            "mode": "osu",
+            "status": "graveyard",
+            "total_length": 165,
+            "user_id": 1921587,
+            "version": "BPM149 Distorted Reality Holy Crap!!That's Square jump!! AR9",
+            "beatmapset": {
+              "artist": "Various Artists",
+              "artist_unicode": "Various Artists",
+              "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/cover.jpg?1458263510",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/cover@2x.jpg?1458263510",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/card.jpg?1458263510",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/card@2x.jpg?1458263510",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/list.jpg?1458263510",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/list@2x.jpg?1458263510",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/slimcover.jpg?1458263510",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/112651\/covers\/slimcover@2x.jpg?1458263510"
+              },
+              "creator": "Jemmmmy",
+              "favourite_count": 1671,
+              "hype": null,
+              "id": 112651,
+              "nsfw": false,
+              "play_count": 1735010,
+              "preview_url": "\/\/b.ppy.sh\/preview\/112651.mp3",
+              "source": "",
+              "status": "graveyard",
+              "title": "Square Jump Practice Maps",
+              "title_unicode": "Square Jump Practice Maps",
+              "track_id": null,
+              "user_id": 1921587,
+              "video": false
+            }
+          },
+          "scores": [
+            {
+              "id": null,
+              "user_id": 11341284,
+              "accuracy": 0.9362606232294618,
+              "mods": [
+                "HD"
+              ],
+              "score": 2062021,
+              "max_combo": 215,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 2,
+                "count_100": 14,
+                "count_300": 656,
+                "count_geki": 144,
+                "count_katu": 5,
+                "count_miss": 34
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 0,
+                "team": "none",
+                "pass": true
+              }
+            },
+            {
+              "id": null,
+              "user_id": 17267744,
+              "accuracy": 0.7615675165250236,
+              "mods": [],
+              "score": 658008,
+              "max_combo": 73,
+              "passed": true,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 6,
+                "count_100": 191,
+                "count_300": 473,
+                "count_geki": 76,
+                "count_katu": 63,
+                "count_miss": 36
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 1,
+                "team": "none",
+                "pass": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1799809752,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T06:20:55+00:00",
+        "user_id": 11341284
+      },
+      {
+        "id": 1799811702,
+        "detail": {
+          "type": "other",
+          "text": "5* techmaps OwO "
+        },
+        "timestamp": "2021-05-29T06:23:39+00:00",
+        "user_id": null,
+        "game": {
+          "id": 432553051,
+          "start_time": "2021-05-29T06:23:39+00:00",
+          "end_time": "2021-05-29T06:24:49+00:00",
+          "mode": "osu",
+          "mode_int": 0,
+          "scoring_type": "score",
+          "team_type": "head-to-head",
+          "mods": [
+            "DT"
+          ],
+          "beatmap": {
+            "beatmapset_id": 436334,
+            "difficulty_rating": 5.23,
+            "id": 939871,
+            "mode": "osu",
+            "status": "graveyard",
+            "total_length": 92,
+            "user_id": 4662004,
+            "version": "Die",
+            "beatmapset": {
+              "artist": "FIDLAR",
+              "artist_unicode": "FIDLAR",
+              "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/cover.jpg?0",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/cover@2x.jpg?0",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/card.jpg?0",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/card@2x.jpg?0",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/list.jpg?0",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/list@2x.jpg?0",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/slimcover.jpg?0",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/436334\/covers\/slimcover@2x.jpg?0"
+              },
+              "creator": "KeIIIuH",
+              "favourite_count": 6,
+              "hype": null,
+              "id": 436334,
+              "nsfw": false,
+              "play_count": 230,
+              "preview_url": "\/\/b.ppy.sh\/preview\/436334.mp3",
+              "source": "",
+              "status": "graveyard",
+              "title": "I JUST WANNA DIE",
+              "title_unicode": "I JUST WANNA DIE",
+              "track_id": null,
+              "user_id": 4662004,
+              "video": false
+            }
+          },
+          "scores": [
+            {
+              "id": null,
+              "user_id": 11341284,
+              "accuracy": 0.7529940119760479,
+              "mods": [
+                "HD",
+                "DT"
+              ],
+              "score": 361748,
+              "max_combo": 75,
+              "passed": false,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 3,
+                "count_100": 69,
+                "count_300": 228,
+                "count_geki": 46,
+                "count_katu": 31,
+                "count_miss": 34
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 0,
+                "team": "none",
+                "pass": false
+              }
+            },
+            {
+              "id": null,
+              "user_id": 17267744,
+              "accuracy": 0.3158682634730539,
+              "mods": [
+                "DT"
+              ],
+              "score": 54243,
+              "max_combo": 10,
+              "passed": false,
+              "perfect": 0,
+              "statistics": {
+                "count_50": 25,
+                "count_100": 91,
+                "count_300": 71,
+                "count_geki": 9,
+                "count_katu": 19,
+                "count_miss": 147
+              },
+              "rank": null,
+              "created_at": null,
+              "best_id": null,
+              "pp": null,
+              "match": {
+                "slot": 1,
+                "team": "none",
+                "pass": false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1799812680,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T06:24:59+00:00",
+        "user_id": 17267744
+      },
+      {
+        "id": 1799813564,
+        "detail": {
+          "type": "host-changed"
+        },
+        "timestamp": "2021-05-29T06:26:12+00:00",
+        "user_id": 11341284
+      },
+      {
+        "id": 1799814983,
+        "detail": {
+          "type": "player-joined"
+        },
+        "timestamp": "2021-05-29T06:28:17+00:00",
+        "user_id": 8948221
+      }
+    ],
+    "users": [
+      {
+        "avatar_url": "https:\/\/a.ppy.sh\/8948221?1502660400.jpg",
+        "country_code": "US",
+        "default_group": "default",
+        "id": 8948221,
+        "is_active": true,
+        "is_bot": false,
+        "is_deleted": false,
+        "is_online": false,
+        "is_supporter": false,
+        "last_visit": "2021-09-07T09:05:01+00:00",
+        "pm_friends_only": true,
+        "profile_colour": null,
+        "username": "FlashOfLighting",
+        "country": {
+          "code": "US",
+          "name": "United States"
+        }
+      },
+      {
+        "avatar_url": "https:\/\/a.ppy.sh\/11341284?1631331844.jpeg",
+        "country_code": "FR",
+        "default_group": "default",
+        "id": 11341284,
+        "is_active": true,
+        "is_bot": false,
+        "is_deleted": false,
+        "is_online": false,
+        "is_supporter": true,
+        "last_visit": "2021-09-11T05:37:58+00:00",
+        "pm_friends_only": false,
+        "profile_colour": null,
+        "username": "dDarak",
+        "country": {
+          "code": "FR",
+          "name": "France"
+        }
+      },
+      {
+        "avatar_url": "https:\/\/a.ppy.sh\/17267744?1630518580.jpeg",
+        "country_code": "FR",
+        "default_group": "default",
+        "id": 17267744,
+        "is_active": true,
+        "is_bot": false,
+        "is_deleted": false,
+        "is_online": true,
+        "is_supporter": false,
+        "last_visit": "2021-09-11T07:16:55+00:00",
+        "pm_friends_only": false,
+        "profile_colour": null,
+        "username": "Anatasen",
+        "country": {
+          "code": "FR",
+          "name": "France"
+        }
+      }
+    ],
+    "first_event_id": 1799792186,
+    "latest_event_id": 1799901984,
+    "current_game_id": null
+  }
