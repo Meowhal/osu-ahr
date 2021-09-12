@@ -201,7 +201,7 @@ export class HostSkipper extends LobbyPlugin {
   StartTimer(isFirst: boolean): void {
     if (this.option.afk_check_interval_ms == 0 || this.lobby.host == null || this.lobby.status != LobbyStatus.Entered || this.lobby.isMatching) return;
     this.StopTimer();
-    this.logger.trace("start afk check fimer");
+    this.logger.trace("start afk check timer");
     const target = this.lobby.host;
     this.afkTimer = setTimeout(async () => {
       if (!this.lobby.isMatching && this.lobby.host == target) {
@@ -215,8 +215,10 @@ export class HostSkipper extends LobbyPlugin {
         } catch {
           this.logger.warn("stat check timeout!");
         }
-
-        this.StartTimer(false);
+        // StopTimerが呼び出されていない、かつホストがターゲットと同じならタイマー再開
+        if (this.afkTimer != undefined && this.lobby.host == target) {
+          this.StartTimer(false);
+        }
       }
     }, isFirst ? this.option.afk_check_interval_first_ms : this.option.afk_check_interval_ms);
   }
