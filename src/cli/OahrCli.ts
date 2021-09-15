@@ -179,7 +179,13 @@ export class OahrCli extends OahrBase {
           case "":
             break;
           default:
-            console.log("invalid command : %s", line);
+            if (l.command.startsWith("!mp")) {
+              this.lobby.SendMessage("!mp " + l.arg);
+            } else if(l.command.startsWith("!") || l.command.startsWith("*")) {
+              this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + " " + l.arg)
+            } else {
+              console.log("invalid command : %s", line);
+            }            
             break;
         }
       },

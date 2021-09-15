@@ -219,7 +219,7 @@ export namespace parser {
   }
 
   export function SplitCliCommand(line: string): { command: string, arg: string } {
-    const l = line.match(/(\w+) (.*)/);
+    const l = line.match(/^\s*([\!\*]?\w+)\s+(.*)/);
     if (l == null) {
       return { command: line, arg: "" };
     } else {
