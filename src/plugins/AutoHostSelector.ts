@@ -1,18 +1,58 @@
 import { escapeUserName, Lobby } from "..";
 import { BanchoResponseType, MpSettingsResult } from "../parsers";
 import { Player, revealUserName, disguiseUserName } from "../Player";
+import { Disposable, TypedEvent } from "../libs";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
-import { TypedEvent } from "../libs";
+import log4js from "log4js";
 
 export interface AutoHostSelectorOption {
   show_host_order_every_after_match: boolean;
   host_order_chars_limit: number;
   host_order_cooltime_ms: number;
-  black_list: Set<string>;
+  deny_list: string[];
 }
 
 export type OrderChangeType = "added" | "removed" | "rotated" | "orderd";
+
+/**
+ * 拒否リスト
+ * 各ロビーで共有することを想定しているので、プレイヤーオブジェクトではなくエスケープ名を保持する
+ *  */
+class DenyList {
+  players = new Set<string>();
+  playerAdded = new TypedEvent<{ name: string }>();
+  playerRemoved = new TypedEvent<{ name: string }>();
+  logger = log4js.getLogger("DenyList");
+  addPlayer(player: Player) {
+    if (this.players.has(player.escaped_name)) {
+      this.logger.info(`${player.name} is already in denylist.`);
+      return false;
+    } else {
+      this.players.add(player.escaped_name);
+      this.logger.info(`Added ${player.name} to denylist.`);
+      this.playerAdded.emit({ name: player.escaped_name });
+      return true;
+    }
+  }
+
+  removePlayer(player: Player) {
+    if (this.players.delete(player.escaped_name)) {
+      this.logger.info(`Removed ${player.name} from denylist.`);
+      this.playerRemoved.emit({ name: player.escaped_name });
+      return true;
+    } else {
+      this.logger.info(`${player.name} is not in denylist.`);
+      return false;
+    }
+  }
+
+  includes(player: Player) {
+    return this.players.has(player.escaped_name);
+  }
+}
+
+export const DENY_LIST = new DenyList();
 
 export class AutoHostSelector extends LobbyPlugin {
   option: AutoHostSelectorOption;
@@ -20,27 +60,30 @@ export class AutoHostSelector extends LobbyPlugin {
   needsRotate: boolean = true;
   mapChanger: Player | null = null;
   orderChanged = new TypedEvent<{ type: OrderChangeType }>();
+  eventDisposers: Disposable[] = [];
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "AutoHostSelector", "selector");
     const d = config.get<AutoHostSelectorOption>(this.pluginName);
     this.option = { ...d, ...option } as AutoHostSelectorOption;
 
-    if (Array.isArray(this.option.black_list)) {
-      this.option.black_list = new Set(this.option.black_list.map(s => escapeUserName(s)));
+    if (Array.isArray(this.option.deny_list)) {
+      this.option.deny_list.map(s => this.lobby.GetOrMakePlayer(s)).forEach(p => DENY_LIST.addPlayer(p));
     }
     this.registerEvents();
   }
 
   private registerEvents(): void {
-    this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot));
-    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
-    this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
-    this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
-    this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
-    this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame));
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
-    this.lobby.ReceivedBanchoResponse.on(a => {
+    this.eventDisposers.push(DENY_LIST.playerAdded.on(a => this.onDenylistAdded(a.name)));
+    this.eventDisposers.push(DENY_LIST.playerRemoved.on(a => this.onDenylistRemoved(a.name)));
+    this.eventDisposers.push(this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot)));
+    this.eventDisposers.push(this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player)));
+    this.eventDisposers.push(this.lobby.HostChanged.on(a => this.onHostChanged(a.player)));
+    this.eventDisposers.push(this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param)));
+    this.eventDisposers.push(this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src)));
+    this.eventDisposers.push(this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame)));
+    this.eventDisposers.push(this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged)));
+    this.eventDisposers.push(this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.BeatmapChanging:
           this.onBeatmapChanging()
@@ -52,7 +95,13 @@ export class AutoHostSelector extends LobbyPlugin {
           this.onMatchFinished();
           break;
       }
-    });
+    }));
+    this.lobby.LeftChannel.once(() => this.dispose());
+  }
+
+  private dispose() {
+    this.eventDisposers.forEach(d => d.dispose());
+    this.eventDisposers = [];
   }
 
   /**
@@ -62,11 +111,11 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param slot 
    */
   private onPlayerJoined(player: Player, slot: number): void {
-    if (this.option.black_list.has(player.escaped_name)) return;
+    if (DENY_LIST.includes(player)) return;
 
     this.hostQueue.push(player);
     this.logger.trace("added %s", player.name);
-    if (this.lobby.players.size == 1) {
+    if (this.hostQueue.length == 1) {
       this.logger.trace("appoint first player to host");
       this.changeHost();
     }
@@ -194,7 +243,7 @@ export class AutoHostSelector extends LobbyPlugin {
     }
 
     if (this.lobby.host != null) {
-      if (this.option.black_list.has(this.lobby.host.escaped_name)) {
+      if (DENY_LIST.includes(this.lobby.host)) {
         this.changeHost();
       } else {
         this.SkipTo(this.lobby.host);
@@ -218,50 +267,38 @@ export class AutoHostSelector extends LobbyPlugin {
           return;
         }
       }
-      if (command == "*blacklist") {
-        let matAdd = param.match(/^add (.*)/);
+      if (command == "*denylist") {
+        let matAdd = param.match(/^add\s+(.+)/);
         if (matAdd) {
-          this.addPlayerToBlacklist(matAdd[1]);
+          let p = this.lobby.GetOrMakePlayer(matAdd[1]);
+          DENY_LIST.addPlayer(p); // 後続処理はイベント経由でonDenylistAddedで実行
         }
 
-        let matRemove = param.match(/^remove (.*)/);
+        let matRemove = param.match(/^remove\s+(.+)/);
         if (matRemove) {
-          this.removePlayerFromBlacklist(matRemove[1]);
+          let p = this.lobby.GetOrMakePlayer(matRemove[1]);
+          DENY_LIST.removePlayer(p); // 後続処理はイベント経由でonDenylistRemovedで実行
         }
       }
     }
   }
 
-  private addPlayerToBlacklist(name: string) {
-    let escaped = escapeUserName(name);
-    if (this.option.black_list.has(escaped)) {
-      this.logger.info(`${escaped} is already in blacklist`);
-    } else {
-      this.option.black_list.add(escaped);
-      this.logger.info(`added ${escaped} to blacklist`);
-      let p = this.hostQueue.find(p => p.escaped_name == escaped);
-      if (p) {
-        this.hostQueue = this.hostQueue.filter(p => p.escaped_name != escaped);
-        this.logger.info(`removed ${escaped} from hostqueue`);
-        if (p.isHost) {
-          this.changeHost();
-        }
+  private onDenylistAdded(name: string) {
+    let player = this.lobby.GetOrMakePlayer(name);
+    if (this.hostQueue.includes(player)) {
+      this.hostQueue = this.hostQueue.filter(p => p != player);
+      this.logger.info(`removed ${player.name} from hostqueue`);
+      if (player.isHost) {
+        this.changeHost();
       }
     }
   }
 
-  private removePlayerFromBlacklist(name: string) {
-    let escaped = escapeUserName(name);
-    if (this.option.black_list.delete(escaped)) {
-      this.logger.info(`removed ${escaped} from blacklist`);
-
-      let p = this.lobby.GetPlayer(escaped);
-      if (p && this.lobby.players.has(p) && !this.hostQueue.find(p => p.escaped_name == escaped)) {
-        this.onPlayerJoined(p, p.slot);
-        this.logger.info(`added ${escaped} to hostqueue`);
-      }
-    } else {
-      this.logger.info(`${escaped} is not in blacklist`);
+  private onDenylistRemoved(name: string) {
+    let player = this.lobby.GetOrMakePlayer(name);
+    if (this.lobby.players.has(player) && !this.hostQueue.includes(player)) {
+      this.onPlayerJoined(player, player.slot);
+      this.logger.info(`added ${player.name} to hostqueue`);
     }
   }
 
@@ -276,7 +313,7 @@ export class AutoHostSelector extends LobbyPlugin {
         return;
       }
       const to = this.lobby.GetOrMakePlayer(args[0]);
-      if (!this.lobby.players.has(to)) {
+      if (!this.hostQueue.includes(to)) {
         this.logger.error("skipto target dosent exist");
         return;
       }
@@ -293,12 +330,12 @@ export class AutoHostSelector extends LobbyPlugin {
    */
   OrderBySlotBase(result: MpSettingsResult): void {
     this.logger.info("reordered slot base order.");
-    this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.name)).filter(p => !this.option.black_list.has(p.escaped_name));
+    this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.name)).filter(p => !DENY_LIST.includes(p));
   }
 
   ModifyOderByMpSettingsResult(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean) {
     // 少人数が出入りしただけとみなし、現在のキューを維持する
-    let newQueue = this.hostQueue.concat(playersIn).filter(p => !playersOut.includes(p) && !this.option.black_list.has(p.escaped_name));
+    let newQueue = this.hostQueue.concat(playersIn).filter(p => !playersOut.includes(p) && !DENY_LIST.includes(p));
 
     if (this.validateNewQueue(newQueue)) {
       this.logger.info("modified host queue.");
@@ -380,7 +417,7 @@ export class AutoHostSelector extends LobbyPlugin {
         this.Reorder(players);
       }
     } else {
-      const nq = order.filter(p => this.lobby.players.has(p) && !this.option.black_list.has(p.escaped_name));
+      const nq = order.filter(p => this.lobby.players.has(p) && !DENY_LIST.includes(p));
       for (let p of this.hostQueue) {
         if (!nq.includes(p)) {
           nq.push(p);
@@ -398,9 +435,9 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   private validateNewQueue(que: Player[]): boolean {
-    let isValid = this.lobby.players.size == que.length;
+    let isValid = true;
     for (let p of que) {
-      isValid = isValid && this.lobby.players.has(p) && !this.option.black_list.has(p.escaped_name);
+      isValid = isValid && this.lobby.players.has(p) && !DENY_LIST.includes(p);
     }
 
     this.logger.trace("validate queue.");
@@ -460,13 +497,17 @@ export class AutoHostSelector extends LobbyPlugin {
     }
   }
 
+  getDeniedPlayerNames() {
+    return [...DENY_LIST.players];
+  }
+
   GetPluginStatus(): string {
     const m = this.hostQueue.map(p => p.name).join(", ");
-    const b = [...this.option.black_list].join(",");
+    const b = this.getDeniedPlayerNames().join(",");
     return `-- AutoHostSelector --
   queue : ${m}
   mapChanger : ${this.mapChanger == null ? "null" : this.mapChanger.name}, needsRotate : ${this.needsRotate}
-  blackList : ${b}`;
+  denyList : ${b}`;
   }
 
   private raiseOrderChanged(type: OrderChangeType) {

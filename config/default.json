@@ -21,7 +21,7 @@
     "show_host_order_every_after_match": true,
     "host_order_chars_limit": 90,
     "host_order_cooltime_ms": 15000,
-    "black_list": []
+    "deny_list": []
   },
   "AutoStartTimer": {
     "enabled": false,

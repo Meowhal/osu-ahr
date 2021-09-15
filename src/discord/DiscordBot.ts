@@ -125,7 +125,7 @@ export class DiscordBot {
     try {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.makeLobbyAsync(name);
-    } catch (e:any) {
+    } catch (e: any) {
       logger.error("couldn't make a tournament lobby. " + e);
       await interaction.editReply("😫 couldn't make a tournament lobby. " + e.message);
       ahr?.lobby.destroy();
@@ -137,7 +137,7 @@ export class DiscordBot {
       let dc = await this.createChannel(interaction.guild, lobbyNumber);
       this.registeAhr(ahr, interaction, dc);
       await interaction.editReply(`😀 Created the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber}) [#mp_${lobbyNumber}](https://discord.com/channels/${interaction.guildId}/${dc.id})`);
-    } catch (e:any) {
+    } catch (e: any) {
       logger.error("couldn't make a discord channel. " + e);
       await interaction.editReply("couldn't make a discord channel. " + e.message);
     }
@@ -211,7 +211,7 @@ export class DiscordBot {
 
     try {
       await interaction.editReply({ embeds: [this.createInfoEmbed(ahr)] });
-    } catch (e:any) {
+    } catch (e: any) {
       logger.error("@discordbot.info " + e);
       await interaction.editReply("😫 error! " + e.message);
     }
@@ -382,8 +382,12 @@ export class DiscordBot {
       embed.addField("referee", refs, false);
     }
 
-    let order = ahr.selector.hostQueue.map(p => p.name).join(", ");
-    embed.addField("selector", `order:${order}, changer:${ahr.selector.mapChanger?.name ?? "none"}, rflag:${ahr.selector.needsRotate ? "true" : "false"}`, false);
+    embed.addField("order", `${ahr.selector.hostQueue.map(p => p.name).join(", ")}`, false);
+    let denylist = ahr.selector.getDeniedPlayerNames();
+    if (denylist.length != 0) {
+      embed.addField("denylist", `${denylist.join(", ")}`);
+    }    
+    embed.addField("selector", `changer:${ahr.selector.mapChanger?.name ?? "none"}, rflag:${ahr.selector.needsRotate ? "true" : "false"}`, false);
 
     const playcounts = Array.from(ahr.inoutLogger.players.keys()).map(p => {
       let num = ahr.inoutLogger?.players.get(p) || 0;
