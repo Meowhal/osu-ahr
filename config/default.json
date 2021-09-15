@@ -20,7 +20,8 @@
   "AutoHostSelector": {
     "show_host_order_every_after_match": true,
     "host_order_chars_limit": 90,
-    "host_order_cooltime_ms": 15000
+    "host_order_cooltime_ms": 15000,
+    "black_list": []
   },
   "AutoStartTimer": {
     "enabled": false,
@@ -45,7 +46,8 @@
     "size": null,
     "password": null,
     "mods": null,
-    "hostkick_tolerance": 4
+    "hostkick_tolerance": 4,
+    "afk_allowed": 0
   },
   "LobbyTerminator": {
     "terminate_time_ms": 60000

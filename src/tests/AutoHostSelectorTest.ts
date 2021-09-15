@@ -5,6 +5,17 @@ import { AutoHostSelector } from "../plugins";
 import { MpSettingsCases } from "./cases/MpSettingsCases";
 import tu from "./TestUtils";
 
+/*
+TODO
+blacklist用のテストを追加する
+・参加時に無視される
+・参加中に追加した場合、キューから消される
+・ホスト中に追加した場合、ホストも剥奪される
+・リストから削除した場合はキューに復帰する
+・他にホスト候補がいない場合の動作
+・!mp setting 等によるキュー再構築時にも無視される
+*/
+
 describe("AutoHostSelectorTest", function () {
   before(function () {
     tu.configMochaAsSilent();
