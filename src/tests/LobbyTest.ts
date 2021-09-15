@@ -535,24 +535,24 @@ describe("LobbyTest", function () {
   describe("message tests", function () {
     it.skip("showInfoMessage test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      tu.configMochaAsNoisy();
+      tu.configMochaVerbosely();
       lobby.RaiseReceivedChatCommand(lobby.GetOrMakePlayer("tester"), "!info");
     });
     it.skip("SendMessageWithDelayAsync test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      tu.configMochaAsNoisy();
+      tu.configMochaVerbosely();
       lobby.SendMessage("hello");
       lobby.SendMessageWithDelayAsync("world", 1000);
     });
     it.skip("SendMultilineMessageWithInterval test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      tu.configMochaAsNoisy();
+      tu.configMochaVerbosely();
       lobby.SendMultilineMessageWithInterval(["a", "b", "c", "d"], 1000, "a", 100);
       lobby.SendMultilineMessageWithInterval(["e", "f", "g", "h"], 1000, "a", 100);
     });
     it.skip("DeferMessage test", async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-      tu.configMochaAsNoisy();
+      tu.configMochaVerbosely();
       lobby.DeferMessage("a", "abc", 10, false);
       await tu.delayAsync(20);
       lobby.DeferMessage("b", "abc", 10, false);

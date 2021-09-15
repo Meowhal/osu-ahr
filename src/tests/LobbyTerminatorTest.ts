@@ -7,7 +7,7 @@ import tu from "./TestUtils";
 
 describe.skip("Lobby Terminator Tests", function () {
   before(function () {
-    tu.configMochaAsNoisy();
+    tu.configMochaVerbosely();
   });
   async function setupAsync(interval: number = 10): Promise<{ terminator: LobbyTerminator, lobby: Lobby, ircClient: DummyIrcClient }> {
     const { lobby, ircClient } = await tu.SetupLobbyAsync();

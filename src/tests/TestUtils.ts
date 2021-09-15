@@ -67,7 +67,7 @@ class TestUtils {
     return p;
   }
 
-  configMochaAsNoisy(): void {
+  configMochaVerbosely(): void {
     log4js.configure("config/log_mocha.json");
   }
 

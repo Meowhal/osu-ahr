@@ -3,7 +3,7 @@ import tu from "./TestUtils";
 
 describe.skip("In Out Logger Tests", function () {
   before(function () {
-    tu.configMochaAsNoisy();
+    tu.configMochaVerbosely();
   });
 
   it("test", async () => {
