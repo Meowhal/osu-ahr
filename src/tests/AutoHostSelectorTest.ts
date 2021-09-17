@@ -1019,33 +1019,27 @@ describe("AutoHostSelectorTest", function () {
     });
 
     describe("denylist command tests", () => {
-      function chatAsOwner(lobby: Lobby, command: string) {
-        let owner = lobby.GetOrMakePlayer("owner");
-        owner.setRole(Roles.Creator | Roles.Referee | Roles.Authorized);
-        lobby.RaiseReceivedChatCommand(owner, command);
-      }
-
       it("add test", async () => {
         const { selector, lobby, ircClient } = await prepareSelector();
         await ircClient.emulateMpSettings(MpSettingsCases.case1_1);
         assert.equal(DENY_LIST.players.size, 0);
 
-        chatAsOwner(lobby, "*denylist add p1");
+        tu.sendMessageAsOwner(lobby, "*denylist add p1");
 
         assert.equal(DENY_LIST.players.size, 1);
         assert.include(DENY_LIST.players, "p1");
 
-        chatAsOwner(lobby, "*denylist add p2 sfd");
+        tu.sendMessageAsOwner(lobby, "*denylist add p2 sfd");
 
         assert.equal(DENY_LIST.players.size, 2);
         assert.include(DENY_LIST.players, escapeUserName("p2 sfd"));
 
-        chatAsOwner(lobby, "*denylist add");
+        tu.sendMessageAsOwner(lobby, "*denylist add");
 
         assert.equal(DENY_LIST.players.size, 2);
 
         let un = "asdf    hello";
-        chatAsOwner(lobby, "*denylist     add    " + un);
+        tu.sendMessageAsOwner(lobby, "*denylist     add    " + un);
 
         assert.equal(DENY_LIST.players.size, 3);
         assert.include(DENY_LIST.players, escapeUserName(un));
@@ -1057,12 +1051,12 @@ describe("AutoHostSelectorTest", function () {
         await ircClient.emulateMpSettings(MpSettingsCases.case1_1);
         assert.equal(DENY_LIST.players.size, 0);
 
-        chatAsOwner(lobby, "*denylist add p1");
+        tu.sendMessageAsOwner(lobby, "*denylist add p1");
 
         assert.equal(DENY_LIST.players.size, 1);
         assert.include(DENY_LIST.players, "p1");
 
-        chatAsOwner(lobby, "*denylist add p1");
+        tu.sendMessageAsOwner(lobby, "*denylist add p1");
 
         assert.equal(DENY_LIST.players.size, 1);
         assert.include(DENY_LIST.players, "p1");
@@ -1075,28 +1069,28 @@ describe("AutoHostSelectorTest", function () {
         await ircClient.emulateMpSettings(MpSettingsCases.case1_1);
         assert.equal(DENY_LIST.players.size, 0);
 
-        chatAsOwner(lobby, "*denylist add p1");
-        chatAsOwner(lobby, "*denylist add p2 piyo");
-        chatAsOwner(lobby, "*denylist add p3 HOGE");
+        tu.sendMessageAsOwner(lobby, "*denylist add p1");
+        tu.sendMessageAsOwner(lobby, "*denylist add p2 piyo");
+        tu.sendMessageAsOwner(lobby, "*denylist add p3 HOGE");
 
         assert.equal(DENY_LIST.players.size, 3);
         assert.include(DENY_LIST.players, escapeUserName("p1"));
         assert.include(DENY_LIST.players, escapeUserName("p2 piyo"));
         assert.include(DENY_LIST.players, escapeUserName("p3 HOGE"));
 
-        chatAsOwner(lobby, "*denylist remove p1");
+        tu.sendMessageAsOwner(lobby, "*denylist remove p1");
         assert.equal(DENY_LIST.players.size, 2);
         assert.notInclude(DENY_LIST.players, escapeUserName("p1"));
         assert.include(DENY_LIST.players, escapeUserName("p2 piyo"));
         assert.include(DENY_LIST.players, escapeUserName("p3 HOGE"));
 
-        chatAsOwner(lobby, "*denylist remove p2 piyo");
+        tu.sendMessageAsOwner(lobby, "*denylist remove p2 piyo");
         assert.equal(DENY_LIST.players.size, 1);
         assert.notInclude(DENY_LIST.players, escapeUserName("p1"));
         assert.notInclude(DENY_LIST.players, escapeUserName("p2 piyo"));
         assert.include(DENY_LIST.players, escapeUserName("p3 HOGE"));
 
-        chatAsOwner(lobby, "*denylist    remove     p3 hoge");
+        tu.sendMessageAsOwner(lobby, "*denylist    remove     p3 hoge");
         assert.equal(DENY_LIST.players.size, 0);
         assert.notInclude(DENY_LIST.players, escapeUserName("p1"));
         assert.notInclude(DENY_LIST.players, escapeUserName("p2 piyo"));
@@ -1110,17 +1104,17 @@ describe("AutoHostSelectorTest", function () {
         await ircClient.emulateMpSettings(MpSettingsCases.case1_1);
         assert.equal(DENY_LIST.players.size, 0);
 
-        chatAsOwner(lobby, "*denylist add p1");
-        chatAsOwner(lobby, "*denylist add p2");
-        chatAsOwner(lobby, "*denylist add p3");
+        tu.sendMessageAsOwner(lobby, "*denylist add p1");
+        tu.sendMessageAsOwner(lobby, "*denylist add p2");
+        tu.sendMessageAsOwner(lobby, "*denylist add p3");
 
         assert.equal(DENY_LIST.players.size, 3);
         assert.include(DENY_LIST.players, escapeUserName("p1"));
         assert.include(DENY_LIST.players, escapeUserName("p2"));
         assert.include(DENY_LIST.players, escapeUserName("p3"));
 
-        chatAsOwner(lobby, "*denylist remove p1");
-        chatAsOwner(lobby, "*denylist remove p1");
+        tu.sendMessageAsOwner(lobby, "*denylist remove p1");
+        tu.sendMessageAsOwner(lobby, "*denylist remove p1");
         assert.equal(DENY_LIST.players.size, 2);
         assert.notInclude(DENY_LIST.players, escapeUserName("p1"));
         assert.include(DENY_LIST.players, escapeUserName("p2"));

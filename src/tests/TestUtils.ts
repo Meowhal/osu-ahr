@@ -35,6 +35,11 @@ class TestUtils {
     }
   }
 
+  async sendMessageAsOwner(lobby: Lobby, message: string) {
+    let owner = lobby.GetOrMakePlayer(this.ownerNickname);
+    lobby.RaiseReceivedChatCommand(owner, message);
+  }
+
   // async呼び出し用のディレイ関数
   delayAsync(ms: number): Promise<void> {
     if (ms == 0) return Promise.resolve();
