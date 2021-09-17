@@ -17,6 +17,11 @@
     "info_message_announcement_interval_ms": 0,
     "transferhost_timeout_ms": 5000
   },
+  "AfkKicker": {
+    "enabled": true,
+    "threshold": 6,
+    "cooltime_ms": 30000
+  },
   "AutoHostSelector": {
     "show_host_order_every_after_match": true,
     "host_order_chars_limit": 90,
@@ -46,8 +51,7 @@
     "size": null,
     "password": null,
     "mods": null,
-    "hostkick_tolerance": 4,
-    "afk_allowed": 0
+    "hostkick_tolerance": 4
   },
   "LobbyTerminator": {
     "terminate_time_ms": 60000

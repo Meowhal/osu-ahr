@@ -1,5 +1,6 @@
 export * from "./LobbyPlugin";
 
+export * from "./AfkKicker";
 export * from "./AutoHostSelector";
 export * from "./AutoStartTimer";
 export * from "./HistoryLoader";

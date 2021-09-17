@@ -154,17 +154,25 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   // 試合をエミュレートする
-  public async emulateMatchAsync(delay: number = 0): Promise<void> {
+  public async emulateMatchAsync(delay: number = 0, scores?: { name: string, score: number, passed: boolean }[]): Promise<void> {
     this.isMatching = true;
     await this.emulateMessageAsync("BanchoBot", this.channel, "The match has started!");
     if (delay) {
       await this.delay(delay);
     }
     const tasks: Promise<void>[] = [];
-    for (let u of this.players) {
-      if (!this.isMatching) return;
-      tasks.push(this.emulateMessageAsync("BanchoBot", this.channel, `${u} finished playing (Score: 100000, PASSED).`));
+    if (scores) {
+      for (let u of scores) {
+        if (!this.isMatching) return;
+        tasks.push(this.emulateMessageAsync("BanchoBot", this.channel, `${u.name} finished playing (Score: ${u.score}, ${u.passed ? "PASSED" : "FAILED"}).`));
+      }
+    } else {
+      for (let u of this.players) {
+        if (!this.isMatching) return;
+        tasks.push(this.emulateMessageAsync("BanchoBot", this.channel, `${u} finished playing (Score: 100000, PASSED).`));
+      }
     }
+
     await Promise.all(tasks);
     if (!this.isMatching) return;
     this.isMatching = false;
@@ -336,6 +344,16 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           break;
         case "clearhost":
           m("Cleared match host");
+          break;
+        case "kick":
+          let ename = escapeUserName(mp.arg);
+          if (this.players.has(ename)) {
+            this.players.delete(ename);
+            m(`${ename} left the game.`);
+            m(`Kicked ${ename} from the match.`);
+          } else {
+            m("User not found");
+          }
           break;
         default:
           logger.warn("unhandled command", mp.command, mp.arg);

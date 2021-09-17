@@ -41,18 +41,12 @@ export interface LobbyKeeperOption {
    * Number of kicks until counterattack kick is activated
    */
   hostkick_tolerance: number;
-
-  /**
-   * Number of matches before being kicked as afk
-   */
-  afk_allowed: number;
 }
 
 export class LobbyKeeper extends LobbyPlugin {
   option: LobbyKeeperOption;
   kickedUsers: Set<Player>;
   mpKickedUsers: Set<Player>;
-  afkCounter: Map<string, number>;
 
   constructor(lobby: Lobby, option: Partial<LobbyKeeperOption> = {}) {
     super(lobby, "LobbyKeeper", "keeper");
@@ -60,16 +54,13 @@ export class LobbyKeeper extends LobbyPlugin {
     this.option = { ...d, ...option } as LobbyKeeperOption;
     this.kickedUsers = new Set();
     this.mpKickedUsers = new Set();
-    this.afkCounter = new Map();
     this.registerEvents();
   }
 
   private registerEvents(): void {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
-    this.lobby.MatchFinished.on(a => this.onMatchFinished());
+    this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
-    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
-    this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score));
     this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.KickedPlayer:
@@ -80,7 +71,7 @@ export class LobbyKeeper extends LobbyPlugin {
     this.lobby.historyRepository.kickedUser.on(a => this.onKickedPlayer(a.kickedUser));
     this.lobby.historyRepository.finishedGame.on(a => this.onFinishedGame(a.game));
   }
-  
+
   private onMpKickedPlayer(name: string): void {
     if (this.option.hostkick_tolerance) {
       const p = this.lobby.GetPlayer(name);
@@ -124,28 +115,6 @@ export class LobbyKeeper extends LobbyPlugin {
         }
       }
     }
-  }
-
-  onPlayerFinished(player: Player, score: number): any {
-    if (this.option.afk_allowed <= 0) return;
-    if (player.isAuthorized || player.isReferee) return;
-
-    if (score == 0) {
-      let c = this.afkCounter.get(player.escaped_name);
-      c = c === undefined ? 1 : c + 1;
-
-      this.afkCounter.set(player.escaped_name, c);
-      
-      if (c == this.option.afk_allowed) {
-        this.lobby.SendMessage("!mp kick " + player.escaped_name);
-        this.lobby.SendMessage("bot: kicked afk player.");
-      } else {
-        this.logger.info(`score 0 player detected: ${player.escaped_name}(${c} / ${this.option.afk_allowed})`);
-      }
-    }
-  }
-  onPlayerLeft(player: Player): any {
-    this.afkCounter.delete(player.escaped_name);
   }
 
   private onMatchFinished(): void {
@@ -225,13 +194,6 @@ export class LobbyKeeper extends LobbyPlugin {
         this.fixMods();
         return `keep mods ${this.option.mods}`;
       }
-
-      const regAfk = /^afkkick?\s*(.+)?\s*$/;
-      const matchAfk = regAfk.exec(param);
-      if (matchAfk) {
-        this.option.afk_allowed = parseInt(matchAfk[1]);
-        return `afk_allowed = ${this.option.afk_allowed}`;
-      }
     }
     if (command == "*no") {
       if (param == "keep mode" && this.option.mode != null) {
@@ -256,11 +218,6 @@ export class LobbyKeeper extends LobbyPlugin {
         this.option.mods = null;
         return "disabled keeping mods";
       }
-      if (param.startsWith("afkkick") && this.option.mods != null) {
-        this.option.afk_allowed = 0;
-        return "disabled afkkick";
-      }
-      
     }
     return null;
   }
@@ -268,7 +225,6 @@ export class LobbyKeeper extends LobbyPlugin {
   GetPluginStatus(): string {
     return `-- Lobby Keeper --
   mode : ${this.option.mode === null ? "disabled" : TeamModes[this.option.mode.team] + ", " + ScoreModes[this.option.mode.score]}, size : ${this.option.size === null ? "disabled" : this.option.size},
-  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}, mods : ${this.option.mods === null ? "disabled" : this.option.mods}
-  afk_allowed : ${this.option.afk_allowed}`;
+  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}, mods : ${this.option.mods === null ? "disabled" : this.option.mods}`;
   }
 }
