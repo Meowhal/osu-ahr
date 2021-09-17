@@ -313,6 +313,8 @@ export class HistoryRepository {
             hostAge = Date.parse(ev.timestamp);
             unresolvedPlayers.delete(ev.user_id);
             break;
+          case "match-created":
+            break;
           case "player-joined":
             if (!(ev.user_id in map)) {
               const la = Date.parse(ev.timestamp);
