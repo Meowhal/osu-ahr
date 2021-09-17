@@ -76,8 +76,8 @@ export class AutoHostSelector extends LobbyPlugin {
   private registerEvents(): void {
     this.eventDisposers.push(DENY_LIST.playerAdded.on(a => this.onDenylistAdded(a.name)));
     this.eventDisposers.push(DENY_LIST.playerRemoved.on(a => this.onDenylistRemoved(a.name)));
-    this.eventDisposers.push(this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot)));
-    this.eventDisposers.push(this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player)));
+    this.eventDisposers.push(this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player, a.slot, a.fromMpSettings)));
+    this.eventDisposers.push(this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player, a.fromMpSettings)));
     this.eventDisposers.push(this.lobby.HostChanged.on(a => this.onHostChanged(a.player)));
     this.eventDisposers.push(this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param)));
     this.eventDisposers.push(this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src)));
@@ -110,8 +110,9 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param player 
    * @param slot 
    */
-  private onPlayerJoined(player: Player, slot: number): void {
+  private onPlayerJoined(player: Player, slot: number, isMpSettingResult:boolean): void {
     if (DENY_LIST.includes(player)) return;
+    if (isMpSettingResult) return;
 
     this.hostQueue.push(player);
     this.logger.trace("added %s", player.name);
@@ -129,9 +130,10 @@ export class AutoHostSelector extends LobbyPlugin {
    * 試合中なら次のホストは任命しない
    * @param player 
    */
-  private onPlayerLeft(player: Player): void {
+  private onPlayerLeft(player: Player, isMpSettingResult:boolean): void {
     this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
     if (this.lobby.isMatching) return;
+    if (isMpSettingResult) return;
     if (this.hostQueue.length == 0) return;
     if (this.lobby.host == null && this.lobby.hostPending == null && !this.lobby.isClearedHost) { // ホストがいない、かつ承認待ちのホストがいない、!mp clearhostが実行されていない
       this.logger.info("host has left");
@@ -297,7 +299,7 @@ export class AutoHostSelector extends LobbyPlugin {
   private onDenylistRemoved(name: string) {
     let player = this.lobby.GetOrMakePlayer(name);
     if (this.lobby.players.has(player) && !this.hostQueue.includes(player)) {
-      this.onPlayerJoined(player, player.slot);
+      this.onPlayerJoined(player, player.slot, false);
       this.logger.info(`added ${player.name} to hostqueue`);
     }
   }

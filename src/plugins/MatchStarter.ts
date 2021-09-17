@@ -30,7 +30,6 @@ export class MatchStarter extends LobbyPlugin {
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.AllPlayerReady:
@@ -67,12 +66,6 @@ export class MatchStarter extends LobbyPlugin {
     if (this.option.start_when_all_player_ready) {
       this.start();
     }    
-  }
-
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
-    playersOut.forEach(p => this.voting.RemoveVoter(p));
-    playersIn.forEach(p => this.voting.AddVoter(p));
-    this.voting.Clear();
   }
 
   private onChatCommand(player: Player, command: string, param: string): void {

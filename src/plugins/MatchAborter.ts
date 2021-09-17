@@ -36,7 +36,6 @@ export class MatchAborter extends LobbyPlugin {
     this.lobby.MatchStarted.on(() => this.onMatchStarted());
     this.lobby.PlayerFinished.on(a => this.onPlayerFinished(a.player, a.score, a.isPassed, a.playersFinished, a.playersInGame));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.LeftChannel.on(a => this.stopTimer());
   }
@@ -70,10 +69,6 @@ export class MatchAborter extends LobbyPlugin {
 
   private onMatchFinished(): void {
     this.stopTimer();
-  }
-
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
-    this.voting.RemoveAllVoters();
   }
 
   private onChatCommand(player: Player, command: string, param: string): void {

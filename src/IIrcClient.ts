@@ -24,7 +24,7 @@ export function logIrcEvent(client: IIrcClient) {
     ircLogger.error('ERROR: ' + JSON.stringify(message));
   });
   client.on('registered', function (message) {
-    const args = message.args as string[];
+    const args = message.args as string[] | undefined;
     ircLogger.debug('@reg %s', args?.join(", "));
   });
   client.on('message', function (from, to, message) {

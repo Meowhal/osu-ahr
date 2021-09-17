@@ -303,7 +303,8 @@ export class HistoryRepository {
       if (ev.user_id != null) {
         switch (ev.detail.type) {
           case "host-changed":
-            if (!(ev.user_id in map)) {
+            // clearhost実行時に id = 0 
+            if (ev.user_id != 0 && !(ev.user_id in map)) {
               map[ev.user_id] = false;
               // -1、直前の試合開始ID、直前のhostchangeIDのいずれか
               //this.logger.trace(`changed ${this.users[ev.user_id].username} ${hostAge}`);
@@ -312,7 +313,6 @@ export class HistoryRepository {
             hostAge = Date.parse(ev.timestamp);
             unresolvedPlayers.delete(ev.user_id);
             break;
-          case "match-created":
           case "player-joined":
             if (!(ev.user_id in map)) {
               const la = Date.parse(ev.timestamp);

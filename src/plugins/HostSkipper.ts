@@ -46,7 +46,6 @@ export class HostSkipper extends LobbyPlugin {
     this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.PlayerChated.on(a => this.onPlayerChated(a.player));
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.ParsedStat.on(a => this.onParsedStat(a.player, a.result, a.isPm));
     this.lobby.LeftChannel.on(() => this.StopTimer());
     this.lobby.ReceivedBanchoResponse.on(a => {
@@ -102,13 +101,6 @@ export class HostSkipper extends LobbyPlugin {
       // reset current timer and restart
       this.StartTimer(false);
     }
-  }
-
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
-    playersOut.forEach(p => this.voting.RemoveVoter(p));
-    playersIn.forEach(p => this.voting.AddVoter(p));
-    this.voting.Clear();
-    this.StopTimer();
   }
 
   private onParsedStat(player: Player, result: StatResult, isPm: boolean): void {

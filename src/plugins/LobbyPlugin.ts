@@ -1,5 +1,6 @@
 import { Lobby } from "..";
 import log4js from "log4js";
+import { MessageActionRow } from "discord.js";
 
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。
@@ -41,5 +42,15 @@ export class LobbyPlugin {
   }
 
   OnConfig(target: string, name: string, value: string): void {
+  }
+}
+
+export function regSwitch(val: string, cases: { case: RegExp, action: (m: RegExpExecArray) => void }[]) {
+  for (let c of cases) {
+    let ea = c.case.exec(val);
+    if (ea) {
+      c.action(ea);
+      return;
+    }
   }
 }

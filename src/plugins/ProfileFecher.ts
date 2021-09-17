@@ -38,18 +38,11 @@ export class ProfileFecher extends LobbyPlugin {
 
   private registerEvents(): void {
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.player));
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
   }
 
   private onPlayerJoined(player: Player): void {
     if (this.hasError) return;
     this.addTaskQueueIfNeeded(player);
-  }
-
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
-    playersIn.forEach(player => {
-      this.addTaskQueueIfNeeded(player);
-    });
   }
 
   private addTaskQueueIfNeeded(player: Player): boolean {

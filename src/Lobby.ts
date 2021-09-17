@@ -61,8 +61,8 @@ export class Lobby {
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
-  PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; }>();
-  PlayerLeft = new TypedEvent<{ player: Player }>();
+  PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; fromMpSettings: boolean; }>();
+  PlayerLeft = new TypedEvent<{ player: Player, fromMpSettings: boolean }>();
   HostChanged = new TypedEvent<{ player: Player }>();
   MatchStarted = new TypedEvent<{ mapId: number, mapTitle: string }>();
   PlayerFinished = new TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>();
@@ -544,7 +544,7 @@ export class Lobby {
   RaisePlayerJoined(username: string, slot: number, team: Teams, asHost: boolean = false): void {
     const player = this.GetOrMakePlayer(username);
     if (this.addPlayer(player, slot, team)) {
-      this.PlayerJoined.emit({ player, slot, team });
+      this.PlayerJoined.emit({ player, slot, team, fromMpSettings: false });
     } else {
       this.LoadMpSettingsAsync();
     }
@@ -553,7 +553,7 @@ export class Lobby {
   RaisePlayerLeft(username: string): void {
     const player = this.GetOrMakePlayer(username);
     if (this.removePlayer(player)) {
-      this.PlayerLeft.emit({ player });
+      this.PlayerLeft.emit({ player, fromMpSettings: false });
     } else {
       this.LoadMpSettingsAsync();
     }
@@ -882,6 +882,7 @@ export class Lobby {
       if (!mpPlayers.includes(p)) {
         this.removePlayer(p);
         playersOut.push(p);
+        this.PlayerLeft.emit({ player: p, fromMpSettings: true });
       }
     }
 
@@ -890,6 +891,7 @@ export class Lobby {
       if (!this.players.has(p)) {
         this.addPlayer(p, r.slot, r.team);
         playersIn.push(p);
+        this.PlayerJoined.emit({ player: p, slot: p.slot, team: p.team, fromMpSettings: true});
       } else {
         p.slot = r.slot;
         p.team = r.team;
