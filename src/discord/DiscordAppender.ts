@@ -60,7 +60,7 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
     switch (ev.categoryName) {
         case "chat":
             if (ev.data.length == 3) {
-                return `> **${ev.data[1]}** ${ev.data[2]}`;
+                return `> **${ev.data[1]}**: ${ev.data[2]}`;
             } else {
                 return "> " + msg;
             }
