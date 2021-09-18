@@ -47,6 +47,21 @@ describe("AfkKicker Tests", function () {
         assert.equal(kicker.playerStats.get(players[1])?.afkPoint, 0);
     });
 
+    it("no map test", async () => {
+        let { kicker, lobby, ircClient } = await setupAsync();
+        let players = (await tu.AddPlayersAsync(["p1", "p2"], ircClient))
+            .map(name => lobby.GetOrMakePlayer(name));
+
+        assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 0);
+        assert.equal(kicker.playerStats.get(players[1])?.afkPoint, 0);
+        await ircClient.emulateMatchAsync(0, [{ name: "p2", score: 100, passed: true }]);
+        assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 2);
+        assert.equal(kicker.playerStats.get(players[1])?.afkPoint, 0);
+        await ircClient.emulateMatchAsync(0, [{ name: "p1", score: 100, passed: true }, { name: "p2", score: 100, passed: true }]);
+        assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 0);
+        assert.equal(kicker.playerStats.get(players[1])?.afkPoint, 0);
+    });
+
     it("chat test", async () => {
         let { kicker, lobby, ircClient } = await setupAsync();
         let players = (await tu.AddPlayersAsync(["p1", "p2"], ircClient))

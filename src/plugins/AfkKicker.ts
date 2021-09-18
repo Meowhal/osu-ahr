@@ -22,7 +22,7 @@ statでafk判定 指定時間 +3
 
 const POINT_STAT_AFK = 3;
 const POINT_NO_SCORE = 2;
-const POINT_NO_MAP = 1;
+const POINT_NO_MAP = 2;
 const POINT_HAS_SCORE = -100;
 const POINT_CHAT = -1;
 
