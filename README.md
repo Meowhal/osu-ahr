@@ -2,9 +2,6 @@
 irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
-## Contributors
-
-
 ## Command List
 |for player|desc|
 |:--|:--|
@@ -28,12 +25,26 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`*order [players list]`| Reorders the queue in specified order. |`*order p1, p2, p3`|
 |`*keep size [1-16]` | Keeps the size of the lobby at specified number. | `*keep size 8`| 
 |`*no keep size` | Stops Keeping the size of the lobby at specified number. | `*no keep size`|
+|`*regulation ["min_star", "max_star", "min_length" or "max_length"] = [value]` | Changes the regulation. | `*regulation max_length = 600`|
+|`*denylist add [username]` | Adds players to deny list | `*denylist add bad_guy` |
+|`*denylist remove [username]` | Removes players from deny list | `*denylist remove bad_guy` |
 
-(proofread by [Meowhalfannumber1](https://github.com/Meowhalfannumber1) ❤) 
+
+Owner commands are also available on the cli.
+When using from discordbot, enter the owner command after /say.
+
+cli
+```
+#mp_123456 > *keep size 16
+```
+discord
+```
+/say *keep size 16
+```
+
 
 ## Setup
 
-[Setup Guide Video](https://youtu.be/8kYbBWgMfIQ) (Special Thanks : [weebskinosu](https://github.com/weebskinosu))
 + Install Node.js and Git
   + [Node.js](https://nodejs.org/)
   + [Git](https://git-scm.com/)
@@ -44,14 +55,25 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 > npm install
 ```
 + get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
-+ copy `./config/default.json` to `./config/local.json`
-+ enter your account id and irc password to `./config/local.json`
++ create a file `./config/local.json`
++ enter your account id and irc password to `./config/local.json` as in the following example.
+```json
+{
+  "irc": {
+    "server": "irc.ppy.sh",
+    "nick": "[your account id]",
+    "opt": {
+      "port": 6667,
+      "password": "[your account password]"
+    }
+  }
+}
+```
 + launch the bot
 ```bash 
 > npm run start
 starting up...
 Connecting to Osu Bancho ...
-Server running at http://localhost:3116/
 Connected :D
 
 === Welcome to osu-ahr ===
@@ -64,21 +86,26 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
+You can also run your bot on discord. See the later section for details.
 
+## configuration
+You can edit local.json to configure the bot's behavior.
 ### irc section
 - `server` : `string` domain name of osu irc server.
 - `nick` : `string` your osu account name
 - `opt.port` : `number` 
 - `opt.password` : `string` your irc password. you can get it from [https://osu.ppy.sh/p/irc](https://osu.ppy.sh/p/irc).
 ```json
-"irc": {
-  "server": "irc.ppy.sh",
-  "nick": "meowhal",
-  "opt": {
-    "port": 6667,
-    "password": "123456"
-  }
-}
+{
+  "irc": {
+    "server": "irc.ppy.sh",
+    "nick": "meowhal",
+    "opt": {
+      "port": 6667,
+      "password": "123456"
+    }
+  },
+...
 ```
 ### Lobby section
 - `authorized_users` : `string[]`
@@ -103,10 +130,31 @@ MainMenu Commands
   "info_message_announcement_interval_ms": 0
 }
 ```
+### AfkKicker section
+Points will be added to the player who seems to be AFK, and the player who gets points above the threshold will be kicked.
+1. Finish the match with no score -> 2 points
+1. Do not participate in the match without a map -> 2 points
+1. !stat command turns out that player is AFK -> added 3 points
+
+- `enabled` : `boolean` 
+- `threshold` : `number` 
+- `cooltime_ms` : `number`
+```json
+{
+  ...
+  "AfkKicker": {
+    "enabled": true,
+    "threshold": 6,
+    "cooltime_ms": 30000
+  },
+  ...
+}
+```
 ### AutoHostSelector section 
 - `show_host_order_every_after_match` : `boolean` set true if you want to show them.
 - `host_order_chars_limit` : `number` Host-order messages are truncated to this length.
 - `host_order_cooltime_ms` : `number` cool time for Host-order messages.
+- `deny_list` : `string[]` Players on this list are not added to the host's queue.
 ### AutoStartTimer section
 the match start timer will automatically activate after the host selects a map.
 - `enabled` : `boolean` set true if you want to start the timer automatically.
@@ -304,4 +352,6 @@ The `/say [message]` Discord command can be used to forward messages to the in-g
 
 * Arguments with [] are required, while () are optional.
 
-(Translated by [GoodPro712](https://github.com/GoodPro712) ❤) 
+# Special thanks
++ [Meowhalfannumber1](https://github.com/Meowhalfannumber1)
++ [GoodPro712](https://github.com/GoodPro712)
