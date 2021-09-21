@@ -142,10 +142,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   mapidSeed: number = 1000;
   // ホストがマップを変更する動作をエミュレートする
-  public async emulateChangeMapAsync(delay: number = 0): Promise<void> {
+  public async emulateChangeMapAsync(delay: number = 0, mapid: number = 0): Promise<void> {
+    if (mapid == 0) {
+      mapid = this.mapidSeed++;
+    }
     await this.emulateMessageAsync("BanchoBot", this.channel, "Host is changing map...");
     await this.delay(delay);
-    await this.emulateMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${this.mapidSeed++})`);
+    await this.emulateMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${mapid})`);
   }
 
   // 全員が準備完了になった動作をエミュレートする

@@ -49,7 +49,7 @@ class TestUtils {
   assertHost(username: string, lobby: Lobby): void {
     const host = lobby.host;
     if (host == null) {
-      assert.fail();
+      assert.fail("No one is host now.");
     } else {
       assert.equal(host.name, username);
     }

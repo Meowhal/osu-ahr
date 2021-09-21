@@ -62,7 +62,8 @@
     "star_max": 7.00,
     "length_min": 0,
     "length_max": 360,
-    "gamemode": "any"
+    "gamemode": "any",
+    "num_violations_to_skip": 3
   },
   "MapRecaster": {},
   "MatchStarter": {

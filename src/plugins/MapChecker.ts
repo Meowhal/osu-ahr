@@ -1,11 +1,11 @@
 import { Lobby } from "..";
-import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import { WebApiClient } from "../webapi/WebApiClient";
-import log4js from "log4js";
-import config from "config";
 import { Beatmap, fetchBeatmap } from "../webapi/Beatmapsets";
 import { Player } from "../Player";
+import { LobbyPlugin } from "./LobbyPlugin";
+import log4js from "log4js";
+import config from "config";
 
 export type ValidatorConstructor = (paret: MapChecker) => IValidator;
 
@@ -13,7 +13,6 @@ export interface IValidator {
   /**
    * returns Penalty points 0 to 1.
    * 0 means accepted, above 0 means rejected.
-   * Penalty points are accumulated and the host will be punished if the point reaches 1.
    * @param map target beatmap
    */
   RateBeatmap(map: Beatmap): { rate: number, message: string };
@@ -216,28 +215,23 @@ RegisterValidatorConstructor((parent: MapChecker) => new DefaultValidator(parent
 
 export type MapCheckerOption = {
   enabled: boolean;
+  num_violations_to_skip: number; // Number of times violations are allowed
   cache_expired_day: number;
 } & DefaultRegulation;
-
-
 
 export class MapChecker extends LobbyPlugin {
   option: MapCheckerOption;
   webApiClient: WebApiClient | null;
-  task: Promise<void>;
   lastMapId: number = 0;
   checkingMapId: number = 0;
-  warningCount: number = 0;
-  penaltyPoint: number = 0; // if reached 1, host will skip
+  numViolations: number = 0;
   maps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
   validator: IValidator;
-  doSkip: boolean = false;
 
   constructor(lobby: Lobby, client: WebApiClient | null = null, option: Partial<MapCheckerOption> = {}) {
     super(lobby, "MapChecker", "mapChecker");
     const d = config.get<MapCheckerOption>(this.pluginName);
     this.option = { ...d, ...option } as MapCheckerOption;
-    this.task = Promise.resolve();
     this.webApiClient = client;
     this.validator = ValidatorConstructors["default_validator"](this);
     this.registerEvents();
@@ -281,34 +275,39 @@ export class MapChecker extends LobbyPlugin {
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
     if (command == "!r" || command == "!regulation") {
       this.lobby.SendMessageWithCoolTime(this.getRegulationDescription(), "regulation", 10000);
+      return;
     }
 
-    if (!player.isAuthorized) {
-      return;
-    };
-
-    switch (command.toLocaleLowerCase()) {
-      case "*mapchecker_enable":
-        this.SetEnabled(true);
-        break;
-      case "*mapchecker_disable":
-        this.SetEnabled(false);
-        break;
-      case "*regulation":
-        if (!param) break;
-        if (param.startsWith("enable")) {
+    if (player.isAuthorized) {
+      switch (command.toLocaleLowerCase()) {
+        case "*mapchecker_enable":
           this.SetEnabled(true);
-        } else if (param.startsWith("disable")) {
+          break;
+        case "*mapchecker_disable":
           this.SetEnabled(false);
-        } else {
-          this.SetConfig(param);
-        }
-        break;
-      case "*no":
-        if (param == "regulation") {
-          this.SetEnabled(false);
-        }
-        break;
+          break;
+        case "*regulation":
+          if (!param) break;
+          if (param.startsWith("enable")) {
+            this.SetEnabled(true);
+          } else if (param.startsWith("disable")) {
+            this.SetEnabled(false);
+          } else if (param.includes("violation")) {
+            let m = /\d+/.exec(param);
+            if (m) {
+              this.option.num_violations_to_skip = parseInt(m[0]);
+              this.logger.info("num_violations_to_skip = " + this.option.num_violations_to_skip);
+            }
+          } else {
+            this.SetConfig(param);
+          }
+          break;
+        case "*no":
+          if (param == "regulation") {
+            this.SetEnabled(false);
+          }
+          break;
+      }
     }
   }
 
@@ -350,7 +349,7 @@ export class MapChecker extends LobbyPlugin {
 
   private async cancelCheck() {
     this.checkingMapId = 0;
-    this.penaltyPoint = 0;
+    this.numViolations = 0;
   }
 
   private async check(mapId: number, mapTitle: string): Promise<void> {
@@ -368,25 +367,27 @@ export class MapChecker extends LobbyPlugin {
       return;
     }
     let r = this.validator.RateBeatmap(map);
-    this.penaltyPoint += r.rate;
-    if (1 <= this.penaltyPoint && this.doSkip) {
-      this.punishHost();
-    } else if (0 < r.rate) {
+    if (0 < r.rate) {
+      this.numViolations += 1;
       this.revertMap();
       this.lobby.SendMessage(r.message);
+      if (this.option.num_violations_to_skip != 0 && this.option.num_violations_to_skip <= this.numViolations) {
+        this.skipHost();
+      }
     } else {
       this.accpectMap();
     }
   }
 
-  private punishHost(): void {
-    this.logger.info("punished " + this.lobby.host?.escaped_name);
-    this.lobby.SendMessage("!mp map " + this.lastMapId);
+  private skipHost(): void {
+    let msg = `The number of violations has reached ${this.option.num_violations_to_skip}. Skipped ${this.lobby.host?.escaped_name}`;
+    this.logger.info(msg);
+    this.lobby.SendMessage(msg);
     this.SendPluginMessage("skip");
   }
 
   private revertMap(): void {
-    this.logger.info("revertMap " + this.lobby.host?.escaped_name);
+    this.logger.info(`revertMap ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_to_skip})`);
     this.lobby.SendMessage("!mp map " + this.lastMapId);
   }
 
@@ -414,7 +415,7 @@ export class MapChecker extends LobbyPlugin {
         } else {
           this.logger.error(e);
         }
-        
+
         // トークンがない状態ならもう使わない。
         // マップが存在しない可能性を考慮
         if (!this.webApiClient.token) {

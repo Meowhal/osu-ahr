@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { Lobby, Roles } from "..";
 import { DummyIrcClient } from '../dummies';
-import { DefaultRegulation, DefaultValidator, MapChecker } from '../plugins';
+import { DefaultRegulation, DefaultValidator, MapChecker, MapCheckerOption } from '../plugins';
 import tu from "./TestUtils";
 
 import beatmap_sample from "./cases/beatmap_848345.json";
@@ -14,11 +14,13 @@ describe("Map Checker Tests", function () {
     tu.configMochaAsSilent();
   });
 
-  async function setupAsync():
+  async function setupAsync(option?: Partial<MapCheckerOption>):
     Promise<{ checker: MapChecker, lobby: Lobby, ircClient: DummyIrcClient }> {
     const li = await tu.SetupLobbyAsync();
-    const ma = new MapChecker(li.lobby, null,);
-    return { checker: ma, ...li };
+    const checker = new MapChecker(li.lobby, null, option);
+    checker.maps[beatmap_sample.id] = { ...beatmap_sample, fetchedAt: Date.now() };
+    await tu.AddPlayersAsync(["p1", "p2", "p3"], li.ircClient);
+    return { checker, ...li };
   }
 
   describe("Default Regulation Tests", function () {
@@ -28,7 +30,7 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: "any"
+        gamemode: "any",
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -149,6 +151,111 @@ describe("Map Checker Tests", function () {
       const dr = new DefaultValidator(reg, getLogger("checker"));
       const r = dr.RateBeatmap(map);
       assert.equal(r.rate, 0);
+
+    });
+  });
+  describe("plugin tests", () => {
+
+    it("accept map test", async () => {
+      const { checker, lobby, ircClient } = await setupAsync({
+        num_violations_to_skip: 2,
+        cache_expired_day: 10,
+        star_min: 5.00,
+        star_max: 6.00,
+        length_min: 0,
+        length_max: 300,
+        gamemode: "osu",
+      });
+
+      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
+      assert.equal(lobby.mapId, beatmap_sample.id);
+    });
+
+    it("reject map test", async () => {
+      const { checker, lobby, ircClient } = await setupAsync({
+        num_violations_to_skip: 2,
+        cache_expired_day: 10,
+        star_min: 1.00,
+        star_max: 3.00,
+        length_min: 0,
+        length_max: 300,
+        gamemode: "osu",
+      });
+
+      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
+      await tu.delayAsync(10);
+      assert.notEqual(lobby.mapId, beatmap_sample.id);
+      /*let skipCalled = false;
+
+      lobby.PluginMessage.once(({ type }) => {
+        if (type == "skip") {
+          skipCalled = true;
+        }
+      });
+*/
+    });
+
+    it("reject and skip test", async () => {
+      const { checker, lobby, ircClient } = await setupAsync({
+        num_violations_to_skip: 2,
+        cache_expired_day: 10,
+        star_min: 1.00,
+        star_max: 3.00,
+        length_min: 0,
+        length_max: 300,
+        gamemode: "osu",
+      });
+
+      let skipCalled = false;
+      lobby.PluginMessage.once(({ type }) => {
+        if (type == "skip") {
+          skipCalled = true;
+        }
+      });
+
+      ircClient.emulateChangeHost("p1");
+
+      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
+      await tu.delayAsync(10);
+      assert.notEqual(lobby.mapId, beatmap_sample.id);
+      assert.isFalse(skipCalled);
+
+      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
+      await tu.delayAsync(10);
+      assert.notEqual(lobby.mapId, beatmap_sample.id);
+      assert.isTrue(skipCalled);
+
+    });
+
+    it("reject and not skip test", async () => {
+      const { checker, lobby, ircClient } = await setupAsync({
+        num_violations_to_skip: 0,
+        cache_expired_day: 10,
+        star_min: 1.00,
+        star_max: 3.00,
+        length_min: 0,
+        length_max: 300,
+        gamemode: "osu",
+      });
+
+      let skipCalled = false;
+      lobby.PluginMessage.once(({ type }) => {
+        if (type == "skip") {
+          skipCalled = true;
+        }
+      });
+
+      ircClient.emulateChangeHost("p1");
+
+      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
+      await tu.delayAsync(10);
+      assert.notEqual(lobby.mapId, beatmap_sample.id);
+      assert.isFalse(skipCalled);
+
+      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
+      await tu.delayAsync(10);
+      assert.notEqual(lobby.mapId, beatmap_sample.id);
+      assert.isFalse(skipCalled);
 
     });
   });

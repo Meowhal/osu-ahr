@@ -26,8 +26,8 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`*keep size [1-16]` | Keeps the size of the lobby at specified number. | `*keep size 8`| 
 |`*no keep size` | Stops Keeping the size of the lobby at specified number. | `*no keep size`|
 |`*regulation ["min_star", "max_star", "min_length" or "max_length"] = [value]` | Changes the regulation. | `*regulation max_length = 600`|
-|`*denylist add [username]` | Adds players to deny list | `*denylist add bad_guy` |
-|`*denylist remove [username]` | Removes players from deny list | `*denylist remove bad_guy` |
+|`*denylist add [username]` | Adds player to the deny list | `*denylist add bad_guy` |
+|`*denylist remove [username]` | Removes player from the deny list | `*denylist remove bad_guy` |
 
 
 Owner commands are also available on the cli.
@@ -132,8 +132,8 @@ You can edit local.json to configure the bot's behavior.
 ```
 ### AfkKicker section
 Points will be added to the player who seems to be AFK, and the player who gets points above the threshold will be kicked.
-1. Finish the match with no score -> 2 points
-1. Do not participate in the match without a map -> 2 points
+1. Finishes the match with no score -> added 2 points
+1. Does not participate in the match without a map -> added 2 points
 1. !stat command turns out that player is AFK -> added 3 points
 
 - `enabled` : `boolean` 
@@ -188,6 +188,7 @@ configs related to host-skip vote and automatic afk host skip.
 - `length_min`: `number` lower cap of length. specify in seconds. 0 means no cap.
 - `length_max`: `number` higher cap of length. 0 means no cap.
 - `gamemode`: `string` specify game mode in the room. "any" means no specific gamemode restriction.
+- `num_violations_to_skip`: `number` Number of times violations are allowed.  0 means no skip.
 ### MatchStarter section
 !start vote configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
