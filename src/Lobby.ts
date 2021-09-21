@@ -418,7 +418,7 @@ export class Lobby {
     } else {
       const user = this.GetPlayer(from);
       if (!user) return;
-      if (message == "!info" || message == "!help") {
+      if ((message == "!info" || message == "!help") && this.players.has(user)) {
         this.sendInfoMessagePM(user);
       }
     }
@@ -891,7 +891,7 @@ export class Lobby {
       if (!this.players.has(p)) {
         this.addPlayer(p, r.slot, r.team);
         playersIn.push(p);
-        this.PlayerJoined.emit({ player: p, slot: p.slot, team: p.team, fromMpSettings: true});
+        this.PlayerJoined.emit({ player: p, slot: p.slot, team: p.team, fromMpSettings: true });
       } else {
         p.slot = r.slot;
         p.team = r.team;
