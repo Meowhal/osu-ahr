@@ -65,7 +65,7 @@ export class MatchStarter extends LobbyPlugin {
   private onAllPlayerReady(): void {
     if (this.option.start_when_all_player_ready) {
       this.start();
-    }    
+    }
   }
 
   private onChatCommand(player: Player, command: string, param: string): void {
@@ -105,7 +105,8 @@ export class MatchStarter extends LobbyPlugin {
         this.start();
       } else {
         const count = parseInt(args[0]);
-        this.startTimer(count);
+        const withhelp = args[1] !== undefined && args[1] === "withhelp";
+        this.startTimer(count, withhelp);
       }
     } else if (type == "mp_abort_start") {
       this.stopTimer();
@@ -133,11 +134,11 @@ export class MatchStarter extends LobbyPlugin {
     }
   }
 
-  private startTimer(count: number): void {
+  private startTimer(count: number, withHint: boolean = false): void {
     if (count == 0) {
       this.start();
     } else {
-      this.lobby.SendMessage(`Queued the match to start in ${count} seconds`);
+      this.lobby.SendMessage(`Queued the match to start in ${count} seconds${withHint ? ". (Host can stop the timer with !stop command.)" : ""}`);
       this.lobby.DeferMessage("!mp start", "mp_start", count * 1000, true);
       if (15 < count) {
         this.lobby.DeferMessage("Match starts in 10 seconds", "mp_start 10 sec", (count - 10) * 1000, true);

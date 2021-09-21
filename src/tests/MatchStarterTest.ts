@@ -289,4 +289,11 @@ describe("MatchStarterTest", function () {
       assert.isTrue(starter.IsSelfStartTimerActive);
     });
   });
+
+  it("with help test", async () => {
+    const { starter, lobby, ircClient } = await setupAsync();
+    const players = await tu.AddPlayersAsync(5, ircClient);
+    await tu.changeHostAsync(players[0], lobby);
+    starter.SendPluginMessage("mp_start", ["30", "withhelp"]);
+  });
 });
