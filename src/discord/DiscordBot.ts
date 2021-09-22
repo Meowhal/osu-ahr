@@ -84,7 +84,24 @@ export class DiscordBot {
       }
     });
 
-    await this.discordClient.login(this.cfg.token);
+    try {
+      await this.discordClient.login(this.cfg.token);
+    } catch(e: any) {
+      if (e?.code == "TOKEN_INVALID" && e.message) {
+        logger.error(e.message);
+        if (this.cfg.token == "") {
+          logger.error(`your token is Empty`);
+        } else {
+          logger.error(`your token is "${this.cfg.token}"`);
+        }
+        logger.error("Check the setup guide -> https://github.com/Meowhal/osu-ahr#discord-integration");
+        
+      } else {
+        logger.error(e);
+      }      
+      process.exit();
+    }
+    
   }
 
   async registerCommands(guild: Guild) {
