@@ -107,11 +107,11 @@ export class AfkKicker extends LobbyPlugin {
             for (const [player, stat] of this.playerStats.entries()) {
                 if (stat.isPlaying) {
                     if (stat.score == -1) {
-                        this.changeAfkPoint(player, stat, POINT_NO_MAP);
+                        this.changeAfkPoint(player, stat, POINT_NO_MAP, "NO_MAP");
                     } else if (stat.score == 0) {
-                        this.changeAfkPoint(player, stat, POINT_NO_SCORE);
+                        this.changeAfkPoint(player, stat, POINT_NO_SCORE, "NO_SCORE");
                     } else {
-                        this.changeAfkPoint(player, stat, POINT_HAS_SCORE);
+                        this.changeAfkPoint(player, stat, POINT_HAS_SCORE, "HAS_SCORE");
                     }
                 }
                 stat.isPlaying = false;
@@ -121,20 +121,20 @@ export class AfkKicker extends LobbyPlugin {
         this.lobby.PlayerChated.on(({ player }) => {
             const stat = this.playerStats.get(player);
             if (stat) {
-                this.changeAfkPoint(player, stat, POINT_CHAT);
+                this.changeAfkPoint(player, stat, POINT_CHAT, "CHATED");
             }
         });
         this.lobby.ParsedStat.on(({ player, result }) => {
             const stat = this.playerStats.get(player);
             if (stat && result.status == StatStatuses.Afk) {
-                this.changeAfkPoint(player, stat, POINT_STAT_AFK);
+                this.changeAfkPoint(player, stat, POINT_STAT_AFK, "AFK_STAT");
             }
         });
         this.lobby.ReceivedChatCommand.on(({ player, command, param }) => this.onReceivedChatCommand(player, command, param));
 
     }
 
-    changeAfkPoint(player: Player, stat: PlayerState, delta: number) {
+    changeAfkPoint(player: Player, stat: PlayerState, delta: number, reason: string) {
         if (!this.option.enabled) return;
         const now = Date.now();
         if (now < stat.timeLastChange + this.option.cooltime_ms) return;
@@ -142,8 +142,9 @@ export class AfkKicker extends LobbyPlugin {
         stat.timeLastChange = now;
         stat.afkPoint += delta;
         if (0 < delta) {
-            this.logger.info(`afk player detected: ${player.escaped_name}(${stat.afkPoint} / ${this.option.threshold})`);
+            this.logger.info(`Detected ${player.escaped_name} is afk. Reason: ${reason}(${(delta > 0 ? "+" : "") + delta}), ${stat.afkPoint} / ${this.option.threshold}`);
         }
+        
         if (stat.afkPoint < 0) {
             stat.afkPoint = 0;
         } else if (this.option.threshold <= stat.afkPoint) {
