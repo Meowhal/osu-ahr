@@ -251,6 +251,40 @@ export class Lobby {
     return this.players.has(p);
   }
 
+  TransferHostAsync(user: Player): Promise<void> {
+    this.hostPending = user;
+    return new Promise((resolve, reject) => {
+
+      const d1 = this.HostChanged.on((a: { player: Player }) => {
+        dispose();
+        if (a.player == user) {
+          resolve();
+        } else {
+          reject("Another player became host.");
+        }
+      });
+
+      const d2 = this.PlayerLeft.on((a: { player: Player }) => {
+        if (a.player == user) {
+          dispose();
+          reject("Pending host left the lobby.");
+        }
+      });
+
+      const t1 = setTimeout(() => {
+        dispose();
+        reject("!mp host command timed out.");
+
+      }, this.option.transferhost_timeout_ms);
+
+      const dispose = () => {
+        d1.dispose();
+        d2.dispose();
+        clearTimeout(t1);
+      }
+    });
+  }
+
   TransferHost(user: Player): void {
     this.transferHostTimeout.cancel();
 
@@ -266,8 +300,10 @@ export class Lobby {
   onTimeoutedTransferHost(): void {
     this.logger.warn("!mp host timeout");
     if (this.hostPending) {
+      if (this.players.has(this.hostPending)) {
+        this.LoadMpSettingsAsync();
+      }
       this.hostPending = null;
-      this.LoadMpSettingsAsync();
     }
   }
 
@@ -832,6 +868,7 @@ export class Lobby {
         this.host = null;
       }
       if (this.hostPending == player) {
+        this.logger.warn("pending中にユーザーが離脱した pending host: %s", player.name);
         this.hostPending = null;
       }
       return true;

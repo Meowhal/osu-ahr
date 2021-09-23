@@ -288,6 +288,8 @@ If `close` is issued, the lobby will be closed after the password is set and eve
 You can control AHR lobbies via a Discord Bot, which allows you to access in-game chat and execute lobby control commands from Discord channels.
 
 ## Setup
+[discord.js](https://discord.js.org/) requires [Node.js](https://nodejs.org/ja/) 16.6 or higher to use, so make sure you're up to date. To check your Node version, use node -v in your terminal or command prompt, and if it's not high enough, update it.
+
 ### Creating your bot
 
 [Setting up a bot application](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)

@@ -389,6 +389,7 @@ export class MapChecker extends LobbyPlugin {
   private revertMap(): void {
     this.logger.info(`revertMap ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_to_skip})`);
     this.lobby.SendMessage("!mp map " + this.lastMapId);
+    this.checkingMapId = 0;
   }
 
   private accpectMap(): void {

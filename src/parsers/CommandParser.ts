@@ -46,6 +46,10 @@ export namespace parser {
         if (m_mphost) {
           return makeBanchoResponse(BanchoResponseType.MpHostChanged, m_mphost[1]);
         }
+        const m_setting = message.match(/Changed match settings to\s?((\d+) slots)?,?\s?(HeadToHead|TagCoop|TeamVs|TagTeamVs)?,?\s?(Score|Accuracy|Combo|ScoreV2)?/);
+        if (m_setting) {
+          return makeBanchoResponse(BanchoResponseType.MpSettingsChanged, m_setting[2], m_setting[3], m_setting[4]);
+        }
         break;
       case 71: // G
         if (message == "Good luck, have fun!") {
@@ -60,6 +64,12 @@ export namespace parser {
       case 73: // I
         if (message == "Invalid map ID provided") {
           return makeBanchoResponse(BanchoResponseType.MpInvalidMapId);
+        }
+        if (message == "Invalid or no settings provided") {
+          return makeBanchoResponse(BanchoResponseType.MpInvalidSettings);
+        }
+        if (message == "Invalid or no size provided") {
+          return makeBanchoResponse(BanchoResponseType.MpInvalidSize);
         }
         const m_invite = message.match(/Invited (.*) to the room/);
         if (m_invite) {
@@ -282,12 +292,15 @@ export enum BanchoResponseType {
   BeatmapChanged,
   MpBeatmapChanged,
   MpInvalidMapId,
+  MpInvalidSettings,
+  MpInvalidSize,
   HostChanged,
   MpHostChanged,
   UserNotFound,
   MatchStarted,
   MpMatchStarted, // response of !mp start
   MpMatchAlreadyStarted,
+  MpSettingsChanged,
   PlayerFinished,
   MatchFinished,
   AbortedMatch,
