@@ -357,4 +357,4 @@ The `/say [message]` Discord command can be used to forward messages to the in-g
 
 # Special thanks
 + [Meowhalfannumber1](https://github.com/Meowhalfannumber1)
-+ [GoodPro712](https://github.com/GoodPro712)
++ [Metacinnabar](https://github.com/Metacinnabar)
