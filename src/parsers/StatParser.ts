@@ -21,9 +21,9 @@ export class StatResult {
   }
   toString(): string {
     return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status == StatStatuses.None ? "" : " is " + StatStatuses[this.status]}:
-  Score:    ${this.score} (#${this.rank})
-  Plays:    ${this.plays} (lv${this.level})
-  Accuracy: ${this.accuracy}%`;
+Score:    ${this.score} (#${this.rank})
+Plays:    ${this.plays} (lv${this.level})
+Accuracy: ${this.accuracy}%`;
   }
 }
 
