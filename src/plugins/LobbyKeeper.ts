@@ -41,6 +41,11 @@ export interface LobbyKeeperOption {
    * Number of kicks until counterattack kick is activated
    */
   hostkick_tolerance: number;
+
+  /**
+   * Multiplayer Room Title
+   */
+  title: string | null;
 }
 
 export class LobbyKeeper extends LobbyPlugin {
@@ -121,6 +126,7 @@ export class LobbyKeeper extends LobbyPlugin {
     this.fixLobbyModeAndSize();
     this.fixPassword();
     this.fixMods();
+    this.fixTitle();
   }
 
   private onFinishedGame(game: Game): any {
@@ -144,6 +150,12 @@ export class LobbyKeeper extends LobbyPlugin {
   private fixPassword(): void {
     if (this.option.password != null) {
       this.lobby.SendMessage(`!mp password ${this.option.password}`);
+    }
+  }
+
+  private fixTitle(): void {
+    if (this.option.title != null) {
+      this.lobby.SendMessage(`!mp name ${this.option.title}`);
     }
   }
 
@@ -194,6 +206,14 @@ export class LobbyKeeper extends LobbyPlugin {
         this.fixMods();
         return `keep mods ${this.option.mods}`;
       }
+
+      const regTitle = /^title\s*(.+)?\s*$/;
+      const matchTitle = regTitle.exec(param);
+      if (matchTitle) {
+        this.option.title = matchTitle[1] !== undefined ? matchTitle[1] : "";
+        this.fixTitle();
+        return `rename lobby title ${this.option.title !== "" ? this.option.title : "[empty]"}`;
+      }
     }
     if (command == "*no") {
       if (param == "keep mode" && this.option.mode != null) {
@@ -218,13 +238,18 @@ export class LobbyKeeper extends LobbyPlugin {
         this.option.mods = null;
         return "disabled keeping mods";
       }
+      if (param.startsWith("keep title") && this.option.title != null) {
+        this.option.title = null;
+        return "disabled keeping room title";
+      }
     }
+
     return null;
   }
 
   GetPluginStatus(): string {
     return `-- Lobby Keeper --
   mode : ${this.option.mode === null ? "disabled" : TeamModes[this.option.mode.team] + ", " + ScoreModes[this.option.mode.score]}, size : ${this.option.size === null ? "disabled" : this.option.size},
-  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}, mods : ${this.option.mods === null ? "disabled" : this.option.mods}`;
+  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}, mods : ${this.option.mods === null ? "disabled" : this.option.mods}, ${this.option.title === null ? "disabled" : this.option.title}`;
   }
 }

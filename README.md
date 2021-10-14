@@ -1,9 +1,11 @@
 # osu-ahr
-irc bot for [osu!](https://osu.ppy.sh/home) multi lobby auto host rotation.  
+Auto Host Rotation bot for [osu!](https://osu.ppy.sh/home) multiplayer.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
 ## Command List
-|for player|desc|
+
+### Player Command
+|Command|Description|
 |:--|:--|
 |`!queue`| Shows host queue.|
 |`!skip `| Triggers vote to skip current host.|
@@ -12,26 +14,34 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`!update`| Updates current selected map to the latest version. Use when host pick an outdated map.|
 |`!regulation`| Shows current regulation.|
  
-|for host|desc|ex|
+### Host Command
+|Command|Description|Example|
 |:--|:--|:--|
 |`!skip`| Transfers host to next player.||
-|`!start [secs]`| Begins start timer.|`!start 30`|
+|`!start [seconds]`| Begins start timer.|`!start 30`|
 |`!stop`| Stops current start timer.||
 
-|for owner|desc|ex|
+### Owner Command
+|Command|Description|Example|
 |:--|:--|:--|
 |`*start`|Forces the match to start.||
 |`*skip`|Forces current host to skip.||
 |`*order [players list]`| Reorders the queue in specified order. |`*order p1, p2, p3`|
 |`*keep size [1-16]` | Keeps the size of the lobby at specified number. | `*keep size 8`| 
-|`*no keep size` | Stops Keeping the size of the lobby at specified number. | `*no keep size`|
+|`*keep password [password]` | Keeps the lobby password. | `*keep password foobar`| 
+|`*keep mode [0-3] [0-3]` | Keeps the lobby team and score mode. | `*keep 0 0`| 
+|`*keep mods [mod] ([mod]) ([mod]) ...` | Keeps the lobby allowed mods. | `*keep mods HR DT`| 
+|`*keep title [title]` | Keeps the lobby title. | `*keep title 0-2.99* Auto Host Rotate`| 
+|`*no keep size` | Stops keeping the size of the lobby at specified number. | `*no keep size`|
+|`*no keep password` | Stops keeping the lobby password. | `*no keep password`|
+|`*no keep mode` | Stops keeping the team and score mode. | `*no keep mode`|
+|`*no keep mod` | Stops keeping the lobby allowed mods and set mod to FreeMod. | `*no keep mod`|
+|`*no keep title` | Stops keeping the lobby title. | `*no keep title`|
 |`*regulation ["min_star", "max_star", "min_length" or "max_length"] = [value]` | Changes the regulation. | `*regulation max_length = 600`|
 |`*denylist add [username]` | Adds player to the deny list | `*denylist add bad_guy` |
 |`*denylist remove [username]` | Removes player from the deny list | `*denylist remove bad_guy` |
 
-
-Owner commands are also available on the cli.
-When using from discordbot, enter the owner command after /say.
+Note: Owner commands are also available on the cli and discord bot. Here are example of owner command using cli and discord:
 
 cli
 ```
@@ -45,18 +55,18 @@ discord
 
 ## Setup
 
-+ Install Node.js and Git
-  + [Node.js](https://nodejs.org/)
+1. Install Node.js and Git
+  + [Node.js](https://nodejs.org/) (Version 16.11.1 or Higher)
   + [Git](https://git-scm.com/)
-+ clone repo and install libs
+2. Clone this repo and install libraries
 ```bash
 > git clone https://github.com/Meowhal/osu-ahr.git
 > cd osu-ahr
 > npm install
 ```
-+ get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
-+ create a file `./config/local.json`
-+ enter your account id and irc password to `./config/local.json` as in the following example.
+3. Create a file `./config/local.json`, use `./config/default.json` as template.
+4. Get irc password from [osu! IRC Authentication](https://osu.ppy.sh/p/irc)
+5. Enter your account ID and irc password to `./config/local.json` as in the following example.
 ```json
 {
   "irc": {
@@ -69,7 +79,8 @@ discord
   }
 }
 ```
-+ launch the bot
+6. Configure the bot (Optional). See the [Configuration section](#configuration) for details.
+7. Launch the bot
 ```bash 
 > npm run start
 starting up...
@@ -86,11 +97,11 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
-You can also run your bot on discord. See the later section for details.
+Note: You can also run your bot on discord. See the [Discord Integration section](#discord-integration) for details.
 
-## configuration
+## Configuration
 You can edit local.json to configure the bot's behavior.
-### irc section
+### IRC Section
 - `server` : `string` domain name of osu irc server.
 - `nick` : `string` your osu account name
 - `opt.port` : `number` 
@@ -107,7 +118,7 @@ You can edit local.json to configure the bot's behavior.
   },
 ...
 ```
-### Lobby section
+### Lobby Section
 - `authorized_users` : `string[]`
   - Specify to Authorized user. They can use *commands(*skip, *start, *order).
 - `listref_duration_ms` : `number`
@@ -121,7 +132,7 @@ You can edit local.json to configure the bot's behavior.
   "authorized_users": ["peppy", "abcedf"], 
   "listref_duration_ms": 1000,
   "info_message": [
-    "welcom to ahr lobby!",
+    "welcome to ahr lobby!",
     "The second item is displayed on the second line.",
     "Too many lines will result in a silent penalty"
   ],
@@ -130,11 +141,11 @@ You can edit local.json to configure the bot's behavior.
   "info_message_announcement_interval_ms": 0
 }
 ```
-### AfkKicker section
+### AfkKicker Section
 Points will be added to the player who seems to be AFK, and the player who gets points above the threshold will be kicked.
 1. Finishes the match with no score -> added 2 points
-1. Does not participate in the match without a map -> added 2 points
-1. !stat command turns out that player is AFK -> added 3 points
+2. Does not participate in the match without a map -> added 2 points
+3. !stat command turns out that player is AFK -> added 3 points
 
 - `enabled` : `boolean` 
 - `threshold` : `number` 
@@ -150,19 +161,19 @@ Points will be added to the player who seems to be AFK, and the player who gets 
   ...
 }
 ```
-### AutoHostSelector section 
+### AutoHostSelector Section 
 - `show_host_order_every_after_match` : `boolean` set true if you want to show them.
 - `host_order_chars_limit` : `number` Host-order messages are truncated to this length.
 - `host_order_cooltime_ms` : `number` cool time for Host-order messages.
 - `deny_list` : `string[]` Players on this list are not added to the host's queue.
-### AutoStartTimer section
+### AutoStartTimer Section
 the match start timer will automatically activate after the host selects a map.
 - `enabled` : `boolean` set true if you want to start the timer automatically.
 - `doClearHost`: `boolean` do !mp clearhost after timer starts.
 - `waitingTime`: `number` seconds until start the match.
-### HistoryLoader section
+### HistoryLoader Section
 - `fetch_interval_ms`: `number` how often fetch the lobby history
-### HostSkipper section
+### HostSkipper Section
 configs related to host-skip vote and automatic afk host skip.
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to skip.
   - if there are 16 players and the rate is 0.5, 8 players need to vote.
@@ -173,15 +184,16 @@ configs related to host-skip vote and automatic afk host skip.
 - `afk_check_interval_first_ms` : `number` time to first check if the host is afk.
 - `afk_check_interval_ms` : `number` interval to check if the host is afk.
 - `afk_check_do_skip` : `boolean` skip afk host automatically or not.
-### LobbyKeeper section
+### LobbyKeeper Section
 - `mode`: `null | { team: number, score: number }` keep lobby mode.
 - `size`: `number` keep lobby size.
 - `password`: `null | string` keep password.
 - `mods`: `null | string` keep mods.
 - `hostkick_tolerance`:`number` when counter kick activated.
-### LobbyTerminator section
+- `title`:`null | string` keep the lobby title.
+### LobbyTerminator Section
 - `terminate_time_ms` : `number` time to close the lobby after everyone has left the lobby.
-### MapChecker section
+### MapChecker Section
 - `enabled`: `boolean` use map checker or not.
 - `star_min`: `number` lower cap of dificullty. 0 means no cap.
 - `star_max`: `number` higher cap of dificullty. 0 means no cap.
@@ -189,13 +201,13 @@ configs related to host-skip vote and automatic afk host skip.
 - `length_max`: `number` higher cap of length. 0 means no cap.
 - `gamemode`: `string` specify game mode in the room. "any" means no specific gamemode restriction.
 - `num_violations_to_skip`: `number` Number of times violations are allowed.  0 means no skip.
-### MatchStarter section
+### MatchStarter Section
 !start vote configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
 - `vote_min`: `number` minimum required vote count.
 - `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
 - `start_when_all_player_ready` : `boolean` start the match when everyoen is ready.
-### MatchAborter section
+### MatchAborter Section
 !abort vote and auto abort configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to abort.
 - `vote_min`: `number` minimum required vote count.
@@ -203,12 +215,12 @@ configs related to host-skip vote and automatic afk host skip.
 - `auto_abort_rate`: `number` the rate of finished players to automatically abort the stuck game.
 - `auto_abort_delay_ms`: `number` the delay time of actually abort the stuck game.
 - `auto_abort_do_abort`: `boolean` do !mp abort or not.
-### WordCounter section
+### WordCounter Section
 Used to measure the amount of bot messages 
-### OahrCli section 
+### OahrCli Section 
 - `invite_users` : `string[]` players are invited to the lobby when the bot make a new lobby.
 - `password` : `string` default lobby password. stay empty("") if you don't need password.
-### WebApi section
+### WebApi Section
 - `client_id`: `number`, webapi client id. you can make client at [https://osu.ppy.sh/home/account/edit](https://osu.ppy.sh/home/account/edit)
   - optional. the bot uses the WebApi instead of webpage to get the beatmap infos.
 - `client_secret`: `string` webapi client secret
@@ -329,21 +341,21 @@ After successful activation, a Discord Bot invitation link will appear in the te
 ### Role settings
 When a bot is invited to a guild, the `ahr-admin` role is created. Only users with this role will be able to manage the lobby. You should assign this role to your own account.
 
-## Lobby creation
+### Lobby creation
 ![how to make a lobby](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/make.png)
 
 You can create a lobby by executing the `/make (lobby name)` command in the appropriate channel of the guild you have invited your bot to. (You need to have the `ahr-admin` role to run this command). If the command succeeds, a tournament lobby will be created in osu, and a bridge channel with a name similar to `mp_123456` will be created in the guild.
 
 You can run the `/make` command as many times as you want and manage multiple lobbies at the same time, however, osu bots have a limit on the number of chats that can be created. If you create a large number of lobbies, your account may be flagged as spam. It is recommended that you limit the number of lobbies to two.
 
-## Join an existing lobby
+### Join an existing lobby
 If the ahr bot has been terminated due to a glitch or some other reason, you can use the `/enter` command after restarting to resume lobby management.
 If there is still a bridge channel in the guild you can run `/enter` within that channel. (The channel name must be in the form of a lobby ID, for example `#mp_123456`). You can join any lobby by passing the lobbyId as an option with `/enter (lobby id)`.
 
-## Chat forwarding
+### Chat forwarding
 The `/say [message]` Discord command can be used to forward messages to the in-game chat. This command takes the message to be forwarded and the lobbyId as options, but you can omit the lobbyId if you are within an existing bridge channel. The `/say` command can also be used for tournament commands such as `!mp start` and owner commands such as `*regulation`.
 
-## Discord Commands
+### Discord Commands
 |command|desc|ex|
 |:--|:--|:--|
 |`/make [lobbyName]`| Make a tournament lobby. |`/make 4.00-5.99 auto host rotation`|
@@ -358,3 +370,4 @@ The `/say [message]` Discord command can be used to forward messages to the in-g
 # Special thanks
 + [Meowhalfannumber1](https://github.com/Meowhalfannumber1)
 + [Metacinnabar](https://github.com/Metacinnabar)
++ [ZeroPyrozen](https://github.com/ZeroPyrozen)
