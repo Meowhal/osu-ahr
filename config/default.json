@@ -51,7 +51,8 @@
     "size": null,
     "password": null,
     "mods": null,
-    "hostkick_tolerance": 4
+    "hostkick_tolerance": 4,
+    "title": null
   },
   "LobbyTerminator": {
     "terminate_time_ms": 60000
