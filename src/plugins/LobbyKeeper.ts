@@ -154,7 +154,10 @@ export class LobbyKeeper extends LobbyPlugin {
   }
 
   private fixTitle(): void {
-    if (this.option.title != null) {
+    if (this.option.title == null) return;
+
+    // If historyRepository is working, this.lobby.lobbyName will be updated automatically at the start of the match.
+    if (this.lobby.historyRepository.hasError || this.option.title != this.lobby.lobbyName) {
       this.lobby.SendMessage(`!mp name ${this.option.title}`);
     }
   }
