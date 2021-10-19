@@ -185,12 +185,29 @@ configs related to host-skip vote and automatic afk host skip.
 - `afk_check_interval_ms` : `number` interval to check if the host is afk.
 - `afk_check_do_skip` : `boolean` skip afk host automatically or not.
 ### LobbyKeeper Section
-- `mode`: `null | { team: number, score: number }` keep lobby mode.
-- `size`: `number` keep lobby size.
+- `mode` : `null | { team: number, score: number }` keep lobby mode.
+  - team  => 0: Head To Head, 1: Tag Coop, 2: Team Vs, 3: Tag Team Vs
+  - score => 0: Score, 1: Accuracy, 2: Combo, 3: Score V2
+- `size` : `number` keep lobby size.
 - `password`: `null | string` keep password.
-- `mods`: `null | string` keep mods.
+- `mods` : `null | string` keep mods.
 - `hostkick_tolerance`:`number` when counter kick activated.
-- `title`:`null | string` keep the lobby title.
+- `title` : `null | string` keep the lobby title.
+```json
+{
+ ...
+ "LobbyKeeper": {
+    "mode": {"team": 2, "score": 1 },
+    "size": 16,
+    "title": "4-5 auto host rotation"
+  }
+  ...
+}
+```
+"LobbyKeeper": {
+        "mode": {"team": 2, "score": 1 },
+        "size": 13
+    }
 ### LobbyTerminator Section
 - `terminate_time_ms` : `number` time to close the lobby after everyone has left the lobby.
 ### MapChecker Section

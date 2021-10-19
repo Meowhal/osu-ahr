@@ -20,8 +20,8 @@ const ScoreModes = [
 
 export interface LobbyKeeperOption {
   /**
-   * team 0: Head To Head, 1: Tag Coop, 2: Team Vs, 3: Tag Team Vs
-   * score 0: Score, 1: Accuracy, 2: Combo, 3: Score V2
+   * team - 0: Head To Head, 1: Tag Coop, 2: Team Vs, 3: Tag Team Vs
+   * score - 0: Score, 1: Accuracy, 2: Combo, 3: Score V2
    */
   mode: { team: number, score: number } | null;
 
