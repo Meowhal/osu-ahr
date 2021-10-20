@@ -82,7 +82,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.eventDisposers.push(this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param)));
     this.eventDisposers.push(this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src)));
     this.eventDisposers.push(this.lobby.AbortedMatch.on(a => this.onMatchAborted(a.playersFinished, a.playersInGame)));
-    this.eventDisposers.push(this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged)));
+    this.eventDisposers.push(this.lobby.FixedSettings.on(a => this.onFixedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged)));
     this.eventDisposers.push(this.lobby.ReceivedBanchoResponse.on(a => {
       switch (a.response.type) {
         case BanchoResponseType.BeatmapChanging:
@@ -233,7 +233,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param playersOut 
    * @param hostChanged 
    */
-  private onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
+  private onFixedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     if (this.lobby.host == null) {
       this.hostQueue = [];
     }

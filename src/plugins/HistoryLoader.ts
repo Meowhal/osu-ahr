@@ -27,13 +27,13 @@ export class HistoryLoader extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
+    this.lobby.FixedSettings.on(a => this.onFixedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged));
     this.lobby.JoinedLobby.on(a => this.onJoinedLobby(a.channel));
     this.lobby.MatchStarted.on(a => this.onMatchStarted());
     this.lobby.LeftChannel.on(a => this.stopFetch());
   }
 
-  async onParsedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): Promise<void> {
+  async onFixedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): Promise<void> {
     if (!this.repository) return;
     let order = (await this.repository.calcCurrentOrderAsName()).join(",");
     this.SendPluginMessage("reorder", [order]);

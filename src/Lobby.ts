@@ -76,6 +76,7 @@ export class Lobby {
   SentMessage = new TypedEvent<{ message: string }>();
   ReceivedBanchoResponse = new TypedEvent<{ message: string, response: BanchoResponse }>();
   ParsedStat = new TypedEvent<{ result: StatResult, player: Player, isPm: boolean }>();
+  FixedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
   ParsedSettings = new TypedEvent<{ result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean }>();
   LeftChannel = new TypedEvent<void>();
   events: { [eventtype: string]: any } = {};
@@ -667,6 +668,7 @@ export class Lobby {
       const r = this.margeMpSettingsResult(result);
       if (r.hostChanged || r.playersIn.length != 0 || r.playersOut.length != 0) {
         this.logger.info("applied mp settings");
+        this.FixedSettings.emit({ result, ...r });
       }
       this.ParsedSettings.emit({ result, ...r });
     }
@@ -820,7 +822,7 @@ export class Lobby {
     if (this.SendMessageWithCoolTime("!mp settings", "mpsettings", 15000)) {
       this.logger.trace("start loadLobbySettings");
       const p = new Promise<void>(resolve => {
-        this.ParsedSettings.once(() => {
+        this.FixedSettings.once(() => {
           this.SendMessage("!mp listrefs");
           this.logger.trace("completed loadLobbySettings");
           resolve();
