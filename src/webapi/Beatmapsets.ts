@@ -5,10 +5,15 @@ export function fetchBeatmapsets(id: number): Promise<Beatmapsets | undefined> {
   return fetchFromBeatmapPage(id);
 }
 
-export async function fetchBeatmap(id: number): Promise<Beatmap | undefined> {
+export async function fetchBeatmap(id: number, mode: string="", allowConvert: number=0): Promise<Beatmap | undefined> {
   let set = await fetchFromBeatmapPage(id);
   if (!set) return;
   let q = set.beatmaps?.find(v => v.id == id);
+  if (!q) return;
+  //Get convert if current map is osu but the mode is not osu and convert is allowed
+  if(q.mode=="osu" && q.mode!=mode && allowConvert===1){
+    q = set.converts?.find(v=>(v.mode==mode && v.id==id));
+  }
   if (!q) return;
   q.beatmapset = set;
   set.beatmaps = undefined;
@@ -78,6 +83,7 @@ export type Beatmapsets = {
   "tags": string,
   "has_favourited"?: boolean,
   "beatmaps"?: Beatmap[],
+  "converts"?: Beatmap[],
   "current_user_attributes"?: {
     "can_delete": false,
     "can_edit_metadata": false,
