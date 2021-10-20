@@ -214,6 +214,7 @@ export class LobbyKeeper extends LobbyPlugin {
         this.lobby.SendMessage(`!mp size ${this.option.size}`);
       }
     }
+    this.slotKeeper.resetTimestamp();
   }
 
   private fixPassword(): void {
@@ -541,6 +542,13 @@ export class SlotKeeper {
       return true;
     } else {
       return false;
+    }
+  }
+
+  resetTimestamp() {
+    const now = Date.now();
+    for(let i = 0; i < 16; i++) {
+      this.slots[i].timestamp = now;
     }
   }
 
