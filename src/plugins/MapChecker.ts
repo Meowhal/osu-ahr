@@ -360,6 +360,7 @@ export class MapChecker extends LobbyPlugin {
     }
     if (!map) {
       this.logger.error(`couldn't find map id:${mapId}, title:${mapTitle}, skip checking`);
+      this.rejectDeletedMap();
       return;
     }
     if (mapId != this.checkingMapId) {
@@ -368,9 +369,7 @@ export class MapChecker extends LobbyPlugin {
     }
     let r = this.validator.RateBeatmap(map);
     if (0 < r.rate) {
-      this.numViolations += 1;
-      this.revertMap();
-      this.lobby.SendMessage(r.message);
+      this.rejectUnfitMap(r.message);
       if (this.option.num_violations_to_skip != 0 && this.option.num_violations_to_skip <= this.numViolations) {
         this.skipHost();
       }
@@ -386,10 +385,27 @@ export class MapChecker extends LobbyPlugin {
     this.SendPluginMessage("skip");
   }
 
-  private revertMap(): void {
-    this.logger.info(`revertMap ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_to_skip})`);
-    this.lobby.SendMessage("!mp map " + this.lastMapId);
+  private rejectDeletedMap(): void {
+    this.numViolations += 1;
+    this.logger.info(`Rejected the map already deleted on the website. ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_to_skip})`);
+    this.lobby.SendMessage("!mp map " + this.lastMapId + " | Rejected the map already deleted on the website.");
     this.checkingMapId = 0;
+
+    if (this.option.num_violations_to_skip != 0 && this.option.num_violations_to_skip <= this.numViolations) {
+      this.skipHost();
+    }
+  }
+
+  private rejectUnfitMap(reason: string): void {
+    this.numViolations += 1;
+    this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_to_skip})`);
+    this.lobby.SendMessage("!mp map " + this.lastMapId);
+    this.lobby.SendMessage(reason);
+    this.checkingMapId = 0;
+
+    if (this.option.num_violations_to_skip != 0 && this.option.num_violations_to_skip <= this.numViolations) {
+      this.skipHost();
+    }
   }
 
   private accpectMap(): void {
