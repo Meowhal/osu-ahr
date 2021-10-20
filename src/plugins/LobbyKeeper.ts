@@ -5,20 +5,6 @@ import config from "config";
 import { Game, User } from "../webapi/HistoryTypes";
 import { TypedEvent } from "../libs";
 import { Mod, ScoreMode, TeamMode } from "../Modes";
-/*
-const TeamModes = [
-  "Head To Head",
-  "Tag Coop",
-  "Team Vs",
-  "Tag Team Vs"
-];
-
-const ScoreModes = [
-  "Score",
-  "Accuracy",
-  "Combo",
-  "Score V2"
-];*/
 
 export interface LobbyKeeperOption {
   /**
@@ -88,8 +74,8 @@ export class LobbyKeeper extends LobbyPlugin {
     this.setModsOption(this.option.mods);
   }
 
-  setModeOption(mode: any) {
-    if (mode == null || mode == "null") {
+  private setModeOption(mode: any) {
+    if (mode == null || mode == "null" || mode == "") {
       this.option.mode = null;
       return;
     }
@@ -102,7 +88,6 @@ export class LobbyKeeper extends LobbyPlugin {
       } else {
         throw new Error("Invalid Option. LobbyKeeper.mode : " + mode);
       }
-
     }
 
     if ("team" in mode && "score" in mode) {
@@ -120,8 +105,8 @@ export class LobbyKeeper extends LobbyPlugin {
     throw new Error("Invalid Option. LobbyKeeper.mode : " + mode);
   }
 
-  setSizeOption(size: any) {
-    if (size == null || size == "null") {
+  private setSizeOption(size: any) {
+    if (size == null || size == "null" || size == "") {
       size = 0;
     }
     if (typeof size == "string") {
@@ -139,7 +124,7 @@ export class LobbyKeeper extends LobbyPlugin {
     this.slotKeeper.size = size;
   }
 
-  setModsOption(mods: any) {
+  private setModsOption(mods: any) {
     if (mods == null || mods == "null") {
       this.option.mods = null;
       return;
@@ -156,7 +141,7 @@ export class LobbyKeeper extends LobbyPlugin {
     throw new Error("Invalid Option. LobbyKeeper.mods : " + mods);
   }
 
-  tryParseModeParams(param: string) {
+  private tryParseModeParams(param: string) {
     const m1 = /^(.+),(.+)$/.exec(param);
     if (m1) {
       try {
@@ -188,7 +173,7 @@ export class LobbyKeeper extends LobbyPlugin {
     throw new Error("Invalid Option. LobbyKeeper.mode : " + param);
   }
 
-  checkMode(teamMode: TeamMode, scoreMode: ScoreMode) {
+  private checkMode(teamMode: TeamMode, scoreMode: ScoreMode) {
     if (this.option.mode == null) return false;
     if (this.option.mode.score != scoreMode || this.option.mode.team != teamMode) {
       return true;
@@ -197,7 +182,7 @@ export class LobbyKeeper extends LobbyPlugin {
     }
   }
 
-  checkMods(mods: Mod[]) {
+  private checkMods(mods: Mod[]) {
     if (this.option.mods == null) return false;
     const s = new Set(this.option.mods);
     for (const m of mods) {
@@ -208,7 +193,7 @@ export class LobbyKeeper extends LobbyPlugin {
     return s.size != 0;
   }
 
-  checkTitle(title: string | undefined) {
+  private checkTitle(title: string | undefined) {
     if (title == null && (this.lobby.historyRepository.hasError || this.option.title != this.lobby.lobbyName)) {
       return true;
     } else if (title != this.option.title) {
@@ -346,10 +331,14 @@ export class LobbyKeeper extends LobbyPlugin {
 
   private processCommand(command: string, param: string): string | null {
     if (command == "*keep") {
-      const matchMode = /^mode\s+(.+)\s*$/.exec(param);
+      const matchMode = /^mode(\s+(.+))?\s*$/.exec(param);
       if (matchMode) {
+        if (matchMode[2] == undefined) {
+          this.logger.warn("missing parameters. *keep mode [0-3] [0-3] e.g. *keep mode 0 0");
+          return null;
+        }
         try {
-          this.setModeOption(matchMode[1]);
+          this.setModeOption(matchMode[2]);
           if (this.option.mode) {
             this.fixLobbyModeAndSize();
             return `Keep lobby mode ${this.option.mode.team.name}, ${this.option.mode.score.name}`;
@@ -357,14 +346,19 @@ export class LobbyKeeper extends LobbyPlugin {
             return `Disabled keeping lobby mode`;
           }
         } catch (e: any) {
-          return e?.message ?? "failed to parse mode params";
+          this.logger.warn(e?.message ?? "failed to parse mode params");
+          return null;
         }
       }
 
-      const matchSize = /^size\s+(\d+)\s*$/.exec(param);
+      const matchSize = /^size(\s+(\d+))?\s*$/.exec(param);
       if (matchSize) {
+        if (matchSize[2] == undefined) {
+          this.logger.warn("missing parameter. *keep size [1-16]");
+          return null;
+        }
         try {
-          this.setSizeOption(matchSize[1]);
+          this.setSizeOption(matchSize[2]);
           if (this.option.size) {
             this.fixLobbyModeAndSize();
             return `Keep lobby size ${this.option.size}`;
@@ -373,21 +367,19 @@ export class LobbyKeeper extends LobbyPlugin {
           }
 
         } catch (e: any) {
-          return e?.message ?? "failed to parse size params";
+          this.logger.warn(e?.message ?? "failed to parse size params");
+          return null;
         }
       }
-
-      const matchPassword = /^password\s*(.+)?\s*$/.exec(param);
-      if (matchPassword) {
-        this.option.password = matchPassword[1] !== undefined ? matchPassword[1] : "";
-        this.fixPassword();
-        return `Keep lobby password ${this.option.password !== "" ? this.option.password : "[empty]"}`;
-      }
-
-      const matchMods = /^mods?\s*(.+)?\s*$/.exec(param);
+      
+      const matchMods = /^mods?(\s+(.+))?\s*$/.exec(param);
       if (matchMods) {
+        if (matchMods[2] == undefined) {
+          this.logger.warn("missing parameters. *keep mods [mod] ([mod]) ([mod]) ...");
+          return null;
+        }
         try {
-          this.setModsOption(matchMods[1]);
+          this.setModsOption(matchMods[2]);
           if (this.option.mods) {
             this.fixMods();
             return `Keep mods ${this.option.mods == null || this.option.mods.length == 0 ? "None" : this.option.mods.map(m => m.name).join(", ")}`;
@@ -395,16 +387,26 @@ export class LobbyKeeper extends LobbyPlugin {
             return `Disabled keeping lobby mods.`;
           }
         } catch (e: any) {
-          return e?.message ?? "failed to parse mods";
+          this.logger.warn(e?.message ?? "failed to parse mods");
+          return null;
         }
       }
 
-      const matchTitle = /^title\s*(.+)?\s*$/.exec(param);
-      if (matchTitle) {
-        this.option.title = matchTitle[1] !== undefined ? matchTitle[1] : "";
-        this.fixTitle();
-        return `rename lobby title ${this.option.title !== "" ? this.option.title : "[empty]"}`;
+      const matchPassword = /^password(\s+(.+))?\s*$/.exec(param);
+      if (matchPassword) {
+        this.option.password = matchPassword[2] !== undefined ? matchPassword[2] : "";
+        this.fixPassword();
+        return `Keep lobby password ${this.option.password != "" ? this.option.password : "[empty]"}`;
       }
+
+      const matchTitle = /^(title|name)(\s+(.+))?\s*$/.exec(param);
+      if (matchTitle) {
+        this.option.title = matchTitle[3] !== undefined ? matchTitle[3] : "";
+        this.fixTitle();
+        return `Keep lobby title ${this.option.title !== "" ? this.option.title : "[empty]"}`;
+      }
+
+      this.logger.warn("missing parameters. *keep <mode|size|mods|password|title> ...params");
     }
 
     if (command == "*no") {
@@ -416,6 +418,10 @@ export class LobbyKeeper extends LobbyPlugin {
         this.setSizeOption(0);
         return "disabled keeping lobby size";
       }
+      if ((param == "keep mod" || param == "keep mods") && this.option.mods != null) {
+        this.setModsOption(null);
+        return "disabled keeping mods";
+      }
       if (param == "keep password" && this.option.password != null) {
         if (this.option.password != "") {
           this.option.password = "";
@@ -424,13 +430,13 @@ export class LobbyKeeper extends LobbyPlugin {
         this.option.password = null;
         return "disabled keeping lobby password";
       }
-      if (param.startsWith("keep mod") && this.option.mods != null) {
-        this.setModsOption(null);
-        return "disabled keeping mods";
-      }
-      if (param.startsWith("keep title") && this.option.title != null) {
+      if ((param == "keep title" || param == "keep name") && this.option.title != null) {
         this.option.title = null;
         return "disabled keeping room title";
+      }
+
+      if (param.startsWith("keep")) {
+        this.logger.warn("missing parameters. *no keep <mode|size|mods|password|title>");
       }
     }
 
