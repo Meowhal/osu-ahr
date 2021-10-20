@@ -9,6 +9,7 @@ export * from "./InOutLogger";
 export * from "./LobbyKeeper";
 export * from "./LobbyTerminator";
 export * from "./MapChecker";
+export * from "./MapMirrorLoader";
 export * from "./MapRecaster";
 export * from "./MatchAborter";
 export * from "./MatchStarter";
