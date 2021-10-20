@@ -71,14 +71,25 @@ class TestUtils {
     lobby.TransferHost(lobby.GetPlayer(name) as Player);
     return p;
   }
+  loggerMode = "";
 
   configMochaVerbosely(): void {
-    log4js.configure("config/log_mocha.json");
+    if (this.loggerMode != "Verbosely") {
+      this.loggerMode = "Verbosely";
+      log4js.shutdown();
+      log4js.configure("config/log_mocha.json");
+    }
+
   }
 
   configMochaAsSilent(): void {
-    log4js.configure("config/log_mocha_silent.json");
+    if (this.loggerMode != "Silent") {
+      this.loggerMode = "Silent"
+      log4js.shutdown();
+      log4js.configure("config/log_mocha_silent.json");
+    }
   }
+
 
   /**
    * 時間内に指定したイベントが発生することを確認する

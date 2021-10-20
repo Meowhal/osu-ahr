@@ -63,6 +63,7 @@ export class Lobby {
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; fromMpSettings: boolean; }>();
   PlayerLeft = new TypedEvent<{ player: Player, fromMpSettings: boolean }>();
+  PlayerMoved = new TypedEvent<{ player: Player, from: number, to: number }>();
   HostChanged = new TypedEvent<{ player: Player }>();
   MatchStarted = new TypedEvent<{ mapId: number, mapTitle: string }>();
   PlayerFinished = new TypedEvent<{ player: Player, score: number, isPassed: boolean, playersFinished: number, playersInGame: number }>();
@@ -508,8 +509,7 @@ export class Lobby {
         this.listRefStart = Date.now();
         break;
       case BanchoResponseType.PlayerMovedSlot:
-        this.GetOrMakePlayer(c.params[0]).slot = c.params[1];
-        this.logger.trace("slot moved : %s, %d", c.params[0], c.params[1]);
+        this.RaisePlayerMoved(c.params[0], c.params[1]);
         break;
       case BanchoResponseType.TeamChanged:
         this.GetOrMakePlayer(c.params[0]).team = c.params[1];
@@ -594,6 +594,15 @@ export class Lobby {
     } else {
       this.LoadMpSettingsAsync();
     }
+  }
+
+  RaisePlayerMoved(username: string, slot: number): void {
+    const player = this.GetOrMakePlayer(username);
+    const from = player.slot;
+    player.slot = slot;
+
+    this.logger.trace("slot moved : %s, %d", username, slot);
+    this.PlayerMoved.emit({ player, from, to: slot });
   }
 
   RaiseHostChanged(username: string): void {
