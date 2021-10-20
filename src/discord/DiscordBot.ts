@@ -21,7 +21,10 @@ export interface DiscordBotConfig {
 
 type GuildCommandInteraction = CommandInteraction & { guildId: string; }
 export type OahrSharedObjects = {
-  maps: { [id: number]: Beatmap & { fetchedAt: number } }
+  osuMaps: { [id: number]: Beatmap & { fetchedAt: number } };
+  ctbMaps: { [id: number]: Beatmap & { fetchedAt: number } };
+  taikoMaps: { [id: number]: Beatmap & { fetchedAt: number } };
+  maniaMaps: { [id: number]: Beatmap & { fetchedAt: number } };
 }
 
 export class DiscordBot {
@@ -37,7 +40,10 @@ export class DiscordBot {
     this.cfg = config.get<DiscordBotConfig>("Discord");
     this.ahrs = {};
     this.sharedObjects = {
-      maps: {}
+      osuMaps: {},
+      ctbMaps: {},
+      taikoMaps: {},
+      maniaMaps: {}
     }
   }
 

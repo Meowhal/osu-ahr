@@ -27,16 +27,19 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`*start`|Forces the match to start.||
 |`*skip`|Forces current host to skip.||
 |`*order [players list]`| Reorders the queue in specified order. |`*order p1, p2, p3`|
+|`*mapchecker_enable` | Enable Map Checker ||
+|`*mapchecker_disable` | Disable Map Checker ||
 |`*keep size [1-16]` | Keeps the size of the lobby at specified number. | `*keep size 8`| 
 |`*keep password [password]` | Keeps the lobby password. | `*keep password foobar`| 
 |`*keep mode [0-3] [0-3]` | Keeps the lobby team and score mode. | `*keep 0 0`| 
 |`*keep mods [mod] ([mod]) ([mod]) ...` | Keeps the lobby allowed mods. | `*keep mods HR DT`| 
 |`*keep title [title]` | Keeps the lobby title. | `*keep title 0-2.99* Auto Host Rotate`| 
-|`*no keep size` | Stops keeping the size of the lobby at specified number. | `*no keep size`|
-|`*no keep password` | Stops keeping the lobby password. | `*no keep password`|
-|`*no keep mode` | Stops keeping the team and score mode. | `*no keep mode`|
-|`*no keep mod` | Stops keeping the lobby allowed mods and set mod to FreeMod. | `*no keep mod`|
-|`*no keep title` | Stops keeping the lobby title. | `*no keep title`|
+|`*no keep size` | Stops keeping the size of the lobby at specified number. ||
+|`*no keep password` | Stops keeping the lobby password. ||
+|`*no keep mode` | Stops keeping the team and score mode. ||
+|`*no keep mod` | Stops keeping the lobby allowed mods and set mod to FreeMod. ||
+|`*no keep title` | Stops keeping the lobby title. ||
+|`*no regulation` | Stops doing Map Checker. ||
 |`*regulation ["min_star", "max_star", "min_length" or "max_length"] = [value]` | Changes the regulation. | `*regulation max_length = 600`|
 |`*denylist add [username]` | Adds player to the deny list | `*denylist add bad_guy` |
 |`*denylist remove [username]` | Removes player from the deny list | `*denylist remove bad_guy` |
@@ -199,8 +202,10 @@ configs related to host-skip vote and automatic afk host skip.
 - `star_max`: `number` higher cap of dificullty. 0 means no cap.
 - `length_min`: `number` lower cap of length. specify in seconds. 0 means no cap.
 - `length_max`: `number` higher cap of length. 0 means no cap.
-- `gamemode`: `string` specify game mode in the room. "any" means no specific gamemode restriction.
+- `gamemode`: `string` specify game mode in the room (osu, taiko, fruits, mania).
 - `num_violations_to_skip`: `number` Number of times violations are allowed.  0 means no skip.
+- `cache_expired_day`: `number` number of day where map cache expired.
+- `allow_convert`: `number` allow convert map for game mode other than osu. 0 means specific game mode map only.
 ### MatchStarter Section
 !start vote configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.

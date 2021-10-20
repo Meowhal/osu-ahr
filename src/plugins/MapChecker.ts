@@ -32,12 +32,17 @@ export interface IValidator {
    * returns a map regulation description for players
    */
   GetDescription(): string;
+
+  GetGameMode(): string;
+  GetAllowConvert(): number;
 }
 
 export abstract class ValidatorBase implements IValidator {
   abstract RateBeatmap(map: Beatmap): { rate: number, message: string };
   abstract SetConfiguration(name: string, value: string): boolean;
   abstract GetDescription(): string;
+  abstract GetGameMode(): string;
+  abstract GetAllowConvert(): number;
 
   OnGotSettingCommand(configuration: string): boolean {
     // valid configuration samples
@@ -68,14 +73,15 @@ export type DefaultRegulation = {
   length_min: number;
   length_max: number;
   gamemode: string;
+  allow_convert: number;
 }
 
 export class DefaultValidator extends ValidatorBase {
   logger: log4js.Logger;
   star = { min: 0, max: 0 };
   length = { min: 0, max: 0 };
-  gamemode = "";
-
+  gamemode = "osu";
+  allow_convert = 0;
 
   constructor(config: DefaultRegulation, logger: log4js.Logger) {
     super();
@@ -84,6 +90,7 @@ export class DefaultValidator extends ValidatorBase {
     this.length.min = config.length_min;
     this.length.max = config.length_max;
     this.gamemode = config.gamemode;
+    this.allow_convert = config.allow_convert;
     this.logger = logger;
   }
 
@@ -91,11 +98,9 @@ export class DefaultValidator extends ValidatorBase {
     let r = 0;
 
     let rs = { rate: r, message: "" };
-
-    if (map.mode != this.gamemode) {
-      if (this.gamemode != "" && this.gamemode != "any") {
-        r += 1;
-      }
+    this.logger.info(map.difficulty_rating);
+    if (map.mode != this.gamemode && this.gamemode != "") {
+      r += 1;
     }
 
     if (this.star.min != 0 && map.difficulty_rating < this.star.min) {
@@ -164,8 +169,21 @@ export class DefaultValidator extends ValidatorBase {
       }
     }
 
+    if(name.includes("allow_convert")){
+      this.allow_convert = v;
+      return true;
+    }
+
     this.logger.warn(`invalid regulation config : ${name} = ${value}`);
     return false;
+  }
+
+  GetGameMode(): string {
+    return this.gamemode;
+  }
+
+  GetAllowConvert(): number {
+    return this.allow_convert;
   }
 
   GetDescription(): string {
@@ -174,6 +192,14 @@ export class DefaultValidator extends ValidatorBase {
     let d_gamemode = "";
     if (this.gamemode != "") {
       d_gamemode = `allowed game mode: ${this.gamemode}`;
+      if(this.gamemode !== "osu"){
+        if(this.allow_convert === 1){
+          d_gamemode+=" (converts allowed)";
+        }
+        else{
+          d_gamemode+=" (converts disallowed)";
+        }
+      }
     }
 
     if (this.star.min != 0 && this.star.max != 0) {
@@ -225,7 +251,10 @@ export class MapChecker extends LobbyPlugin {
   lastMapId: number = 0;
   checkingMapId: number = 0;
   numViolations: number = 0;
-  maps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
+  osuMaps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
+  ctbMaps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
+  taikoMaps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
+  maniaMaps: { [id: number]: Beatmap & { fetchedAt: number } } = {};
   validator: IValidator;
 
   constructor(lobby: Lobby, client: WebApiClient | null = null, option: Partial<MapCheckerOption> = {}) {
@@ -366,6 +395,7 @@ export class MapChecker extends LobbyPlugin {
       this.logger.info(`target map is changed. checked:${mapId}, current:${this.checkingMapId}`);
       return;
     }
+    this.logger.info(this.validator.GetGameMode());
     let r = this.validator.RateBeatmap(map);
     if (0 < r.rate) {
       this.numViolations += 1;
@@ -375,7 +405,7 @@ export class MapChecker extends LobbyPlugin {
         this.skipHost();
       }
     } else {
-      this.accpectMap();
+      this.acceptMap();
     }
   }
 
@@ -392,42 +422,82 @@ export class MapChecker extends LobbyPlugin {
     this.checkingMapId = 0;
   }
 
-  private accpectMap(): void {
+  private acceptMap(): void {
     this.SendPluginMessage("validatedMap");
     this.lastMapId = this.lobby.mapId;
+    let mode = 0;
+    switch(this.validator.GetGameMode()){
+      case "osu": mode = 0
+        break;
+      case "taiko": mode = 1
+        break;
+      case "fruits": mode = 2
+        break;
+      case "mania": mode = 3
+        break;  
+    }
+    this.lobby.SendMessage("!mp map " + this.lobby.mapId + " " + mode);
   }
 
   private async getBeatmap(mapId: number): Promise<Beatmap | undefined> {
-    // check cache
-    if (mapId in this.maps) {
-      const v = this.maps[mapId];
-      if (Date.now() < v.fetchedAt + this.option.cache_expired_day * 24 * 3600 * 1000) {
-        return v;
+    // check cache for osu map, multiple gamemode object needed to avoid collision between convert and non convert
+    if(this.validator.GetGameMode() == "osu"){
+      if (mapId in this.osuMaps) {
+        const v = this.osuMaps[mapId];
+        if (Date.now() < v.fetchedAt + this.option.cache_expired_day * 24 * 3600 * 1000) {
+          return v;
+        }
+      }
+    }   
+    else if(this.validator.GetGameMode() == "fruits"){
+      if (mapId in this.ctbMaps) {
+        const v = this.ctbMaps[mapId];
+        if (Date.now() < v.fetchedAt + this.option.cache_expired_day * 24 * 3600 * 1000) {
+          return v;
+        }
       }
     }
+    else if(this.validator.GetGameMode() == "taiko"){
+      if (mapId in this.taikoMaps) {
+        const v = this.taikoMaps[mapId];
+        if (Date.now() < v.fetchedAt + this.option.cache_expired_day * 24 * 3600 * 1000) {
+          return v;
+        }
+      }
+    }
+    else if(this.validator.GetGameMode() == "mania"){
+      if (mapId in this.maniaMaps) {
+        const v = this.maniaMaps[mapId];
+        if (Date.now() < v.fetchedAt + this.option.cache_expired_day * 24 * 3600 * 1000) {
+          return v;
+        }
+      }
+    }
+    
 
     let q = null;
-    if (this.webApiClient) {
-      try {
-        q = await this.webApiClient.lookupBeatmap(mapId);
-      } catch (e) {
-        if (e instanceof Error) {
-          this.logger.error(e.message);
-        } else {
-          this.logger.error(e);
-        }
+    // Disabling osu!API to prioritize osu beatmap page
+    // if (this.webApiClient) {
+    //   try {
+    //     q = await this.webApiClient.lookupBeatmap(mapId);
+    //   } catch (e) {
+    //     if (e instanceof Error) {
+    //       this.logger.error(e.message);
+    //     } else {
+    //       this.logger.error(e);
+    //     }
 
-        // トークンがない状態ならもう使わない。
-        // マップが存在しない可能性を考慮
-        if (!this.webApiClient.token) {
-          this.webApiClient = null;
-        }
-      }
-    }
+    //     // トークンがない状態ならもう使わない。
+    //     // マップが存在しない可能性を考慮
+    //     if (!this.webApiClient.token) {
+    //       this.webApiClient = null;
+    //     }
+    //   }
+    // }
 
     if (!q) {
       try {
-        q = await fetchBeatmap(mapId);
+        q = await fetchBeatmap(mapId, this.validator.GetGameMode(), this.validator.GetAllowConvert());
       } catch (e) {
         if (e instanceof Error) {
           this.logger.error(e.message);
@@ -439,7 +509,18 @@ export class MapChecker extends LobbyPlugin {
 
     if (q) {
       let v = { ...q, fetchedAt: Date.now() };
-      this.maps[mapId] = v;
+      if(this.validator.GetGameMode() == "osu"){
+        this.osuMaps[mapId] = v;
+      }
+      else if(this.validator.GetGameMode() == "fruits"){
+        this.ctbMaps[mapId] = v;
+      }
+      else if(this.validator.GetGameMode() == "taiko"){
+        this.taikoMaps[mapId] = v;
+      }
+      else if(this.validator.GetGameMode() == "mania"){
+        this.maniaMaps[mapId] = v;
+      }
       return v;
     }
 

@@ -64,7 +64,9 @@
     "length_min": 0,
     "length_max": 360,
     "gamemode": "any",
-    "num_violations_to_skip": 3
+    "num_violations_to_skip": 3,
+    "cache_expired_day": 1,
+    "allowConvert": 0
   },
   "MapRecaster": {},
   "MatchStarter": {

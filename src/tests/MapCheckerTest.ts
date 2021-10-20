@@ -5,6 +5,7 @@ import { DefaultRegulation, DefaultValidator, MapChecker, MapCheckerOption } fro
 import tu from "./TestUtils";
 
 import beatmap_sample from "./cases/beatmap_848345.json";
+import beatmap_sample_convert from "./cases/beatmap_1323207.json";
 import beatmap_sample_fuilts from "./cases/beatmap_fruits_2578171.json";
 import { Beatmap } from '../webapi/Beatmapsets';
 import { getLogger } from "log4js";
@@ -18,7 +19,7 @@ describe("Map Checker Tests", function () {
     Promise<{ checker: MapChecker, lobby: Lobby, ircClient: DummyIrcClient }> {
     const li = await tu.SetupLobbyAsync();
     const checker = new MapChecker(li.lobby, null, option);
-    checker.maps[beatmap_sample.id] = { ...beatmap_sample, fetchedAt: Date.now() };
+    checker.osuMaps[beatmap_sample.id] = { ...beatmap_sample, fetchedAt: Date.now() };
     await tu.AddPlayersAsync(["p1", "p2", "p3"], li.ircClient);
     return { checker, ...li };
   }
@@ -30,7 +31,8 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: "any",
+        gamemode: "osu",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -45,7 +47,8 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: "any"
+        gamemode: "osu",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -66,7 +69,8 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: "any"
+        gamemode: "osu",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -82,7 +86,8 @@ describe("Map Checker Tests", function () {
         star_max: 0,
         length_min: 0,
         length_max: 300,
-        gamemode: "any"
+        gamemode: "osu",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -97,7 +102,8 @@ describe("Map Checker Tests", function () {
         star_max: 0,
         length_min: 0,
         length_max: 0,
-        gamemode: "any"
+        gamemode: "osu",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -112,9 +118,27 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: "osu"
+        gamemode: "osu",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
+
+      const dr = new DefaultValidator(reg, getLogger("checker"));
+      const r = dr.RateBeatmap(map);
+      assert.equal(r.rate, 0);
+
+    });
+
+    it("gamemode accept convert test", async () => {
+      const reg: DefaultRegulation = {
+        star_min: 1.00,
+        star_max: 6.00,
+        length_min: 0,
+        length_max: 300,
+        gamemode: "mania",
+        allow_convert: 1
+      }
+      const map: Beatmap = Object.assign({}, beatmap_sample_convert);
 
       const dr = new DefaultValidator(reg, getLogger("checker"));
       const r = dr.RateBeatmap(map);
@@ -128,7 +152,8 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: "mania"
+        gamemode: "mania",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 
@@ -144,7 +169,8 @@ describe("Map Checker Tests", function () {
         star_max: 6.00,
         length_min: 0,
         length_max: 300,
-        gamemode: ""
+        gamemode: "",
+        allow_convert: 0
       }
       const map: Beatmap = Object.assign({}, beatmap_sample);
 

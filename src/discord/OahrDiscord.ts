@@ -13,7 +13,10 @@ export class OahrDiscord extends OahrBase {
 
   constructor(client: IIrcClient, sh: OahrSharedObjects) {
     super(client);
-    this.checker.maps = sh.maps;
+    this.checker.osuMaps = sh.osuMaps;
+    this.checker.ctbMaps = sh.ctbMaps;
+    this.checker.taikoMaps = sh.taikoMaps;
+    this.checker.maniaMaps = sh.maniaMaps;
   }
 
   setDiscordId(guildId: string, channelId: string) {
