@@ -184,6 +184,7 @@ describe("Map Checker Tests", function () {
 
     it("accept map test", async () => {
       const { checker, lobby, ircClient } = await setupAsync({
+        enabled: true,
         num_violations_to_skip: 2,
         cache_expired_day: 10,
         star_min: 5.00,
@@ -199,6 +200,7 @@ describe("Map Checker Tests", function () {
 
     it("reject map test", async () => {
       const { checker, lobby, ircClient } = await setupAsync({
+        enabled: true,
         num_violations_to_skip: 2,
         cache_expired_day: 10,
         star_min: 1.00,
@@ -223,6 +225,7 @@ describe("Map Checker Tests", function () {
 
     it("reject and skip test", async () => {
       const { checker, lobby, ircClient } = await setupAsync({
+        enabled: true,
         num_violations_to_skip: 2,
         cache_expired_day: 10,
         star_min: 1.00,
@@ -255,6 +258,7 @@ describe("Map Checker Tests", function () {
 
     it("reject and not skip test", async () => {
       const { checker, lobby, ircClient } = await setupAsync({
+        enabled: true,
         num_violations_to_skip: 0,
         cache_expired_day: 10,
         star_min: 1.00,
