@@ -264,6 +264,9 @@ export class MapChecker extends LobbyPlugin {
     this.webApiClient = client;
     this.validator = ValidatorConstructors["default_validator"](this);
     this.registerEvents();
+
+    // For option compatibility (TODO: code option validator)
+    if (this.option.gamemode == "any") this.option.gamemode = "";
   }
 
   private registerEvents(): void {
