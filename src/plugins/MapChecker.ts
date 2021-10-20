@@ -92,6 +92,9 @@ export class DefaultValidator extends ValidatorBase {
     this.gamemode = config.gamemode;
     this.allow_convert = config.allow_convert;
     this.logger = logger;
+
+    // For option compatibility (TODO: code option validator)
+    if (this.gamemode == "any") this.gamemode = "";
   }
 
   RateBeatmap(map: Beatmap): { rate: number, message: string } {
@@ -265,8 +268,6 @@ export class MapChecker extends LobbyPlugin {
     this.validator = ValidatorConstructors["default_validator"](this);
     this.registerEvents();
 
-    // For option compatibility (TODO: code option validator)
-    if (this.option.gamemode == "any") this.option.gamemode = "";
   }
 
   private registerEvents(): void {
