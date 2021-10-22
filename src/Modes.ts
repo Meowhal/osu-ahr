@@ -103,7 +103,7 @@ export class PlayMode extends Mode {
 
     static readonly Osu = new PlayMode(0, "Osu");
     static readonly Taiko = new PlayMode(1, "Taiko");
-    static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", ["fruits"]);
+    static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", ["fruits", "catch", "fruit"]);
     static readonly OsuMania = new PlayMode(3, "OsuMania", ["mania"]);
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
