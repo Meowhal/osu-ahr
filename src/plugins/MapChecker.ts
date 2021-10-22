@@ -101,7 +101,7 @@ export class DefaultValidator extends ValidatorBase {
     let r = 0;
 
     let rs = { rate: r, message: "" };
-    this.logger.info(map.difficulty_rating);
+
     if (map.mode != this.gamemode && this.gamemode != "") {
       r += 1;
     }
@@ -400,7 +400,7 @@ export class MapChecker extends LobbyPlugin {
       this.logger.info(`target map is changed. checked:${mapId}, current:${this.checkingMapId}`);
       return;
     }
-    this.logger.info(this.validator.GetGameMode());
+
     let r = this.validator.RateBeatmap(map);
     if (0 < r.rate) {
       this.rejectUnfitMap(r.message);
