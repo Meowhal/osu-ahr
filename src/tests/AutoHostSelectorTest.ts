@@ -381,6 +381,61 @@ describe("AutoHostSelectorTest", function () {
       await tu.delayAsync(10);
       tu.assertHost("player2", lobby);
     });
+
+    it("issue #37 host left and match started at the same time", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      ircClient.latency = 10; // it makes bot respond to !mp start command before !mp host command
+      await ircClient.emulateRemovePlayerAsync("player1");
+      ircClient.latency = 0;
+      const t1 = ircClient.emulateMatchAsync(20);
+      await tu.delayAsync(10);
+      tu.assertHost("player2", lobby);
+      assertStateIs("m", selector);
+      await t1;
+      tu.assertHost("player2", lobby);
+      assertStateIs("hr", selector);
+    });
+
+    it("issue #37 test rotation after the issue", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      ircClient.latency = 10;
+      await ircClient.emulateRemovePlayerAsync("player1");
+      ircClient.latency = 0;
+      const t1 = ircClient.emulateMatchAsync(20);
+      await tu.delayAsync(10);
+      tu.assertHost("player2", lobby);
+      await t1;
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      await ircClient.emulateMatchAsync(0);
+      tu.assertHost("player3", lobby);
+    });
+
+    it("issue #37 player2 dosen't change map test", async () => {
+      const { selector, lobby, ircClient } = await prepareSelector();
+      await tu.AddPlayersAsync(["player1", "player2", "player3"], ircClient);
+      assertStateIs("hr", selector);
+      tu.assertHost("player1", lobby);
+      await ircClient.emulateChangeMapAsync(0);
+      ircClient.latency = 10; // it makes bot respond to !mp start command before !mp host command
+      await ircClient.emulateRemovePlayerAsync("player1");
+      ircClient.latency = 0;
+      const t1 = ircClient.emulateMatchAsync(20);
+      await tu.delayAsync(10);
+      tu.assertHost("player2", lobby);
+      await t1;
+      tu.assertHost("player2", lobby);
+      await ircClient.emulateMatchAsync(0);
+      tu.assertHost("player3", lobby);
+    });
   });
 
   describe("external operation tests", function () {
@@ -1160,4 +1215,7 @@ describe("AutoHostSelectorTest", function () {
       b.lobby.destroy();
     });
   });
+  describe("tests for issues", () => {
+
+  })
 });

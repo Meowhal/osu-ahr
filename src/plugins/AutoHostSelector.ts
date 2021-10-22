@@ -110,7 +110,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param player 
    * @param slot 
    */
-  private onPlayerJoined(player: Player, slot: number, isMpSettingResult:boolean): void {
+  private onPlayerJoined(player: Player, slot: number, isMpSettingResult: boolean): void {
     if (DENY_LIST.includes(player)) return;
     if (isMpSettingResult) return;
 
@@ -130,7 +130,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 試合中なら次のホストは任命しない
    * @param player 
    */
-  private onPlayerLeft(player: Player, isMpSettingResult:boolean): void {
+  private onPlayerLeft(player: Player, isMpSettingResult: boolean): void {
     this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
     if (this.lobby.isMatching) return;
     if (isMpSettingResult) return;
@@ -188,7 +188,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 試合が始まったらキューを回す
    */
   private onMatchStarted(): void {
-    if (this.needsRotate) {
+    if (this.lobby.hostPending == null && this.needsRotate) {
       this.rotateQueue();
     } else {
       this.logger.info("rotation skipped.");
