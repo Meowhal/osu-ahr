@@ -95,8 +95,8 @@ export class LobbyKeeper extends LobbyPlugin {
         this.option.mode = mode;
       } else {
         this.option.mode = {
-          team: TeamMode.from(mode.team.toString(), null),
-          score: ScoreMode.from(mode.score.toString(), null)
+          team: TeamMode.from(mode.team.toString(), true),
+          score: ScoreMode.from(mode.score.toString(), true)
         };
       }
       return;
@@ -145,8 +145,8 @@ export class LobbyKeeper extends LobbyPlugin {
     const m1 = /^(.+),(.+)$/.exec(param);
     if (m1) {
       try {
-        const team = TeamMode.from(m1[1], null);
-        const score = ScoreMode.from(m1[2], null);
+        const team = TeamMode.from(m1[1], true);
+        const score = ScoreMode.from(m1[2], true);
         return { team, score };
       } catch { }
     }
@@ -154,19 +154,19 @@ export class LobbyKeeper extends LobbyPlugin {
     const m2 = /^(\S+)\s+(\S+)$/.exec(param);
     if (m2) {
       try {
-        const team = TeamMode.from(m2[1], null);
-        const score = ScoreMode.from(m2[2], null);
+        const team = TeamMode.from(m2[1], true);
+        const score = ScoreMode.from(m2[2], true);
         return { team, score };
       } catch { }
     }
 
     try {
-      const team = TeamMode.from(param, null);
+      const team = TeamMode.from(param, true);
       return { team, score: this.option.mode?.score ?? ScoreMode.Score };
     } catch { }
 
     try {
-      const score = ScoreMode.from(param, null);
+      const score = ScoreMode.from(param, true);
       return { team: this.option.mode?.team ?? TeamMode.HeadToHead, score };
     } catch { }
 

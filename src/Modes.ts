@@ -38,17 +38,17 @@ class Mode {
         return v.replace(/[ -]/g, "").toLowerCase();
     }
 
-    protected static _from<T extends Mode>(value: string, values: T[], defaultMode: T | null, tag: string): T {
+    protected static _from<T extends Mode>(value: string, values: T[], defaultMode: T, throwsIfFailed: boolean, tag: string): T {
         const nv = Mode.normalize(value);
         for (const m of values) {
             if (m._match(nv)) {
                 return m;
             }
         }
-        if (defaultMode != null) {
-            return defaultMode;
-        } else {
+        if (throwsIfFailed) {
             throw new Error(`Failed to parse ${value}`);
+        } else {
+            return defaultMode;
         }
 
     }
@@ -71,8 +71,8 @@ export class ScoreMode extends Mode {
         ScoreMode.Values.push(this);
     }
 
-    static from(value: string, defaultMode: ScoreMode | null = ScoreMode.Score) {
-        return Mode._from(value, ScoreMode.Values, defaultMode, "ScoreMode");
+    static from(value: string, throwsIfFailed: boolean = false) {
+        return Mode._from(value, ScoreMode.Values, ScoreMode.Score, throwsIfFailed, "ScoreMode");
     }
 }
 
@@ -89,8 +89,8 @@ export class TeamMode extends Mode {
         TeamMode.Values.push(this);
     }
 
-    static from(value: string, defaultMode: TeamMode | null = TeamMode.HeadToHead) {
-        return Mode._from(value, TeamMode.Values, defaultMode, "TeamMode");
+    static from(value: string, throwsIfFailed: boolean = false) {
+        return Mode._from(value, TeamMode.Values, TeamMode.HeadToHead, throwsIfFailed, "TeamMode");
     }
 
     isTeamMatch(): boolean {
@@ -111,8 +111,8 @@ export class PlayMode extends Mode {
         PlayMode.Values.push(this);
     }
 
-    static from(value: string, defaultMode: PlayMode | null = PlayMode.Osu) {
-        return Mode._from(value, PlayMode.Values, defaultMode, "PlayMode");
+    static from(value: string, throwsIfFailed: boolean = false) {
+        return Mode._from(value, PlayMode.Values, PlayMode.Osu, throwsIfFailed, "PlayMode");
     }
 }
 
@@ -128,8 +128,8 @@ export class Team extends Mode {
         Team.Values.push(this);
     }
 
-    static from(value: string, defaultMode: Team | null = Team.Red) {
-        return Mode._from(value, Team.Values, defaultMode, "Team");
+    static from(value: string, throwsIfFailed: boolean = false) {
+        return Mode._from(value, Team.Values, Team.Red, throwsIfFailed, "Team");
     }
 }
 
@@ -172,8 +172,8 @@ export class Mod extends Mode {
         this.isGlobalMod = isGlobalMod;
     }
 
-    static from(value: string, defaultMode: Mod | null = Mod.None) {
-        return Mode._from(value, Mod.Values, defaultMode, "Mod");
+    static from(value: string, throwsIfFailed: boolean = false) {
+        return Mode._from(value, Mod.Values, Mod.None, throwsIfFailed, "Mod");
     }
 
     static parseMods(str: string): Mod[] {
