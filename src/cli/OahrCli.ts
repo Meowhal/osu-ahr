@@ -132,14 +132,8 @@ export class OahrCli extends OahrBase {
           case "regulation":
             if (!l.arg) {
               console.log(this.checker.getRegulationDescription());
-            } else if (l.arg.startsWith("enable")) {
-              this.checker.SetEnabled(true);
-              console.log("Regulation check Enabled");
-            } else if (l.arg.startsWith("disable")) {
-              this.checker.SetEnabled(false);
-              console.log("Regulation check Disabled");
             } else {
-              this.checker.SetConfig(l.arg);
+              this.checker.processOwnerCommand("*regulation", l.arg); // TODO check
             }
             break;
           case "c":
@@ -174,18 +168,18 @@ export class OahrCli extends OahrBase {
             this.lobby.historyRepository.calcCurrentOrderAsName().then(r => {
               logger.info("history order = " + r.join(", "));
               logger.info("current order = " + this.selector.hostQueue.map(p => p.name).join(", "));
-            }); 
+            });
             break;
           case "":
             break;
           default:
             if (l.command.startsWith("!mp")) {
               this.lobby.SendMessage("!mp " + l.arg);
-            } else if(l.command.startsWith("!") || l.command.startsWith("*")) {
+            } else if (l.command.startsWith("!") || l.command.startsWith("*")) {
               this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + " " + l.arg)
             } else {
               console.log("invalid command : %s", line);
-            }            
+            }
             break;
         }
       },

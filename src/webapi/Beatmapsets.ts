@@ -1,23 +1,57 @@
 import axios from 'axios';
 import cheerio from "cheerio";
+import { PlayMode } from '../Modes';
 
 export function fetchBeatmapsets(id: number): Promise<Beatmapsets | undefined> {
   return fetchFromBeatmapPage(id);
 }
 
-export async function fetchBeatmap(id: number, mode: string="", allowConvert: number=0): Promise<Beatmap | undefined> {
-  let set = await fetchFromBeatmapPage(id);
-  if (!set) return;
-  let q = set.beatmaps?.find(v => v.id == id);
-  if (!q) return;
-  //Get convert if current map is osu but the mode is not osu and convert is allowed
-  if(q.mode=="osu" && q.mode!=mode && allowConvert===1){
-    q = set.converts?.find(v=>(v.mode==mode && v.id==id));
+export enum FetchBeatmapErrorReason {
+  NotFound,
+  FormatError,
+  PlayModeMismatched,
+  Unknown,
+}
+
+export function isFetchBeatmapError(err: any): err is FetchBeatmapError {
+  return "isFetchBeatmapError" in err;
+}
+export class FetchBeatmapError extends Error {
+  isFetchBeatmapError: true = true;
+  reason: FetchBeatmapErrorReason;
+  constructor(reason: FetchBeatmapErrorReason, message?: string) {
+    super(message ?? FetchBeatmapErrorReason[reason]);
+    this.reason = reason;
+    this.name = "FetchBeatmapError";
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, FetchBeatmapError);
+    }
   }
-  if (!q) return;
-  q.beatmapset = set;
+}
+
+/**
+ * 
+ * @param id 
+ * @param mode 
+ * @param allowConvert 
+ * @returns 
+ * @throws FetchBeatmapError 
+ */
+export async function fetchBeatmap(id: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = false): Promise<Beatmap> {
+  const set = await fetchFromBeatmapPage(id);
+  let map = set.beatmaps?.find(v => v.id == id && v.mode_int.toString() == mode.value);
+  if (map === undefined && allowConvert) {
+    map = set.converts?.find(v => v.id == id && v.mode_int.toString() == mode.value);
+  }
+
+  if (!map) {
+    throw new FetchBeatmapError(FetchBeatmapErrorReason.PlayModeMismatched);
+  }
+
+  map.beatmapset = set;
   set.beatmaps = undefined;
-  return q;
+  return map;
 }
 
 async function fetchFromSearch(id: number): Promise<any> {
@@ -27,18 +61,32 @@ async function fetchFromSearch(id: number): Promise<any> {
   return res.data;
 }
 
-async function fetchFromBeatmapPage(id: number): Promise<Beatmapsets | undefined> {
-  const target = "https://osu.ppy.sh/b/" + id;
-  const res = await axios.get(target);
-
-  const $ = cheerio.load(res.data);
-  const jsonTag = $('#json-beatmapset');
-  if (jsonTag.length == 0) return;
-  const n : any = $('#json-beatmapset')[0].children[0];
-  const src = n.data;
-  if (src) {
-    const json = JSON.parse(src);
-    return json as Beatmapsets;
+async function fetchFromBeatmapPage(id: number): Promise<Beatmapsets> {
+  try {
+    const target = "https://osu.ppy.sh/b/" + id;
+    const res = await axios.get(target);
+    const $ = cheerio.load((res).data);
+    const jsonTag = $('#json-beatmapset');
+    if (jsonTag.length) {
+      const n: any = $('#json-beatmapset')[0].children[0];
+      const src = n.data;
+      if (src) {
+        const json = JSON.parse(src);
+        return json as Beatmapsets;
+      }
+    }
+    throw new FetchBeatmapError(FetchBeatmapErrorReason.FormatError);
+  } catch (e: any) {
+    if (isFetchBeatmapError(e)) {
+      throw e;
+    }
+    if (axios.isAxiosError(e)) {
+      if (e.response?.status == 404) {
+        throw new FetchBeatmapError(FetchBeatmapErrorReason.NotFound);
+      }
+      throw new FetchBeatmapError(FetchBeatmapErrorReason.Unknown, e.message);
+    }
+    throw new FetchBeatmapError(FetchBeatmapErrorReason.FormatError, e.message);
   }
 }
 

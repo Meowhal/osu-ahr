@@ -5,7 +5,6 @@ import config from "config";
 import { IIrcClient, Player } from "..";
 import { OahrDiscord } from "./OahrDiscord";
 import { setDiscordClient } from "./DiscordAppender";
-import { Beatmap } from "../webapi/Beatmapsets";
 import { BotCommands } from "./BotCommand";
 
 const logger = log4js.getLogger("discord");
@@ -21,10 +20,6 @@ export interface DiscordBotConfig {
 
 type GuildCommandInteraction = CommandInteraction & { guildId: string; }
 export type OahrSharedObjects = {
-  osuMaps: { [id: number]: Beatmap & { fetchedAt: number } };
-  ctbMaps: { [id: number]: Beatmap & { fetchedAt: number } };
-  taikoMaps: { [id: number]: Beatmap & { fetchedAt: number } };
-  maniaMaps: { [id: number]: Beatmap & { fetchedAt: number } };
 }
 
 export class DiscordBot {
@@ -39,12 +34,7 @@ export class DiscordBot {
     this.discordClient = discordClient;
     this.cfg = config.get<DiscordBotConfig>("Discord");
     this.ahrs = {};
-    this.sharedObjects = {
-      osuMaps: {},
-      ctbMaps: {},
-      taikoMaps: {},
-      maniaMaps: {}
-    }
+    this.sharedObjects = {}
   }
 
   async start() {
@@ -92,7 +82,7 @@ export class DiscordBot {
 
     try {
       await this.discordClient.login(this.cfg.token);
-    } catch(e: any) {
+    } catch (e: any) {
       if (e?.code == "TOKEN_INVALID" && e.message) {
         logger.error(e.message);
         if (this.cfg.token == "") {
@@ -101,13 +91,13 @@ export class DiscordBot {
           logger.error(`your token is "${this.cfg.token}"`);
         }
         logger.error("Check the setup guide -> https://github.com/Meowhal/osu-ahr#discord-integration");
-        
+
       } else {
         logger.error(e);
-      }      
+      }
       process.exit();
     }
-    
+
   }
 
   async registerCommands(guild: Guild) {
@@ -409,7 +399,7 @@ export class DiscordBot {
     let denylist = ahr.selector.getDeniedPlayerNames();
     if (denylist.length != 0) {
       embed.addField("denylist", `${denylist.join(", ")}`);
-    }    
+    }
     embed.addField("selector", `changer:${ahr.selector.mapChanger?.name ?? "none"}, rflag:${ahr.selector.needsRotate ? "true" : "false"}`, false);
 
     const playcounts = Array.from(ahr.inoutLogger.players.keys()).map(p => {
