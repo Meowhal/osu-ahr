@@ -249,7 +249,7 @@ export class MapChecker extends LobbyPlugin {
     this.SendPluginMessage("validatedMap");
     this.lastMapId = this.lobby.mapId;
 
-    this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${map.beatmapset?.title ?? ""} [https://osu.ppy.sh/beatmapsets/${map.beatmapset_id}/download Download Link] - [https://beatconnect.io/b/${map.beatmapset_id} Alternative(beatconnect.ip)]`);
+    this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${map.beatmapset?.title ?? ""} [https://osu.ppy.sh/beatmapsets/${map.beatmapset_id}/download Download Link] - [https://beatconnect.io/b/${map.beatmapset_id} Alternative(beatconnect.io)]`);
   }
 
   GetPluginStatus(): string {
