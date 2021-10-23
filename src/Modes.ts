@@ -106,8 +106,11 @@ export class PlayMode extends Mode {
     static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", ["fruits", "catch", "fruit"]);
     static readonly OsuMania = new PlayMode(3, "OsuMania", ["mania"]);
 
+    id: number;
+
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
+        this.id = typeof value == "number" ? value : parseInt(value);
         PlayMode.Values.push(this);
     }
 

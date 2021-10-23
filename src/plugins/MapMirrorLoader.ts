@@ -2,8 +2,9 @@ import { Lobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import { WebApiClient } from "../webapi/WebApiClient";
-import { Beatmap, fetchBeatmap } from "../webapi/Beatmapsets";
+import { Beatmap } from "../webapi/Beatmapsets";
 import config from "config";
+import { BeatmapRepository } from "../webapi/BeatmapRepository";
 
 export interface MapMirrorLoaderOption {
 }
@@ -72,7 +73,7 @@ export class MapMirrorLoader extends LobbyPlugin {
 
     if (!q) {
       try {
-        q = await fetchBeatmap(mapId);
+        q = await BeatmapRepository.getBeatmap(mapId);
       } catch (e) {
         if (e instanceof Error) {
           this.logger.error(e.message);
