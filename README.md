@@ -27,11 +27,9 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`*start`|Forces the match to start.||
 |`*skip`|Forces current host to skip.||
 |`*order [players list]`| Reorders the queue in specified order. |`*order p1, p2, p3`|
-|`*mapchecker_enable` | Enable Map Checker ||
-|`*mapchecker_disable` | Disable Map Checker ||
 |`*keep size [1-16]` | Keeps the size of the lobby at specified number. | `*keep size 8`| 
 |`*keep password [password]` | Keeps the lobby password. | `*keep password foobar`| 
-|`*keep mode [0-3] [0-3]` | Keeps the lobby team and score mode. | `*keep 0 0`| 
+|`*keep mode [0-3] [0-3]` | Keeps the lobby team and score mode. | `*keep 0 0`, `*keep HeadToHead Combo` | 
 |`*keep mods [mod] ([mod]) ([mod]) ...` | Keeps the lobby allowed mods. | `*keep mods HR DT`| 
 |`*keep title [title]` | Keeps the lobby title. | `*keep title 0-2.99* Auto Host Rotate`| 
 |`*no keep size` | Stops keeping the size of the lobby at specified number. ||
@@ -39,8 +37,17 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`*no keep mode` | Stops keeping the team and score mode. ||
 |`*no keep mod` | Stops keeping the lobby allowed mods and set mod to FreeMod. ||
 |`*no keep title` | Stops keeping the lobby title. ||
+|`*regulation enable` | Enable Map Checker ||
+|`*regulation disable` | Stops doing Map Checker. ||
 |`*no regulation` | Stops doing Map Checker. ||
-|`*regulation ["min_star", "max_star", "min_length" or "max_length"] = [value]` | Changes the regulation. | `*regulation max_length = 600`|
+|`*regulation min_star [number]` | Changes the lower star cap. If set to 0, the cap will be removed. | `*regulation min_star 2`|
+|`*regulation max_star [number]` | Changes the upper star cap. | `*regulation max_star 6`|
+|`*regulation min_length [sec]` | Changes the lower length cap. | `*regulation min_length 60`|
+|`*regulation max_length [sec]` | Changes the upper length cap. | `*regulation max_length 600`|
+|`*regulation gamemode [osu\|taiko\|fruits\|mania]` | Changes the gamemode. | `*regulation gamemode osu`|
+|`*regulation [name]=[value] [name]=[value]...` | Changes multiple settings. | `*regulation min_star=6.00 max_star=6.99 gameode=taiko`|
+|`*regulation allow_convert` | Allows convert map for game mode other than osu. | `*regulation allow_convert`|
+|`*regulation disallow_convert` | Disallows convert map for game mode other than osu. | `*regulation disallow_convert`|
 |`*denylist add [username]` | Adds player to the deny list | `*denylist add bad_guy` |
 |`*denylist remove [username]` | Removes player from the deny list | `*denylist remove bad_guy` |
 
@@ -188,7 +195,7 @@ configs related to host-skip vote and automatic afk host skip.
 - `afk_check_interval_ms` : `number` interval to check if the host is afk.
 - `afk_check_do_skip` : `boolean` skip afk host automatically or not.
 ### LobbyKeeper Section
-- `mode` : `null | { team: number, score: number }` keep lobby mode.
+- `mode` : `null | { "team": number, "score": number }` keep lobby mode.
   - team  => 0: Head To Head, 1: Tag Coop, 2: Team Vs, 3: Tag Team Vs
   - score => 0: Score, 1: Accuracy, 2: Combo, 3: Score V2
 - `size` : `number` keep lobby size.
@@ -220,9 +227,8 @@ configs related to host-skip vote and automatic afk host skip.
 - `length_min`: `number` lower cap of length. specify in seconds. 0 means no cap.
 - `length_max`: `number` higher cap of length. 0 means no cap.
 - `gamemode`: `string` specify game mode in the room (osu, taiko, fruits, mania).
-- `num_violations_to_skip`: `number` Number of times violations are allowed.  0 means no skip.
-- `cache_expired_day`: `number` number of day where map cache expired.
-- `allow_convert`: `number` allow convert map for game mode other than osu. 0 means specific game mode map only.
+- `num_violations_allowed`: `number` Number of times violations are allowed.  0 means no skip.
+- `allow_convert`: `boolean` allow convert map for game mode other than osu. set to false if you don't want to allow it.
 ### MatchStarter Section
 !start vote configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
@@ -265,12 +271,11 @@ Used to measure the amount of bot messages
 Issue the `!mp make` command to create a new lobby. BOT manages lobbies via IRC, but only lobbies created with the `!mp make` command can be communicated with via IRC. Lobbies created using the normal method (creating a new lobby in the multi-menu of osu!) cannot be managed. Lobbies that you have created by yourself in the chat field can be managed by ID.
 
 ### Entering Lobby
-Enter the lobby you have already created, check the current settings and players who have joined, and then manage the lobby.
-The queue starts with the current host and moves down in slot order.
-You will not be able to enter a lobby created in the normal way.
+When you restart the bot, it will be able to re-enter the lobby it has already created. The bot will analyze the lobby history and try to restore the order of hosts.
+The bot cannot enter lobbies built in the usual way, or lobbies built by others.
 
 ### IRC chat
-You can send a chat message to the lobby from the console screen. Type `say` followed by the message you want to send.
+You can send a chat message to the lobby from the console. Type `say` followed by the message you want to send.
 ```bash
 #mp_10000 > say hello guys!
 ```
@@ -368,7 +373,7 @@ When a bot is invited to a guild, the `ahr-admin` role is created. Only users wi
 
 You can create a lobby by executing the `/make (lobby name)` command in the appropriate channel of the guild you have invited your bot to. (You need to have the `ahr-admin` role to run this command). If the command succeeds, a tournament lobby will be created in osu, and a bridge channel with a name similar to `mp_123456` will be created in the guild.
 
-You can run the `/make` command as many times as you want and manage multiple lobbies at the same time, however, osu bots have a limit on the number of chats that can be created. If you create a large number of lobbies, your account may be flagged as spam. It is recommended that you limit the number of lobbies to two.
+Up to four lobbies can be activated simultaneously, but the bots can only send ten messages every five seconds. If you exceed this limit, your account may be marked as spam. I recommend that you keep the number of lobbies to about two.
 
 ### Join an existing lobby
 If the ahr bot has been terminated due to a glitch or some other reason, you can use the `/enter` command after restarting to resume lobby management.
