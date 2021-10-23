@@ -346,7 +346,7 @@ describe("Map Checker Tests", function () {
 
     });
 
-    it("type matching option test", async () => {
+    it("type matched option test", async () => {
       const { checker, lobby, ircClient } = await setup({
         allow_convert: false,
         enabled: true,
@@ -369,7 +369,7 @@ describe("Map Checker Tests", function () {
 
     });
 
-    it("type mismatchinhg option test", async () => {
+    it("type mismatched option test", async () => {
       const { checker, lobby, ircClient } = await setup({
         allow_convert: "false",
         enabled: 1,
@@ -390,28 +390,6 @@ describe("Map Checker Tests", function () {
       assert.equal(checker.option.star_max, 0);
       assert.equal(checker.option.star_min, 3);
 
-    });
-
-    it("type mismatchinhg option test", async () => {
-      const { checker, lobby, ircClient } = await setup({
-        allow_convert: "false",
-        enabled: 1,
-        gamemode: "fruits",
-        length_max: "0",
-        length_min: "100",
-        num_violations_allowed: "1",
-        star_max: "0",
-        star_min: "3"
-      });
-
-      assert.equal(checker.option.allow_convert, false);
-      assert.equal(checker.option.enabled, true);
-      assert.equal(checker.option.gamemode, PlayMode.CatchTheBeat);
-      assert.equal(checker.option.length_max, 0);
-      assert.equal(checker.option.length_min, 100);
-      assert.equal(checker.option.num_violations_allowed, 1);
-      assert.equal(checker.option.star_max, 0);
-      assert.equal(checker.option.star_min, 3);
     });
 
     it("conflicted option test", async () => {
@@ -428,7 +406,7 @@ describe("Map Checker Tests", function () {
       assert.equal(checker.option.star_min, 0);
     });
 
-    it("0 max option test (not conflicted)", async () => {
+    it("no max cap option test (not conflicted)", async () => {
       const { checker, lobby, ircClient } = await setup({
         length_max: "0",
         length_min: "50",
@@ -442,7 +420,7 @@ describe("Map Checker Tests", function () {
       assert.equal(checker.option.star_min, 5);
     });
 
-    it("0 min option test (not conflicted)", async () => {
+    it("no min cap option test (not conflicted)", async () => {
       const { checker, lobby, ircClient } = await setup({
         length_max: "50",
         length_min: "0",
