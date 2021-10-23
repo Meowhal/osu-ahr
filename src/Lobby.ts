@@ -138,6 +138,12 @@ export class Lobby {
           this.status = LobbyStatus.Left;
           this.destroy();
         }
+      },
+      selfMessage: (target: string, toSend: any) => {
+        if (target == this.channel) {
+          const r = toSend.replace(/\[http\S+\s([^\]]+)\]/g, "[http... $1]");
+          this.chatlogger.info("bot:%s", r);
+        }
       }
     };
 
@@ -517,10 +523,12 @@ export class Lobby {
         break;
       case BanchoResponseType.BeatmapChanged:
       case BanchoResponseType.MpBeatmapChanged:
-        this.mapId = c.params[0];
-        this.mapTitle = c.params[1];
-        const changer = this.host ? `(by ${this.host.name})` : "";
-        this.logger.info("beatmap changed%s : %s %s", changer, "https://osu.ppy.sh/b/" + this.mapId, this.mapTitle);
+        if (this.mapId != c.params[0]) {
+          this.mapId = c.params[0];
+          this.mapTitle = c.params[1];
+          const changer = this.host ? `(by ${c.type == BanchoResponseType.BeatmapChanged ? this.host.name : "bot"})` : "";
+          this.logger.info("beatmap changed%s : %s %s", changer, "https://osu.ppy.sh/b/" + this.mapId, this.mapTitle);
+        }
         break;
       case BanchoResponseType.Settings:
         if (this.settingParser.feedLine(message)) {
