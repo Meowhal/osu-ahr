@@ -1,7 +1,6 @@
 import axios from 'axios';
 import config from "config";
 import { WebApiClient } from "../webapi/WebApiClient";
-import { UserProfile } from "../webapi/UserProfile";
 export interface WebApiTrialOption {
   client_id: number,
   client_secret: string,
@@ -14,9 +13,9 @@ const oAuthConfig = config.get<WebApiTrialOption>("WebApi");
 export async function trial() {
   //getTokenTrial();
 
-  const client = new WebApiClient({ asGuest: true });
+  const client = WebApiClient;
 
-  const user = await client.lookupBeatmap(2647589);
+  const user = await client.lookupBeatmapset(2647589);
   console.log(JSON.stringify(user));
 }
 

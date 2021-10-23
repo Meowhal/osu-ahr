@@ -1,14 +1,12 @@
-import { Lobby } from "..";
-import { BanchoResponseType } from "../parsers";
-import { WebApiClient } from "../webapi/WebApiClient";
-import { Beatmap, FetchBeatmapError, FetchBeatmapErrorReason } from "../webapi/Beatmapsets";
-import { Player } from "../Player";
-import { LobbyPlugin } from "./LobbyPlugin";
 import log4js from "log4js";
 import config from "config";
-import { PlayMode } from "../Modes";
+import { LobbyPlugin } from ".";
+import { Lobby, Player } from "..";
 import { validateOption } from "../libs/OptionValidator";
-import { BeatmapRepository } from "../webapi/BeatmapRepository";
+import { PlayMode } from "../Modes";
+import { BanchoResponseType } from "../parsers";
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from "../webapi/BeatmapRepository";
+import { Beatmap } from "../webapi/Beatmapsets";
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -24,22 +22,18 @@ export type MapCheckerOption = {
 export type MapCheckerUncheckedOption =
   { [key in keyof MapCheckerOption]?: any } & { num_violations_to_skip?: any, allowConvert?: any };
 
-
 export class MapChecker extends LobbyPlugin {
   option: MapCheckerOption;
-  webApiClient: WebApiClient | null;
   lastMapId: number = 0;
   checkingMapId: number = 0;
   numViolations: number = 0;
   validator: MapValidator;
 
-  constructor(lobby: Lobby, client: WebApiClient | null = null, option: Partial<MapCheckerUncheckedOption> = {}) {
+  constructor(lobby: Lobby, option: Partial<MapCheckerUncheckedOption> = {}) {
     super(lobby, "MapChecker", "mapChecker");
     const d = { ...config.get<MapCheckerUncheckedOption>(this.pluginName), ...option } as MapCheckerUncheckedOption;
     validateMapchekerOption(d);
     this.option = d as MapCheckerOption;
-
-    this.webApiClient = client;
     this.validator = new MapValidator(this.option, this.logger);
     this.registerEvents();
   }
@@ -147,7 +141,7 @@ export class MapChecker extends LobbyPlugin {
       }
 
       if (changed) {
-        const m = "new regulation: " + this.validator.GetDescription();
+        const m = "New regulation: " + this.validator.GetDescription();
         this.lobby.SendMessage(m);
         this.logger.info(m);
       }
@@ -160,7 +154,7 @@ export class MapChecker extends LobbyPlugin {
     if (this.option.enabled) {
       return this.validator.GetDescription();
     } else {
-      return "disabled (" + this.validator.GetDescription() + ")";
+      return "Disabled (" + this.validator.GetDescription() + ")";
     }
   }
 
@@ -170,7 +164,7 @@ export class MapChecker extends LobbyPlugin {
     if (v) {
       this.SendPluginMessage("enabledMapChecker");
       this.lobby.SendMessage("mapChecker Enabled");
-      this.logger.info("mapChecker Enabled"); // TODO check behavior
+      this.logger.info("mapChecker Enabled");
     } else {
       this.SendPluginMessage("disabledMapChecker");
       this.lobby.SendMessage("mapChecker Disabled");
@@ -185,7 +179,7 @@ export class MapChecker extends LobbyPlugin {
   }
 
   private async check(mapId: number, mapTitle: string): Promise<void> {
-
+    if (mapId == this.lastMapId) return;
     try {
       const map = await BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
 
@@ -198,7 +192,7 @@ export class MapChecker extends LobbyPlugin {
       if (0 < r.rate) {
         this.rejectUnfitMap(r.message);
       } else {
-        this.acceptMap();
+        this.acceptMap(map);
       }
     } catch (e: any) {
       if (e instanceof FetchBeatmapError) {
@@ -219,21 +213,6 @@ export class MapChecker extends LobbyPlugin {
         this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
       }
     }
-
-    let map = await this.getBeatmap(mapId);
-    if (!map) {
-      this.logger.warn(`couldn't find map id:${mapId}, title:${mapTitle}, retrying...`);
-      map = await this.getBeatmap(mapId);
-    }
-    if (!map) {
-      this.logger.error(`couldn't find map id:${mapId}, title:${mapTitle}, skip checking`);
-      this.rejectDeletedMap();
-      return;
-    }
-    if (mapId != this.checkingMapId) {
-      this.logger.info(`target map is changed. checked:${mapId}, current:${this.checkingMapId}`);
-      return;
-    }
   }
 
   private skipHost(): void {
@@ -245,8 +224,8 @@ export class MapChecker extends LobbyPlugin {
 
   private rejectDeletedMap(): void {
     this.numViolations += 1;
-    this.logger.info(`Rejected the map already deleted on the website. ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage("!mp map " + this.lastMapId + " | Rejected the map already deleted on the website.");
+    this.logger.info(`The map was rejected because it had already been removed from the website. ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
+    this.lobby.SendMessage("!mp map " + this.lastMapId + " | The map was rejected because it had already been removed from the website.");
     this.checkingMapId = 0;
 
     if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {
@@ -257,7 +236,7 @@ export class MapChecker extends LobbyPlugin {
   private rejectUnfitMap(reason: string): void {
     this.numViolations += 1;
     this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage("!mp map " + this.lastMapId);
+    this.lobby.SendMessage(`!mp map ${this.lastMapId} | Current Regulation : ${this.validator.GetDescription()}`);
     this.lobby.SendMessage(reason);
     this.checkingMapId = 0;
 
@@ -266,23 +245,11 @@ export class MapChecker extends LobbyPlugin {
     }
   }
 
-  private acceptMap(): void {
+  private acceptMap(map: BeatmapCache): void {
     this.SendPluginMessage("validatedMap");
     this.lastMapId = this.lobby.mapId;
 
-    this.lobby.SendMessage("!mp map " + this.lobby.mapId + " " + this.option.gamemode.value);
-  }
-
-  private async getBeatmap(mapId: number): Promise<Beatmap | undefined> {
-    try {
-      return await BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
-    } catch (e: any) {
-      if (e instanceof Error) {
-        this.logger.error(e.message);
-      } else {
-        this.logger.error(e);
-      }
-    }
+    this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${map.beatmapset?.title ?? ""} [https://osu.ppy.sh/beatmapsets/${map.beatmapset_id}/download Download Link] - [https://beatconnect.io/b/${map.beatmapset_id} Alternative(beatconnect.ip)]`);
   }
 
   GetPluginStatus(): string {
@@ -307,61 +274,47 @@ export class MapValidator {
   }
 
   RateBeatmap(map: Beatmap): { rate: number, message: string } {
-    let r = 0;
-
-    let rs = { rate: r, message: "" };
+    let rate = 0;
+    let message = "";
 
     const mapmode = PlayMode.from(map.mode);
     if (mapmode != this.option.gamemode && this.option.gamemode != null) {
-      r += 1;
+      rate += 1;
     }
 
     if (this.option.star_min != 0 && map.difficulty_rating < this.option.star_min) {
-      r += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
+      rate += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
     }
 
     if (this.option.star_max != 0 && this.option.star_max < map.difficulty_rating) {
-      r += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
+      rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
     }
 
     if (this.option.length_min != 0 && map.total_length < this.option.length_min) {
-      r += (this.option.length_min - map.total_length) / 60.0;
+      rate += (this.option.length_min - map.total_length) / 60.0;
     }
 
     if (this.option.length_max != 0 && this.option.length_max < map.total_length) {
-      r += (map.total_length - this.option.length_max) / 60.0;
+      rate += (map.total_length - this.option.length_max) / 60.0;
     }
 
-    if (0.01 <= r) {
-      rs.message
-        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
-        + `Violation of Regulation : ${this.GetDescription()}`;
-      rs.rate = Math.min(Math.max(r, 0.45), 0.9);
-    } else if (0.001 < r) {
-      rs.message
-        = `picked map: ${map.url} ${map.beatmapset?.title} star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}` + "\n"
-        + `Violation of Regulation : ${this.GetDescription()}` + "\n"
-        + `you can skip current host with '!skip' voting command.`
-        ;
-      rs.rate = 0;
+    if (0 < rate) {
+      message = `The map was rejected due to violation of regulations. [${map.url} ${map.beatmapset?.title}] star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}`
     }
 
-    return rs;
+    return { rate, message };
   }
 
   GetDescription(): string {
     let d_star = "";
     let d_length = "";
-    let d_gamemode = "";
-    if (this.option.gamemode != null) {
-      d_gamemode = ` mode: ${this.option.gamemode}`;
-      if (this.option.gamemode != PlayMode.Osu) {
-        if (this.option.allow_convert) {
-          d_gamemode += " (converts allowed)";
-        }
-        else {
-          d_gamemode += " (converts disallowed)";
-        }
+    let d_gamemode = `mode: ${this.option.gamemode.name}`;
+    if (this.option.gamemode != PlayMode.Osu) {
+      if (this.option.allow_convert) {
+        d_gamemode += " (converts allowed)";
+      }
+      else {
+        d_gamemode += " (converts disallowed)";
       }
     }
 
@@ -381,13 +334,7 @@ export class MapValidator {
       d_length = `length <= ${secToTimeNotation(this.option.length_max)}`;
     }
 
-    if (d_star != "" && d_length != "") {
-      return `${d_star}, ${d_length}, ${d_gamemode}`;
-    } else if (d_star == "" && d_length == "") {
-      return "no regulation";
-    } else {
-      return d_star + d_length + d_gamemode;
-    }
+    return [d_star, d_length, d_gamemode].filter(d => d != "").join(", ");
   }
 }
 
@@ -515,9 +462,8 @@ function parseRegulationCommand(params: string[]): MapCheckerUncheckedOption {
       if (params.length < 2) {
         return { allow_convert: true };
       } else {
-        return { gamemode: params[1] };
+        return { allow_convert: params[1] };
       }
-
     case "disallow_convert":
       return { allow_convert: false };
   }
@@ -544,10 +490,8 @@ function parseNoRegulationCommand(param: string): MapCheckerUncheckedOption | un
 }
 
 function parseRegulationSetter(param: string): MapCheckerUncheckedOption {
-  const re = /([0-9a-zA-Z_\-]+)\s*=\s*([^\s,]+)/g;
-  let m = re.exec(param);
   let result: { [key: string]: string } = {};
-  while (m) {
+  for (const m of param.matchAll(/([0-9a-zA-Z_\-]+)\s*=\s*([^\s,]+)/g)) {
     const name = unifyParamName(m[1]);
     const value = m[2];
     result[name] = value;
@@ -576,9 +520,9 @@ function unifyParamName(name: string): string {
     return "disabled";
   } else if (name == "num_violations_to_skip" || name.includes("violations")) {
     return "num_violations_allowed";
-  } else if (name == "allowConvert") {
+  } else if (name == "allowconvert") {
     return "allow_convert";
-  } else if (name == "disallowConver") {
+  } else if (name == "disallowconver") {
     return "disallow_convert";
   }
   return name;

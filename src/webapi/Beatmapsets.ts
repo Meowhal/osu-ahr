@@ -1,17 +1,19 @@
 
-export type Beatmapsets = {
+export type Beatmapset = {
   "artist": string,
   "artist_unicode": string,
   "covers": Covers,
   "creator": string,
   "favourite_count": number,
   "id": number,
+  "nsfw": boolean,
   "play_count": number,
   "preview_url": string,
   "source": string,
   "status": string,
   "title": string,
   "title_unicode": string,
+  "track_id": number,
   "user_id": number,
   "video": boolean,
   "availability": {
@@ -25,14 +27,14 @@ export type Beatmapsets = {
   "hype": {
     "current": number,
     "required": number
-  },
+  } | null,
   "is_scoreable": boolean,
   "last_updated": string,
   "legacy_thread_url": string,
-  "nominations": {
+  "nominations_summary": {
     "current": number,
     "required": number
-  },
+  } | null,
   "ranked": number,
   "ranked_date": string,
   "storyboard": boolean,
@@ -108,5 +110,5 @@ export type Beatmap = {
     "exit": number[]
   },
   "max_combo": number,
-  "beatmapset"?: Beatmapsets
+  "beatmapset"?: Beatmapset
 }

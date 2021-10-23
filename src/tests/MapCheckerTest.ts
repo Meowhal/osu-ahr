@@ -1,24 +1,23 @@
 import { assert } from 'chai';
-import { Lobby, Roles } from "..";
+import { Lobby, Roles } from '..';
 import { DummyIrcClient } from '../dummies';
-import { MapValidator, MapChecker, MapCheckerOption, MapCheckerUncheckedOption } from '../plugins';
+import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher';
+import { PlayMode } from '../Modes';
+import { MapCheckerUncheckedOption, MapChecker } from '../plugins';
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
+import { WebApiClient } from '../webapi/WebApiClient';
 import tu from "./TestUtils";
 
-import beatmap_sample from "./cases/beatmap_848345.json";
-import beatmap_sample_convert from "./cases/beatmap_1323207.json";
-import beatmap_sample_fuilts from "./cases/beatmap_fruits_2578171.json";
-import { Beatmap, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/Beatmapsets';
-import { getLogger } from "log4js";
-import { BeatmapRepository } from '../webapi/BeatmapRepository';
-import { PlayMode, TeamMode } from '../Modes';
-import { Team } from 'discord.js';
-
-describe.only("Map Checker Tests", function () {
+describe("Map Checker Tests", function () {
   before(function () {
-    tu.configMochaVerbosely();
+    tu.configMochaAsSilent();
   });
 
-  async function setupAsync(option?: MapCheckerUncheckedOption):
+  afterEach(function () {
+    BeatmapRepository.maps.clear();
+  })
+
+  async function setup(option?: MapCheckerUncheckedOption):
     Promise<{ checker: MapChecker, lobby: Lobby, ircClient: DummyIrcClient }> {
     const defaultOption = {
       enabled: false,
@@ -34,19 +33,21 @@ describe.only("Map Checker Tests", function () {
     option = { ...defaultOption, ...option };
 
     const li = await tu.SetupLobbyAsync();
-    const checker = new MapChecker(li.lobby, null, option);
+    const checker = new MapChecker(li.lobby, option);
     await tu.AddPlayersAsync(["p1", "p2", "p3"], li.ircClient);
     return { checker, ...li };
   }
 
   describe.skip("fetch beatmap form osu.ppy.sh tests", () => {
+    before(function () {
+      BeatmapRepository.fetcher = BeatmapRepository.websiteFetcher;
+    });
     it("fetch osu map", async () => {
       const mapid = 3182198;
       const b = await BeatmapRepository.getBeatmap(mapid);
       assert.equal(b.mode, "osu");
       assert.equal(b.id, mapid);
-      assert.equal(b.title, "aquamarine");
-      assert.isUndefined(b.beatmapset);
+      assert.equal(b.beatmapset?.title, "aquamarine");
     });
 
     it("fetch invalid map id", async () => {
@@ -68,7 +69,7 @@ describe.only("Map Checker Tests", function () {
       const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko);
       assert.equal(b.mode, "taiko");
       assert.equal(b.id, mapid);
-      assert.equal(b.title, "The Old Blood");
+      assert.equal(b.beatmapset?.title, "The Old Blood");
     });
 
     it("fetch fruits map", async () => {
@@ -76,7 +77,7 @@ describe.only("Map Checker Tests", function () {
       const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.CatchTheBeat);
       assert.equal(b.mode, "fruits");
       assert.equal(b.id, mapid);
-      assert.equal(b.title, "Otter Pop (feat. Hollis)");
+      assert.equal(b.beatmapset?.title, "Otter Pop (feat. Hollis)");
     });
 
     it("fetch mania map", async () => {
@@ -84,18 +85,18 @@ describe.only("Map Checker Tests", function () {
       const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.OsuMania);
       assert.equal(b.mode, "mania");
       assert.equal(b.id, mapid);
-      assert.equal(b.title, "Hanshoku-ki (Cut Ver.)");
+      assert.equal(b.beatmapset?.title, "Hanshoku-ki (Cut Ver.)");
     });
 
-    it("fetch taiko map from osu only mapset as allowconvert", async () => {
+    it("fetch converted taiko map", async () => {
       const mapid = 3182198;
       const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, true);
       assert.equal(b.mode, "taiko");
       assert.equal(b.id, mapid);
-      assert.equal(b.title, "aquamarine");
+      assert.equal(b.beatmapset?.title, "aquamarine");
     });
 
-    it("fetch taiko map from osu only mapset as disallowconvert", async () => {
+    it("fail to fetch taiko map", async () => {
       const mapid = 3182198;
       try {
         const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, false);
@@ -109,7 +110,7 @@ describe.only("Map Checker Tests", function () {
       }
     });
 
-    it("fetch osu map from taiko only mapset", async () => {
+    it("fail to fetch osu map", async () => {
       const mapid = 2938202;
       try {
         const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Osu);
@@ -127,16 +128,212 @@ describe.only("Map Checker Tests", function () {
       const mapid = 3182198;
       BeatmapRepository.maps.clear();
       const b1 = await BeatmapRepository.getBeatmap(mapid);
-      assert.equal(BeatmapRepository.maps.get(`${PlayMode.Osu.name}-${mapid}`), b1)
+      assert.equal(BeatmapRepository.maps.get(BeatmapRepository.genKey(mapid, PlayMode.Osu)), b1)
       const b2 = await BeatmapRepository.getBeatmap(mapid);
       assert.equal(b1, b2);
     })
+  });
+
+  describe.skip("fetch beatmap form osu.ppy.sh tests", () => {
+    before(function () {
+      BeatmapRepository.fetcher = WebApiClient;
+    });
+    after(function () {
+      BeatmapRepository.fetcher = BeatmapRepository.websiteFetcher;
+    });
+
+    it("fetch osu map", async () => {
+      const mapid = 3182198;
+      const b = await BeatmapRepository.getBeatmap(mapid);
+      assert.equal(b.mode, "osu");
+      assert.equal(b.id, mapid);
+      assert.equal(b.beatmapset?.title, "aquamarine");
+    });
+
+    it("fetch invalid map id", async () => {
+      const mapid = 737157;
+      try {
+        const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko);
+        assert.fail();
+      } catch (e: any) {
+        if (e instanceof FetchBeatmapError) {
+          assert.equal(e.reason, FetchBeatmapErrorReason.NotFound);
+        } else {
+          assert.fail();
+        }
+      }
+    });
+
+    it("fetch taiko map", async () => {
+      const mapid = 2938202;
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko);
+      assert.equal(b.mode, "taiko");
+      assert.equal(b.id, mapid);
+      assert.equal(b.beatmapset?.title, "The Old Blood");
+    });
+
+    it("fetch fruits map", async () => {
+      const mapid = 3175483;
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.CatchTheBeat);
+      assert.equal(b.mode, "fruits");
+      assert.equal(b.id, mapid);
+      assert.equal(b.beatmapset?.title, "Otter Pop (feat. Hollis)");
+    });
+
+    it("fetch mania map", async () => {
+      const mapid = 3259543;
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.OsuMania);
+      assert.equal(b.mode, "mania");
+      assert.equal(b.id, mapid);
+      assert.equal(b.beatmapset?.title, "Hanshoku-ki (Cut Ver.)");
+    });
+
+    it("fetch converted taiko map", async () => {
+      const mapid = 3182198;
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, true);
+      assert.equal(b.mode, "taiko");
+      assert.equal(b.id, mapid);
+      assert.equal(b.beatmapset?.title, "aquamarine");
+    });
+
+    it("fail to fetch taiko map", async () => {
+      const mapid = 3182198;
+      try {
+        const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, false);
+        assert.fail();
+      } catch (e: any) {
+        if (e instanceof FetchBeatmapError) {
+          assert.equal(e.reason, FetchBeatmapErrorReason.PlayModeMismatched);
+        } else {
+          assert.fail();
+        }
+      }
+    });
+
+    it("fail to fetch osu map", async () => {
+      const mapid = 2938202;
+      try {
+        const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Osu);
+        assert.fail();
+      } catch (e: any) {
+        if (e instanceof FetchBeatmapError) {
+          assert.equal(e.reason, FetchBeatmapErrorReason.PlayModeMismatched);
+        } else {
+          assert.fail();
+        }
+      }
+    });
+
+    it("cache test", async () => {
+      const mapid = 3182198;
+      BeatmapRepository.maps.clear();
+      const b1 = await BeatmapRepository.getBeatmap(mapid);
+      assert.equal(BeatmapRepository.maps.get(BeatmapRepository.genKey(mapid, PlayMode.Osu)), b1)
+      const b2 = await BeatmapRepository.getBeatmap(mapid);
+      assert.equal(b1, b2);
+    })
+  });
+
+  describe("fetch beatmap form fakes tests", () => {
+    const originalFetcher = BeatmapRepository.fetcher;
+    const fakeFetcher = new FakeBeatmapFetcher();
+    before(function () {
+      BeatmapRepository.fetcher = fakeFetcher;
+    });
+    after(function () {
+      BeatmapRepository.fetcher = originalFetcher;
+    });
+
+    it("fetch osu map", async () => {
+      const mapid = 3182198;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Osu, 100, 5);
+      const b = await BeatmapRepository.getBeatmap(mapid);
+      assert.equal(b.mode, "osu");
+      assert.equal(b.id, mapid);
+    });
+
+    it("fetch invalid map id", async () => {
+      const mapid = 1000;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Osu, 100, 5);
+      try {
+        const b = await BeatmapRepository.getBeatmap(500, PlayMode.Taiko);
+        assert.fail();
+      } catch (e: any) {
+        if (e instanceof FetchBeatmapError) {
+          assert.equal(e.reason, FetchBeatmapErrorReason.NotFound);
+        } else {
+          assert.fail();
+        }
+      }
+    });
+
+    it("fetch taiko map", async () => {
+      const mapid = 2938202;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Taiko, 100, 5);
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, false);
+      assert.equal(b.mode, "taiko");
+      assert.equal(b.id, mapid);
+    });
+
+    it("fetch fruits map", async () => {
+      const mapid = 3175483;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.CatchTheBeat, 100, 5);
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.CatchTheBeat, false);
+      assert.equal(b.mode, "fruits");
+      assert.equal(b.id, mapid);
+    });
+
+    it("fetch mania map", async () => {
+      const mapid = 3259543;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.OsuMania, 100, 5);
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.OsuMania, false);
+      assert.equal(b.mode, "mania");
+      assert.equal(b.id, mapid);
+    });
+
+    it("fetch converted taiko map", async () => {
+      const mapid = 3182198;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Osu, 100, 5);
+      const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, true);
+      assert.equal(b.mode, "taiko");
+      assert.equal(b.id, mapid);
+    });
+
+    it("fail to fetch taiko map", async () => {
+      const mapid = 3182198;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Osu, 100, 5);
+      try {
+        const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Taiko, false);
+        assert.fail();
+      } catch (e: any) {
+        if (e instanceof FetchBeatmapError) {
+          assert.equal(e.reason, FetchBeatmapErrorReason.PlayModeMismatched);
+        } else {
+          assert.fail();
+        }
+      }
+    });
+
+    it("fail to fetch osu map", async () => {
+      const mapid = 2938202;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Taiko, 100, 5);
+      try {
+        const b = await BeatmapRepository.getBeatmap(mapid, PlayMode.Osu);
+        assert.fail();
+      } catch (e: any) {
+        if (e instanceof FetchBeatmapError) {
+          assert.equal(e.reason, FetchBeatmapErrorReason.PlayModeMismatched);
+        } else {
+          assert.fail();
+        }
+      }
+    });
 
   });
 
   describe("mapchecker option tests", () => {
     it("default option test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       assert.equal(checker.option.allow_convert, true);
       assert.equal(checker.option.enabled, false);
@@ -150,7 +347,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("type matching option test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         allow_convert: false,
         enabled: true,
         gamemode: PlayMode.OsuMania,
@@ -173,7 +370,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("type mismatchinhg option test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         allow_convert: "false",
         enabled: 1,
         gamemode: "fruits",
@@ -196,7 +393,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("type mismatchinhg option test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         allow_convert: "false",
         enabled: 1,
         gamemode: "fruits",
@@ -218,7 +415,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("conflicted option test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         length_max: "20",
         length_min: "50",
         star_max: "3",
@@ -232,7 +429,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("0 max option test (not conflicted)", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         length_max: "0",
         length_min: "50",
         star_max: "0",
@@ -246,7 +443,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("0 min option test (not conflicted)", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         length_max: "50",
         length_min: "0",
         star_max: "5",
@@ -261,7 +458,7 @@ describe.only("Map Checker Tests", function () {
 
 
     it("abolished option test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
+      const { checker, lobby, ircClient } = await setup({
         allowConvert: false,
         num_violations_to_skip: 10,
       });
@@ -273,7 +470,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : allow_convert", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           allow_convert: "aaaa"
         });
       } catch (e) {
@@ -285,7 +482,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : enabled", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           enabled: "aaaa"
         });
       } catch (e) {
@@ -297,7 +494,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : gamemode aaaa", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           gamemode: "aaaa"
         });
       } catch (e) {
@@ -309,7 +506,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : gamemode dsflkjsd", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           gamemode: "dsflkjsd"
         });
       } catch (e) {
@@ -321,7 +518,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : gamemode 123456", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           gamemode: 123456
         });
       } catch (e) {
@@ -333,7 +530,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : length_max", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           length_max: -1
         });
       } catch (e) {
@@ -345,7 +542,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : length_min", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           length_min: -1
         });
       } catch (e) {
@@ -357,7 +554,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : num_violations_allowed", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           num_violations_allowed: -1
         });
       } catch (e) {
@@ -369,7 +566,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : star_max", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           star_max: -1
         });
       } catch (e) {
@@ -381,7 +578,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : star_min", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           star_min: -1
         });
       } catch (e) {
@@ -393,7 +590,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : number NaN", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           star_min: NaN
         });
       } catch (e) {
@@ -405,7 +602,7 @@ describe.only("Map Checker Tests", function () {
     it("invalid option test : number string", async () => {
       let threw = false;
       try {
-        const { checker, lobby, ircClient } = await setupAsync({
+        const { checker, lobby, ircClient } = await setup({
           star_min: "aaaa"
         });
       } catch (e) {
@@ -417,7 +614,7 @@ describe.only("Map Checker Tests", function () {
 
   describe("owner command tests", () => {
     it("command: enabled ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
@@ -436,7 +633,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("command: num_violations_allowed ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
@@ -468,7 +665,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("command: star_min ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
@@ -517,7 +714,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("command: star_max ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
@@ -570,7 +767,7 @@ describe.only("Map Checker Tests", function () {
 
 
     it("command: length_min ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
@@ -619,7 +816,7 @@ describe.only("Map Checker Tests", function () {
     });
 
     it("command: length_max ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
@@ -670,12 +867,12 @@ describe.only("Map Checker Tests", function () {
       assert.equal(checker.option.length_max, 5);
     });
 
-    it.only("command: gamemode ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+    it("command: gamemode ", async () => {
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
 
-      const initialValue = TeamMode.HeadToHead; // invalid mode
+      let initialValue = PlayMode.OsuMania;
       checker.option.gamemode = initialValue;
       ircClient.emulateMessage("p1", ircClient.channel, "*regulation gamemode osu");
       assert.equal(checker.option.gamemode, PlayMode.Osu);
@@ -716,6 +913,7 @@ describe.only("Map Checker Tests", function () {
       ircClient.emulateMessage("p1", ircClient.channel, "*regulation gamemode 2");
       assert.equal(checker.option.gamemode, PlayMode.CatchTheBeat);
 
+      initialValue = PlayMode.Osu;
       checker.option.gamemode = initialValue;
       ircClient.emulateMessage("p1", ircClient.channel, "*regulation gamemode OsuMania");
       assert.equal(checker.option.gamemode, PlayMode.OsuMania);
@@ -745,295 +943,440 @@ describe.only("Map Checker Tests", function () {
       assert.equal(checker.option.gamemode, initialValue);
     });
 
-    it.only("command: allow_convert ", async () => {
-      const { checker, lobby, ircClient } = await setupAsync();
+    it("command: allow_convert ", async () => {
+      const { checker, lobby, ircClient } = await setup();
 
       lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
+
+      checker.option.allow_convert = false;
+      ircClient.emulateMessage("p1", ircClient.channel, "*regulation allow_convert");
+      assert.equal(checker.option.allow_convert, true);
+
+      ircClient.emulateMessage("p1", ircClient.channel, "*regulation disallow_convert");
+      assert.equal(checker.option.allow_convert, false);
+
+      ircClient.emulateMessage("p1", ircClient.channel, "*regulation allow_convert true");
+      assert.equal(checker.option.allow_convert, true);
+
+      ircClient.emulateMessage("p1", ircClient.channel, "*regulation allow_convert false");
+      assert.equal(checker.option.allow_convert, false);
+    });
+
+    it("command  statement ", async () => {
+      const { checker, lobby, ircClient } = await setup();
+
+      lobby.GetOrMakePlayer("p1").setRole(Roles.Authorized);
+
+      checker.option.allow_convert = false;
+      ircClient.emulateMessage("p1", ircClient.channel, "*regulation starmax=10 starmin=1 maxlen=100 lenmin = 20 gamemode= osu");
+
+      assert.equal(checker.option.gamemode, PlayMode.Osu);
+      assert.equal(checker.option.star_max, 10);
+      assert.equal(checker.option.star_min, 1);
+      assert.equal(checker.option.length_max, 100);
+      assert.equal(checker.option.length_min, 20);
     });
   });
 
-
-
-
-});
-/*
-describe("Map Checker Tests", function () {
-  before(function () {
-    tu.configMochaAsSilent();
-  });
-
-  async function setupAsync(option?: Partial<MapCheckerOption>):
-    Promise<{ checker: MapChecker, lobby: Lobby, ircClient: DummyIrcClient }> {
-    const li = await tu.SetupLobbyAsync();
-    const checker = new MapChecker(li.lobby, null, option);
-    checker.osuMaps[beatmap_sample.id] = { ...beatmap_sample, fetchedAt: Date.now() };
-    await tu.AddPlayersAsync(["p1", "p2", "p3"], li.ircClient);
-    return { checker, ...li };
-  }
-
-  describe("Default Regulation Tests", function () {
-    it("default regulation simple test", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 5.00,
-        star_max: 6.00,
+  describe("description tests", () => {
+    it("default config", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        enabled: false,
+        star_min: 0,
+        star_max: 7.00,
         length_min: 0,
-        length_max: 300,
+        length_max: 600,
         gamemode: "osu",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
+        num_violations_allowed: 3,
+        allow_convert: true
+      });
 
-      const dr = new MapValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map);
-      assert.equal(r.rate, 0);
+      assert.equal(checker.getRegulationDescription(), "Disabled (difficulty <= 7.00, length <= 10:00, mode: Osu)");
     });
 
-    it("default regulation out of regulation diff test", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 5.00,
-        star_max: 6.00,
-        length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
-
-      const dr = new MapValidator(reg, getLogger("checker"));
-      map.difficulty_rating = 10;
-      let r = dr.RateBeatmap(map);
-      assert.notEqual(r.rate, 0);
-
-      map.difficulty_rating = 1;
-      r = dr.RateBeatmap(map);
-      assert.notEqual(r.rate, 0);
-
-    });
-
-    it("default regulation out of regulation length test", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 5.00,
-        star_max: 6.00,
-        length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
-
-      const dr = new MapValidator(reg, getLogger("checker"));
-      map.total_length = 500;
-      let r = dr.RateBeatmap(map);
-      assert.notEqual(r.rate, 0);
-    });
-
-    it("star no cap", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 3.00,
-        star_max: 0,
-        length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
-
-      const dr = new MapValidator(reg, getLogger("checker"));
-      let r = dr.RateBeatmap(map);
-      assert.equal(r.rate, 0);
-    });
-
-    it("length no cap", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 3.00,
+    it("config", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        enabled: true,
+        star_min: 0,
         star_max: 0,
         length_min: 0,
         length_max: 0,
         gamemode: "osu",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
+        allow_convert: true
+      });
+      assert.equal(checker.getRegulationDescription(), "mode: Osu");
 
-      const dr = new MapValidator(reg, getLogger("checker"));
-      let r = dr.RateBeatmap(map);
-      assert.equal(r.rate, 0);
+      checker.option.gamemode = PlayMode.Taiko;
+      checker.option.allow_convert = true;
+      assert.equal(checker.getRegulationDescription(), "mode: Taiko (converts allowed)");
+      checker.option.allow_convert = false;
+      assert.equal(checker.getRegulationDescription(), "mode: Taiko (converts disallowed)");
+
+      checker.option.gamemode = PlayMode.CatchTheBeat;
+      checker.option.allow_convert = true;
+      assert.equal(checker.getRegulationDescription(), "mode: CatchTheBeat (converts allowed)");
+      checker.option.allow_convert = false;
+      assert.equal(checker.getRegulationDescription(), "mode: CatchTheBeat (converts disallowed)");
+
+      checker.option.gamemode = PlayMode.OsuMania;
+      checker.option.allow_convert = true;
+      assert.equal(checker.getRegulationDescription(), "mode: OsuMania (converts allowed)");
+      checker.option.allow_convert = false;
+      assert.equal(checker.getRegulationDescription(), "mode: OsuMania (converts disallowed)");
+
+      checker.option.gamemode = PlayMode.Osu;
+      checker.option.star_max = 1;
+      assert.equal(checker.getRegulationDescription(), "difficulty <= 1.00, mode: Osu");
+      checker.option.star_max = 0;
+      checker.option.star_min = 1;
+      assert.equal(checker.getRegulationDescription(), "1.00 <= difficulty, mode: Osu");
+      checker.option.star_max = 2;
+      checker.option.star_min = 1;
+      assert.equal(checker.getRegulationDescription(), "1.00 <= difficulty <= 2.00, mode: Osu");
+
+      checker.option.star_max = 0;
+      checker.option.star_min = 0;
+      checker.option.length_max = 60;
+      assert.equal(checker.getRegulationDescription(), "length <= 1:00, mode: Osu");
+      checker.option.length_max = 0;
+      checker.option.length_min = 90;
+      assert.equal(checker.getRegulationDescription(), "1:30 <= length, mode: Osu");
+      checker.option.length_max = 120;
+      checker.option.length_min = 30;
+      assert.equal(checker.getRegulationDescription(), "0:30 <= length <= 2:00, mode: Osu");
+
+      checker.option.star_max = 2;
+      checker.option.star_min = 1;
+      checker.option.length_max = 120;
+      checker.option.length_min = 30;
+      assert.equal(checker.getRegulationDescription(), "1.00 <= difficulty <= 2.00, 0:30 <= length <= 2:00, mode: Osu");
+
+      checker.option.enabled = false;
+      assert.equal(checker.getRegulationDescription(), "Disabled (1.00 <= difficulty <= 2.00, 0:30 <= length <= 2:00, mode: Osu)");
+    });
+  });
+
+  describe("regulation check tests", () => {
+    const originalFetcher = BeatmapRepository.fetcher;
+    const fakeFetcher = new FakeBeatmapFetcher();
+    before(function () {
+      BeatmapRepository.fetcher = fakeFetcher;
+    });
+    after(function () {
+      BeatmapRepository.fetcher = originalFetcher;
+    });
+
+    it("default settings test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        enabled: true
+      });
+      const mapid = 100;
+      fakeFetcher.setBeatmapProperties(mapid, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, mapid);
+      assert.equal(checker.lastMapId, mapid);
+    });
+
+    it("star accept test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 5,
+        star_min: 2,
+        length_max: 0,
+        length_min: 0,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 101);
+    });
+
+    it("star no limit accept test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 2,
+        length_max: 0,
+        length_min: 0,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 100, 10);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 101);
+    });
+
+    it("star reject test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 5,
+        star_min: 2,
+        length_max: 0,
+        length_min: 0,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5.01);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 100, 1.99);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 0);
+    });
+
+    it("length accept test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 100,
+        length_min: 10,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 10, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 101);
+    });
+
+    it("length no limit accept test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 0,
+        length_min: 10,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 10, 10);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 101);
+    });
+
+    it("length reject test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 5,
+        star_min: 2,
+        length_max: 100,
+        length_min: 10,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 101, 5.);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 9, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 0);
     });
 
     it("gamemode accept test", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 5.00,
-        star_max: 6.00,
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 0,
         length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
+        gamemode: PlayMode.Osu,
+        allow_convert: false,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
 
-      const dr = new MapValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map);
-      assert.equal(r.rate, 0);
+      checker.option.gamemode = PlayMode.Taiko;
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Taiko, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 101);
 
+      checker.option.gamemode = PlayMode.CatchTheBeat;
+      fakeFetcher.setBeatmapProperties(102, "test", PlayMode.CatchTheBeat, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 102);
+      assert.equal(checker.lastMapId, 102);
+
+      checker.option.gamemode = PlayMode.OsuMania;
+      fakeFetcher.setBeatmapProperties(103, "test", PlayMode.OsuMania, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 103);
+      assert.equal(checker.lastMapId, 103);
     });
 
-    it("gamemode accept convert test", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 1.00,
-        star_max: 6.00,
+    it("gamemode allow convert accept test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 0,
         length_min: 0,
-        length_max: 300,
-        gamemode: "mania",
-        allow_convert: 1
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample_convert);
+        gamemode: PlayMode.Osu,
+        allow_convert: true,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
 
-      const dr = new MapValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map);
-      assert.equal(r.rate, 0);
+      checker.option.gamemode = PlayMode.Taiko;
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 101);
 
+      checker.option.gamemode = PlayMode.CatchTheBeat;
+      fakeFetcher.setBeatmapProperties(102, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 102);
+      assert.equal(checker.lastMapId, 102);
+
+      checker.option.gamemode = PlayMode.OsuMania;
+      fakeFetcher.setBeatmapProperties(103, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 103);
+      assert.equal(checker.lastMapId, 103);
     });
 
-    it("gamemode reject test2", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 5.00,
-        star_max: 6.00,
+    it("gamemode disallow convert reject test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 0,
         length_min: 0,
-        length_max: 300,
-        gamemode: "mania",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
+        gamemode: PlayMode.Osu,
+        allow_convert: false,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 100);
 
-      const dr = new MapValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map);
-      assert.notEqual(r.rate, 0);
+      checker.option.gamemode = PlayMode.Taiko;
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 100);
 
+      checker.option.gamemode = PlayMode.CatchTheBeat;
+      fakeFetcher.setBeatmapProperties(102, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 102);
+      assert.equal(checker.lastMapId, 100);
+
+      checker.option.gamemode = PlayMode.OsuMania;
+      fakeFetcher.setBeatmapProperties(103, "test", PlayMode.Osu, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 103);
+      assert.equal(checker.lastMapId, 100);
     });
 
-    it("gamemode empty", async () => {
-      const reg: DefaultRegulation = {
-        star_min: 5.00,
-        star_max: 6.00,
+    it("gamemode ous reject test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 0,
         length_min: 0,
-        length_max: 300,
-        gamemode: "",
-        allow_convert: 0
-      }
-      const map: Beatmap = Object.assign({}, beatmap_sample);
+        gamemode: PlayMode.Osu,
+        allow_convert: false,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Taiko, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
 
-      const dr = new MapValidator(reg, getLogger("checker"));
-      const r = dr.RateBeatmap(map);
-      assert.equal(r.rate, 0);
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.CatchTheBeat, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 0);
 
+      fakeFetcher.setBeatmapProperties(102, "test", PlayMode.OsuMania, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 102);
+      assert.equal(checker.lastMapId, 0);
+    });
+
+    it("gamemode ous reject test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 0,
+        star_min: 0,
+        length_max: 0,
+        length_min: 0,
+        gamemode: PlayMode.Osu,
+        allow_convert: false,
+        enabled: true
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Taiko, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.CatchTheBeat, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 0);
+
+      fakeFetcher.setBeatmapProperties(102, "test", PlayMode.OsuMania, 100, 2);
+      await ircClient.emulateChangeMapAsync(0, 102);
+      assert.equal(checker.lastMapId, 0);
+    });
+
+    it("disalbed test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 3,
+        star_min: 2,
+        length_max: 100,
+        length_min: 20,
+        gamemode: PlayMode.Osu,
+        allow_convert: false,
+        enabled: false
+      });
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Taiko, 100, 15);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+      assert.equal(checker.numViolations, 0);
+
+      fakeFetcher.setBeatmapProperties(101, "test", PlayMode.CatchTheBeat, 1000, 1);
+      await ircClient.emulateChangeMapAsync(0, 101);
+      assert.equal(checker.lastMapId, 0);
+      assert.equal(checker.numViolations, 0);
+
+      fakeFetcher.setBeatmapProperties(102, "test", PlayMode.OsuMania, 100, 5);
+      await ircClient.emulateChangeMapAsync(0, 102);
+      assert.equal(checker.lastMapId, 0);
+      assert.equal(checker.numViolations, 0);
     });
   });
-  describe("plugin tests", () => {
 
-    it("accept map test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
-        enabled: true,
-        num_violations_allowed: 2,
-        cache_expired_day: 10,
-        star_min: 5.00,
-        star_max: 6.00,
-        length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-      });
-
-      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
-      assert.equal(lobby.mapId, beatmap_sample.id);
+  describe("skip host tests", () => {
+    const originalFetcher = BeatmapRepository.fetcher;
+    const fakeFetcher = new FakeBeatmapFetcher();
+    before(function () {
+      BeatmapRepository.fetcher = fakeFetcher;
     });
-
-    it("reject map test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
-        enabled: true,
-        num_violations_allowed: 2,
-        cache_expired_day: 10,
-        star_min: 1.00,
-        star_max: 3.00,
-        length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-      });
-
-      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
-      await tu.delayAsync(10);
-      assert.notEqual(lobby.mapId, beatmap_sample.id);
-      // let skipCalled = false;
-
-      // lobby.PluginMessage.once(({ type }) => {
-      //   if (type == "skip") {
-      //     skipCalled = true;
-      //   }
-      // });
-
+    after(function () {
+      BeatmapRepository.fetcher = originalFetcher;
     });
-
-    it("reject and skip test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
-        enabled: true,
-        num_violations_allowed: 2,
-        cache_expired_day: 10,
-        star_min: 1.00,
-        star_max: 3.00,
+    it("num violation test", async () => {
+      const { checker, lobby, ircClient } = await setup({
+        star_max: 5,
+        star_min: 0,
+        length_max: 0,
         length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
+        gamemode: PlayMode.Osu,
+        allow_convert: false,
+        enabled: true
       });
+      await ircClient.emulateChangeHost("p1");
+      assert.equal(checker.numViolations, 0);
+      fakeFetcher.setBeatmapProperties(100, "test", PlayMode.Osu, 100, 6.55);
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+      assert.equal(checker.numViolations, 1);
 
-      let skipCalled = false;
-      lobby.PluginMessage.once(({ type }) => {
-        if (type == "skip") {
-          skipCalled = true;
-        }
-      });
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+      assert.equal(checker.numViolations, 2);
 
-      ircClient.emulateChangeHost("p1");
+      await ircClient.emulateChangeMapAsync(0, 100);
+      assert.equal(checker.lastMapId, 0);
+      assert.equal(checker.numViolations, 3);
 
-      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
-      await tu.delayAsync(10);
-      assert.notEqual(lobby.mapId, beatmap_sample.id);
-      assert.isFalse(skipCalled);
-
-      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
-      await tu.delayAsync(10);
-      assert.notEqual(lobby.mapId, beatmap_sample.id);
-      assert.isTrue(skipCalled);
-
-    });
-
-    it("reject and not skip test", async () => {
-      const { checker, lobby, ircClient } = await setupAsync({
-        enabled: true,
-        num_violations_allowed: 0,
-        cache_expired_day: 10,
-        star_min: 1.00,
-        star_max: 3.00,
-        length_min: 0,
-        length_max: 300,
-        gamemode: "osu",
-      });
-
-      let skipCalled = false;
-      lobby.PluginMessage.once(({ type }) => {
-        if (type == "skip") {
-          skipCalled = true;
-        }
-      });
-
-      ircClient.emulateChangeHost("p1");
-
-      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
-      await tu.delayAsync(10);
-      assert.notEqual(lobby.mapId, beatmap_sample.id);
-      assert.isFalse(skipCalled);
-
-      await ircClient.emulateChangeMapAsync(0, beatmap_sample.id);
-      await tu.delayAsync(10);
-      assert.notEqual(lobby.mapId, beatmap_sample.id);
-      assert.isFalse(skipCalled);
-
+      await ircClient.emulateChangeHost("p2");
+      assert.equal(checker.numViolations, 0);
     });
   });
-});*/
+});

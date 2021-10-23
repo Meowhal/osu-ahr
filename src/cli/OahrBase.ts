@@ -3,7 +3,6 @@ import config from "config";
 import log4js from "log4js";
 import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker, LobbyKeeper, AfkKicker, MapMirrorLoader } from "../plugins";
 import { parser } from "../parsers";
-import { WebApiClient } from "../webapi/WebApiClient";
 
 const logger = log4js.getLogger("cli");
 
@@ -31,7 +30,6 @@ export class OahrBase {
   keeper: LobbyKeeper;
   afkkicker: AfkKicker;
   mirrorLoader: MapMirrorLoader;
-  webApiClient: WebApiClient | null = null;
   option: OahrCliOption = OahrCliDefaultOption;
 
   constructor(client: IIrcClient) {
@@ -48,11 +46,7 @@ export class OahrBase {
     this.recaster = new MapRecaster(this.lobby);
     this.history = new HistoryLoader(this.lobby);
     this.mirrorLoader = new MapMirrorLoader(this.lobby);
-    this.webApiClient = new WebApiClient();
-    if (this.webApiClient.option.client_id == 0) {
-      this.webApiClient = null;
-    }
-    this.checker = new MapChecker(this.lobby, this.webApiClient);
+    this.checker = new MapChecker(this.lobby);
     this.keeper = new LobbyKeeper(this.lobby);
     this.afkkicker = new AfkKicker(this.lobby);
     this.lobby.RaisePluginsLoaded();

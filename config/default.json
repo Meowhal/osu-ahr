@@ -57,11 +57,11 @@
     "terminate_time_ms": 60000
   },
   "MapChecker": {
-    "enabled": false,
+    "enabled": true,
     "star_min": 0,
-    "star_max": 7.00,
+    "star_max": 0,
     "length_min": 0,
-    "length_max": 600,
+    "length_max": 0,
     "gamemode": "osu",
     "num_violations_allowed": 3,
     "allow_convert": true

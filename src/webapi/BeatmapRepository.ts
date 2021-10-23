@@ -1,19 +1,27 @@
 import axios from "axios";
 import cheerio from "cheerio";
 import { PlayMode } from "../Modes";
-import { Beatmap, Beatmapsets } from "./Beatmapsets";
+import { Beatmap, Beatmapset as Beatmapset } from "./Beatmapsets";
+import { WebApiClient } from "./WebApiClient";
 
-export type BeatmapCache = Beatmap & { fetchedAt: number, title?: string, title_unicode?: string };
+export type BeatmapCache = Beatmap & { fetchedAt: number };
 
-class BeatmapRepositoryClass implements IBeatmapFetcher {
+class BeatmapRepositoryClass {
     maps: Map<string, BeatmapCache>;
     cacheExpiredMs: number;
     fetcher: IBeatmapFetcher;
 
+    websiteFetcher: IBeatmapFetcher;
+
     constructor() {
         this.maps = new Map();
         this.cacheExpiredMs = 24 * 3600 * 1000;
-        this.fetcher = new WebsiteBeatmapFecher();
+        this.websiteFetcher = new WebsiteBeatmapFecher();
+        if (WebApiClient.available) {
+            this.fetcher = WebApiClient;
+        } else {
+            this.fetcher = this.websiteFetcher;
+        }
     }
 
     /**
@@ -25,30 +33,49 @@ class BeatmapRepositoryClass implements IBeatmapFetcher {
      * @throws FetchBeatmapError
      */
     async getBeatmap(mapId: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = true): Promise<BeatmapCache> {
-        const mapKey = `${mode.name}-${mapId}`;
+        if (this.fetcher == WebApiClient) {
+            if (!WebApiClient.available) {
+                this.fetcher = this.websiteFetcher;
+            }
+        }
+
+        let cache = this.tryGetCache(mapId, mode, allowConvert);
+        if (cache) return cache;
+
+        const set = await this.fetcher.getBeatmapset(mapId);
+        this.cacheMaps(set);
+
+        cache = this.tryGetCache(mapId, mode, allowConvert);
+        if (cache) return cache;
+
+        throw new FetchBeatmapError(FetchBeatmapErrorReason.PlayModeMismatched);
+    }
+
+    tryGetCache(mapId: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = true): BeatmapCache | undefined {
+        const mapKey = this.genKey(mapId, mode);
         const cache = this.maps.get(mapKey);
 
-        if (cache !== undefined) {
+        if (cache) {
             if (Date.now() < cache.fetchedAt + this.cacheExpiredMs) {
-                return cache;
+                if (mode == PlayMode.Osu || allowConvert || !cache.convert) {
+                    return cache;
+                }
             } else {
                 this.maps.delete(mapKey);
             }
         }
+    }
 
-        let map = await this.fetcher.getBeatmap(mapId, mode, allowConvert);
-        let v = {
-            ...map,
-            fetchedAt: Date.now(),
-            title: map.beatmapset?.title,
-            title_unicode: map.beatmapset?.title_unicode
-        };
-
-        // remove unused datas
-        v.beatmapset = undefined;
-
-        this.maps.set(mapKey, v);
-        return v;
+    cacheMaps(set: Beatmapset) {
+        const now = Date.now();
+        set.recent_favourites = [];
+        for (const map of [...set.beatmaps ?? [], ...set.converts ?? []] as BeatmapCache[]) {
+            const key = this.genKey(map.id, map.mode);
+            map.fetchedAt = now;
+            map.beatmapset = set;
+            map.failtimes = { exit: [], fail: [] };
+            this.maps.set(key, map);
+        }
     }
 
     discardExpiredCache() {
@@ -58,6 +85,13 @@ class BeatmapRepositoryClass implements IBeatmapFetcher {
                 this.maps.delete(key);
             }
         }
+    }
+
+    genKey(mapid: number, mode: string | PlayMode) {
+        if (typeof mode == "string") {
+            mode = PlayMode.from(mode);
+        }
+        return `${mode.id}.${mapid}`;
     }
 }
 
@@ -71,6 +105,7 @@ export enum FetchBeatmapErrorReason {
 export function isFetchBeatmapError(err: any): err is FetchBeatmapError {
     return "isFetchBeatmapError" in err;
 }
+
 export class FetchBeatmapError extends Error {
     isFetchBeatmapError: true = true;
     reason: FetchBeatmapErrorReason;
@@ -85,14 +120,13 @@ export class FetchBeatmapError extends Error {
     }
 }
 
-
 export interface IBeatmapFetcher {
-    getBeatmap(mapId: number, mode: PlayMode, allowConvert: boolean): Promise<Beatmap>;
+    getBeatmapset(mapId: number): Promise<Beatmapset>;
 }
 
 export class WebsiteBeatmapFecher implements IBeatmapFetcher {
 
-    getBeatmapsets(id: number): Promise<Beatmapsets | undefined> {
+    getBeatmapsets(id: number): Promise<Beatmapset | undefined> {
         return this.fetchBeatmapFromWebsite(id);
     }
 
@@ -120,7 +154,11 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
         return map;
     }
 
-    async fetchBeatmapFromWebsite(id: number): Promise<Beatmapsets> {
+    getBeatmapset(mapId: number): Promise<Beatmapset> {
+        return this.fetchBeatmapFromWebsite(mapId);
+    }
+
+    async fetchBeatmapFromWebsite(id: number): Promise<Beatmapset> {
         try {
             const target = "https://osu.ppy.sh/b/" + id;
             const res = await axios.get(target);
@@ -131,7 +169,7 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
                 const src = n.data;
                 if (src) {
                     const json = JSON.parse(src);
-                    return json as Beatmapsets;
+                    return json as Beatmapset;
                 }
             }
             throw new FetchBeatmapError(FetchBeatmapErrorReason.FormatError);
@@ -149,7 +187,5 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
         }
     }
 }
-
-
 
 export const BeatmapRepository = new BeatmapRepositoryClass();

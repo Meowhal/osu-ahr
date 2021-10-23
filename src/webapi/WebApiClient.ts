@@ -7,7 +7,8 @@ import path from "path";
 import { URL } from 'url';
 import { promises as fs } from 'fs';
 import { UserProfile, trimProfile } from "./UserProfile";
-import { Beatmap } from "./Beatmapsets";
+import { Beatmap, Beatmapset } from "./Beatmapsets";
+import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from './BeatmapRepository';
 
 export interface ApiToken {
   token_type: string,
@@ -30,19 +31,21 @@ export interface WebApiClientOption {
   token_store_dir: string,
 }
 
-export class WebApiClient {
+class WebApiClientClass implements IBeatmapFetcher {
   option: WebApiClientOption;
   logger: log4js.Logger;
-
+  available: boolean;
   token: ApiToken | undefined;
 
   constructor(option: Partial<WebApiClientOption> = {}) {
     const WebApiDefaultOption = config.get<WebApiClientOption>("WebApi");
     this.option = { ...WebApiDefaultOption, ...option } as WebApiClientOption;
     this.logger = log4js.getLogger("webapi");
+    this.available = this.option.client_id != 0 && this.option.client_secret != "***";
   }
 
   async updateToken(): Promise<boolean> {
+    if (!this.available) return false;
     if (!isExpired(this.token)) return true;
     let token: ApiToken | undefined;
     token = await this.loadStoredToken(this.option.asGuest);
@@ -57,7 +60,7 @@ export class WebApiClient {
       this.token = token;
       return true;
     }
-
+    this.available = false;
     return false;
   }
 
@@ -153,9 +156,9 @@ export class WebApiClient {
           return;
         }
         res.end("ok : " + code);
-        console.log("got code! " + code);
+        this.logger.trace("got code! " + code);
         server.close(() => {
-          console.log("closed callback");
+          this.logger.trace("closed callback");
         });
         if (res.connection) {
           res.connection.end();
@@ -166,7 +169,7 @@ export class WebApiClient {
 
       });
       server.once("close", () => {
-        console.log("closed event");
+        this.logger.trace("closed event");
         if (code == null) {
           reject("no code");
         } else {
@@ -226,7 +229,6 @@ export class WebApiClient {
             this.token = undefined;
             break;
           default:
-            console.error(`${e?.response?.status} ${e?.response?.statusText}`);
             throw e;
         }
       }
@@ -287,18 +289,34 @@ export class WebApiClient {
     }
   }
 
-  async lookupBeatmap(mapid: number): Promise<Beatmap | undefined> {
+  async lookupBeatmap(mapid: number): Promise<Beatmap> {
+    const data = await this.accessApi(`https://osu.ppy.sh/api/v2/beatmaps/lookup?id=${mapid}`, {
+      method: "GET"
+    });
+    data.get_time = Date.now();
+    return data;
+  }
+
+  async lookupBeatmapset(mapid: number): Promise<Beatmapset> {
+    const data = await this.accessApi(`https://osu.ppy.sh/api/v2/beatmapsets/lookup?beatmap_id=${mapid}`, {
+      method: "GET"
+    });
+    data.get_time = Date.now();
+    return data;
+  }
+
+  async getBeatmapset(mapId: number): Promise<Beatmapset> {
     try {
-      const data = await this.accessApi(`https://osu.ppy.sh/api/v2/beatmaps/lookup?id=${mapid}`, {
-        method: "GET"
-      });
-      data.get_time = Date.now();
-      return data;
+      return await this.lookupBeatmapset(mapId);
     } catch (e: any) {
-      if (e.response?.status == 404) {
-      } else {
-        throw e;
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status == 404) {
+          throw new FetchBeatmapError(FetchBeatmapErrorReason.NotFound);
+        }
       }
+      throw new FetchBeatmapError(FetchBeatmapErrorReason.Unknown, e.message);
     }
   }
 }
+
+export const WebApiClient = new WebApiClientClass();
