@@ -66,6 +66,8 @@ export class ScoreMode extends Mode {
     static readonly Combo = new ScoreMode(2, "Combo");
     static readonly ScoreV2 = new ScoreMode(3, "ScoreV2");
 
+    type: "ScoreMode" = "ScoreMode";
+
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
         ScoreMode.Values.push(this);
@@ -83,6 +85,8 @@ export class TeamMode extends Mode {
     static readonly TagCoop = new TeamMode(1, "TagCoop");
     static readonly TeamVs = new TeamMode(2, "TeamVs");
     static readonly TagTeamVs = new TeamMode(3, "TagTeamVs");
+
+    type: "TeamMode" = "TeamMode";
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -106,6 +110,7 @@ export class PlayMode extends Mode {
     static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", ["fruits", "catch", "fruit"]);
     static readonly OsuMania = new PlayMode(3, "OsuMania", ["mania"]);
 
+    type: "PlayMode" = "PlayMode";
     id: number;
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
@@ -125,6 +130,8 @@ export class Team extends Mode {
     static readonly None = new Team("none", "None");
     static readonly Red = new Team("red", "Red");
     static readonly Blue = new Team("blue", "Blue");
+
+    type: "Team" = "Team";
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -168,6 +175,7 @@ export class Mod extends Mode {
     static readonly Key9 = new Mod("9k", "Key9", false);
 
     isGlobalMod: boolean;
+    type: "Mod" = "Mod";
 
     protected constructor(value: string | number, name: string, isGlobalMod: boolean, aliases: string[] = []) {
         super(value.toString(), name, aliases);
