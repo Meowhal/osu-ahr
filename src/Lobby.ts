@@ -501,6 +501,7 @@ export class Lobby {
         this.RaisePlayerLeft(c.params[0] as string);
         break;
       case BanchoResponseType.AbortedMatch:
+      case BanchoResponseType.AbortMatchFailed:
         this.RaiseAbortedMatch();
         break;
       case BanchoResponseType.AddedReferee:
