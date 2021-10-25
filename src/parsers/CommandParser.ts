@@ -221,7 +221,7 @@ export namespace parser {
   }
 
   export function ParseMPCommand(message: string): MpCommand | null {
-    const res = message.match(/^!mp (\w+)\s*(.*)\s*/i);
+    const res = message.match(/^!mp\s+(\w+)\s*(.*?)\s*$/i);
     if (res) {
       return { command: res[1], arg: res[2] };
     }
@@ -265,11 +265,11 @@ export namespace parser {
 
   export function ParseChatCommand(message: string): { command: string, param: string } {
     message = message.trimRight();
-    let m = message.match(/\!mp (\w+)\s*(.*)\s*/);
+    let m = message.match(/^\!mp\s+(\w+)\s*(.*?)$/);
     if (m) {
       return { command: "!" + m[1].toLowerCase(), param: m[2] };
     }
-    m = message.match(/([\!\*]\w+)\s*(.*)\s*/);
+    m = message.match(/^([\!\*]\w+)\s*(.*?)$/);
     if (m) {
       return { command: m[1].toLowerCase(), param: m[2] };
     } else {
