@@ -1,10 +1,10 @@
 import { Lobby, Player } from "..";
-import { BanchoResponseType, MpSettingsParser, MpSettingsResult } from "../parsers";
+import { MpSettingsResult } from "../parsers";
 import { LobbyPlugin } from "./LobbyPlugin";
 import config from "config";
 import { Game, User } from "../webapi/HistoryTypes";
-import { TypedEvent } from "../libs";
 import { Mod, ScoreMode, TeamMode } from "../Modes";
+import { Logger } from "log4js";
 
 export interface LobbyKeeperOption {
   /**
@@ -16,7 +16,7 @@ export interface LobbyKeeperOption {
   /**
    * 1-16
    */
-  size: number | null;
+  size: number;
 
   password: string | null;
 
@@ -48,7 +48,7 @@ export class LobbyKeeper extends LobbyPlugin {
     this.option = { ...d, ...option } as LobbyKeeperOption;
     this.kickedUsers = new Set();
     this.mpKickedUsers = new Set();
-    this.slotKeeper = new SlotKeeper();
+    this.slotKeeper = new SlotKeeper(this.option.size, this.logger);
     this.convertOptions();
 
     this.registerEvents();
@@ -60,7 +60,7 @@ export class LobbyKeeper extends LobbyPlugin {
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
     this.lobby.PlayerJoined.on(a => this.onPlayerJoined(a.slot));
-    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player));
+    this.lobby.PlayerLeft.on(a => this.onPlayerLeft(a.player, a.slot));
     this.lobby.PlayerMoved.on(a => this.onPlayerMoved(a.from, a.to));
     this.lobby.ParsedSettings.on(a => this.onParsedSettings(a.result));
 
@@ -245,7 +245,7 @@ export class LobbyKeeper extends LobbyPlugin {
     try {
       const team = TeamMode.from(result.teamMode);
       const score = ScoreMode.from(result.winCondition);
-      if (this.checkMode(team, score)) {
+      if (this.checkMode(team, score) || this.slotKeeper.checkMpSettings(result)) {
         this.fixLobbyModeAndSize();
       }
 
@@ -269,8 +269,8 @@ export class LobbyKeeper extends LobbyPlugin {
     }
   }
 
-  private onPlayerLeft(player: Player) {
-    if (this.slotKeeper.checkLeave(player.slot)) {
+  private onPlayerLeft(player: Player, slot: number) {
+    if (this.slotKeeper.checkLeave(slot)) {
       this.fixLobbyModeAndSize();
     }
   }
@@ -372,7 +372,7 @@ export class LobbyKeeper extends LobbyPlugin {
           return null;
         }
       }
-      
+
       const matchMods = /^mods?(\s+(.+))?\s*$/.exec(param);
       if (matchMods) {
         if (matchMods[2] == undefined) {
@@ -454,21 +454,20 @@ export class LobbyKeeper extends LobbyPlugin {
 export class SlotKeeper {
   size: number;
   slots: { timestamp: number, hasPlayer: boolean }[];
-  detectedSlotsChange = new TypedEvent<{ estematedSize: number, lockedSlot?: number, reason: string }>();
+  logger?: Logger;
 
   /**
    * スロットがロックされているとみなすまでのミリ秒時間
    */
   timeToConsiderAsLockedSlotMS = 10 * 60 * 1000;
 
-  constructor(size: number = 16) {
+  constructor(size: number = 16, logger?: Logger) {
     this.size = size;
     this.slots = new Array(16).fill(null).map(_ => ({ timestamp: Date.now(), hasPlayer: false }));
+    this.logger = logger;
   }
 
   checkJoin(slot: number) {
-    if (this.size == 0) return false;
-
     let result = false;
     const idx = slot - 1;
     if (this.size == 0) {
@@ -476,14 +475,14 @@ export class SlotKeeper {
     } else if (this.size <= idx) {
       result = true;
       // Slots larger than the specified size are open
-      this.detectedSlotsChange.emit({ estematedSize: slot, reason: `Detected slot expansion. actual size:${slot}, specified size:${this.size}` });
+      this.logger?.trace(`Detected slot expansion. actual size:${slot}, specified size:${this.size}`);
 
     } else { // 一度に複数のイベントを発生させないために else句を使う
       for (let i = 0; i < idx; i++) {
         // the player didn't enter the slot that shold be empty
         if (!this.slots[i].hasPlayer) {
           result = true;
-          this.detectedSlotsChange.emit({ estematedSize: this.size, lockedSlot: slot, reason: `Detected locked slot ${i + 1}` });
+          this.logger?.trace(`Detected locked slot ${i + 1}`);
           break;
         }
       }
@@ -511,7 +510,7 @@ export class SlotKeeper {
     if (this.size != 0 && this.size <= toIdx) {
       // Slots larger than the specified size are open
       result = true;
-      this.detectedSlotsChange.emit({ estematedSize: toSlot, reason: `Detected slot expansion. actual size:${toSlot}, specified size:${this.size}` });
+      this.logger?.trace(`Detected slot expansion. actual size:${toSlot}, specified size:${this.size}`);
     }
 
     this.slots[toIdx].hasPlayer = true;
@@ -538,7 +537,7 @@ export class SlotKeeper {
     }
 
     if (lockedSlot != -1) {
-      this.detectedSlotsChange.emit({ estematedSize, lockedSlot, reason: `Detected locked slot ${lockedSlot}` });
+      this.logger?.trace(`Detected locked slot ${lockedSlot}`);
       return true;
     } else {
       return false;
@@ -547,9 +546,26 @@ export class SlotKeeper {
 
   resetTimestamp() {
     const now = Date.now();
-    for(let i = 0; i < 16; i++) {
+    for (let i = 0; i < 16; i++) {
       this.slots[i].timestamp = now;
     }
   }
 
+  checkMpSettings(setting: MpSettingsResult) {
+    for (let idx = 0; idx < 16; idx++) {
+      this.slots[idx].hasPlayer = false;
+    }
+
+    let result = false;
+    for (const ps of setting.players) {
+      const idx = ps.slot - 1;
+      this.slots[idx].hasPlayer = true;
+      this.slots[idx].timestamp = Date.now();
+      if (this.size != 0 && this.size < ps.slot) {
+        result = true;
+      }
+    }
+
+    return result;
+  }
 }

@@ -62,7 +62,7 @@ export class Lobby {
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
   PlayerJoined = new TypedEvent<{ player: Player; slot: number; team: Teams; fromMpSettings: boolean; }>();
-  PlayerLeft = new TypedEvent<{ player: Player, fromMpSettings: boolean }>();
+  PlayerLeft = new TypedEvent<{ player: Player, slot: number, fromMpSettings: boolean }>();
   PlayerMoved = new TypedEvent<{ player: Player, from: number, to: number }>();
   HostChanged = new TypedEvent<{ player: Player }>();
   MatchStarted = new TypedEvent<{ mapId: number, mapTitle: string }>();
@@ -137,12 +137,6 @@ export class Lobby {
           this.logger.info("part");
           this.status = LobbyStatus.Left;
           this.destroy();
-        }
-      },
-      selfMessage: (target: string, toSend: any) => {
-        if (target == this.channel) {
-          const r = toSend.replace(/\[http\S+\s([^\]]+)\]/g, "[http... $1]");
-          this.chatlogger.info("bot:%s", r);
         }
       }
     };
@@ -334,7 +328,7 @@ export class Lobby {
     this.ircClient.say(target, message);
     this.ircClient.emit("sentPrivateMessage", target, message);
     this.SentMessage.emit({ message });
-    this.chatlogger.trace("%s:%s", "botbot->" + target, message);
+    this.chatlogger.info("%s:%s", "botbot->" + target, message);
   }
 
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
@@ -598,8 +592,9 @@ export class Lobby {
 
   RaisePlayerLeft(username: string): void {
     const player = this.GetOrMakePlayer(username);
+    const slot = player.slot;
     if (this.removePlayer(player)) {
-      this.PlayerLeft.emit({ player, fromMpSettings: false });
+      this.PlayerLeft.emit({ player, fromMpSettings: false, slot });
     } else {
       this.LoadMpSettingsAsync();
     }
@@ -937,9 +932,10 @@ export class Lobby {
 
     for (let p of this.players) {
       if (!mpPlayers.includes(p)) {
+        const slot = p.slot;
         this.removePlayer(p);
         playersOut.push(p);
-        this.PlayerLeft.emit({ player: p, fromMpSettings: true });
+        this.PlayerLeft.emit({ player: p, fromMpSettings: true, slot });
       }
     }
 
@@ -992,9 +988,7 @@ export class Lobby {
   }
 
   private getInfoMessage(): string {
-
-    return `- Osu Auto Host Rotation Bot ver ${process.env.npm_package_version} - \n`
-      + this.option.info_message;
+    return this.option.info_message.replace("${version}", process.env.npm_package_version ?? "0.0.0");
   }
 
   // ircでログインしたユーザーに権限を与える

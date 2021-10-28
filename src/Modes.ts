@@ -8,6 +8,7 @@ class Mode {
     readonly value: string; // !mp set などで利用する数値/文字列
     readonly name: string; // わかりやすい文字列表現
     readonly aliases: Set<string>; // osu内での表記ゆれに対応する
+    readonly type: string = "";
 
     protected constructor(value: string, name: string, aliases: string[] = []) {
         this.value = value;
@@ -66,7 +67,7 @@ export class ScoreMode extends Mode {
     static readonly Combo = new ScoreMode(2, "Combo");
     static readonly ScoreV2 = new ScoreMode(3, "ScoreV2");
 
-    type: "ScoreMode" = "ScoreMode";
+    readonly type: "ScoreMode" = "ScoreMode";
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -86,7 +87,7 @@ export class TeamMode extends Mode {
     static readonly TeamVs = new TeamMode(2, "TeamVs");
     static readonly TagTeamVs = new TeamMode(3, "TagTeamVs");
 
-    type: "TeamMode" = "TeamMode";
+    readonly type: "TeamMode" = "TeamMode";
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -110,8 +111,8 @@ export class PlayMode extends Mode {
     static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", ["fruits", "catch", "fruit"]);
     static readonly OsuMania = new PlayMode(3, "OsuMania", ["mania"]);
 
-    type: "PlayMode" = "PlayMode";
-    id: number;
+    readonly type: "PlayMode" = "PlayMode";
+    readonly id: number;
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -131,7 +132,7 @@ export class Team extends Mode {
     static readonly Red = new Team("red", "Red");
     static readonly Blue = new Team("blue", "Blue");
 
-    type: "Team" = "Team";
+    readonly type: "Team" = "Team";
 
     protected constructor(value: string | number, name: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -174,8 +175,8 @@ export class Mod extends Mode {
     static readonly Key8 = new Mod("8k", "Key8", false);
     static readonly Key9 = new Mod("9k", "Key9", false);
 
-    isGlobalMod: boolean;
-    type: "Mod" = "Mod";
+    readonly isGlobalMod: boolean;
+    readonly type: "Mod" = "Mod";
 
     protected constructor(value: string | number, name: string, isGlobalMod: boolean, aliases: string[] = []) {
         super(value.toString(), name, aliases);
@@ -228,8 +229,8 @@ export class Mod extends Mode {
             set.delete(Mod.Relax2);
         }
 
-        if (set.has(Mod.DoubleTime)) {
-            set.delete(Mod.Nightcore);
+        if (set.has(Mod.Nightcore)) {
+            set.add(Mod.DoubleTime);
         }
 
         if (set.has(Mod.Relax)) {

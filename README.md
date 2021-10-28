@@ -396,5 +396,11 @@ The `/say [message]` Discord command can be used to forward messages to the in-g
 
 # Special thanks
 + [Meowhalfannumber1](https://github.com/Meowhalfannumber1)
+  + He made great suggestions.
 + [Metacinnabar](https://github.com/Metacinnabar)
+  + He helped me with the Japanese translation.
 + [ZeroPyrozen](https://github.com/ZeroPyrozen)
+  + He helped me improve the map checker.
++ [qqzzy](https://osu.ppy.sh/users/10911588) 
+  + He gives me various insights.
+  + https://github.com/jramseygreen/osu_bot_framework_v2
