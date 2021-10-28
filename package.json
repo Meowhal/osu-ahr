@@ -26,15 +26,12 @@
   "dependencies": {
     "@discordjs/builders": "^0.6.0",
     "axios": "^0.21.4",
-    "cheerio": "^1.0.0-rc.10",
     "config": "^3.3.6",
     "discord.js": "^13.1.0",
     "express": "^4.17.1",
     "irc-upd": "^0.11.0",
     "log4js": "^6.3.0",
-    "open": "^8.2.1",
-    "reflect-metadata": "^0.1.13",
-    "socket.io": "^4.1.2"
+    "open": "^8.2.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",

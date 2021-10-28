@@ -1,5 +1,4 @@
 import axios from "axios";
-import cheerio from "cheerio";
 import { PlayMode } from "../Modes";
 import { Beatmap, Beatmapset as Beatmapset } from "./Beatmapsets";
 import { WebApiClient } from "./WebApiClient";
@@ -158,19 +157,16 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
         return this.fetchBeatmapFromWebsite(mapId);
     }
 
+    webpreg = new RegExp('<script id="json-beatmapset" type="application/json">\s*(.+?)\s*</script>', "ms");
+
     async fetchBeatmapFromWebsite(id: number): Promise<Beatmapset> {
         try {
             const target = "https://osu.ppy.sh/b/" + id;
             const res = await axios.get(target);
-            const $ = cheerio.load((res).data);
-            const jsonTag = $('#json-beatmapset');
-            if (jsonTag.length) {
-                const n: any = $('#json-beatmapset')[0].children[0];
-                const src = n.data;
-                if (src) {
-                    const json = JSON.parse(src);
-                    return json as Beatmapset;
-                }
+            const match = this.webpreg.exec(res.data);
+            if (match) {
+                const json = JSON.parse(match[1]);
+                return json as Beatmapset;
             }
             throw new FetchBeatmapError(FetchBeatmapErrorReason.FormatError);
         } catch (e: any) {
