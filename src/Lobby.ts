@@ -138,6 +138,12 @@ export class Lobby {
           this.status = LobbyStatus.Left;
           this.destroy();
         }
+      },
+      selfMessage: (target: string, toSend: any) => {
+        if (target == this.channel) {
+          const r = toSend.replace(/\[http\S+\s([^\]]+)\]/g, "[http... $1]");
+          this.chatlogger.info("bot:%s", r);
+        }
       }
     };
 
@@ -320,7 +326,7 @@ export class Lobby {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit("sentMessage", this.channel, message);
       this.SentMessage.emit({ message });
-      this.chatlogger.trace("%s:%s", "bot", message);
+      //this.chatlogger.trace("%s:%s", "bot", message);
     }
   }
 
