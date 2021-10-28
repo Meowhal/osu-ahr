@@ -12,7 +12,7 @@ describe("LobbyKeepserTest", function () {
     tu.configMochaAsSilent();
   });
 
-  after(function() {
+  after(function () {
     Sinon.restore();
   });
 
@@ -45,202 +45,142 @@ describe("LobbyKeepserTest", function () {
 
       it("size over test", () => {
         const sk = new SlotKeeper(4);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
         assert.isFalse(sk.checkJoin(3));
         assert.isFalse(sk.checkJoin(4));
-        Sinon.assert.notCalled(callback);
         assert.isTrue(sk.checkJoin(5));
-        Sinon.assert.calledOnce(callback);
       });
 
       it("locked slot test", () => {
         const sk = new SlotKeeper(4);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
         assert.isTrue(sk.checkJoin(4));
-        Sinon.assert.calledOnce(callback);
       });
 
       it("leave slot test", () => {
         const sk = new SlotKeeper(4);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
         assert.isFalse(sk.checkJoin(3));
         assert.isFalse(sk.checkJoin(4));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkLeave(2));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkLeave(1));
         assert.isFalse(sk.checkLeave(2));
         assert.isFalse(sk.checkLeave(3));
         assert.isFalse(sk.checkLeave(4));
         assert.isFalse(sk.checkJoin(1));
-        Sinon.assert.notCalled(callback);
       });
 
       it("move slot test", () => {
         const sk = new SlotKeeper(4);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkMove(1, 4));
-        Sinon.assert.notCalled(callback);
         assert.isFalse(sk.checkJoin(1));
-        Sinon.assert.notCalled(callback);
 
         assert.isTrue(sk.checkMove(1, 5));
-        Sinon.assert.calledOnce(callback);
       });
 
       it("move slot test", () => {
         const sk = new SlotKeeper(4);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkMove(1, 4));
-        Sinon.assert.notCalled(callback);
         assert.isFalse(sk.checkJoin(1));
-        Sinon.assert.notCalled(callback);
 
         assert.isTrue(sk.checkMove(1, 5));
-        Sinon.assert.calledOnce(callback);
       });
 
       it("check unused slot test", () => {
         const sk = new SlotKeeper(4);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
 
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
         assert.isFalse(sk.checkUnused());
-        Sinon.assert.notCalled(callback);
 
         clock?.tick(sk.timeToConsiderAsLockedSlotMS / 2);
         assert.isFalse(sk.checkUnused());
-        Sinon.assert.notCalled(callback);
 
         clock?.tick(sk.timeToConsiderAsLockedSlotMS / 2 + 10);
         assert.isTrue(sk.checkUnused());
-        Sinon.assert.calledOnce(callback);
       });
     });
 
     describe("size 0 tests", () => {
       it("size over test", () => {
         const sk = new SlotKeeper(0);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
         assert.isFalse(sk.checkJoin(3));
         assert.isFalse(sk.checkJoin(4));
-        Sinon.assert.notCalled(callback);
         assert.isFalse(sk.checkJoin(5));
-        Sinon.assert.notCalled(callback);
       });
 
       it("locked slot test", () => {
         const sk = new SlotKeeper(0);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
         assert.isFalse(sk.checkJoin(4));
-        Sinon.assert.notCalled(callback);
       });
 
       it("leave slot test", () => {
         const sk = new SlotKeeper(0);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
         assert.isFalse(sk.checkJoin(3));
         assert.isFalse(sk.checkJoin(4));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkLeave(2));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkLeave(1));
         assert.isFalse(sk.checkLeave(2));
         assert.isFalse(sk.checkLeave(3));
         assert.isFalse(sk.checkLeave(4));
         assert.isFalse(sk.checkJoin(1));
-        Sinon.assert.notCalled(callback);
       });
 
       it("move slot test", () => {
         const sk = new SlotKeeper(0);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkMove(1, 4));
-        Sinon.assert.notCalled(callback);
         assert.isFalse(sk.checkJoin(1));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkMove(1, 5));
-        Sinon.assert.notCalled(callback);
       });
 
       it("move slot test", () => {
         const sk = new SlotKeeper(0);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkMove(1, 4));
-        Sinon.assert.notCalled(callback);
         assert.isFalse(sk.checkJoin(1));
-        Sinon.assert.notCalled(callback);
 
         assert.isFalse(sk.checkMove(1, 5));
-        Sinon.assert.notCalled(callback);
       });
 
       it("check unused slot test", () => {
         const sk = new SlotKeeper(0);
-        const callback = Sinon.spy();
-        sk.detectedSlotsChange.on(callback);
 
         assert.isFalse(sk.checkJoin(1));
         assert.isFalse(sk.checkJoin(2));
         assert.isFalse(sk.checkUnused());
-        Sinon.assert.notCalled(callback);
 
         clock?.tick(sk.timeToConsiderAsLockedSlotMS / 2);
         assert.isFalse(sk.checkUnused());
-        Sinon.assert.notCalled(callback);
 
         clock?.tick(sk.timeToConsiderAsLockedSlotMS / 2 + 10);
         assert.isFalse(sk.checkUnused());
-        Sinon.assert.notCalled(callback);
       });
 
     })
@@ -395,7 +335,7 @@ describe("LobbyKeepserTest", function () {
 
       keeper.option.mods = [Mod.Freemod, Mod.HardRock, Mod.Relax, Mod.Nightcore] as any;
       keeper.convertOptions();
-      assert.sameMembers(keeper.option.mods as any, [Mod.Freemod, Mod.Nightcore]);
+      assert.sameMembers(keeper.option.mods as any, [Mod.Freemod, Mod.DoubleTime, Mod.Nightcore]);
 
       keeper.option.mods = [] as any;
       keeper.convertOptions();
@@ -411,7 +351,7 @@ describe("LobbyKeepserTest", function () {
 
       keeper.option.mods = ["Freemod", "HardRock", "Relax", "Nightcore"] as any;
       keeper.convertOptions();
-      assert.sameMembers(keeper.option.mods as any, [Mod.Freemod, Mod.Nightcore]);
+      assert.sameMembers(keeper.option.mods as any, [Mod.Freemod, Mod.DoubleTime, Mod.Nightcore]);
     });
 
     it("invalid mods option check", async () => {
@@ -445,7 +385,7 @@ describe("LobbyKeepserTest", function () {
 
     it("size option check", async () => {
       const { keeper } = await setupAsync({
-        size: null,
+        size: 0,
       });
 
       assert.equal(keeper.option.size, 0);
@@ -469,7 +409,7 @@ describe("LobbyKeepserTest", function () {
 
     it("invalid size option check", async () => {
       const { keeper } = await setupAsync({
-        size: null,
+        size: 0,
       });
 
       keeper.option.size = 1000 as any;
@@ -870,12 +810,12 @@ describe("LobbyKeepserTest", function () {
     });
   });
 
-    
+
   describe("slotkeeper on lobbykeeper tests", () => {
-    
-    it("size over test", async () =>{
+
+    it("size over test", async () => {
       const { keeper, lobby, ircClient } = await setupAsync({
-        size:4,
+        size: 4,
       });
 
       const spy = Sinon.spy(lobby);

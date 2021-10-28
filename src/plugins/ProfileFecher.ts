@@ -1,6 +1,5 @@
 import { Lobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
-import { MpSettingsResult } from "../parsers";
 import { WebApiClient } from "../webapi/WebApiClient";
 
 import config from "config";
@@ -15,7 +14,6 @@ export interface ProfileFecherOption {
 
 export class ProfileFecher extends LobbyPlugin {
   option: ProfileFecherOption;
-  webApiClient: WebApiClient;
   hasError: boolean = false;
   profileMap: Map<string, UserProfile>;
   pendingNames: Set<string>;
@@ -25,7 +23,6 @@ export class ProfileFecher extends LobbyPlugin {
     super(lobby, "profile", "profile");
     const d = config.get<ProfileFecherOption>(this.pluginName);
     this.option = { ...d, ...option } as ProfileFecherOption;
-    this.webApiClient = new WebApiClient();
     this.profileMap = new Map<string, UserProfile>();
     this.pendingNames = new Set<string>();
     this.task = this.initializeAsync();
@@ -33,7 +30,7 @@ export class ProfileFecher extends LobbyPlugin {
   }
 
   private async initializeAsync(): Promise<void> {
-    await this.webApiClient.updateToken();
+    await WebApiClient.updateToken();
   }
 
   private registerEvents(): void {
@@ -82,7 +79,7 @@ export class ProfileFecher extends LobbyPlugin {
   }
 
   private getProfileFromWebApi(player: Player): Promise<UserProfile | null> {
-    return this.webApiClient.getUser(player.name);
+    return WebApiClient.getUser(player.name);
   }
 
   private isExpiredProfile(profile: UserProfile): boolean {
