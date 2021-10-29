@@ -16,7 +16,7 @@ describe("BeatmapRepository Tests", function () {
         BeatmapRepository.maps.clear();
     });
 
-    describe.only("fetch beatmap form osu.ppy.sh tests", () => {
+    describe.skip("fetch beatmap form osu.ppy.sh tests", () => {
         before(function () {
             BeatmapRepository.fetcher = BeatmapRepository.websiteFetcher;
         });
@@ -36,7 +36,7 @@ describe("BeatmapRepository Tests", function () {
             
         });
 
-        it.only("fetch osu map", async () => {
+        it("fetch osu map", async () => {
             const mapid = 3182198;
             const b = await BeatmapRepository.getBeatmap(mapid);
             assert.equal(b.mode, "osu");
