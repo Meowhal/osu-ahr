@@ -51,6 +51,9 @@ export function logIrcEvent(client: IIrcClient) {
   client.on('action', function (from, to, text, message) {
     ircLogger.debug('@action  %s => %s: %s', from, to, text);
   });
+  client.on("selfMessage", (target: string, toSend) => {
+    ircLogger.debug('@sent bot => %s: %s', target, toSend);    
+  });
 }
 
 export function logPrivateMessage(client: IIrcClient) {
