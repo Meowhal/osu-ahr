@@ -1,11 +1,14 @@
 import { Client, ColorResolvable, MessageEmbed, TextBasedChannels, MessageOptions } from "discord.js";
 import log4js from "log4js";
+import { OahrDiscord } from "./OahrDiscord";
 
 let discordClient: Client | undefined;
+let ahrs: { [index: string]: OahrDiscord };
 const logger = log4js.getLogger("discord");
 
-export function setDiscordClient(client: Client) {
+export function setContext(client: Client, ahrs_: { [index: string]: OahrDiscord }) {
     discordClient = client;
+    ahrs = ahrs_;
 }
 
 const COLOR_MAP: { [key: string]: ColorResolvable } = {
@@ -30,6 +33,7 @@ export function configure(config: any, layouts: any) {
         startTime:Sat Aug 28 2021 22:30:41 GMT+0900  */
     return async (loggingEvent: log4js.LoggingEvent) => {
         if (discordClient) {
+
             try {
                 let ch = getDiscordChannel(loggingEvent.context);
                 if (ch) {
@@ -37,18 +41,22 @@ export function configure(config: any, layouts: any) {
                     let content = createContent(loggingEvent, msg);
                     await ch.send(content);
                 }
-            } catch (e:any) {
+            } catch (e: any) {
                 logger.error(e.message);
+                const ahr = ahrs[loggingEvent.context.channelId];
+                if (ahr) {
+                    ahr.stopTransferLog();
+                }
             }
         }
     };
 }
 
 function getDiscordChannel(context: any): TextBasedChannels | undefined {
-    if (discordClient && context && context.guildId && context.channelId) {
+    if (discordClient && context && context.transfer && context.guildId && context.channelId) {
         let guild = discordClient.guilds.cache.get(context.guildId);
         let ch = guild?.channels.cache.get(context.channelId)
-        if (ch?.isText()) {
+        if (ch?.isText() && !ch?.deleted) {
             return ch;
         }
     }

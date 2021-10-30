@@ -1,32 +1,56 @@
-import { ApplicationCommandData, Client, Intents } from "discord.js";
+import { ApplicationCommandData, ApplicationCommandPermissionData, Client, Guild, Intents, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import config from "config";
+import { MessageButtonStyles } from "discord.js/typings/enums";
 
 interface DiscordOption {
     token: string
 }
+
+const commands = [
+    {
+        name: "ping",
+        description: "ping"
+    }
+]
 
 export async function trial() {
 
     let client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS] });
     let cfg = config.get<DiscordOption>("Discord");
 
-    const commands: ApplicationCommandData[] = [{
-        name: 'ping',
-        description: 'Ping!',
-
-    }];
-
-    client.once('ready', () => {
+    client.once('ready', async cl => {
         console.log('Ready!');
+        for (let g of cl.guilds.cache.values()) {
+            await g.commands.set(commands);
+        }
     });
 
-    client.on('interactionCreate', async interaction => {
-        console.log(interaction);
-        if (!interaction.isCommand()) return;
 
-        if (interaction.commandName === "ping") {
-            await interaction.reply("Pong!");
+    client.on('interactionCreate', async interaction => {
+        if (interaction.isCommand()) {
+            if (interaction.commandName === "ping") {
+                const emb = new MessageEmbed().setColor("AQUA").setTitle("aaa").addField("field", "aa");
+                const btn1 = new MessageButton().setLabel("show chat").setStyle(MessageButtonStyles.SUCCESS).setCustomId("btn1");
+                const btn2 = new MessageButton().setLabel("close").setStyle(MessageButtonStyles.SUCCESS).setCustomId("btn2");
+                const row = new MessageActionRow().addComponents(btn1, btn2);
+                await interaction.reply("Pong!");
+                await interaction.channel?.send({ embeds: [emb], components: [row] });
+            }
         }
+
+        if (interaction.isButton()) {
+            switch (interaction.customId) {
+                case "btn1":
+                    await interaction.reply("btn1 pushed");
+                    break;
+
+                case "btn2":
+                    await interaction.reply({ content: "aaa", ephemeral: true });
+                    break;
+            }
+        }
+
+
     });
 
     client.on("messageCreate", async message => {
@@ -43,11 +67,4 @@ export async function trial() {
 
     console.log(cfg.token);
     await client.login(cfg.token);
-}
-
-function createPingCommand(): ApplicationCommandData {
-    return {
-        name: "ping",
-        description: "ping"
-    }
 }

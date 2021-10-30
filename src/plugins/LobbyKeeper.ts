@@ -444,10 +444,33 @@ export class LobbyKeeper extends LobbyPlugin {
     return null;
   }
 
+  getDescription(): string {
+    const keeps = [];
+    if (this.option.mode) {
+      keeps.push(`mode: ${this.option.mode.team.name}, ${this.option.mode.score.name}`);
+    }
+    if (this.option.size != 0) {
+      keeps.push(`size: ${this.option.size}`);
+    }
+
+    if (this.option.password) {
+      keeps.push(`password: ${this.option.password != "" ? this.option.password : "(empty)"}`);
+    }
+
+    if (this.option.mods) {
+      keeps.push(`mods: ${this.option.mods.map(m => m.value).join(" ")}`);
+    }
+
+    if (this.option.title) {
+      keeps.push(`title: ${this.option.title}`);
+    }
+
+    return keeps.join(", ");
+  }
+
   GetPluginStatus(): string {
     return `-- Lobby Keeper --
-  mode : ${this.option.mode === null ? "disabled" : this.option.mode.team.name + ", " + this.option.mode.score.name}, size : ${this.option.size === null ? "disabled" : this.option.size},
-  password : ${this.option.password === null ? "disabled" : this.option.password === "" ? '""' : this.option.password}, mods : ${this.option.mods === null ? "disabled" : this.option.mods.map(m => m.value).join(" ")}, ${this.option.title === null ? "disabled" : this.option.title}`;
+  ${this.getDescription()}`
   }
 }
 

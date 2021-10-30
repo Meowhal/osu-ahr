@@ -1,11 +1,19 @@
+/**
+ * check list
+ * admin roleが正しく登録される
+ * admin role以外のユーザーはスラッシュコマンド、ボタンコマンドを利用できない
+ * 
+ */
+
 import log4js from "log4js";
-import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton } from "discord.js";
+import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton, DiscordAPIError, Message, Role, TextChannel, GuildMember, ButtonInteraction } from "discord.js";
 import config from "config";
 
-import { IIrcClient, Player } from "..";
+import { IIrcClient, LobbyStatus, Player } from "..";
 import { OahrDiscord } from "./OahrDiscord";
-import { setDiscordClient } from "./DiscordAppender";
+import { setContext } from "./DiscordAppender";
 import { BotCommands } from "./BotCommand";
+import { BanchoResponse, BanchoResponseType } from "../parsers";
 
 const logger = log4js.getLogger("discord");
 
@@ -14,6 +22,7 @@ const ADMIN_ROLE: CreateRoleOptions = {
   color: "ORANGE",
   reason: "ahr-bot administrator"
 };
+
 export interface DiscordBotConfig {
   token: string; // ボットのトークン https://discord.com/developers/applications
 }
@@ -40,43 +49,29 @@ export class DiscordBot {
   async start() {
     this.discordClient.once('ready', async cl => {
       for (let g of cl.guilds.cache.values()) {
-        await this.registerCommands(g);
+        await this.registerCommandsAndRoles(g);
       }
-      setDiscordClient(cl);
+      setContext(cl, this.ahrs);
       logger.info("discord bot is ready.");
       logger.info(`invite link => ${this.generateInviteLink()}`);
     });
 
     this.discordClient.on("guildCreate", async guild => {
       console.log("guildCreate " + guild.name);
-      await this.registerCommands(guild);
+      await this.registerCommandsAndRoles(guild);
     });
 
     this.discordClient.on("interactionCreate", async interaction => {
-      if (!interaction.isCommand()) return;
       if (!interaction.inGuild()) return;
-
-      switch (interaction.commandName) {
-        case "make":
-          await this.make(interaction);
-          break;
-        case "enter":
-          await this.enter(interaction);
-          break;
-        case "info":
-          await this.info(interaction);
-          break;
-        case "say":
-          await this.say(interaction);
-          break;
-        case "config":
-          break;
-        case "close":
-          await this.close(interaction);
-          break;
-        case "quit":
-          await this.quit(interaction);
-          break;
+      if (!this.checkMemberHasAhrAdminRole(interaction.member as GuildMember)) return;
+      if (interaction.isCommand()) {
+        await this.handleCommandInteraction(interaction);
+      }
+      if (interaction.isButton()) {
+        const m = /^(\w+),#mp_(\d+)$/.exec(interaction.customId);
+        if (m) {
+          await this.handleButtonInteraction(interaction, m[1], m[2]);
+        }
       }
     });
 
@@ -88,7 +83,7 @@ export class DiscordBot {
         if (this.cfg.token == "") {
           logger.error(`your token is Empty`);
         } else {
-          logger.error(`your token is "${this.cfg.token}"`);
+          logger.error(`your token is invalid. "${this.cfg.token}"`);
         }
         logger.error("Check the setup guide -> https://github.com/Meowhal/osu-ahr#discord-integration");
 
@@ -100,7 +95,11 @@ export class DiscordBot {
 
   }
 
-  async registerCommands(guild: Guild) {
+  checkMemberHasAhrAdminRole(member: GuildMember) {
+    return member.roles.cache.find(f => f.name == ADMIN_ROLE.name) !== undefined;
+  }
+
+  async registerCommandsAndRoles(guild: Guild) {
     let results = await guild.commands.set(BotCommands);
     let roleId = await this.registerRole(guild);
     const permissions: ApplicationCommandPermissionData[] = [
@@ -122,6 +121,31 @@ export class DiscordBot {
       role = await guild.roles.create(ADMIN_ROLE);
     }
     return role.id;
+  }
+
+  async handleCommandInteraction(interaction: GuildCommandInteraction) {
+    switch (interaction.commandName) {
+      case "make":
+        await this.make(interaction);
+        break;
+      case "enter":
+        await this.enter(interaction);
+        break;
+      case "info":
+        await this.info(interaction);
+        break;
+      case "say":
+        await this.say(interaction);
+        break;
+      case "config":
+        break;
+      case "close":
+        await this.close(interaction);
+        break;
+      case "quit":
+        await this.quit(interaction);
+        break;
+    }
   }
 
   async make(interaction: GuildCommandInteraction) {
@@ -147,9 +171,9 @@ export class DiscordBot {
 
     try {
       let lobbyNumber = ahr.lobby.lobbyId ?? "new_lobby";
-      let dc = await this.createChannel(interaction.guild, lobbyNumber);
-      this.registeAhr(ahr, interaction, dc);
-      await interaction.editReply(`😀 Created the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber}) [#mp_${lobbyNumber}](https://discord.com/channels/${interaction.guildId}/${dc.id})`);
+      this.registeAhr(ahr, interaction);
+      await this.updateMatchSummary(ahr);
+      await interaction.editReply(`😀 Created the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e: any) {
       logger.error("couldn't make a discord channel. " + e);
       await interaction.editReply("couldn't make a discord channel. " + e.message);
@@ -190,17 +214,20 @@ export class DiscordBot {
     }
 
     try {
-      let dc = interaction.guild.channels.cache.find(c => `#${c.name}` == lobbyId);
-      if (!dc) {
-        dc = await this.createChannel(interaction.guild, lobbyNumber);
+      this.registeAhr(ahr, interaction);
+      // ロビー用チャンネルからenterコマンドを引数無しで呼び出している場合はそのチャンネルでログ転送を開始する
+      const ch = interaction.guild?.channels.cache.get(interaction.channelId);
+      if (ch && lobbyId == ("#" + ch.name)) {
+        ahr.startTransferLog(ch.id);
       }
-      this.registeAhr(ahr, interaction, dc);
-      await interaction.editReply(`😀 Entered the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber}) [#mp_${lobbyNumber}](https://discord.com/channels/${interaction.guildId}/${dc.id})`);
+      await this.updateMatchSummary(ahr);
+      await interaction.editReply(`😀 Entered the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e) {
       logger.error("couldn't make a discord channel.  " + e);
       await interaction.editReply("😫 couldn't make a discord channel.  " + e);
     }
   }
+
 
   async info(interaction: GuildCommandInteraction) {
     await interaction.deferReply();
@@ -223,7 +250,7 @@ export class DiscordBot {
     }
 
     try {
-      await interaction.editReply({ embeds: [this.createInfoEmbed(ahr)] });
+      await interaction.editReply({ embeds: [ahr.createDetailInfoEmbed()] });
     } catch (e: any) {
       logger.error("@discordbot.info " + e);
       await interaction.editReply("😫 error! " + e.message);
@@ -250,7 +277,6 @@ export class DiscordBot {
       ahr.lobby.SendMessage(msg);
       await interaction.editReply("sent: " + msg);
     }
-
   }
 
   async close(interaction: GuildCommandInteraction) {
@@ -297,29 +323,116 @@ export class DiscordBot {
     }
   }
 
-  async createChannel(guild: Guild, lobbyNumber: string) {
-    return await guild.channels.create("mp_" + lobbyNumber, {
+  async handleButtonInteraction(interaction: ButtonInteraction<"present">, command: string, lobbyNumber: string) {
+    if (!interaction.guild) return;
+    const lobbyId = "#mp_" + lobbyNumber;
+    let ahr = this.ahrs[lobbyId];
+    if (!ahr) return;
+
+    try {
+      switch (command) {
+        case "close":
+          await ahr.lobby.CloseLobbyAsync();
+          break;
+        case "startLog":
+          await this.getOrCreateMatchChannel(interaction.guild, lobbyNumber);
+          this.startTransferLog(ahr, interaction.guild);
+          break;
+        case "stopLog":
+          ahr.stopTransferLog();
+          break;
+      }
+
+      await interaction.reply("ok");
+      await interaction.deleteReply();
+      await this.updateMatchSummary(ahr);
+    } catch (e) {
+      logger.error("@handleButtonInteraction " + e);
+    }
+  }
+
+  async getOrCreateMatchChannel(guild: Guild, lobbyNumber: string): Promise<TextChannel> {
+    const lobbyId = "mp_" + lobbyNumber;
+    const dc = guild.channels.cache.find(c => c.name == lobbyId);
+    if (dc) return dc as TextChannel;
+    const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+    return await guild.channels.create(lobbyId, {
       type: "GUILD_TEXT",
-      topic: `created by ${this.discordClient.user?.username}. [history](https://osu.ppy.sh/community/matches/${lobbyNumber})`
+      topic: `created by ${this.discordClient.user?.username}. [history](https://osu.ppy.sh/community/matches/${lobbyNumber})`,
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone,
+          deny: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+        },
+        {
+          id: role ?? "",
+          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+        },
+        {
+          id: this.discordClient.user?.id ?? "",
+          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+        }
+      ]
     });
   }
 
-  registeAhr(ahr: OahrDiscord, interaction: GuildCommandInteraction, channel: GuildChannel | ThreadChannel) {
-    if (interaction.guildId && channel) {
-      ahr.setDiscordId(interaction.guildId, channel.id);
-    } else {
-      throw new Error("interaction.guildId is null!");
-    }
+  async getOrCreateMatchesChannel(guild: Guild): Promise<TextChannel> {
+    const dc = guild.channels.cache.find(c => c.name.toLowerCase() == "matches");
+    if (dc) return dc as TextChannel;
+    const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+    return await guild.channels.create("matches", {
+      type: "GUILD_TEXT",
+      topic: `created by ${this.discordClient.user?.username}.`,
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone,
+          deny: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+        },
+        {
+          id: role ?? "",
+          allow: [Permissions.FLAGS.VIEW_CHANNEL]
+        },
+        {
+          id: this.discordClient.user?.id ?? "",
+          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+        }
+      ]
+    });
+  }
+
+  registeAhr(ahr: OahrDiscord, interaction: GuildCommandInteraction) {
     if (!ahr.lobby.channel) {
       throw new Error("lobbyId not defined");
     }
     let lid = ahr.lobby.channel;
+    const updateHandler = (a: { message: string, response: BanchoResponse, }) => {
+      switch (a.response.type) {
+        case BanchoResponseType.BeatmapChanged:
+        case BanchoResponseType.MatchStarted:
+        case BanchoResponseType.MatchFinished:
+        case BanchoResponseType.AbortedMatch:
+        case BanchoResponseType.HostChanged:
+          this.updateMatchSummary(ahr);
+          break;
+      }
+    }
+    ahr.lobby.ReceivedBanchoResponse.on(updateHandler);
     ahr.lobby.LeftChannel.once(() => {
       delete this.ahrs[lid];
-      delete this.ahrs[channel.id];
+      delete this.ahrs[ahr.discordChannelId];
+      ahr.lobby.ReceivedBanchoResponse.off(updateHandler);
+      this.deleteMatchSummary(ahr);
     });
+    ahr.setGuildId(interaction.guildId);
+    ahr.stopTransferLog();
     this.ahrs[lid] = ahr;
-    this.ahrs[channel.id] = ahr;
+
+  }
+
+  async startTransferLog(ahr: OahrDiscord, guild: Guild) {
+    const dc = await this.getOrCreateMatchChannel(guild, ahr.lobby.lobbyId ?? "");
+    ahr.startTransferLog(dc.id);
+    this.ahrs[ahr.discordChannelId] = ahr;
   }
 
   /**
@@ -370,7 +483,8 @@ export class DiscordBot {
       scopes: ['bot', 'applications.commands'],
       permissions: [
         Permissions.FLAGS.MANAGE_CHANNELS,
-        Permissions.FLAGS.MANAGE_ROLES
+        Permissions.FLAGS.MANAGE_ROLES,
+        Permissions.FLAGS.MANAGE_MESSAGES
       ]
     });
   }
@@ -382,37 +496,55 @@ export class DiscordBot {
     )
   }
 
-  createInfoEmbed(ahr: OahrDiscord) {
-    let lobby = ahr.lobby;
-
-    let lid = lobby.lobbyId ?? "";
-    let name = lobby.lobbyName ?? "";
-    let host = lobby.host?.name ?? "none";
-    let embed = new MessageEmbed().setColor("BLURPLE").setTitle("Lobby Information - " + name).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
-    embed.addField("lobby", `id:${lid}, status:${lobby.status}, host:${host}, players:${lobby.players.size}, name:${name}`,);
-    let refs = Array.from(lobby.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(",");
-    if (refs) {
-      embed.addField("referee", refs, false);
+  async updateMatchSummary(ahr: OahrDiscord) {
+    if (!ahr.updateSummaryMessage) return;
+    try {
+      const guild = this.discordClient.guilds.cache.find(f => f.id == ahr.guildId);
+      if (guild == undefined) throw new Error("guild not found");
+      const channel = await this.getOrCreateMatchesChannel(guild);
+      const embed = ahr.createSummaryInfoEmbed();
+      const btns = ahr.createInteractionButtons();
+      let message: Message | undefined = await this.findMatchSummaryMessage(channel, ahr);
+      if (message) {
+        message.edit({ embeds: [embed], components: [btns] });
+      } else {
+        message = await channel.send({ embeds: [embed], components: [btns] });
+      }
+      ahr.matchSummaryMessageId = message.id;
+    } catch (e: any) {
+      if (e instanceof DiscordAPIError) {
+        if (e.message == "Missing Permissions") {
+          logger.error(`Missing Permissions. Remove the bot then Invite it again. invite link => ${this.generateInviteLink()}`);
+          return;
+        }
+      }
+      logger.error(e);
+      ahr.updateSummaryMessage = false;
     }
+  }
 
-    embed.addField("order", `${ahr.selector.hostQueue.map(p => p.name).join(", ")}`, false);
-    let denylist = ahr.selector.getDeniedPlayerNames();
-    if (denylist.length != 0) {
-      embed.addField("denylist", `${denylist.join(", ")}`);
+  async findMatchSummaryMessage(channel: TextChannel, ahr: OahrDiscord) {
+    let message: Message | undefined;
+    if (ahr.matchSummaryMessageId != "") {
+      message = await channel.messages.fetch(ahr.matchSummaryMessageId);
     }
-    embed.addField("selector", `changer:${ahr.selector.mapChanger?.name ?? "none"}, rflag:${ahr.selector.needsRotate ? "true" : "false"}`, false);
+    if (message) return message;
+    const msgs = await channel.messages.fetch({ limit: 10 });
+    const recent = msgs.find(f => (f.embeds && f.embeds.length > 0 && f.embeds[0].title == `#mp_${ahr.lobby.lobbyId ?? ""}`));
+    if (recent) return recent;
+  }
 
-    const playcounts = Array.from(ahr.inoutLogger.players.keys()).map(p => {
-      let num = ahr.inoutLogger?.players.get(p) || 0;
-      return `${p.name}(${num})`;
-    }).join(", ");
-    if (playcounts) {
-      embed.addField("playcount", playcounts, false);
+  async deleteMatchSummary(ahr: OahrDiscord) {
+    if (!ahr.updateSummaryMessage) return;
+    try {
+      const guild = await this.discordClient.guilds.fetch(ahr.guildId);
+      const channel = await this.getOrCreateMatchesChannel(guild);
+      const message: Message | undefined = await this.findMatchSummaryMessage(channel, ahr);
+      if (message) {
+        await message.delete();
+      }
+    } catch (e: any) {
+      logger.error(e);
     }
-
-    embed.addField("history", `${ahr.history.repository.hasError ? "stopped" : "active"}, latest:${ahr.history.repository?.latestEventId.toString() ?? "0"}, loaded:${ahr.history.repository?.events.length.toString() ?? "0"}`, false);
-    embed.addField("regulation", ahr.checker.getRegulationDescription(), false);
-
-    return embed;
   }
 }
