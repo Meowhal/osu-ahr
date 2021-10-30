@@ -33,7 +33,6 @@ export function configure(config: any, layouts: any) {
         startTime:Sat Aug 28 2021 22:30:41 GMT+0900  */
     return async (loggingEvent: log4js.LoggingEvent) => {
         if (discordClient) {
-
             try {
                 let ch = getDiscordChannel(loggingEvent.context);
                 if (ch) {

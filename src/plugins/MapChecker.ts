@@ -225,7 +225,7 @@ export class MapChecker extends LobbyPlugin {
   private rejectDeletedMap(): void {
     this.numViolations += 1;
     this.logger.info(`The map was rejected because it had already been removed from the website. ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage("!mp map " + this.lastMapId + " | The map was rejected because it had already been removed from the website.");
+    this.lobby.SendMessage("!mp map " + this.lastMapId + "The map was rejected because it had already been removed from the website.");
     this.checkingMapId = 0;
 
     if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {
@@ -236,8 +236,9 @@ export class MapChecker extends LobbyPlugin {
   private rejectUnfitMap(reason: string): void {
     this.numViolations += 1;
     this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage(`!mp map ${this.lastMapId} | Current Regulation : ${this.validator.GetDescription()} (*Attention! Difficulty will not be calculated correctly if a global mod is applied.`);
+    this.lobby.SendMessage(`!mp map ${this.lastMapId} | Current Regulation : ${this.validator.GetDescription()}`);
     this.lobby.SendMessage(reason);
+    this.lobby.SendMessage("*Attention! Difficulty will not be calculated correctly if a global mod is applied.");
     this.checkingMapId = 0;
 
     if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {

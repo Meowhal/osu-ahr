@@ -5,6 +5,7 @@ import { logIrcEvent } from "..";
 import { getIrcConfig } from "../TypedConfig";
 import log4js from "log4js";
 import { logPrivateMessage } from '../IIrcClient';
+import { applySpeedLimit } from '../libs/ChatLimiter';
 const logger = log4js.getLogger("cli");
 
 console.log("starting up...");
@@ -32,6 +33,8 @@ try {
       process.exit(1);
     }
   });
+
+  applySpeedLimit(client, 10, 5000);
 
   logIrcEvent(client);
   logPrivateMessage(client);

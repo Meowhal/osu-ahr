@@ -1,5 +1,4 @@
 import { IIrcClient, LobbyStatus, Player } from "..";
-
 import log4js from "log4js";
 import { OahrBase } from "../cli/OahrBase";
 import { OahrSharedObjects } from "./DiscordBot";
@@ -130,9 +129,9 @@ export class OahrDiscord extends OahrBase {
     const btn2 = new MessageButton().setLabel("close").setStyle(MessageButtonStyles.DANGER).setCustomId("close," + cid); // close,#mp_xxxx
 
     if (this.transferLog) {
-      btn1.setLabel("stop logging").setStyle(MessageButtonStyles.SECONDARY).setCustomId("stopLog," + cid); // stopLog,#mp_xxxx
+      btn1.setLabel("Stop transfer").setStyle(MessageButtonStyles.SECONDARY).setCustomId("stopLog," + cid); // stopLog,#mp_xxxx
     } else {
-      btn1.setLabel("start logging").setStyle(MessageButtonStyles.PRIMARY).setCustomId("startLog," + cid); // stopLog,#mp_xxxx
+      btn1.setLabel("Start transfer").setStyle(MessageButtonStyles.PRIMARY).setCustomId("startLog," + cid); // stopLog,#mp_xxxx
     }
 
     const row = new MessageActionRow().addComponents(btn1, btn2);

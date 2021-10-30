@@ -5,6 +5,7 @@ import { logIrcEvent } from "..";
 import * as irc from '../libs/irc';
 import { getIrcConfig } from "../TypedConfig";
 import { logPrivateMessage } from '../IIrcClient';
+import { applySpeedLimit } from "../libs/ChatLimiter";
 
 const logger = log4js.getLogger("cli");
 
@@ -22,7 +23,7 @@ try {
         logger.error("Copy config/default.json to config/local.json, and enter your id and irc password.");
         process.exit(1);
     }
-    
+
     let ircClient = new irc.Client(c.server, c.nick, c.opt);
     ircClient.on("error", err => {
         if (err.command == "err_passwdmismatch") {
@@ -31,15 +32,15 @@ try {
             process.exit(1);
         }
     });
-    
+    applySpeedLimit(ircClient, 10, 5000);
     logIrcEvent(ircClient);
     logPrivateMessage(ircClient);
-    
+
     let discordClient = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS] });
-    
+
     const bot = new DiscordBot(ircClient, discordClient);
-    bot.start();    
+    bot.start();
 } catch (e: any) {
     logger.error(e);
     process.exit(1);
-  }
+}
