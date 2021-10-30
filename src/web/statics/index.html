@@ -17,16 +17,16 @@
     <input name="mapid" autocomplete="on" list="ids" type="text" />
     <datalist id="ids">
     </datalist>
-    <button onclick="updateClicked()">update</button>
+    <button id="update">update</button>
     <a target="oahrhistory" id="history" href=".">*</a>
-    <button onclick="closeClicked()">close server</button>
+    <button id="close">close server</button>
   </header>
   <section>
     <ul id="list"></ul>
   </section>
   <hr>
   <footer>
-    <button onclick="fetchLogsAsync()">update</button>
+    <button id="fetchlog">update</button>
     <input id="autoScroll" name="autoScroll" type="checkbox" /><label for="autoScroll">Auto scroll</label>
   </footer>
 </body>
