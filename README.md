@@ -386,7 +386,7 @@ It is recommended to keep the number of lobbies to one or two, as each additiona
 ## Check match Status
 ![match status panel](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/matches.png)
 
-The status of each match can be check in the information panel on the "matches" channel. The information panel will be automatically updated when the host is changed.
+The status of each match can be check in the information panel on the "matches" channel. The information panel will be automatically updated as needed.
  
 ## Transfer ingame chat
 You can transfer the in-game chat to your guild's channel by pressing the "Start Transfer" button at the bottom of the information panel. When you press that button, a bridge channel will be created starting with "#mp_", where you can see the in-game chat and some logs.
