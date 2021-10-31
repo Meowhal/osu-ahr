@@ -2,9 +2,9 @@
 Auto Host Rotation bot for [osu!](https://osu.ppy.sh/home) multiplayer.  
 The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.
 
-## Command List
+# Command List
 
-### Player Command
+## Player Command
 |Command|Description|
 |:--|:--|
 |`!queue`| Shows host queue.|
@@ -14,14 +14,14 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`!update`| Updates current selected map to the latest version. Use when host pick an outdated map.|
 |`!regulation`| Shows current regulation.|
  
-### Host Command
+## Host Command
 |Command|Description|Example|
 |:--|:--|:--|
 |`!skip`| Transfers host to next player.||
 |`!start [seconds]`| Begins start timer.|`!start 30`|
 |`!stop`| Stops current start timer.||
 
-### Owner Command
+## Owner Command
 |Command|Description|Example|
 |:--|:--|:--|
 |`*start`|Forces the match to start.||
@@ -61,9 +61,16 @@ discord
 ```
 /say *keep size 16
 ```
+# Recent Changes
+## 1.5.11
++ Improved Discord Integration.
+  + The "matches" channel now displays an information panel that allows you to check the status of each match.
+  + The permissions have been changed, so if you are already using the bot, please re-invite the bot again.
+  + To start forwarding in-game chat, you need to press the "Start Forwarding" button.
++ Added chat speed limiter.
+  + The risk of your bot being silenced is reduced.
 
-
-## Setup
+# Setup
 
 1. Install Node.js and Git
   + [Node.js](https://nodejs.org/) (Version 16.11.1 or Higher)
@@ -109,9 +116,9 @@ MainMenu Commands
 ```
 Note: You can also run your bot on discord. See the [Discord Integration section](#discord-integration) for details.
 
-## Configuration
+# Configuration
 You can edit local.json to configure the bot's behavior.
-### IRC Section
+## IRC Section
 - `server` : `string` domain name of osu irc server.
 - `nick` : `string` your osu account name
 - `opt.port` : `number` 
@@ -128,7 +135,7 @@ You can edit local.json to configure the bot's behavior.
   },
 ...
 ```
-### Lobby Section
+## Lobby Section
 - `authorized_users` : `string[]`
   - Specify to Authorized user. They can use *commands(*skip, *start, *order).
 - `listref_duration_ms` : `number`
@@ -151,7 +158,7 @@ You can edit local.json to configure the bot's behavior.
   "info_message_announcement_interval_ms": 0
 }
 ```
-### AfkKicker Section
+## AfkKicker Section
 Points will be added to the player who seems to be AFK, and the player who gets points above the threshold will be kicked.
 1. Finishes the match with no score -> added 2 points
 2. Does not participate in the match without a map -> added 2 points
@@ -171,19 +178,19 @@ Points will be added to the player who seems to be AFK, and the player who gets 
   ...
 }
 ```
-### AutoHostSelector Section 
+## AutoHostSelector Section 
 - `show_host_order_every_after_match` : `boolean` set true if you want to show them.
 - `host_order_chars_limit` : `number` Host-order messages are truncated to this length.
 - `host_order_cooltime_ms` : `number` cool time for Host-order messages.
 - `deny_list` : `string[]` Players on this list are not added to the host's queue.
-### AutoStartTimer Section
+## AutoStartTimer Section
 the match start timer will automatically activate after the host selects a map.
 - `enabled` : `boolean` set true if you want to start the timer automatically.
 - `doClearHost`: `boolean` do !mp clearhost after timer starts.
 - `waitingTime`: `number` seconds until start the match.
-### HistoryLoader Section
+## HistoryLoader Section
 - `fetch_interval_ms`: `number` how often fetch the lobby history
-### HostSkipper Section
+## HostSkipper Section
 configs related to host-skip vote and automatic afk host skip.
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to skip.
   - if there are 16 players and the rate is 0.5, 8 players need to vote.
@@ -194,7 +201,7 @@ configs related to host-skip vote and automatic afk host skip.
 - `afk_check_interval_first_ms` : `number` time to first check if the host is afk.
 - `afk_check_interval_ms` : `number` interval to check if the host is afk.
 - `afk_check_do_skip` : `boolean` skip afk host automatically or not.
-### LobbyKeeper Section
+## LobbyKeeper Section
 - `mode` : `null | { "team": number, "score": number }` keep lobby mode.
   - team  => 0: Head To Head, 1: Tag Coop, 2: Team Vs, 3: Tag Team Vs
   - score => 0: Score, 1: Accuracy, 2: Combo, 3: Score V2
@@ -218,9 +225,9 @@ configs related to host-skip vote and automatic afk host skip.
         "mode": {"team": 2, "score": 1 },
         "size": 13
     }
-### LobbyTerminator Section
+## LobbyTerminator Section
 - `terminate_time_ms` : `number` time to close the lobby after everyone has left the lobby.
-### MapChecker Section
+## MapChecker Section
 - `enabled`: `boolean` use map checker or not.
 - `star_min`: `number` lower cap of dificullty. 0 means no cap.
 - `star_max`: `number` higher cap of dificullty. 0 means no cap.
@@ -229,13 +236,13 @@ configs related to host-skip vote and automatic afk host skip.
 - `gamemode`: `string` specify game mode in the room (osu, taiko, fruits, mania).
 - `num_violations_allowed`: `number` Number of times violations are allowed.  0 means no skip.
 - `allow_convert`: `boolean` allow convert map for game mode other than osu. set to false if you don't want to allow it.
-### MatchStarter Section
+## MatchStarter Section
 !start vote configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to start.
 - `vote_min`: `number` minimum required vote count.
 - `vote_msg_defer_ms` : `number` cooltime for voteprogress message for not responding to every votes.
 - `start_when_all_player_ready` : `boolean` start the match when everyoen is ready.
-### MatchAborter Section
+## MatchAborter Section
 !abort vote and auto abort configs
 - `vote_rate` : `number(0.0 - 1.0)` rate of votes required to abort.
 - `vote_min`: `number` minimum required vote count.
@@ -243,12 +250,12 @@ configs related to host-skip vote and automatic afk host skip.
 - `auto_abort_rate`: `number` the rate of finished players to automatically abort the stuck game.
 - `auto_abort_delay_ms`: `number` the delay time of actually abort the stuck game.
 - `auto_abort_do_abort`: `boolean` do !mp abort or not.
-### WordCounter Section
+## WordCounter Section
 Used to measure the amount of bot messages 
-### OahrCli Section 
+## OahrCli Section 
 - `invite_users` : `string[]` players are invited to the lobby when the bot make a new lobby.
 - `password` : `string` default lobby password. stay empty("") if you don't need password.
-### WebApi Section
+## WebApi Section
 - `client_id`: `number`, webapi client id. you can make client at [https://osu.ppy.sh/home/account/edit](https://osu.ppy.sh/home/account/edit)
   - optional. the bot uses the WebApi instead of webpage to get the beatmap infos.
 - `client_secret`: `string` webapi client secret
@@ -257,7 +264,7 @@ Used to measure the amount of bot messages
 - `callback`: `string`,
 - `callback_port`: `number` ,
 
-## Functions
+# Features
 - Making Lobby
 - Entering Lobby
 - IRC chat
@@ -267,20 +274,20 @@ Used to measure the amount of bot messages
 - Voting for abort the match
 - Closing the lobby
 
-### Making Lobby
+## Making Lobby
 Issue the `!mp make` command to create a new lobby. BOT manages lobbies via IRC, but only lobbies created with the `!mp make` command can be communicated with via IRC. Lobbies created using the normal method (creating a new lobby in the multi-menu of osu!) cannot be managed. Lobbies that you have created by yourself in the chat field can be managed by ID.
 
-### Entering Lobby
+## Entering Lobby
 When you restart the bot, it will be able to re-enter the lobby it has already created. The bot will analyze the lobby history and try to restore the order of hosts.
 The bot cannot enter lobbies built in the usual way, or lobbies built by others.
 
-### IRC chat
+## IRC chat
 You can send a chat message to the lobby from the console. Type `say` followed by the message you want to send.
 ```bash
 #mp_10000 > say hello guys!
 ```
 
-### Auto host rotation
+## Auto host rotation
 When a player enters a room, they are added to the end of the host queue, and the player at the beginning of the host queue becomes the host.
 The player at the head of the host queue becomes the host. Even if a player who has left the room re-enters, they will be added to the end of the queue.
 The host queue is rotated immediately after the game starts, so players who join during the game will be added behind the current host.
@@ -300,23 +307,23 @@ To check the current queue, type `info` on the console screen.
 ...
 ```
 
-### Voting for skipping current host
+## Voting for skipping current host
 If `!skip` typed in the chat field, a vote will be held to skip the host. When half of the lobby has voted, the host will move on. The required percentage of votes can be changed in the config file.
 If a host skips, it will immediately move to the next person.
 Hosts that have been AFK can be skipped with this feature.
 
-### Starting the match
+## Starting the match
 The game will start automatically when everyone is in the ready state.
 Please note that the game will not start automatically when everyone is ready as a result of a user leaving the game.
 A player can vote for the start of the game with `!start`.
 The host can start the start timer with `!start <time>`.
 
-### Voting for abort the match
+## Voting for abort the match
 If the game starts and the message "waiting for players" is displayed and the game cannot proceed, the game may be aborted by voting with `!abort`.
 If the abort is approved when no one has cleared the map, the host will not be changed. Please resume the game as is. If the map is changed through the console, the host will be rotated.
 If someone has cleared the map, the game will behave as if it had ended normally.
 
-### Closing the lobby
+## Closing the lobby
 Lobbies created with `!mp make` will continue to exist until a certain amount of time has passed, even if there are no more players.
 Since this is a long time, and may cause problems for other users, the lobby will be automatically be closed if no one is in it for a certain period of time.
 If `close now` is issued in the console, the `!mp close` command will be issued and the lobby will be closed immediately.  
@@ -329,7 +336,7 @@ You can control AHR lobbies via a Discord Bot, which allows you to access in-gam
 ## Setup
 [discord.js](https://discord.js.org/) requires [Node.js](https://nodejs.org/ja/) 16.6 or higher to use, so make sure you're up to date. To check your Node version, use node -v in your terminal or command prompt, and if it's not high enough, update it.
 
-### Creating your bot
+## Creating your bot
 
 [Setting up a bot application](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
 
@@ -352,7 +359,7 @@ The obtained token should be written in `./config/local.json` as follows:
 }
 ```
 
-### Startup
+## Startup
 Start the bot with the following command:
 ```sh
 npm run start:discord
@@ -363,26 +370,44 @@ After successful activation, a Discord Bot invitation link will appear in the te
 [12:00:00.100][INFO] discord - invite link => https://discord.com/api/oauth2/authorize?client_id=123&scope=bot+applications.commands&permissions=268435472
 ```
 
-[**Caution**] For security reasons please do not make bot invitation links or guilds with bots available to the public. Any problems that may arise are entirely under your responsibility.
+[**Caution**] For security reasons, please do not make this bot a public bot. Any problems that may arise are entirely under your responsibility.
 
-### Role settings
+## Role settings
 When a bot is invited to a guild, the `ahr-admin` role is created. Only users with this role will be able to manage the lobby. You should assign this role to your own account.
 
-### Lobby creation
+## Make a new lobby
 ![how to make a lobby](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/make.png)
 
-You can create a lobby by executing the `/make (lobby name)` command in the appropriate channel of the guild you have invited your bot to. (You need to have the `ahr-admin` role to run this command). If the command succeeds, a tournament lobby will be created in osu, and a bridge channel with a name similar to `mp_123456` will be created in the guild.
+You can make a lobby by executing the `/make (lobby name)` command in your guild. (You need to have the `ahr-admin` role to run this command). If the command succeeds, a tournament lobby will be created in OSU multiplayer, and a `#matches` channel will be created for your guild.
 
-Up to four lobbies can be activated simultaneously, but the bots can only send ten messages every five seconds. If you exceed this limit, your account may be marked as spam. I recommend that you keep the number of lobbies to about two.
+You can make up to four lobbies at the same time, but the bot can only send ten messages every five seconds. 
+It is recommended to keep the number of lobbies to one or two, as each additional lobby increases the delay in sending messages for the bot.
 
-### Join an existing lobby
-If the ahr bot has been terminated due to a glitch or some other reason, you can use the `/enter` command after restarting to resume lobby management.
-If there is still a bridge channel in the guild you can run `/enter` within that channel. (The channel name must be in the form of a lobby ID, for example `#mp_123456`). You can join any lobby by passing the lobbyId as an option with `/enter (lobby id)`.
+## Check match Status
+![match status panel](https://raw.githubusercontent.com/Meowhal/osu-ahr/images/screenshot/matches.png)
 
-### Chat forwarding
-The `/say [message]` Discord command can be used to forward messages to the in-game chat. This command takes the message to be forwarded and the lobbyId as options, but you can omit the lobbyId if you are within an existing bridge channel. The `/say` command can also be used for tournament commands such as `!mp start` and owner commands such as `*regulation`.
+The status of each match can be check in the information panel on the "matches" channel. The information panel will be automatically updated when the host is changed.
+ 
+## Transfer ingame chat
+You can transfer the in-game chat to your guild's channel by pressing the "Start Transfer" button at the bottom of the information panel. When you press that button, a bridge channel will be created starting with "#mp_", where you can see the in-game chat and some logs.
 
-### Discord Commands
+## Join an existing lobby
+If the bot has been terminated due to a glitch or some other reason, you can use the `/enter` command after restarting to resume lobby management. The command requires `lobby_id`. It is the numerical part of "#mp_12345".
+
+`/enter lobby_id:123456`
+
+If the guild still has the bridge channel, you can run the `/enter` command without the `lobby_id` in the bridge channel.
+
+## Chat forwarding
+The `/say [message]` command is used to forward a message to the in-game chat. This command takes the `message` to be forwarded and the `lobby_id` as options, but you can omit the `lobby_id` if you are in a bridge channel. It can also be used to issue tournament commands such as `!mp start`, and owner commands such as `*regulation`.
+
+```
+/say message:hello lobby_id:123456
+/say message:!mp start 120
+/say message:*regulation max_star=8.99
+```
+
+## Slash Commands
 |command|desc|ex|
 |:--|:--|:--|
 |`/make [lobbyName]`| Make a tournament lobby. |`/make 4.00-5.99 auto host rotation`|

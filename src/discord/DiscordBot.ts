@@ -514,7 +514,7 @@ export class DiscordBot {
     } catch (e: any) {
       if (e instanceof DiscordAPIError) {
         if (e.message == "Missing Permissions") {
-          logger.error(`Missing Permissions. Remove the bot then Invite it again. invite link => ${this.generateInviteLink()}`);
+          logger.error(`Missing Permissions. Invite this bot again. invite link => ${this.generateInviteLink()}`);
           return;
         }
       }
