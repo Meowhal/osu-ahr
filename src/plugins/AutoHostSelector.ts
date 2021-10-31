@@ -7,7 +7,7 @@ import config from "config";
 import log4js from "log4js";
 
 export interface AutoHostSelectorOption {
-  show_host_order_every_after_match: boolean;
+  show_host_order_after_every_match: boolean;
   host_order_chars_limit: number;
   host_order_cooltime_ms: number;
   deny_list: string[];
@@ -155,7 +155,7 @@ export class AutoHostSelector extends LobbyPlugin {
       this.logger.trace("a new host has been appointed:%s", newhost.name);
     } else {
       // ホストがキューの先頭以外に変更された場合
-      if (this.lobby.hostPending == null && this.lobby.hostPending != this.hostQueue[0]) {
+      if (this.lobby.hostPending == null) {
         this.logger.trace("the host may have manually changed by the previous host");
         this.rotateQueue();
       }
@@ -202,7 +202,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.needsRotate = true;
     this.mapChanger = null;
     this.changeHost();
-    if (this.option.show_host_order_every_after_match) {
+    if (this.option.show_host_order_after_every_match) {
       this.ShowHostQueue();
     }
   }

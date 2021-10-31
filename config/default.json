@@ -10,7 +10,7 @@
   "Lobby": {
     "authorized_users": [],
     "listref_duration_ms": 1000,
-    "info_message": "- Osu Auto Host Rotation Bot ver ${version} -\n-  The host rotation is managed by a list. Player is queued at the bottom when joining lobby or when his map pick was played.\n-  Check the links > [https://github.com/Meowhal/osu-ahr/blob/master/CMDLIST.md Command List] | [https://github.com/Meowhal/osu-ahr Source Code]",
+    "info_message": "- Osu Auto Host Rotation Bot ver ${version} -\n-  The host rotation is managed with a queue. Players are added to the queue when joining a multiplayer lobby and are sent to the back of the queue once their beatmap has been played.\n-  Check the links > [https://github.com/Meowhal/osu-ahr/blob/master/CMDLIST.md Command List] | [https://github.com/Meowhal/osu-ahr Source Code]",
     "info_message_cooltime_ms": 60000,
     "stat_timeout_ms": 5000,
     "info_message_announcement_interval_ms": 0,
@@ -22,7 +22,7 @@
     "cooltime_ms": 30000
   },
   "AutoHostSelector": {
-    "show_host_order_every_after_match": true,
+    "show_host_order_after_every_match": true,
     "host_order_chars_limit": 90,
     "host_order_cooltime_ms": 15000,
     "deny_list": []

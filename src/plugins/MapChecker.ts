@@ -105,28 +105,28 @@ export class MapChecker extends LobbyPlugin {
       let changed = false;
       if (p.star_min !== undefined) {
         this.option.star_min = p.star_min;
-        if (this.option.star_max <= this.option.star_min && this.option.star_max != 0) {
+        if (this.option.star_max <= this.option.star_min && 0 < this.option.star_max) {
           this.option.star_max = 0;
         }
         changed = true;
       }
       if (p.star_max !== undefined) {
         this.option.star_max = p.star_max;
-        if (this.option.star_max <= this.option.star_min && this.option.star_max != 0) {
+        if (this.option.star_max <= this.option.star_min && 0 < this.option.star_max) {
           this.option.star_min = 0;
         }
         changed = true;
       }
       if (p.length_min !== undefined) {
         this.option.length_min = p.length_min;
-        if (this.option.length_max <= this.option.length_min && this.option.length_max != 0) {
+        if (this.option.length_max <= this.option.length_min && 0 < this.option.length_max) {
           this.option.length_max = 0;
         }
         changed = true;
       }
       if (p.length_max !== undefined) {
         this.option.length_max = p.length_max;
-        if (this.option.length_max <= this.option.length_min && this.option.length_max != 0) {
+        if (this.option.length_max <= this.option.length_min && 0 < this.option.length_max ) {
           this.option.length_min = 0;
         }
         changed = true;
@@ -283,19 +283,19 @@ export class MapValidator {
       rate += 1;
     }
 
-    if (this.option.star_min != 0 && map.difficulty_rating < this.option.star_min) {
+    if (0 < this.option.star_min && map.difficulty_rating < this.option.star_min) {
       rate += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
     }
 
-    if (this.option.star_max != 0 && this.option.star_max < map.difficulty_rating) {
+    if (0 < this.option.star_max && this.option.star_max < map.difficulty_rating) {
       rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
     }
 
-    if (this.option.length_min != 0 && map.total_length < this.option.length_min) {
+    if (0 < this.option.length_min && map.total_length < this.option.length_min) {
       rate += (this.option.length_min - map.total_length) / 60.0;
     }
 
-    if (this.option.length_max != 0 && this.option.length_max < map.total_length) {
+    if (0 < this.option.length_max && this.option.length_max < map.total_length) {
       rate += (map.total_length - this.option.length_max) / 60.0;
     }
 
@@ -319,19 +319,19 @@ export class MapValidator {
       }
     }
 
-    if (this.option.star_min != 0 && this.option.star_max != 0) {
+    if (0 < this.option.star_min && 0 < this.option.star_max) {
       d_star = `${this.option.star_min.toFixed(2)} <= difficulty <= ${this.option.star_max.toFixed(2)}`;
-    } else if (this.option.star_min != 0) {
+    } else if (0 < this.option.star_min) {
       d_star = `${this.option.star_min.toFixed(2)} <= difficulty`;
-    } else if (this.option.star_max != 0) {
+    } else if (0 < this.option.star_max) {
       d_star = `difficulty <= ${this.option.star_max.toFixed(2)}`;
     }
 
-    if (this.option.length_min != 0 && this.option.length_max != 0) {
+    if (0 < this.option.length_min && 0< this.option.length_max) {
       d_length = `${secToTimeNotation(this.option.length_min)} <= length <= ${secToTimeNotation(this.option.length_max)}`;
-    } else if (this.option.length_min != 0) {
+    } else if (0 <this.option.length_min) {
       d_length = `${secToTimeNotation(this.option.length_min)} <= length`;
-    } else if (this.option.length_max != 0) {
+    } else if (0 < this.option.length_max) {
       d_length = `length <= ${secToTimeNotation(this.option.length_max)}`;
     }
 
@@ -360,11 +360,11 @@ function validateMapchekerOption(option: MapCheckerUncheckedOption): option is P
     option.length_max = validateOption.number("MapChecker.length_max", option.length_max, 0);
   }
 
-  if (option.star_max !== undefined && option.star_min !== undefined && option.star_max <= option.star_min && option.star_max != 0) {
+  if (option.star_max !== undefined && option.star_min !== undefined && option.star_max <= option.star_min && 0 < option.star_max) {
     option.star_min = 0;
   }
 
-  if (option.length_max !== undefined && option.length_min !== undefined && option.length_max <= option.length_min && option.length_max != 0) {
+  if (option.length_max !== undefined && option.length_min !== undefined && option.length_max <= option.length_min && 0 < option.length_max) {
     option.length_min = 0;
   }
 
