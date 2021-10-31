@@ -63,7 +63,12 @@ export class DiscordBot {
 
     this.discordClient.on("interactionCreate", async interaction => {
       if (!interaction.inGuild()) return;
-      if (!this.checkMemberHasAhrAdminRole(interaction.member as GuildMember)) return;
+      if (!this.checkMemberHasAhrAdminRole(interaction.member as GuildMember)) {
+        if (interaction.isButton()) {
+          await interaction.reply({content:"looking for a menu for you", ephemeral:true});
+        }
+        return;
+      }
       if (interaction.isCommand()) {
         await this.handleCommandInteraction(interaction);
       }
@@ -327,24 +332,30 @@ export class DiscordBot {
     if (!interaction.guild) return;
     const lobbyId = "#mp_" + lobbyNumber;
     let ahr = this.ahrs[lobbyId];
-    if (!ahr) return;
+    if (!ahr) {
+      await interaction.reply({content:`${lobbyId} - the lobby has already been unmanaged.`, ephemeral:true});
+    };
 
     try {
       switch (command) {
+        case "menu":
+          const menu = ahr.createControllButtons();
+          await interaction.reply({content:`${lobbyId} - menu`, components:[menu], ephemeral:true});
+          return;
         case "close":
           await ahr.lobby.CloseLobbyAsync();
+          await interaction.reply({content:`${lobbyId} - closed`, ephemeral:true});
           break;
         case "startLog":
           await this.getOrCreateMatchChannel(interaction.guild, lobbyNumber);
+          await interaction.reply({content:`${lobbyId} - start transfer`, ephemeral:true});
           this.startTransferLog(ahr, interaction.guild);
           break;
         case "stopLog":
           ahr.stopTransferLog();
+          await interaction.reply({content:`${lobbyId} - stop transfer`, ephemeral:true});
           break;
       }
-
-      await interaction.reply("ok");
-      await interaction.deleteReply();
       await this.updateMatchSummary(ahr);
     } catch (e) {
       logger.error("@handleButtonInteraction " + e);
@@ -503,7 +514,7 @@ export class DiscordBot {
       if (guild == undefined) throw new Error("guild not found");
       const channel = await this.getOrCreateMatchesChannel(guild);
       const embed = ahr.createSummaryInfoEmbed();
-      const btns = ahr.createInteractionButtons();
+      const btns = ahr.createMenuButton();
       let message: Message | undefined = await this.findMatchSummaryMessage(channel, ahr);
       if (message) {
         message.edit({ embeds: [embed], components: [btns] });
@@ -540,6 +551,7 @@ export class DiscordBot {
       const guild = await this.discordClient.guilds.fetch(ahr.guildId);
       const channel = await this.getOrCreateMatchesChannel(guild);
       const message: Message | undefined = await this.findMatchSummaryMessage(channel, ahr);
+      ahr.updateSummaryMessage = false;
       if (message) {
         await message.delete();
       }

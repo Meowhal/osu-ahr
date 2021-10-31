@@ -122,7 +122,13 @@ export class OahrDiscord extends OahrBase {
     return embed;
   }
 
-  createInteractionButtons() {
+  createMenuButton() {
+    const cid = this.lobby.channel; // #mp_xxxx
+    if (cid == undefined) throw new Error("invalid ahr lobby state. channel is undefined");
+    return new MessageActionRow().addComponents(new MessageButton().setLabel("Menu").setStyle(MessageButtonStyles.PRIMARY).setCustomId("menu," + cid));
+  }
+
+  createControllButtons() {
     const cid = this.lobby.channel; // #mp_xxxx
     if (cid == undefined) throw new Error("invalid ahr lobby state. channel is undefined");
     const btn1 = new MessageButton();
