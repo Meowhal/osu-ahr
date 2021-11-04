@@ -387,7 +387,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
     // キューにいないプレイヤーの場合は何もしない
     if (!this.hostQueue.find(p => p == trg)) {
-      this.logger.error(`could't skip to who isn't in queue. ${trg.name}`);
+      this.logger.error(`couldn't skip to who isn't in queue. ${trg.name}`);
       return;
     }
 
