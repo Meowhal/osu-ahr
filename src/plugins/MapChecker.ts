@@ -236,7 +236,7 @@ export class MapChecker extends LobbyPlugin {
   private rejectUnfitMap(reason: string): void {
     this.numViolations += 1;
     this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage(`!mp map ${this.lastMapId} | Current Regulation : ${this.validator.GetDescription()}`);
+    this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation : ${this.validator.GetDescription()}`);
     this.lobby.SendMessage(reason);
     this.lobby.SendMessage("*Attention! Difficulty will not be calculated correctly if a global mod is applied.");
     this.checkingMapId = 0;
@@ -277,6 +277,7 @@ export class MapValidator {
   RateBeatmap(map: Beatmap): { rate: number, message: string } {
     let rate = 0;
     let message = "";
+    let violationMsg = "";
 
     const mapmode = PlayMode.from(map.mode);
     if (mapmode != this.option.gamemode && this.option.gamemode != null) {
@@ -285,22 +286,29 @@ export class MapValidator {
 
     if (0 < this.option.star_min && map.difficulty_rating < this.option.star_min) {
       rate += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
+      violationMsg += "map star rating is lower than allowed star rating";
     }
 
     if (0 < this.option.star_max && this.option.star_max < map.difficulty_rating) {
       rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
+      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += "map star rating is higher than allowed star rating";
     }
 
     if (0 < this.option.length_min && map.total_length < this.option.length_min) {
       rate += (this.option.length_min - map.total_length) / 60.0;
+      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += "map duration is shorter than allowed duration";
     }
 
     if (0 < this.option.length_max && this.option.length_max < map.total_length) {
       rate += (map.total_length - this.option.length_max) / 60.0;
+      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += "map duration is longer than allowed duration";
     }
 
     if (0 < rate) {
-      message = `The map was rejected due to violation of regulations. [${map.url} ${map.beatmapset?.title}] star=${map.difficulty_rating} length=${secToTimeNotation(map.total_length)}`
+      message = `The [${map.url} ${map.beatmapset?.title}] was rejected because of following reason: ${violationMsg}`;
     }
 
     return { rate, message };
@@ -523,7 +531,7 @@ function unifyParamName(name: string): string {
     return "num_violations_allowed";
   } else if (name == "allowconvert") {
     return "allow_convert";
-  } else if (name == "disallowconver") {
+  } else if (name == "disallowconvert") {
     return "disallow_convert";
   }
   return name;
