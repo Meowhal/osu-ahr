@@ -428,4 +428,4 @@ The `/say [message]` command is used to forward a message to the in-game chat. T
   + He helped me improve the map checker.
 + [qqzzy](https://osu.ppy.sh/users/10911588) 
   + He gives me various insights.
-  + https://github.com/jramseygreen/osu_bot_framework_v2
+  + https://github.com/jramseygreen/osu_bot_framework-v3
