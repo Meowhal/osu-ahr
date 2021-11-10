@@ -178,7 +178,7 @@ export class DiscordBot {
       let lobbyNumber = ahr.lobby.lobbyId ?? "new_lobby";
       this.registeAhr(ahr, interaction);
       await this.updateMatchSummary(ahr);
-      await interaction.editReply(`😀 Created the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber})`);
+      await interaction.editReply(`😀 Created the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e: any) {
       logger.error("couldn't make a discord channel. " + e);
       await interaction.editReply("couldn't make a discord channel. " + e.message);
@@ -226,7 +226,7 @@ export class DiscordBot {
         ahr.startTransferLog(ch.id);
       }
       await this.updateMatchSummary(ahr);
-      await interaction.editReply(`😀 Entered the lobby [Lobby Histroy](https://osu.ppy.sh/mp/${lobbyNumber})`);
+      await interaction.editReply(`😀 Entered the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e) {
       logger.error("couldn't make a discord channel.  " + e);
       await interaction.editReply("😫 couldn't make a discord channel.  " + e);
