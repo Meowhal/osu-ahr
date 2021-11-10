@@ -138,13 +138,40 @@ export class MatchStarter extends LobbyPlugin {
     if (count == 0) {
       this.start();
     } else {
-      this.lobby.SendMessage(`Queued the match to start in ${count} seconds${withHint ? ". (Host can stop the timer with !stop command.)" : ""}`);
+      this.lobby.SendMessage(`Queued the match to start in ${this.secsToCountdownText(count)}${withHint ? ". (Host can stop the timer with !stop command.)" : ""}`);
       this.lobby.DeferMessage("!mp start", "mp_start", count * 1000, true);
       if (15 < count) {
         this.lobby.DeferMessage("Match starts in 10 seconds", "mp_start 10 sec", (count - 10) * 1000, true);
       }
     }
   }
+
+  private secsToCountdownText(secs: number): string {
+    const min = Math.floor(secs / 60);
+    const sec = Math.floor(secs % 60);
+
+    let strMin = "";
+    let strAnd = "";
+    let strSec = "";
+
+    if (min > 1) {
+        strMin = min.toString() + " minutes";
+    } else if (min == 1) {
+        strMin = "1 minute"
+    }
+
+    if (min > 0 && sec > 0) {
+        strAnd = " and "
+    }
+
+    if (sec > 1) {
+        strSec = sec.toString() + " seconds";
+    } else if (sec == 1) {
+        strSec = "1 second";
+    }
+
+    return `${strMin}${strAnd}${strSec}`;
+}
 
   private start(): void {
     this.stopTimer();

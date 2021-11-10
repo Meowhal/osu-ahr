@@ -6,7 +6,7 @@ import { validateOption } from "../libs/OptionValidator";
 import { PlayMode } from "../Modes";
 import { BanchoResponseType } from "../parsers";
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from "../webapi/BeatmapRepository";
-import { Beatmap } from "../webapi/Beatmapsets";
+import { Beatmap, Beatmapset } from "../webapi/Beatmapsets";
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -17,6 +17,7 @@ export type MapCheckerOption = {
   length_max: number;
   gamemode: PlayMode;
   allow_convert: boolean;
+  map_description: string;
 };
 
 export type MapCheckerUncheckedOption =
@@ -126,7 +127,7 @@ export class MapChecker extends LobbyPlugin {
       }
       if (p.length_max !== undefined) {
         this.option.length_max = p.length_max;
-        if (this.option.length_max <= this.option.length_min && 0 < this.option.length_max ) {
+        if (this.option.length_max <= this.option.length_min && 0 < this.option.length_max) {
           this.option.length_min = 0;
         }
         changed = true;
@@ -249,8 +250,23 @@ export class MapChecker extends LobbyPlugin {
   private acceptMap(map: BeatmapCache): void {
     this.SendPluginMessage("validatedMap");
     this.lastMapId = this.lobby.mapId;
+    if (map.beatmapset) {
+      const desc = this.getMapDescription(map, map.beatmapset);
 
-    this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${map.beatmapset?.title ?? ""} [https://osu.ppy.sh/beatmapsets/${map.beatmapset_id}/download Download Link] - [https://beatconnect.io/b/${map.beatmapset_id} Alternative(beatconnect.io)]`);
+      this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${desc}`);
+    } else {
+      this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value}`);
+    }
+  }
+
+  private getMapDescription(map: BeatmapCache, set: Beatmapset) {
+    let desc = this.option.map_description;
+    desc = desc.replace(/\$\{title\}/g, set.title);
+    desc = desc.replace(/\$\{map_id\}/g, map.id.toString());
+    desc = desc.replace(/\$\{beatmapset_id\}/g, set.id.toString());
+    desc = desc.replace(/\$\{star\}/g, map.difficulty_rating.toFixed(2));
+    desc = desc.replace(/\$\{length\}/g, secToTimeNotation(map.total_length));
+    return desc;
   }
 
   GetPluginStatus(): string {
@@ -327,9 +343,9 @@ export class MapValidator {
       d_star = `difficulty <= ${this.option.star_max.toFixed(2)}`;
     }
 
-    if (0 < this.option.length_min && 0< this.option.length_max) {
+    if (0 < this.option.length_min && 0 < this.option.length_max) {
       d_length = `${secToTimeNotation(this.option.length_min)} <= length <= ${secToTimeNotation(this.option.length_max)}`;
-    } else if (0 <this.option.length_min) {
+    } else if (0 < this.option.length_min) {
       d_length = `${secToTimeNotation(this.option.length_min)} <= length`;
     } else if (0 < this.option.length_max) {
       d_length = `length <= ${secToTimeNotation(this.option.length_max)}`;
