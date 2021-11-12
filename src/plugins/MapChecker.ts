@@ -252,22 +252,22 @@ export class MapChecker extends LobbyPlugin {
     this.lastMapId = this.lobby.mapId;
     if (map.beatmapset) {
       const desc = this.getMapDescription(map, map.beatmapset);
-      const availability = this.checkMapAvailability(map.beatmapset);
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${desc}`);
-      if(availability!=="")
-        this.lobby.SendMessage(`${availability}`);
+      const warningMessage = this.checkMapAvailability(map.beatmapset);
+      if (warningMessage) {
+        this.lobby.SendMessage(warningMessage);
+      }
     } else {
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value}`);
     }
   }
 
-  private checkMapAvailability(set: Beatmapset){
-    var availability = "";
-    if(set.availability.download_disabled == true)
-      availability = "Direct download isn't available, you can get the map from alternative.";
-    else if(set.availability.more_information != null)
-      availability = "Portion of map isn't available in direct download, it's recommended to get the map from alternative.";
-    return availability;
+  private checkMapAvailability(set: Beatmapset): string | undefined {
+    if (set.availability.download_disabled == true) {
+      return "Direct download isn't available, you can get the map from alternative.";
+    } else if (set.availability.more_information != null) {
+      return "Portion of map isn't available in direct download, it's recommended to get the map from alternative.";
+    }
   }
 
   private getMapDescription(map: BeatmapCache, set: Beatmapset) {
@@ -318,19 +318,19 @@ export class MapValidator {
 
     if (0 < this.option.star_max && this.option.star_max < map.difficulty_rating) {
       rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
-      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += (violationMsg === "") ? "" : " and ";
       violationMsg += "map star rating is higher than allowed star rating";
     }
 
     if (0 < this.option.length_min && map.total_length < this.option.length_min) {
       rate += (this.option.length_min - map.total_length) / 60.0;
-      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += (violationMsg === "") ? "" : " and ";
       violationMsg += "map duration is shorter than allowed duration";
     }
 
     if (0 < this.option.length_max && this.option.length_max < map.total_length) {
       rate += (map.total_length - this.option.length_max) / 60.0;
-      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += (violationMsg === "") ? "" : " and ";
       violationMsg += "map duration is longer than allowed duration";
     }
 
