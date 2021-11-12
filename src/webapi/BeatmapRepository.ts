@@ -42,6 +42,9 @@ class BeatmapRepositoryClass {
         if (cache) return cache;
 
         const set = await this.fetcher.getBeatmapset(mapId);
+        if (set.availability.download_disabled == true || set.availability.more_information != null){
+            throw new FetchBeatmapError(FetchBeatmapErrorReason.NotAvailable);
+        }
         this.cacheMaps(set);
 
         cache = this.tryGetCache(mapId, mode, allowConvert);
@@ -99,6 +102,7 @@ export enum FetchBeatmapErrorReason {
     FormatError,
     PlayModeMismatched,
     Unknown,
+    NotAvailable
 }
 
 export function isFetchBeatmapError(err: any): err is FetchBeatmapError {

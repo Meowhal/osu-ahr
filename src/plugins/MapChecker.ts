@@ -202,12 +202,16 @@ export class MapChecker extends LobbyPlugin {
             this.logger.error(`Couldn't parse the webpage. checked:${mapId}`);
             break;
           case FetchBeatmapErrorReason.NotFound:
-            this.logger.info(`Map not found. checked:${mapId}`);
+            this.logger.info(`Map can not be found. checked:${mapId}`);
             this.rejectDeletedMap();
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
             this.logger.info(`Map not found. checked:${mapId}`);
             this.rejectUnfitMap(`Gamemode Mismatched. Pick ${this.option.gamemode.name} map.`);
+            break;
+          case FetchBeatmapErrorReason.NotAvailable:
+            this.logger.info(`Map is not available. checked:${mapId}`);
+            this.rejectUnfitMap(`Map is not available for download.`);
             break;
         }
       } else {
@@ -253,20 +257,8 @@ export class MapChecker extends LobbyPlugin {
     if (map.beatmapset) {
       const desc = this.getMapDescription(map, map.beatmapset);
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${desc}`);
-      const warningMessage = this.checkMapAvailability(map.beatmapset);
-      if (warningMessage) {
-        this.lobby.SendMessage(warningMessage);
-      }
     } else {
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value}`);
-    }
-  }
-
-  private checkMapAvailability(set: Beatmapset): string | undefined {
-    if (set.availability.download_disabled == true) {
-      return "Direct download isn't available, you can get the map from alternative.";
-    } else if (set.availability.more_information != null) {
-      return "Portion of map isn't available in direct download, it's recommended to get the map from alternative.";
     }
   }
 
