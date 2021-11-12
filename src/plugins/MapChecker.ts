@@ -7,6 +7,7 @@ import { PlayMode } from "../Modes";
 import { BanchoResponseType } from "../parsers";
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from "../webapi/BeatmapRepository";
 import { Beatmap, Beatmapset } from "../webapi/Beatmapsets";
+import { MpSettingsCases } from "../tests/cases/MpSettingsCases";
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -252,11 +253,22 @@ export class MapChecker extends LobbyPlugin {
     this.lastMapId = this.lobby.mapId;
     if (map.beatmapset) {
       const desc = this.getMapDescription(map, map.beatmapset);
-
+      const availability = this.checkMapAvailability(map.beatmapset);
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${desc}`);
+      if(availability!=="")
+        this.lobby.SendMessage(`${availability}`);
     } else {
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value}`);
     }
+  }
+
+  private checkMapAvailability(set: Beatmapset){
+    var availability = "";
+    if(set.availability.download_disabled == true)
+      availability = "Direct download isn't available, you can get the map from alternative.";
+    else if(set.availability.more_information != null)
+      availability = "Portion of map isn't available in direct download, it's recommended to get the map from alternative.";
+    return availability;
   }
 
   private getMapDescription(map: BeatmapCache, set: Beatmapset) {
