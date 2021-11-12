@@ -7,7 +7,6 @@ import { PlayMode } from "../Modes";
 import { BanchoResponseType } from "../parsers";
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from "../webapi/BeatmapRepository";
 import { Beatmap, Beatmapset } from "../webapi/Beatmapsets";
-import { MpSettingsCases } from "../tests/cases/MpSettingsCases";
 
 export type MapCheckerOption = {
   enabled: boolean;
