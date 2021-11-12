@@ -191,7 +191,7 @@ export class MapChecker extends LobbyPlugin {
 
       const r = this.validator.RateBeatmap(map);
       if (0 < r.rate) {
-        this.rejectUnfitMap(r.message);
+        this.rejectMap(r.message, true);
       } else {
         this.acceptMap(map);
       }
@@ -203,15 +203,15 @@ export class MapChecker extends LobbyPlugin {
             break;
           case FetchBeatmapErrorReason.NotFound:
             this.logger.info(`Map can not be found. checked:${mapId}`);
-            this.rejectDeletedMap();
+            this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] had already been removed from the website.`, false);
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
-            this.logger.info(`Map not found. checked:${mapId}`);
-            this.rejectUnfitMap(`Gamemode Mismatched. Pick ${this.option.gamemode.name} map.`);
+            this.logger.info(`Gamemode Mismatched. checked:${mapId}`);
+            this.rejectMap(`Gamemode Mismatched. Pick ${this.option.gamemode.name} map.`, false);
             break;
           case FetchBeatmapErrorReason.NotAvailable:
             this.logger.info(`Map is not available. checked:${mapId}`);
-            this.rejectUnfitMap(`Map is not available for download.`);
+            this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not available for download.`, false);
             break;
         }
       } else {
@@ -227,23 +227,18 @@ export class MapChecker extends LobbyPlugin {
     this.SendPluginMessage("skip");
   }
 
-  private rejectDeletedMap(): void {
-    this.numViolations += 1;
-    this.logger.info(`The map was rejected because it had already been removed from the website. ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage("!mp map " + this.lastMapId + "The map was rejected because it had already been removed from the website.");
-    this.checkingMapId = 0;
-
-    if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {
-      this.skipHost();
-    }
-  }
-
-  private rejectUnfitMap(reason: string): void {
+  private rejectMap(reason: string, showRegulation: boolean): void {
     this.numViolations += 1;
     this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
-    this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation : ${this.validator.GetDescription()}`);
-    this.lobby.SendMessage(reason);
-    this.lobby.SendMessage("*Attention! Difficulty will not be calculated correctly if a global mod is applied.");
+
+    if (showRegulation) {
+      this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation : ${this.validator.GetDescription()}`);
+      this.lobby.SendMessage(reason);
+      this.lobby.SendMessage("*Attention! Difficulty will not be calculated correctly if a global mod is applied.");
+    } else {
+      this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | ${reason}`);
+    }
+
     this.checkingMapId = 0;
 
     if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {
@@ -295,42 +290,46 @@ export class MapValidator {
 
   RateBeatmap(map: Beatmap): { rate: number, message: string } {
     let rate = 0;
-    let message = "";
-    let violationMsg = "";
+    let violationMsgs = [];
 
     const mapmode = PlayMode.from(map.mode);
     if (mapmode != this.option.gamemode && this.option.gamemode != null) {
+      violationMsgs.push(`gamemode is not ${this.option.gamemode.name}.`);
       rate += 1;
     }
 
     if (0 < this.option.star_min && map.difficulty_rating < this.option.star_min) {
       rate += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
-      violationMsg += "map star rating is lower than allowed star rating";
+      violationMsgs.push("map star rating is lower than allowed star rating.");
     }
 
     if (0 < this.option.star_max && this.option.star_max < map.difficulty_rating) {
       rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
-      violationMsg += (violationMsg === "") ? "" : " and ";
-      violationMsg += "map star rating is higher than allowed star rating";
+      violationMsgs.push("map star rating is higher than allowed star rating.");
     }
 
     if (0 < this.option.length_min && map.total_length < this.option.length_min) {
       rate += (this.option.length_min - map.total_length) / 60.0;
-      violationMsg += (violationMsg === "") ? "" : " and ";
-      violationMsg += "map duration is shorter than allowed duration";
+      violationMsgs.push("map duration is shorter than allowed duration.");
     }
 
     if (0 < this.option.length_max && this.option.length_max < map.total_length) {
       rate += (map.total_length - this.option.length_max) / 60.0;
-      violationMsg += (violationMsg === "") ? "" : " and ";
-      violationMsg += "map duration is longer than allowed duration";
+      violationMsgs.push("map duration is longer than allowed duration.");
     }
 
     if (0 < rate) {
-      message = `The [${map.url} ${map.beatmapset?.title}] was rejected because of following reason: ${violationMsg}`;
+      let message;
+      const mapDesc = `The [${map.url} ${map.beatmapset?.title}] (star=${map.difficulty_rating} len=${secToTimeNotation(map.total_length)})`
+      if (violationMsgs.length == 1) {
+        message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
+      } else {
+        message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => "- " + m).join("\n")}`;
+      }
+      return { rate, message }
+    } else {
+      return { rate: 0, message: "" };
     }
-
-    return { rate, message };
   }
 
   GetDescription(): string {
