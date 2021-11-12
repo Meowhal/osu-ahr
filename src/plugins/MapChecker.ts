@@ -202,12 +202,16 @@ export class MapChecker extends LobbyPlugin {
             this.logger.error(`Couldn't parse the webpage. checked:${mapId}`);
             break;
           case FetchBeatmapErrorReason.NotFound:
-            this.logger.info(`Map not found. checked:${mapId}`);
+            this.logger.info(`Map can not be found. checked:${mapId}`);
             this.rejectDeletedMap();
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
             this.logger.info(`Map not found. checked:${mapId}`);
             this.rejectUnfitMap(`Gamemode Mismatched. Pick ${this.option.gamemode.name} map.`);
+            break;
+          case FetchBeatmapErrorReason.NotAvailable:
+            this.logger.info(`Map is not available. checked:${mapId}`);
+            this.rejectUnfitMap(`Map is not available for download.`);
             break;
         }
       } else {
@@ -252,7 +256,6 @@ export class MapChecker extends LobbyPlugin {
     this.lastMapId = this.lobby.mapId;
     if (map.beatmapset) {
       const desc = this.getMapDescription(map, map.beatmapset);
-
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value} | ${desc}`);
     } else {
       this.lobby.SendMessage(`!mp map ${this.lobby.mapId} ${this.option.gamemode.value}`);
@@ -307,19 +310,19 @@ export class MapValidator {
 
     if (0 < this.option.star_max && this.option.star_max < map.difficulty_rating) {
       rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
-      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += (violationMsg === "") ? "" : " and ";
       violationMsg += "map star rating is higher than allowed star rating";
     }
 
     if (0 < this.option.length_min && map.total_length < this.option.length_min) {
       rate += (this.option.length_min - map.total_length) / 60.0;
-      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += (violationMsg === "") ? "" : " and ";
       violationMsg += "map duration is shorter than allowed duration";
     }
 
     if (0 < this.option.length_max && this.option.length_max < map.total_length) {
       rate += (map.total_length - this.option.length_max) / 60.0;
-      violationMsg += (violationMsg==="")?"":" and ";
+      violationMsg += (violationMsg === "") ? "" : " and ";
       violationMsg += "map duration is longer than allowed duration";
     }
 
