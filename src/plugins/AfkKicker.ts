@@ -139,12 +139,16 @@ export class AfkKicker extends LobbyPlugin {
         const now = Date.now();
         if (now < stat.timeLastChange + this.option.cooltime_ms) return;
 
+        if (!this.lobby.players.has(player)) {
+            this.playerStats.delete(player);
+            return;
+        }
         stat.timeLastChange = now;
         stat.afkPoint += delta;
         if (0 < delta) {
             this.logger.info(`Detected ${player.escaped_name} is afk. Reason: ${reason}(${(delta > 0 ? "+" : "") + delta}), ${stat.afkPoint} / ${this.option.threshold}`);
         }
-        
+
         if (stat.afkPoint < 0) {
             stat.afkPoint = 0;
         } else if (this.option.threshold <= stat.afkPoint) {
