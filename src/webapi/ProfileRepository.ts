@@ -17,7 +17,7 @@ class ProfileRepositoryClass {
 
     /**
      * 
-     * @param mapId 
+     * @param userID 
      * @param mode 
      * @returns 
      * @throws FetchProfileError
@@ -81,7 +81,7 @@ export function isFetchProfileError(err: any): err is FetchProfileError {
 
 export class FetchProfileError extends Error {
 
-    isFetchBeatmapError: true = true;
+    isFetchProfileError: true = true;
     reason: FetchProfileErrorReason;
     constructor(reason: FetchProfileErrorReason, message?: string) {
         super(message ?? FetchProfileErrorReason[reason]);
@@ -102,10 +102,10 @@ export class WebsiteProfileFetcher implements IProfileFetcher {
 
     /**
      * 
-     * @param id 
+     * @param userID 
      * @param mode 
      * @returns 
-     * @throws FetchBeatmapError 
+     * @throws FetchProfileError 
      */
     async getPlayer(userID: number, mode: string): Promise<UserProfile> {
         const pro = await this.fetchProfileFromWebsite(userID, mode);
