@@ -37,7 +37,6 @@ export class MapChecker extends LobbyPlugin {
     this.option = d as MapCheckerOption;
     if(this.option.gamemode instanceof PlayMode){
       this.lobby.gameMode = this.option.gamemode;
-      console.log(this.lobby.gameMode);
     }
     this.validator = new MapValidator(this.option, this.logger);
     this.registerEvents();

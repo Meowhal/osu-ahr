@@ -32,7 +32,6 @@ class ProfileRepositoryClass {
 
         cache = this.tryGetCache(userID, mode);
         if (cache) return cache;
-        console.log('Test');
         throw new FetchProfileError(FetchProfileErrorReason.NotFound);
     }
     
@@ -137,7 +136,6 @@ export class WebsiteProfileFetcher implements IProfileFetcher {
                     var regex = /"/ig;
                     rxes.playmode = mode[1].trim().replace(regex,'');
                 }
-                console.log(rxes.playmode);
                 return rxes;
             }
             throw new FetchProfileError(FetchProfileErrorReason.FormatError);
