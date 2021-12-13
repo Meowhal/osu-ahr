@@ -113,7 +113,7 @@ export class PlayMode extends Mode {
 
     readonly type: "PlayMode" = "PlayMode";
     readonly id: number;
-    officialName: string;
+    readonly officialName: string;
 
     protected constructor(value: string | number, name: string, officialName: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
