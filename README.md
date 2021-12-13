@@ -13,6 +13,7 @@ The host rotation is managed with a queue. Players are added to the queue when j
 |`!abort`| Triggers vote abort the match. Use when the match is stuck.|
 |`!update`| Updates current selected map to the latest version. Use when a host picks an outdated map.|
 |`!regulations`| Shows any current regulations.|
+|`!rank`| Show player rank.|
  
 ## Host Command
 |Command|Description|Example|

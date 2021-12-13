@@ -7,6 +7,7 @@ import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import { HistoryRepository } from "./webapi/HistoryRepository";
 import config from "config";
 import log4js from "log4js";
+import { PlayMode } from "./Modes";
 
 export enum LobbyStatus {
   Standby,
@@ -58,6 +59,7 @@ export class Lobby {
   historyRepository: HistoryRepository;
   infoMessageAnnouncementTimeId: NodeJS.Timeout | null = null;
   transferHostTimeout: DeferredAction<void>;
+  gameMode: PlayMode | undefined;
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();

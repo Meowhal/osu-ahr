@@ -1,7 +1,7 @@
 import { Lobby, IIrcClient } from "..";
 import config from "config";
 import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker, LobbyKeeper, AfkKicker, MapMirrorLoader } from "../plugins";
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker, LobbyKeeper, AfkKicker, MiscLoader } from "../plugins";
 import { parser } from "../parsers";
 
 const logger = log4js.getLogger("cli");
@@ -29,7 +29,7 @@ export class OahrBase {
   checker: MapChecker;
   keeper: LobbyKeeper;
   afkkicker: AfkKicker;
-  mirrorLoader: MapMirrorLoader;
+  miscLoader: MiscLoader;
   option: OahrCliOption = OahrCliDefaultOption;
 
   constructor(client: IIrcClient) {
@@ -45,7 +45,7 @@ export class OahrBase {
     this.autoTimer = new AutoStartTimer(this.lobby);
     this.recaster = new MapRecaster(this.lobby);
     this.history = new HistoryLoader(this.lobby);
-    this.mirrorLoader = new MapMirrorLoader(this.lobby);
+    this.miscLoader = new MiscLoader(this.lobby);
     this.checker = new MapChecker(this.lobby);
     this.keeper = new LobbyKeeper(this.lobby);
     this.afkkicker = new AfkKicker(this.lobby);

@@ -11,6 +11,7 @@ The host rotation is managed by a list. Player is queued at the bottom when join
 |`!abort`| Triggers vote abort the match. Use when the match is stuck.|
 |`!update`| Updates current selected map to the latest version. Use when host pick an outdated map.|
 |`!regulation`| Shows current regulation.|
+|`!rank`| Show player rank.|
  
 |for host|desc|ex|
 |:--|:--|:--|
