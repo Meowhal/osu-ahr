@@ -582,6 +582,9 @@ export class Lobby {
     if (command == "!info" || command == "!help") {
       this.showInfoMessage();
     }
+    if (command == "!version" || command == "!v"){
+      this.showVersionMessage();
+    }
     this.ReceivedChatCommand.emit({ player, command, param });
   }
 
@@ -988,7 +991,11 @@ export class Lobby {
   }
 
   private showInfoMessage(): void {
-    !this.SendMessageWithCoolTime(this.getInfoMessage(), "infomessage", this.option.info_message_cooltime_ms);
+    this.SendMessageWithCoolTime(this.getInfoMessage(), "infomessage", this.option.info_message_cooltime_ms);
+  }
+
+  private showVersionMessage(): void {
+    this.SendMessageWithCoolTime(`osu! Auto Host Rotation Bot v. ${process.env.npm_package_version}`, "versionmessage", this.option.info_message_cooltime_ms);
   }
 
   private sendInfoMessagePM(player: Player): void {
