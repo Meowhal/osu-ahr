@@ -67,7 +67,7 @@
     "allow_convert": true,
     "map_description": "[https://osu.ppy.sh/b/${map_id} ${title}] star=${star} len=${length} - [https://beatconnect.io/b/${beatmapset_id} Alternative(beatconnect.io)]"
   },
-  "MapMirrorLoader": {},
+  "MiscLoader": {},
   "MapRecaster": {},
   "MatchStarter": {
     "vote_rate": 0.45,

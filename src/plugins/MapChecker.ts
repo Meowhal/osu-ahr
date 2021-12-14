@@ -33,8 +33,11 @@ export class MapChecker extends LobbyPlugin {
   constructor(lobby: Lobby, option: Partial<MapCheckerUncheckedOption> = {}) {
     super(lobby, "MapChecker", "mapChecker");
     const d = { ...config.get<MapCheckerUncheckedOption>(this.pluginName), ...option } as MapCheckerUncheckedOption;
-    validateMapchekerOption(d);
+    validateMapCheckerOption(d);
     this.option = d as MapCheckerOption;
+    if(this.option.gamemode instanceof PlayMode){
+      this.lobby.gameMode = this.option.gamemode;
+    }
     this.validator = new MapValidator(this.option, this.logger);
     this.registerEvents();
   }
@@ -93,7 +96,7 @@ export class MapChecker extends LobbyPlugin {
 
   processOwnerCommand(command: string, param: string) {
     try {
-      const p = parseMapcheckerOwenerCommand(command, param);
+      const p = parseMapcheckerOwnerCommand(command, param);
       if (p === undefined) return;
 
       if (p.enabled !== undefined) {
@@ -134,6 +137,7 @@ export class MapChecker extends LobbyPlugin {
       }
       if (p.gamemode !== undefined) {
         this.option.gamemode = p.gamemode;
+        this.lobby.gameMode = p.gamemode;
         changed = true;
       }
       if (p.allow_convert !== undefined) {
@@ -207,7 +211,7 @@ export class MapChecker extends LobbyPlugin {
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
             this.logger.info(`Gamemode Mismatched. checked:${mapId}`);
-            this.rejectMap(`Gamemode Mismatched. Pick ${this.option.gamemode.name} map.`, false);
+            this.rejectMap(`Gamemode Mismatched. Pick ${this.option.gamemode.officialName} map.`, false);
             break;
           case FetchBeatmapErrorReason.NotAvailable:
             this.logger.info(`Map is not available. checked:${mapId}`);
@@ -294,7 +298,7 @@ export class MapValidator {
 
     const mapmode = PlayMode.from(map.mode);
     if (mapmode != this.option.gamemode && this.option.gamemode != null) {
-      violationMsgs.push(`gamemode is not ${this.option.gamemode.name}.`);
+      violationMsgs.push(`gamemode is not ${this.option.gamemode.officialName}.`);
       rate += 1;
     }
 
@@ -335,7 +339,7 @@ export class MapValidator {
   GetDescription(): string {
     let d_star = "";
     let d_length = "";
-    let d_gamemode = `mode: ${this.option.gamemode.name}`;
+    let d_gamemode = `mode: ${this.option.gamemode.officialName}`;
     if (this.option.gamemode != PlayMode.Osu) {
       if (this.option.allow_convert) {
         d_gamemode += " (converts allowed)";
@@ -365,7 +369,7 @@ export class MapValidator {
   }
 }
 
-function validateMapchekerOption(option: MapCheckerUncheckedOption): option is Partial<MapCheckerOption> {
+function validateMapCheckerOption(option: MapCheckerUncheckedOption): option is Partial<MapCheckerOption> {
   if (option.enabled !== undefined) {
     option.enabled = validateOption.bool("MapChecker.enabled", option.enabled);
   }
@@ -398,6 +402,7 @@ function validateMapchekerOption(option: MapCheckerUncheckedOption): option is P
     if (typeof option.gamemode == "string") {
       try {
         option.gamemode = PlayMode.from(option.gamemode, true);
+        
       } catch {
         throw new Error("option MapChecker#gamemode must be [osu | fruits | taiko | mania].");
       }
@@ -428,7 +433,7 @@ function validateMapchekerOption(option: MapCheckerUncheckedOption): option is P
  * function for processing owner commands
  * Separated from MapChecker for ease of testing
  */
-export function parseMapcheckerOwenerCommand(command: string, param: string): Partial<MapCheckerOption> | undefined {
+export function parseMapcheckerOwnerCommand(command: string, param: string): Partial<MapCheckerOption> | undefined {
   let option: undefined | MapCheckerUncheckedOption = undefined;
   command = command.toLocaleLowerCase();
   if (command == "*mapchecker_enable") {
@@ -456,7 +461,7 @@ export function parseMapcheckerOwenerCommand(command: string, param: string): Pa
     }
   }
   if (option != undefined) {
-    validateMapchekerOption(option);
+    validateMapCheckerOption(option);
   }
   return option;
 }

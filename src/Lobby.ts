@@ -7,6 +7,7 @@ import { LobbyPlugin } from "./plugins/LobbyPlugin";
 import { HistoryRepository } from "./webapi/HistoryRepository";
 import config from "config";
 import log4js from "log4js";
+import { PlayMode } from "./Modes";
 
 export enum LobbyStatus {
   Standby,
@@ -58,6 +59,7 @@ export class Lobby {
   historyRepository: HistoryRepository;
   infoMessageAnnouncementTimeId: NodeJS.Timeout | null = null;
   transferHostTimeout: DeferredAction<void>;
+  gameMode: PlayMode | undefined;
 
   // Events
   JoinedLobby = new TypedEvent<{ channel: string, creator: Player }>();
@@ -580,6 +582,9 @@ export class Lobby {
     if (command == "!info" || command == "!help") {
       this.showInfoMessage();
     }
+    if (command == "!version" || command == "!v"){
+      this.showVersionMessage();
+    }
     this.ReceivedChatCommand.emit({ player, command, param });
   }
 
@@ -986,7 +991,11 @@ export class Lobby {
   }
 
   private showInfoMessage(): void {
-    !this.SendMessageWithCoolTime(this.getInfoMessage(), "infomessage", this.option.info_message_cooltime_ms);
+    this.SendMessageWithCoolTime(this.getInfoMessage(), "infomessage", this.option.info_message_cooltime_ms);
+  }
+
+  private showVersionMessage(): void {
+    this.SendMessageWithCoolTime(`osu! Auto Host Rotation Bot v. ${process.env.npm_package_version}`, "versionmessage", this.option.info_message_cooltime_ms);
   }
 
   private sendInfoMessagePM(player: Player): void {

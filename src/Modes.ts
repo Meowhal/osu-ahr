@@ -106,17 +106,19 @@ export class TeamMode extends Mode {
 export class PlayMode extends Mode {
     static readonly Values: PlayMode[] = [];
 
-    static readonly Osu = new PlayMode(0, "Osu");
-    static readonly Taiko = new PlayMode(1, "Taiko");
-    static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", ["fruits", "catch", "fruit"]);
-    static readonly OsuMania = new PlayMode(3, "OsuMania", ["mania"]);
+    static readonly Osu = new PlayMode(0, "Osu", "osu!");
+    static readonly Taiko = new PlayMode(1, "Taiko", "osu!taiko");
+    static readonly CatchTheBeat = new PlayMode(2, "CatchTheBeat", "osu!catch", ["fruits", "catch", "fruit"]);
+    static readonly OsuMania = new PlayMode(3, "OsuMania", "osu!mania", ["mania"]);
 
     readonly type: "PlayMode" = "PlayMode";
     readonly id: number;
+    readonly officialName: string;
 
-    protected constructor(value: string | number, name: string, aliases: string[] = []) {
+    protected constructor(value: string | number, name: string, officialName: string, aliases: string[] = []) {
         super(value.toString(), name, aliases);
         this.id = typeof value == "number" ? value : parseInt(value);
+        this.officialName = officialName;
         PlayMode.Values.push(this);
     }
 

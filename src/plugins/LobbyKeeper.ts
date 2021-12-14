@@ -225,6 +225,8 @@ export class LobbyKeeper extends LobbyPlugin {
 
   private fixTitle(): void {
     if (this.option.title == null) return;
+    //Set title length to max 50
+    this.option.title = this.option.title.substring(0, 50);
     this.lobby.SendMessage(`!mp name ${this.option.title}`);
   }
 
