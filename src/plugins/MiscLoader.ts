@@ -2,7 +2,7 @@ import { Lobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
-import { BeatmapRepository } from "../webapi/BeatmapRepository";
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from "../webapi/BeatmapRepository";
 import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from "../webapi/ProfileRepository";
 
 export interface MiscLoaderOption {
@@ -89,15 +89,37 @@ export class MiscLoader extends LobbyPlugin {
   }
 
   async checkMirror(mapId: number): Promise<void> {
-    let map = await BeatmapRepository.getBeatmap(mapId);
-    this.canResend = false;
-    if (!map) {
-      this.lobby.SendMessage("Current beatmap doesn't have mirror...");
+    try {
+      let map = await BeatmapRepository.getBeatmap(mapId);
       this.canResend = false;
-      return;
+      if (!map) {
+        this.lobby.SendMessage("Current beatmap doesn't have mirror...");
+        this.canResend = false;
+        return;
+      }
+      this.canResend = true;
+      var downloadLink = this.rootURL + map.beatmapset_id;
+      this.lobby.SendMessageWithCoolTime("Alternative download link for [" + downloadLink + " " + map.beatmapset?.title + "]", "!mirror", 5000);
+    } catch (e: any) {
+      this.canResend = false;
+      if (e instanceof FetchBeatmapError) {
+        switch (e.reason) {
+          case FetchBeatmapErrorReason.FormatError:
+            this.logger.error(`Couldn't parse the webpage. checked:${mapId}`);
+            break;
+          case FetchBeatmapErrorReason.NotFound:
+            this.logger.info(`Map can not be found. checked:${mapId}`);
+            break;
+          case FetchBeatmapErrorReason.PlayModeMismatched:
+            this.logger.info(`Gamemode Mismatched. checked:${mapId}`);
+            break;
+          case FetchBeatmapErrorReason.NotAvailable:
+            this.logger.info(`Map is not available. checked:${mapId}`);
+            break;
+        }
+      } else {
+        this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
+      }
     }
-    this.canResend = true;
-    var downloadLink = this.rootURL + map.beatmapset_id;
-    this.lobby.SendMessageWithCoolTime("Alternative download link for [" + downloadLink + " " + map.beatmapset?.title + "]", "!mirror", 5000);
   }
 }
