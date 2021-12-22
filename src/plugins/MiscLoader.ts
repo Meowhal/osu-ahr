@@ -90,7 +90,7 @@ export class MiscLoader extends LobbyPlugin {
 
   async checkMirror(mapId: number): Promise<void> {
     try {
-      let map = await BeatmapRepository.getBeatmap(mapId);
+      let map = await BeatmapRepository.getBeatmap(mapId, this.lobby.gameMode);
       this.canResend = false;
       if (!map) {
         this.lobby.SendMessage("Current beatmap doesn't have mirror...");
