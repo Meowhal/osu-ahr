@@ -4,6 +4,7 @@ import { BanchoResponseType } from "../parsers";
 import config from "config";
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from "../webapi/BeatmapRepository";
 import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from "../webapi/ProfileRepository";
+import { WebApiClient } from "../webapi/WebApiClient";
 
 export interface MiscLoaderOption {
 }
@@ -16,10 +17,14 @@ export class MiscLoader extends LobbyPlugin {
   option: MiscLoaderOption;
   canResend: boolean = true;
   rootURL: string = "https://beatconnect.io/b/";
+  canSeeRank: boolean = false;
 
   constructor(lobby: Lobby, option: Partial<MiscLoaderOption> = {}) {
     super(lobby, "MiscLoader", "miscLoader");
     const d = config.get<MiscLoaderOption>(this.pluginName);
+    if(WebApiClient.available){
+      this.canSeeRank = true;
+    }
     this.option = { ...d, ...option } as MiscLoaderOption;
     this.registerEvents();
   }
@@ -46,6 +51,9 @@ export class MiscLoader extends LobbyPlugin {
 
   async getProfile(player: Player){
     try {
+      if(!this.canSeeRank){
+        return;
+      }
       let currentPlayer = this.lobby.GetPlayer(player.name);
       if(!currentPlayer)
         return;
@@ -68,10 +76,11 @@ export class MiscLoader extends LobbyPlugin {
           selectedMode = "mania";
           break;
       }
-      const profile = await ProfileRepository.getProfile(currentPlayer.id, selectedMode);
-      
+      const profile = await WebApiClient.getPlayer(currentPlayer.id, selectedMode);
+    
       const msg = profile.username + " your rank is #" + profile.statistics.global_rank;
       this.lobby.SendMessageWithCoolTime(msg, "!rank",5000);
+      
     } catch (e: any) {
       if (e instanceof FetchProfileError) {
         switch (e.reason) {
