@@ -324,7 +324,7 @@ export class MapValidator {
 
     if (0 < rate) {
       let message;
-      const mapDesc = `The [${map.url} ${map.beatmapset?.title}] (star=${map.difficulty_rating} len=${secToTimeNotation(map.total_length)})`
+      const mapDesc = `[${map.url} ${map.beatmapset?.title}] (Star Rating: ${map.difficulty_rating} Duration: ${secToTimeNotation(map.total_length)})`
       if (violationMsgs.length == 1) {
         message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
       } else {

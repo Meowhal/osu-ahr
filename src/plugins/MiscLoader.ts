@@ -16,7 +16,8 @@ export interface MiscLoaderOption {
 export class MiscLoader extends LobbyPlugin {
   option: MiscLoaderOption;
   canResend: boolean = true;
-  rootURL: string = "https://beatconnect.io/b/";
+  beatconnectURL: string = "https://beatconnect.io/b/${beatmapset_id}";
+  chimuURL: string = "https://api.chimu.moe/v1/download/${beatmapset_id}?n=1";
   canSeeRank: boolean = false;
 
   constructor(lobby: Lobby, option: Partial<MiscLoaderOption> = {}) {
@@ -107,8 +108,10 @@ export class MiscLoader extends LobbyPlugin {
         return;
       }
       this.canResend = true;
-      var downloadLink = this.rootURL + map.beatmapset_id;
-      this.lobby.SendMessageWithCoolTime("Alternative download link for [" + downloadLink + " " + map.beatmapset?.title + "]", "!mirror", 5000);
+      var beatconnectLink = this.beatconnectURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
+      var chimuLink = this.chimuURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
+      var beatmapView = map.beatmapset?.title.toString();
+      this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView} : [${beatconnectLink} Beatconnect] | [${chimuLink} Chimu]`, "!mirror", 5000);
     } catch (e: any) {
       this.canResend = false;
       if (e instanceof FetchBeatmapError) {
