@@ -65,7 +65,7 @@
     "gamemode": "osu",
     "num_violations_allowed": 3,
     "allow_convert": true,
-    "map_description": "[https://osu.ppy.sh/b/${map_id} ${title}] | Star Rating: ${star} | Duration: ${length} | Alternative:  [https://beatconnect.io/b/${beatmapset_id} (Beatconnect)] | [https://api.chimu.moe/v1/download/${beatmapset_id}?n=1 (Chimu)]"
+    "map_description": "[https://osu.ppy.sh/b/${map_id} ${title}] | Star Rating: ${star} | Duration: ${length} | Alternative:  [https://beatconnect.io/b/${beatmapset_id} (BeatConnect.io)] | [https://kitsu.moe/d/${beatmapset_id} (Kitsu.moe)]"
   },
   "MiscLoader": {},
   "MapRecaster": {},

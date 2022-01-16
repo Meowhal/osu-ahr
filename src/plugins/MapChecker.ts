@@ -210,8 +210,8 @@ export class MapChecker extends LobbyPlugin {
             this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] had already been removed from the website.`, false);
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
-            this.logger.info(`Gamemode Mismatched. checked:${mapId}`);
-            this.rejectMap(`Gamemode Mismatched. Pick ${this.option.gamemode.officialName} map.`, false);
+            this.logger.info(`Gamemode mismatched. checked:${mapId}`);
+            this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not ${this.option.gamemode.officialName} map. Pick ${this.option.gamemode.officialName} map.`, false);
             break;
           case FetchBeatmapErrorReason.NotAvailable:
             this.logger.info(`Map is not available. checked:${mapId}`);
@@ -236,7 +236,7 @@ export class MapChecker extends LobbyPlugin {
     this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
 
     if (showRegulation) {
-      this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation : ${this.validator.GetDescription()}`);
+      this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation: ${this.validator.GetDescription()}`);
       this.lobby.SendMessage(reason);
       this.lobby.SendMessage("*Attention! Difficulty will not be calculated correctly if a global mod is applied.");
     } else {
