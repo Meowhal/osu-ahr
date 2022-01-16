@@ -9,6 +9,7 @@ import { promises as fs } from 'fs';
 import { UserProfile, trimProfile } from "./UserProfile";
 import { Beatmap, Beatmapset } from "./Beatmapsets";
 import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from './BeatmapRepository';
+import { FetchProfileError, FetchProfileErrorReason } from './ProfileRepository';
 
 export interface ApiToken {
   token_type: string,
@@ -286,6 +287,21 @@ class WebApiClientClass implements IBeatmapFetcher {
         return null;
       }
       throw e;
+    }
+  }
+
+  async getPlayer(userID: number, mode: string): Promise<UserProfile> {
+    try {
+      const data = await this.accessApi(`https://osu.ppy.sh/api/v2/users/${userID}/${mode}`, {
+        method: "GET"
+      });
+      data.get_time = Date.now();
+      return data;
+    } catch (e: any) {
+      if (e.response?.status == 404) {
+        throw new FetchProfileError(FetchProfileErrorReason.NotFound);
+      }
+      throw new FetchProfileError(FetchProfileErrorReason.Unknown, e.message);
     }
   }
 

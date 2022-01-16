@@ -2,8 +2,9 @@ import { Lobby, Player } from "..";
 import { LobbyPlugin } from "./LobbyPlugin";
 import { BanchoResponseType } from "../parsers";
 import config from "config";
-import { BeatmapRepository } from "../webapi/BeatmapRepository";
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from "../webapi/BeatmapRepository";
 import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from "../webapi/ProfileRepository";
+import { WebApiClient } from "../webapi/WebApiClient";
 
 export interface MiscLoaderOption {
 }
@@ -15,11 +16,16 @@ export interface MiscLoaderOption {
 export class MiscLoader extends LobbyPlugin {
   option: MiscLoaderOption;
   canResend: boolean = true;
-  rootURL: string = "https://beatconnect.io/b/";
+  beatconnectURL: string = "https://beatconnect.io/b/${beatmapset_id}";
+  kitsuURL: string = "https://kitsu.moe/d/${beatmapset_id}";
+  canSeeRank: boolean = false;
 
   constructor(lobby: Lobby, option: Partial<MiscLoaderOption> = {}) {
     super(lobby, "MiscLoader", "miscLoader");
     const d = config.get<MiscLoaderOption>(this.pluginName);
+    if(WebApiClient.available){
+      this.canSeeRank = true;
+    }
     this.option = { ...d, ...option } as MiscLoaderOption;
     this.registerEvents();
   }
@@ -46,6 +52,9 @@ export class MiscLoader extends LobbyPlugin {
 
   async getProfile(player: Player){
     try {
+      if(!this.canSeeRank){
+        return;
+      }
       let currentPlayer = this.lobby.GetPlayer(player.name);
       if(!currentPlayer)
         return;
@@ -68,10 +77,11 @@ export class MiscLoader extends LobbyPlugin {
           selectedMode = "mania";
           break;
       }
-      const profile = await ProfileRepository.getProfile(currentPlayer.id, selectedMode);
-      
+      const profile = await WebApiClient.getPlayer(currentPlayer.id, selectedMode);
+    
       const msg = profile.username + " your rank is #" + profile.statistics.global_rank;
       this.lobby.SendMessageWithCoolTime(msg, "!rank",5000);
+      
     } catch (e: any) {
       if (e instanceof FetchProfileError) {
         switch (e.reason) {
@@ -89,15 +99,39 @@ export class MiscLoader extends LobbyPlugin {
   }
 
   async checkMirror(mapId: number): Promise<void> {
-    let map = await BeatmapRepository.getBeatmap(mapId);
-    this.canResend = false;
-    if (!map) {
-      this.lobby.SendMessage("Current beatmap doesn't have mirror...");
+    try {
+      let map = await BeatmapRepository.getBeatmap(mapId, this.lobby.gameMode);
       this.canResend = false;
-      return;
+      if (!map) {
+        this.lobby.SendMessage("Current beatmap doesn't have mirror...");
+        this.canResend = false;
+        return;
+      }
+      this.canResend = true;
+      var beatconnectLink = this.beatconnectURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
+      var kitsuLink = this.kitsuURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
+      var beatmapView = map.beatmapset?.title.toString();
+      this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView} : [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, "!mirror", 5000);
+    } catch (e: any) {
+      this.canResend = false;
+      if (e instanceof FetchBeatmapError) {
+        switch (e.reason) {
+          case FetchBeatmapErrorReason.FormatError:
+            this.logger.error(`Couldn't parse the webpage. checked:${mapId}`);
+            break;
+          case FetchBeatmapErrorReason.NotFound:
+            this.logger.info(`Map can not be found. checked:${mapId}`);
+            break;
+          case FetchBeatmapErrorReason.PlayModeMismatched:
+            this.logger.info(`Gamemode Mismatched. checked:${mapId}`);
+            break;
+          case FetchBeatmapErrorReason.NotAvailable:
+            this.logger.info(`Map is not available. checked:${mapId}`);
+            break;
+        }
+      } else {
+        this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
+      }
     }
-    this.canResend = true;
-    var downloadLink = this.rootURL + map.beatmapset_id;
-    this.lobby.SendMessageWithCoolTime("Alternative download link for [" + downloadLink + " " + map.beatmapset?.title + "]", "!mirror", 5000);
   }
 }
