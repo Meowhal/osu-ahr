@@ -268,6 +268,7 @@ export class MapChecker extends LobbyPlugin {
     desc = desc.replace(/\$\{beatmapset_id\}/g, set.id.toString());
     desc = desc.replace(/\$\{star\}/g, map.difficulty_rating.toFixed(2));
     desc = desc.replace(/\$\{length\}/g, secToTimeNotation(map.total_length));
+    desc = desc.replace(/\$\{status\}/g, map.status);
     return desc;
   }
 
