@@ -2,6 +2,8 @@
 
 **osu-ahr** is auto host rotation bot for [osu!](https://osu.ppy.sh/home) multiplayer. The host rotation is managed with a queue. Players are added to the queue when joining a multiplayer room and sent to the back of the queue once their beatmap has been played.
 
+<!--TODO: Oahr Web and Test are undocumented, we need to add separate article for those-->
+
 ## Table of Contents
 
 - [osu-ahr](#osu-ahr)
@@ -40,6 +42,8 @@ These are what osu-ahr bot can do osu! bancho server:
 ## Recent Changes
 
 *Main page: [Changelog](/wiki/Changelog.md)*
+
+<!--Show latest version changelog down here-->
 
 ### 1.5.11
 + Improved Discord Integration.
@@ -99,7 +103,7 @@ MainMenu Commands
 > make 5-6* | auto host rotation
 ```
 
-*Note: You can also run your bot on discord. See the [Discord Integration](#discord-integration) article for details.*
+*Note: You can also run your bot on Discord. See the [Discord Integration](#discord-integration) article for details.*
 
 ## Bot Configuration
 
