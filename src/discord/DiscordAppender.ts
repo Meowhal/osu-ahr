@@ -1,4 +1,4 @@
-import { Client, ColorResolvable, MessageEmbed, TextBasedChannels, MessageOptions } from "discord.js";
+import { Client, ColorResolvable, MessageEmbed, MessageOptions, TextBasedChannel } from "discord.js";
 import log4js from "log4js";
 import { OahrDiscord } from "./OahrDiscord";
 
@@ -51,11 +51,11 @@ export function configure(config: any, layouts: any) {
     };
 }
 
-function getDiscordChannel(context: any): TextBasedChannels | undefined {
+function getDiscordChannel(context: any): TextBasedChannel | undefined {
     if (discordClient && context && context.transfer && context.guildId && context.channelId) {
         let guild = discordClient.guilds.cache.get(context.guildId);
         let ch = guild?.channels.cache.get(context.channelId)
-        if (ch?.isText() && !ch?.deleted) {
+        if (ch && ch.isText()) {
             return ch;
         }
     }
