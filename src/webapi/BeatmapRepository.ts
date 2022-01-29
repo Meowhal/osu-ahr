@@ -42,7 +42,7 @@ class BeatmapRepositoryClass {
         if (cache) return cache;
 
         const set = await this.fetcher.getBeatmapset(mapId);
-        if (set.availability.download_disabled == true || set.availability.more_information != null){
+        if (set.availability.download_disabled == true || set.availability.more_information != null) {
             throw new FetchBeatmapError(FetchBeatmapErrorReason.NotAvailable);
         }
         this.cacheMaps(set);
@@ -80,10 +80,10 @@ class BeatmapRepositoryClass {
         }
     }
 
-    discardExpiredCache() {
+    discardExpiredCache(expiredMs: number = this.cacheExpiredMs) {
         const now = Date.now();
         for (const [key, cache] of this.maps.entries()) {
-            if (now > cache.fetchedAt + this.cacheExpiredMs) {
+            if (now > cache.fetchedAt + expiredMs) {
                 this.maps.delete(key);
             }
         }

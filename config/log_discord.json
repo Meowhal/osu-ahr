@@ -13,7 +13,7 @@
             "appender": "console"
         },
         "discord": {
-            "type": "src/discord/DiscordAppender",
+            "type": "DiscordAppender",
             "layout": {
                 "type": "pattern",
                 "pattern": "%m"

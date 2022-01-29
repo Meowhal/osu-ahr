@@ -1,29 +1,42 @@
 {
   "appenders": {
     "console": {
-      "type": "console"
+      "type": "console",
+      "layout": {
+        "type": "pattern",
+        "pattern": "%[[%d{hh:mm:ss.SSS}][%p] %c -%] %m"
+      }
     },
     "console_f": {
       "type": "logLevelFilter",
       "level": "info",
       "appender": "console"
     },
-    "file_all": {
-      "type": "file",
-      "filename": "logs/all.log"
+    "file_app": {
+      "type": "multiFile",
+      "base": "logs/app",
+      "property": "channel",
+      "extension": ".log"
     },
-    "file_all_f": {
+    "file_app_f": {
       "type": "logLevelFilter",
-      "level": "trace",
-      "appender": "file_all"
+      "level": "info",
+      "appender": "file_app"
     },
     "file_irc": {
       "type": "file",
       "filename": "logs/irc.log"
     },
-    "file_chat": {
-      "type": "file",
-      "filename": "logs/chat.log"
+    "file_cli": {
+      "type": "multiFile",
+      "base": "logs/cli",
+      "property": "channel",
+      "extension": ".log"
+    },
+    "file_cli_f": {
+      "type": "logLevelFilter",
+      "level": "info",
+      "appender": "file_cli"
     },
     "file_pm": {
       "type": "file",
@@ -42,43 +55,53 @@
     "default": {
       "appenders": [
         "console_f",
-        "file_all_f"
+        "file_app",
+        "file_cli_f"
       ],
-      "level": "debug"
+      "level": "info"
     },
     "irc": {
       "appenders": [
         "console_f",
-        "file_all_f",
+        "file_app_f",
         "file_irc"
       ],
-      "level": "debug"
+      "level": "all"
     },
     "chat": {
       "appenders": [
-        "console",
-        "file_chat"
+        "console_f",
+        "file_app",
+        "file_cli"
       ],
-      "level": "debug"
+      "level": "all"
+    },
+    "inout": {
+      "appenders": [
+        "console",
+        "file_cli"
+      ],
+      "level": "all"
     },
     "PMLogger": {
       "appenders": [
-        "console",
-        "file_pm"
+        "console_f",
+        "file_pm",
+        "file_cli"
       ],
-      "level": "debug"
+      "level": "all"
     },
-    "wordCounter": {
+    "wcounter": {
       "appenders": [
         "file_counter"
       ],
-      "level": "debug"
+      "level": "info"
     },
     "webapi": {
       "appenders": [
         "file_webapi"
       ],
-      "level": "debug"
+      "level": "info"
     }
   }
 }

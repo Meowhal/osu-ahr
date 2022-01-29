@@ -32,6 +32,10 @@
     "doClearHost": false,
     "waitingTime": 90
   },
+  "CacheCleaner": {
+    "enabled": true,
+    "intervalMs": 86400000
+  },
   "HistoryLoader": {
     "fetch_interval_ms": 0
   },
