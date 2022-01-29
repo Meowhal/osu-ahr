@@ -7,7 +7,7 @@ import config from "config";
 
 export interface MatchStarterOption {
   vote_rate: number; // 投票時の必要数/プレイヤー数
-  vote_min: number;　// 最低投票数
+  vote_min: number; // 最低投票数
   vote_msg_defer_ms: number;
   start_when_all_player_ready: boolean; // 全員準備完了したら試合を始める
 }

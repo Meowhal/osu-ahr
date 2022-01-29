@@ -94,7 +94,7 @@ export class HistoryRepository {
       } else {
         this.logger.error("@updateToLatest : " + e);
       }
-      
+
       this.hasError = true;
       if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
         setTimeout(() => {
@@ -381,5 +381,14 @@ export class HistoryRepository {
 
     result.sort((a, b) => a.age - b.age);
     return result.map(a => a.id);
+  }
+
+  /**
+   * イベントキャッシュをすべて削除する
+   */
+  async clearCache(): Promise<void> {
+    await this.fetchTask;
+    this.events = [];
+    this.users = {};
   }
 }

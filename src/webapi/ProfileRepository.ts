@@ -55,10 +55,10 @@ class ProfileRepositoryClass {
         this.profiles.set(key, cacheProfile);
     }
     
-    discardExpiredCache() {
+    discardExpiredCache(expiredMs: number = this.cacheExpiredMs) {
         const now = Date.now();
         for (const [key, cache] of this.profiles.entries()) {
-            if (now > cache.fetchedAt + this.cacheExpiredMs) {
+            if (now > cache.fetchedAt + expiredMs) {
                 this.profiles.delete(key);
             }
         }

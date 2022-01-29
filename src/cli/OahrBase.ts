@@ -3,12 +3,13 @@ import config from "config";
 import log4js from "log4js";
 import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker, LobbyKeeper, AfkKicker, MiscLoader } from "../plugins";
 import { parser } from "../parsers";
+import { CacheCleaner } from "../plugins/CacheCleaner";
 
 const logger = log4js.getLogger("cli");
 
 export interface OahrCliOption {
   invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
-  password: string;　// デフォルトのパスワード, 空文字でパスワードなし。
+  password: string; // デフォルトのパスワード, 空文字でパスワードなし。
 }
 
 const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
@@ -30,6 +31,7 @@ export class OahrBase {
   keeper: LobbyKeeper;
   afkkicker: AfkKicker;
   miscLoader: MiscLoader;
+  cleaner: CacheCleaner;
   option: OahrCliOption = OahrCliDefaultOption;
 
   constructor(client: IIrcClient) {
@@ -49,6 +51,7 @@ export class OahrBase {
     this.checker = new MapChecker(this.lobby);
     this.keeper = new LobbyKeeper(this.lobby);
     this.afkkicker = new AfkKicker(this.lobby);
+    this.cleaner = new CacheCleaner(this.lobby);
     this.lobby.RaisePluginsLoaded();
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "osu-ahr",
-  "version": "1.5.15",
+  "version": "1.5.16",
   "description": "irc bot for osu! multi lobby auto host rotation.",
   "main": "dist/cli/index.js",
   "homepage": "https://github.com/Meowhal/osu-ahr",
@@ -9,17 +9,18 @@
     "url": "https://github.com/Meowhal/osu-ahr.git"
   },
   "scripts": {
-    "build-dev": "cross-env NODE_ENV=development npm run build",
-    "build": "rimraf dist && tsc",
-    "start": "cross-env Node_ENV=development ts-node src/cli/index.ts",
-    "start:discord": "ts-node src/discord/index.ts",
-    "test-production": "cross-env Node_ENV=production npm run test",
-    "test-dev": "cross-env Node_ENV=development npm run test",
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "start": "rimraf dist && tsc && node dist/cli/index.js",
+    "start:discord": "rimraf dist && tsc && node dist/discord/index.js",
+    "node:cli": "node dist/cli/index.js",
+    "node:discord": "node dist/discord/index.js",
+    "dev:cli": "ts-node src/cli/index.ts",
+    "dev:discord": "ts-node src/discord/index.ts",
     "test": "mocha -r ts-node/register src/tests/*Test.ts",
-    "trial": "cross-env Node_ENV=development ts-node src/trials/index.ts",
-    "start:web": "cross-env Node_ENV=development ts-node src/web/index.ts",
-    "start:log": "cross-env Node_ENV=development ts-node src/cli/LogServer.ts",
-    "startjs": "node ."
+    "trial": "ts-node src/trials/index.ts",
+    "dev:web": "ts-node src/web/index.ts",
+    "dev:log": "ts-node src/cli/LogServer.ts"
   },
   "author": "gnsksz",
   "license": "ISC",
