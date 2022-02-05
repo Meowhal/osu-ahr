@@ -1,6 +1,6 @@
 {
   "name": "osu-ahr",
-  "version": "1.5.16",
+  "version": "1.5.17",
   "description": "irc bot for osu! multi lobby auto host rotation.",
   "main": "dist/cli/index.js",
   "homepage": "https://github.com/Meowhal/osu-ahr",
@@ -11,8 +11,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc",
-    "start": "rimraf dist && tsc && node dist/cli/index.js",
-    "start:discord": "rimraf dist && tsc && node dist/discord/index.js",
+    "start": "node dist/cli/index.js",
+    "start:discord": "node dist/discord/index.js",
     "node:cli": "node dist/cli/index.js",
     "node:discord": "node dist/discord/index.js",
     "dev:cli": "ts-node src/cli/index.ts",
