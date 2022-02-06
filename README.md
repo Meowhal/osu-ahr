@@ -10,8 +10,10 @@
   - [Table of Contents](#table-of-contents)
   - [Bot Feature](#bot-feature)
   - [Command List](#command-list)
-  - [Recent Changes](#recent-changes)
-    - [1.5.11](#1511)
+  - [Latest Version](#latest-version)
+    - [Version 1.5.14](#version-1514)
+      - [Code Quality](#code-quality)
+      - [UI](#ui)
   - [Bot Installation](#bot-installation)
   - [Bot Configuration](#bot-configuration)
   - [Special Thanks](#special-thanks)
@@ -39,19 +41,24 @@ These are what osu-ahr bot can do osu! bancho server:
 
 *Main page: [Bot Command](/wiki/Command_List.md)*
 
-## Recent Changes
+## Latest Version
 
-*Main page: [Changelog](/wiki/Changelog.md)*
+*For full changelog history, see: [Changelog](/wiki/Changelog.md)*
 
 <!--Show latest version changelog down here-->
 
-### 1.5.11
-+ Improved Discord Integration.
-  + The "matches" channel now displays an information panel that allows you to check the status of each match.
-  + The permissions have been changed, so if you are already using the bot, please re-invite the bot again.
-  + To start forwarding in-game chat, you need to press the "Start Forwarding" button.
-+ Added chat speed limiter.
-  + The risk of your bot being silenced is reduced.
+### Version 1.5.14
+
+#### Code Quality
+
++ Add maximum length for keeping room title up to 50 characters
++ Bug fix `!mirror` command that break on non-osu! game mode room
++ Deprecate ProfileRepository because osu! web profile JSON isn't available anymore in web
+  + Redirect `!rank` command to fetch from osu! api with current game mode in room
+
+#### UI
+
++ Add [Kitsu.moe](https://kitsu.moe/) as another mirror download
 
 ## Bot Installation
 

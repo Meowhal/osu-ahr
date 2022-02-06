@@ -73,5 +73,3 @@ This commands are only available for the owner or referee(s) of the multiplayer 
 ```
 /say *keep size 16
 ```
-
-You can get the bot source code from [here](https://github.com/Meowhal/osu-ahr).
