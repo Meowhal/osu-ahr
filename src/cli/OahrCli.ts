@@ -19,7 +19,7 @@ LobbyMenu Commands
   [say <Message>] Send Message to #multiplayer.
   [info] Show current application's informations.
   [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
-  [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
+  [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 length_min=60 length_max=300' 
   [regulation enable] Enable regulation checking 
   [regulation disable] Disable regulation checking
   [close] Close the lobby and Quit this application. ex: 'close now'
@@ -52,14 +52,14 @@ export class OahrCli extends OahrBase {
           case "m":
           case "make":
             if (l.arg == "") {
-              logger.info("make command needs lobby name. ex:make testlobby");
+              logger.info("make command needs lobby name. e.g. \"make osu! Auto Host Rotate\"");
               return;
             }
             try {
               await this.makeLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
             } catch (e) {
-              logger.info("faiiled to make lobby : %s", e);
+              logger.info("failed to make lobby : %s", e);
               this.scene = this.scenes.exited;
             }
             break;
@@ -67,7 +67,7 @@ export class OahrCli extends OahrBase {
           case "enter":
             try {
               if (l.arg == "") {
-                logger.info("enter command needs lobby id. ex:enter 123456");
+                logger.info("enter command needs lobby id. e.g. \"enter 123456\"");
                 return;
               }
               await this.enterLobbyAsync(l.arg);
