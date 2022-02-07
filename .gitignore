@@ -89,7 +89,6 @@ typings/
 
 # custom settings
 data/
-dist/
 irc-log/
 config/development.json
 config/production.json
