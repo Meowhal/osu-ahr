@@ -11,9 +11,8 @@
   - [Bot Feature](#bot-feature)
   - [Command List](#command-list)
   - [Latest Version](#latest-version)
-    - [Version 1.5.14](#version-1514)
+    - [Version 1.5.17](#version-1517)
       - [Code Quality](#code-quality)
-      - [UI](#ui)
   - [Bot Installation](#bot-installation)
   - [Bot Configuration](#bot-configuration)
   - [Special Thanks](#special-thanks)
@@ -47,18 +46,11 @@ These are what osu-ahr bot can do osu! bancho server:
 
 <!--Show latest version changelog down here-->
 
-### Version 1.5.14
+### Version 1.5.17
 
 #### Code Quality
 
-+ Add maximum length for keeping room title up to 50 characters
-+ Bug fix `!mirror` command that break on non-osu! game mode room
-+ Deprecate ProfileRepository because osu! web profile JSON isn't available anymore in web
-  + Redirect `!rank` command to fetch from osu! api with current game mode in room
-
-#### UI
-
-+ Add [Kitsu.moe](https://kitsu.moe/) as another mirror download
++ Add compiled JavaScript files for faster running option
 
 ## Bot Installation
 
@@ -90,8 +82,8 @@ These are what osu-ahr bot can do osu! bancho server:
 }
 ```
 
-6. Configure the bot (Optional). See the [Configuration](#configuration) article for details.
-7. Launch the bot
+6. (Optional) Configure the bot. See the [Configuration](#configuration) article for details.
+7. Launch the bot. *Note: You can also run your bot on Discord. See the [Discord Integration](#discord-integration) article for details.*
 
 ```bash 
 > npm run start
@@ -109,8 +101,6 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
-
-*Note: You can also run your bot on Discord. See the [Discord Integration](#discord-integration) article for details.*
 
 ## Bot Configuration
 

@@ -22,6 +22,25 @@ This section is dedicated to osu-ahr bot changelog, sorted by most recent change
 
 -->
 
+## Version 1.5.17
+
+### Code Quality
+
++ Add compiled JavaScript files for faster running option
+
+## Version 1.5.16
+
+### Code Quality
+
++ Add CacheCleaner plugin to handle cache cleaning in bot
+
+## Version 1.5.15
+
+### Code Quality
+
++ Bumping used node libraries version for security update
+
+
 ## Version 1.5.14
 
 ### Code Quality
