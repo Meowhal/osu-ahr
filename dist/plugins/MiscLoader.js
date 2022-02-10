@@ -106,7 +106,7 @@ class MiscLoader extends LobbyPlugin_1.LobbyPlugin {
             var beatconnectLink = this.beatconnectURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
             var kitsuLink = this.kitsuURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
             var beatmapView = map.beatmapset?.title.toString();
-            this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView} : [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, "!mirror", 5000);
+            this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView}: [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, "!mirror", 5000);
         }
         catch (e) {
             this.canResend = false;

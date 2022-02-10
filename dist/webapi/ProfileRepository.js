@@ -13,7 +13,7 @@ class ProfileRepositoryClass {
         this.fetcher = new WebsiteProfileFetcher();
     }
     /**
-     * 0
+     *
      * @param userID
      * @param mode
      * @returns

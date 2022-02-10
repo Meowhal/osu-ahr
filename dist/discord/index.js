@@ -34,9 +34,7 @@ const logger = log4js_1.default.getLogger("cli");
 console.log("starting up...");
 const config_path = "./config/log_discord.json";
 try {
-    console.log("1");
     log4js_1.default.configure(config_path);
-    console.log("2");
     const c = (0, TypedConfig_1.getIrcConfig)();
     if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
         logger.error("you must enter your account name and irc password in the config file. ");
@@ -44,7 +42,6 @@ try {
         logger.error("Copy config/default.json to config/local.json, and enter your id and irc password.");
         process.exit(1);
     }
-    console.log("3");
     let ircClient = new irc.Client(c.server, c.nick, c.opt);
     ircClient.on("error", err => {
         if (err.command == "err_passwdmismatch") {
@@ -53,14 +50,11 @@ try {
             process.exit(1);
         }
     });
-    console.log("aa");
     (0, ChatLimiter_1.applySpeedLimit)(ircClient, 10, 5000);
     (0, __1.logIrcEvent)(ircClient);
     (0, IIrcClient_1.logPrivateMessage)(ircClient);
     let discordClient = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
-    logger.info("bb");
     const bot = new DiscordBot_1.DiscordBot(ircClient, discordClient);
-    logger.info("cc");
     bot.start();
 }
 catch (e) {
