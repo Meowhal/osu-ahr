@@ -124,6 +124,7 @@
     "port": 3115
   },
   "Discord": {
-    "token": ""
+    "token": "",
+    "matchListChannelName": "matches"
   }
 }

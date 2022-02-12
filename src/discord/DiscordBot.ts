@@ -25,6 +25,7 @@ const ADMIN_ROLE: CreateRoleOptions = {
 
 export interface DiscordBotConfig {
   token: string; // ボットのトークン https://discord.com/developers/applications
+  matchListChannelName: string;
 }
 
 type GuildCommandInteraction = CommandInteraction & { guildId: string; }
@@ -97,7 +98,9 @@ export class DiscordBot {
       }
       process.exit();
     }
-
+    if(this.cfg.matchListChannelName == undefined){
+      this.cfg.matchListChannelName = "matches";
+    }
   }
 
   checkMemberHasAhrAdminRole(member: GuildMember) {
@@ -388,10 +391,10 @@ export class DiscordBot {
   }
 
   async getOrCreateMatchesChannel(guild: Guild): Promise<TextChannel> {
-    const dc = guild.channels.cache.find(c => c.name.toLowerCase() == "matches");
+    const dc = guild.channels.cache.find(c => c.name.toLowerCase() == this.cfg.matchListChannelName);
     if (dc) return dc as TextChannel;
     const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
-    return await guild.channels.create("matches", {
+    return await guild.channels.create(this.cfg.matchListChannelName, {
       type: "GUILD_TEXT",
       topic: `created by ${this.discordClient.user?.username}.`,
       permissionOverwrites: [
