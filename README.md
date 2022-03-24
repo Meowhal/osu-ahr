@@ -121,8 +121,8 @@ Note: You can also run your bot on discord. See the [Discord Integration section
 # Configuration
 You can edit local.json to configure the bot's behavior.
 ## IRC Section
-- `server` : `string` host name of osu irc server.
-- `nick` : `string` your osu account name
+- `server` : `string` host name of osu! irc server.
+- `nick` : `string` your osu! account name
 - `opt.port` : `number` 
 - `opt.password` : `string` your irc password. you can get it from [https://osu.ppy.sh/p/irc](https://osu.ppy.sh/p/irc).
 ```json
