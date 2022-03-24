@@ -55,11 +55,11 @@ The host rotation is managed with a queue. Players are added to the queue when j
 
 Note: Administrator commands are also available on the cli and discord bot. Here are examples of Administrator commands using cli and discord:
 
-cli
+Cli
 ```
 #mp_123456 > *keep size 16
 ```
-discord
+Discord
 ```
 /say *keep size 16
 ```
@@ -121,10 +121,10 @@ Note: You can also run your bot on discord. See the [Discord Integration section
 # Configuration
 You can edit local.json to configure the bot's behavior.
 ## IRC Section
-- `server` : `string` host name of osu irc server.
-- `nick` : `string` your osu account name
+- `server` : `string` Host name of osu IRC server.
+- `nick` : `string` Your osu account name
 - `opt.port` : `number` 
-- `opt.password` : `string` your irc password. you can get it from [https://osu.ppy.sh/p/irc](https://osu.ppy.sh/p/irc).
+- `opt.password` : `string` Your IRC password. You can get it from [https://osu.ppy.sh/p/irc](https://osu.ppy.sh/p/irc).
 ```json
 {
   "irc": {
@@ -139,7 +139,7 @@ You can edit local.json to configure the bot's behavior.
 ```
 ## Lobby Section
 - `authorized_users` : `string[]`
-  - Specify any Authorized users. Authorized users can use *commands(*skip, *start, *order).
+  - Specify any authorized users. Authorized users can use *commands(*skip, *start, *order).
 - `listref_duration_ms` : `number`
   - Sets the time in milliseconds to wait for a response from BanchoBot when typing "!mp listref".
 - `info_message` : `string[]` The response message for !info or !help.
@@ -183,35 +183,35 @@ Points are added to players who seem AFK. Any player with points totaling above 
 ## AutoHostSelector Section 
 - `show_host_order_after_every_match` : `boolean` Sends a message containing the player queue after every match.
 - `host_order_chars_limit` : `number` Host-order messages are truncated to this length.
-- `host_order_cooltime_ms` : `number` cooldown time between Host-order messages.
+- `host_order_cooltime_ms` : `number` Cooldown time between Host-order messages.
 - `deny_list` : `string[]` Players contained in this list are not added to the host queue.
 ## AutoStartTimer Section
 The match start timer will automatically activate after the host selects a map.
-- `enabled` : `boolean` set true if you want to start the timer automatically.
+- `enabled` : `boolean` Set true if you want to start the timer automatically.
 - `doClearHost`: `boolean` Send '!mp clearhost' after the timer starts.
 - `waitingTime`: `number` Number of seconds for the timer.
 ## HistoryLoader Section
 - `fetch_interval_ms`: `number` Time period between fetching the match history
 ## HostSkipper Section
-configs related to host-skip vote and automatic afk host skip.
-- `vote_rate` : `number(0.0 - 1.0)` number of votes required to skip.
-  - if there are 16 players and the rate is 0.5, 8 players need to vote.
-- `vote_min`: `number` minimum required vote count .
-- `vote_cooltime_ms` : `number` cooldown time for the next vote (avoids involving the next host).
-- `vote_msg_defer_ms` : `number` cooldown time for vote progress message.
-- `afk_check_timeout_ms"` : `number` waiting time for !stat command result.
-- `afk_check_interval_first_ms` : `number` period before first afk host check.
-- `afk_check_interval_ms` : `number` interval period to check if the host is afk.
-- `afk_check_do_skip` : `boolean` Automatically skips afk hosts.
+Configs related to host-skip vote and automatic AFK host skip.
+- `vote_rate` : `number(0.0 - 1.0)` Number of votes required to skip.
+  - If there are 16 players and the rate is 0.5, 8 players need to vote.
+- `vote_min`: `number` Minimum required vote count .
+- `vote_cooltime_ms` : `number` Cooldown time for the next vote (avoids involving the next host).
+- `vote_msg_defer_ms` : `number` Cooldown time for vote progress message.
+- `afk_check_timeout_ms"` : `number` Waiting time for !stat command result.
+- `afk_check_interval_first_ms` : `number` Period before first AFK host check.
+- `afk_check_interval_ms` : `number` Interval period to check if the host is AFK.
+- `afk_check_do_skip` : `boolean` Automatically skips AFK hosts.
 ## LobbyKeeper Section
-- `mode` : `null | { "team": number, "score": number }` keep lobby mode.
+- `mode` : `null | { "team": number, "score": number }` Keep lobby mode.
   - team  => 0: Head To Head, 1: Tag Coop, 2: Team Vs, 3: Tag Team Vs
   - score => 0: Score, 1: Accuracy, 2: Combo, 3: Score V2
-- `size` : `number` keep lobby size.
-- `password`: `null | string` keep password.
-- `mods` : `null | string` keep mods.
+- `size` : `number` Keep lobby size.
+- `password`: `null | string` Keep password.
+- `mods` : `null | string` Keep mods.
 - `hostkick_tolerance`:`integer` Number of players kicked by the host before host is kicked for abuse.
-- `title` : `null | string` keep the lobby title.
+- `title` : `null | string` Keep the lobby title.
 ```json
 {
  ...
@@ -228,41 +228,41 @@ configs related to host-skip vote and automatic afk host skip.
         "size": 13
     }
 ## LobbyTerminator Section
-- `terminate_time_ms` : `number` period of time to wait before closing the lobby for inactivity.
+- `terminate_time_ms` : `number` Period of time to wait before closing the lobby for inactivity.
 ## MapChecker Section
 - `enabled`: `boolean` Enable map checker.
-- `star_min`: `number` change lower difficulty cap. 0 means no cap.
-- `star_max`: `number` change lower difficulty cap. 0 means no cap.
-- `length_min`: `number` change minimum allowed song length (seconds). 0 means no cap.
-- `length_max`: `number` change maximum allowed song length (seconds). 0 means no cap.
-- `gamemode`: `string` specify game mode in the room (osu, taiko, fruits, mania).
+- `star_min`: `number` Change lower difficulty cap. 0 means no cap.
+- `star_max`: `number` Change lower difficulty cap. 0 means no cap.
+- `length_min`: `number` Change minimum allowed song length (seconds). 0 means no cap.
+- `length_max`: `number` Change maximum allowed song length (seconds). 0 means no cap.
+- `gamemode`: `string` Specify game mode in the room (osu, taiko, fruits, mania).
 - `num_violations_allowed`: `number` Number of times violations are allowed.  0 means unlimited.
 - `allow_convert`: `boolean` Allows conversion of maps for alternate game modes.
 ## MatchStarter Section
 !start vote configs
-- `vote_rate` : `number(0.0 - 1.0)` number of votes required to start.
-- `vote_min`: `number` minimum required vote count.
-- `vote_msg_defer_ms` : `number` cooldown time for vote progress message.
-- `start_when_all_player_ready` : `boolean` starts the match when everyone is ready.
+- `vote_rate` : `number(0.0 - 1.0)` Number of votes required to start.
+- `vote_min`: `number` Minimum required vote count.
+- `vote_msg_defer_ms` : `number` Cooldown time for vote progress message.
+- `start_when_all_player_ready` : `boolean` Starts the match when everyone is ready.
 ## MatchAborter Section
 !abort vote and auto abort configs
-- `vote_rate` : `number(0.0 - 1.0)` number of votes required to abort.
-- `vote_min`: `number` minimum number of votes required to abort.
-- `vote_msg_defer_ms` : `number` cooldown time for vote progress message.
-- `auto_abort_rate`: `integer` number of players required to have finished before automatic match abortion.
-- `auto_abort_delay_ms`: `number` number of milliseconds to wait before executing abort command.
-- `auto_abort_do_abort`: `boolean` enable match abortion.
+- `vote_rate` : `number(0.0 - 1.0)` Number of votes required to abort.
+- `vote_min`: `number` Minimum number of votes required to abort.
+- `vote_msg_defer_ms` : `number` Cooldown time for vote progress message.
+- `auto_abort_rate`: `integer` Number of players required to have finished before automatic match abortion.
+- `auto_abort_delay_ms`: `number` Number of milliseconds to wait before executing abort command.
+- `auto_abort_do_abort`: `boolean` Enable match abortion.
 ## WordCounter Section
 Used to measure the amount of bot messages 
 ## OahrCli Section 
-- `invite_users` : `string[]` players to be invited when the bot makes a new lobby.
-- `password` : `string` default lobby password; empty("") if you don't need password.
+- `invite_users` : `string[]` Players to be invited when the bot makes a new lobby.
+- `password` : `string` Default lobby password; empty("") if you don't need password.
 ## WebApi Section
-- `client_id`: `number`, webapi client id. you can make client at [https://osu.ppy.sh/home/account/edit](https://osu.ppy.sh/home/account/edit)
-  - optional. the bot uses the WebApi instead of webpage to get the beatmap info.
-- `client_secret`: `string` webapi client secret
-- `token_store_dir`: `string`, don't care
-- `asGuest`: `true` set true
+- `client_id`: `number`, WebApi client id. You can make client at [https://osu.ppy.sh/home/account/edit](https://osu.ppy.sh/home/account/edit)
+  - Optional. The bot uses the WebApi instead of webpage to get the beatmap info.
+- `client_secret`: `string` WebApi client secret
+- `token_store_dir`: `string`, Don't care
+- `asGuest`: `true` Set true
 - `callback`: `string`,
 - `callback_port`: `number` ,
 
@@ -277,18 +277,18 @@ Used to measure the amount of bot messages
 - Closing the lobby
 
 ## Making Lobby
-Issue the `!mp make` command to create a new lobby. BOT manages lobbies via IRC, but only lobbies where you are a referee can be communicated with via IRC.
+Issue the `!mp make` command to create a new lobby. Bot manages lobbies via IRC, but only lobbies where you are a referee can be communicated with via IRC.
 
 ## Entering Lobby
 When you restart the bot, it will be able to re-enter the lobby it has already created. The bot will analyze the lobby history and try to restore the order of hosts.
 
-## IRC chat
+## IRC Chat
 You can send a chat message to the lobby from the console. Type `say` followed by the message you want to send.
 ```bash
 #mp_10000 > say hello guys!
 ```
 
-## Auto host rotation
+## Auto Host Rotation
 When a player enters a room, they are added to the end of the host queue.
 The player at the front of the queue is the host. 
 If a player who has left the room re-enters, they will be added to the end of the queue.
@@ -333,7 +333,7 @@ If a number of seconds is specified as an argument, such as `close 30`, the lobb
 If `close` is issued, the lobby will be closed after the password is set and everyone has left.
 
 # Discord Integration
-You can control AHR lobbies via a Discord Bot, which allows you to access in-game chat and execute lobby control commands from Discord channels.
+You can control AHR lobbies via a Discord bot, which allows you to access in-game chat and execute lobby control commands from Discord channels.
 
 ## Setup
 [discord.js](https://discord.js.org/) requires [Node.js](https://nodejs.org/ja/) 16.6 or higher to use, so make sure you're up to date. To check your Node version, use node -v in your terminal or command prompt, and if it's not high enough, update it.
