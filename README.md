@@ -4,7 +4,7 @@ The host rotation is managed with a queue. Players are added to the queue when j
 
 # Command List
 
-## Player Command
+## Player Commands
 |Command|Description|
 |:--|:--|
 |`!queue`| Shows host queue.|
@@ -15,7 +15,7 @@ The host rotation is managed with a queue. Players are added to the queue when j
 |`!regulations`| Shows any current regulations.|
 |`!rank`| Show player rank.|
  
-## Host Command
+## Host Commands
 |Command|Description|Example|
 |:--|:--|:--|
 |`!skip`| Transfers host to next player in the queue.||
