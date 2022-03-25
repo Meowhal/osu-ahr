@@ -4,7 +4,7 @@ The host rotation is managed with a queue. Players are added to the queue when j
 
 # Command List
 
-## Player Command
+## Player Commands
 |Command|Description|
 |:--|:--|
 |`!queue`| Shows host queue.|
@@ -15,7 +15,7 @@ The host rotation is managed with a queue. Players are added to the queue when j
 |`!regulations`| Shows any current regulations.|
 |`!rank`| Show player rank.|
  
-## Host Command
+## Host Commands
 |Command|Description|Example|
 |:--|:--|:--|
 |`!skip`| Transfers host to next player in the queue.||
@@ -98,7 +98,7 @@ Discord
   }
 }
 ```
-6. Configure the bot (Optional). See the [Configuration section](#configuration) for details.
+6. Configure the bot (Optional). See the [Configuration](#configuration) section for details.
 7. Launch the bot
 ```bash 
 > npm run start
@@ -116,7 +116,7 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
-Note: You can also run your bot on discord. See the [Discord Integration section](#discord-integration) for details.
+Note: You can also run your bot on discord. See the [Discord Integration](#discord-integration) section for details.
 
 # Configuration
 You can edit local.json to configure the bot's behavior.
