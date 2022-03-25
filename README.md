@@ -98,7 +98,7 @@ discord
   }
 }
 ```
-6. Configure the bot (Optional). See the [Configuration section](#configuration) for details.
+6. Configure the bot (Optional). See the [Configuration](#configuration) section for details.
 7. Launch the bot
 ```bash 
 > npm run start
@@ -116,7 +116,7 @@ MainMenu Commands
 
 > make 5-6* | auto host rotation
 ```
-Note: You can also run your bot on discord. See the [Discord Integration section](#discord-integration) for details.
+Note: You can also run your bot on discord. See the [Discord Integration](#discord-integration) section for details.
 
 # Configuration
 You can edit local.json to configure the bot's behavior.
