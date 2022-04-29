@@ -10,7 +10,7 @@ const ircLogger = log4js_1.default.getLogger("irc");
 const pmLogger = log4js_1.default.getLogger("PMLogger");
 function logIrcEvent(client) {
     client.on('error', function (message) {
-        ircLogger.error('ERROR: ' + JSON.stringify(message));
+        ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);
     });
     client.on('registered', function (message) {
         const args = message.args;
