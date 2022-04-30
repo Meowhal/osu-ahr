@@ -21,7 +21,7 @@ export interface IIrcClient extends EventEmitter {
 
 export function logIrcEvent(client: IIrcClient) {
   client.on('error', function (message) {
-    ircLogger.error('ERROR: ' + JSON.stringify(message));
+    ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);
   });
   client.on('registered', function (message) {
     const args = message.args as string[] | undefined;
