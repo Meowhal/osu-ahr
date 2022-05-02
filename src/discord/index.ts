@@ -13,9 +13,9 @@ console.log("starting up...");
 
 const config_path = "./config/log_discord.json";
 
-try {
-    log4js.configure(config_path);
+log4js.configure(config_path);
 
+try {
     const c = getIrcConfig();
     if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
         logger.error("you must enter your account name and irc password in the config file. ");
