@@ -1,9 +1,9 @@
-import { Lobby, IIrcClient } from "..";
-import config from "config";
-import log4js from "log4js";
-import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker, LobbyKeeper, AfkKicker, MiscLoader } from "../plugins";
-import { parser } from "../parsers";
-import { CacheCleaner } from "../plugins/CacheCleaner";
+import { Lobby, IIrcClient } from '..';
+import config from 'config';
+import log4js from 'log4js';
+import { AutoHostSelector, MatchStarter, HostSkipper, LobbyTerminator, MatchAborter, WordCounter, MapRecaster, InOutLogger, AutoStartTimer, HistoryLoader, MapChecker, LobbyKeeper, AfkKicker, MiscLoader } from '../plugins';
+import { parser } from '../parsers';
+import { CacheCleaner } from '../plugins/CacheCleaner';
 
 const logger = log4js.getLogger("cli");
 

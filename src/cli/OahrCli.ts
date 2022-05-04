@@ -1,8 +1,8 @@
-import { IIrcClient, LobbyStatus, Player } from "..";
+import { IIrcClient, LobbyStatus, Player } from '..';
 import * as readline from 'readline';
-import log4js from "log4js";
-import { parser } from "../parsers";
-import { OahrBase } from "./OahrBase";
+import log4js from 'log4js';
+import { parser } from '../parsers';
+import { OahrBase } from './OahrBase';
 
 const logger = log4js.getLogger("cli");
 

@@ -1,5 +1,5 @@
-import { startLogServer } from "../web/LogServer";
-import config from "config";
+import { startLogServer } from '../web/LogServer';
+import config from 'config';
 
 export interface LogServerOption {
   port: number;
