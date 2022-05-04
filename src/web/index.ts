@@ -1,3 +1,3 @@
-import { startLogServer } from './LogServer.js';
+import { startLogServer } from './LogServer';
 
 startLogServer(3112);
