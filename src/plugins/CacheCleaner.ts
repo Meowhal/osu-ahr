@@ -1,9 +1,9 @@
-import { Lobby } from '../Lobby.js';
-import { Player } from '../Player.js';
-import { LobbyPlugin } from './LobbyPlugin.js';
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { LobbyPlugin } from './LobbyPlugin';
 import config from 'config';
-import { BeatmapRepository } from '../webapi/BeatmapRepository.js';
-import { ProfileRepository } from '../webapi/ProfileRepository.js';
+import { BeatmapRepository } from '../webapi/BeatmapRepository';
+import { ProfileRepository } from '../webapi/ProfileRepository';
 
 
 export interface CacheCleanerOption {

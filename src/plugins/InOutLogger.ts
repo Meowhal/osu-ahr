@@ -1,7 +1,7 @@
-import { Lobby } from '../Lobby.js';
-import { Player } from '../Player.js';
-import { LobbyPlugin } from './LobbyPlugin.js';
-import { BanchoResponseType, BanchoResponse } from '../parsers/CommandParser.js';
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { LobbyPlugin } from './LobbyPlugin';
+import { BanchoResponseType, BanchoResponse } from '../parsers/CommandParser';
 
 export class InOutLogger extends LobbyPlugin {
   players: Map<Player, number> = new Map<Player, number>();

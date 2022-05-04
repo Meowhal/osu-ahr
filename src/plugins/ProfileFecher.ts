@@ -1,11 +1,11 @@
-import { Lobby } from '../Lobby.js';
-import { Player } from '../Player.js';
-import { LobbyPlugin } from './LobbyPlugin.js';
-import { WebApiClient } from '../webapi/WebApiClient.js';
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { LobbyPlugin } from './LobbyPlugin';
+import { WebApiClient } from '../webapi/WebApiClient';
 
 import config from 'config';
 
-import { UserProfile } from '../webapi/UserProfile.js';
+import { UserProfile } from '../webapi/UserProfile';
 
 export interface ProfileFecherOption {
   profile_expired_day: number

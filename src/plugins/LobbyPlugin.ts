@@ -1,4 +1,4 @@
-import { Lobby } from '../Lobby.js';
+import { Lobby } from '../Lobby';
 import log4js from 'log4js';
 import { MessageActionRow } from 'discord.js';
 

@@ -1,7 +1,7 @@
-import { Lobby } from '../Lobby.js';
-import { Player } from '../Player.js';
-import { StatStatuses } from '../parsers/StatParser.js';
-import { LobbyPlugin } from './LobbyPlugin.js';
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { StatStatuses } from '../parsers/StatParser';
+import { LobbyPlugin } from './LobbyPlugin';
 import config from 'config';
 
 /* 

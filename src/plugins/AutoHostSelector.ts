@@ -1,10 +1,10 @@
-import { escapeUserName } from '../Player.js';
-import { Lobby } from '../Lobby.js';
-import { BanchoResponseType } from '../parsers/CommandParser.js';
-import { MpSettingsResult } from '../parsers/MpSettingsParser.js';
-import { Player, revealUserName, disguiseUserName } from '../Player.js';
-import { Disposable, TypedEvent } from '../libs/TypedEvent.js';
-import { LobbyPlugin } from './LobbyPlugin.js';
+import { escapeUserName } from '../Player';
+import { Lobby } from '../Lobby';
+import { BanchoResponseType } from '../parsers/CommandParser';
+import { MpSettingsResult } from '../parsers/MpSettingsParser';
+import { Player, revealUserName, disguiseUserName } from '../Player';
+import { Disposable, TypedEvent } from '../libs/TypedEvent';
+import { LobbyPlugin } from './LobbyPlugin';
 import config from 'config';
 import log4js from 'log4js';
 
