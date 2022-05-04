@@ -1,10 +1,11 @@
-import { Lobby, Player } from "..";
-import { MpSettingsResult } from "../parsers";
-import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
-import { Game, User } from "../webapi/HistoryTypes";
-import { Mod, ScoreMode, TeamMode } from "../Modes";
-import { Logger } from "log4js";
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { MpSettingsResult } from '../parsers/MpSettingsParser';
+import { LobbyPlugin } from './LobbyPlugin';
+import config from 'config';
+import { Game, User } from '../webapi/HistoryTypes';
+import { Mod, ScoreMode, TeamMode } from '../Modes';
+import { Logger } from 'log4js';
 
 export interface LobbyKeeperOption {
   /**

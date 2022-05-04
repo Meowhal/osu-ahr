@@ -1,9 +1,9 @@
 import { OahrCli } from './OahrCli';
-import { OahrHeadless } from "./OahrHeadless";
+import { OahrHeadless } from './OahrHeadless';
 import * as irc from '../libs/irc';
-import { logIrcEvent } from "..";
-import { getIrcConfig } from "../TypedConfig";
-import log4js from "log4js";
+import { logIrcEvent } from '../IIrcClient';
+import { getIrcConfig } from '../TypedConfig';
+import log4js from 'log4js';
 import { logPrivateMessage } from '../IIrcClient';
 import { applySpeedLimit } from '../libs/ChatLimiter';
 const logger = log4js.getLogger("cli");

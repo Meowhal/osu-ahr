@@ -1,3 +1,3 @@
-import { startLogServer } from "./LogServer";
+import { startLogServer } from './LogServer';
 
 startLogServer(3112);

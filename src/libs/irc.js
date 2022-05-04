@@ -24,8 +24,8 @@ var tls = require('tls');
 var util = require('util');
 var EventEmitter = require('events');
 
-var colors = require('irc-upd/lib/colors');
-var parseMessage = require('irc-upd/lib/parse_message');
+var colors = require('irc-upd/lib/colors.js');
+var parseMessage = require('irc-upd/lib/parse_message.js');
 exports.colors = colors;
 var CyclingPingTimer = require('irc-upd/lib/cycling_ping_timer.js');
 

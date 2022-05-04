@@ -1,5 +1,5 @@
-import express, { Express, RequestHandler, Request, Response, NextFunction } from "express";
-import historyData from "./cases/history_84468237.json";
+import express, { Express, RequestHandler, Request, Response, NextFunction } from 'express';
+import historyData from './cases/history_84468237.json';
 import fs from 'fs';
 import readline from 'readline';
 

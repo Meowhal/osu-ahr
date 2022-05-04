@@ -1,10 +1,11 @@
-import { IIrcClient } from "..";
-import * as irc from "../libs/irc";
-import { parser, MpCommand, StatResult, StatStatuses } from "../parsers";
-import { escapeUserName } from "../Player";
-import { MpSettingsCase } from "../tests/cases/MpSettingsCases";
-import log4js from "log4js";
-import { EventEmitter } from "events";
+import { IIrcClient } from '../IIrcClient';
+import * as irc from '../libs/irc';
+import { parser, MpCommand } from '../parsers/CommandParser';
+import { StatResult, StatStatuses } from '../parsers/StatParser';
+import { escapeUserName } from '../Player';
+import { MpSettingsCase } from '../tests/cases/MpSettingsCases';
+import log4js from 'log4js';
+import { EventEmitter } from 'events';
 const logger = log4js.getLogger("irc");
 
 // テスト用の実際に通信を行わないダミーIRCクライアント

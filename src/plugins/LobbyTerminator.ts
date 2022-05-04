@@ -1,7 +1,8 @@
-import { LobbyPlugin } from "./LobbyPlugin";
-import { Lobby, Player } from "..";
-import { BanchoResponseType } from "../parsers";
-import config from "config";
+import { LobbyPlugin } from './LobbyPlugin';
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { BanchoResponseType } from '../parsers/CommandParser';
+import config from 'config';
 
 export interface LobbyTerminatorOption {
   terminate_time_ms: number;

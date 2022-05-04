@@ -1,7 +1,7 @@
-import express from "express";
+import express from 'express';
 import fs from 'fs';
 import readline from 'readline';
-import { Server } from "http";
+import { Server } from 'http';
 
 export function startLogServer(port: number): Server {
   const app = express();

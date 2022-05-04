@@ -1,9 +1,12 @@
-import { Lobby, logIrcEvent, Player, Roles } from "..";
-import { DummyIrcClient } from "../dummies";
-import { BanchoResponse, BanchoResponseType, MpSettingsResult } from "../parsers";
-import { TypedEvent } from "../libs";
+import { Lobby } from '../Lobby';
+import { logIrcEvent } from '../IIrcClient';
+import { Player, Roles } from '../Player';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { BanchoResponse, BanchoResponseType } from '../parsers/CommandParser';
+import { MpSettingsResult } from '../parsers/MpSettingsParser';
+import { TypedEvent } from '../libs/TypedEvent';
 import { assert } from 'chai';
-import log4js from "log4js";
+import log4js from 'log4js';
 
 class TestUtils {
   ownerNickname: string = "creator";

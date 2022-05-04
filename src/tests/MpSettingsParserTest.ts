@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { Teams } from '..';
-import { MpSettingsParser, MpSettingsResult } from "../parsers";
-import { MpSettingsCases } from "./cases/MpSettingsCases";
+import { Teams } from '../Player';
+import { MpSettingsParser, MpSettingsResult } from '../parsers/MpSettingsParser';
+import { MpSettingsCases } from './cases/MpSettingsCases';
 
-import log4js from "log4js";
+import log4js from 'log4js';
 
 describe("MpSettingsParserTest", function () {
   before(function () {

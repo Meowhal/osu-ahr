@@ -1,6 +1,6 @@
-import { Lobby } from "../Lobby";
-import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
+import { Lobby } from '../Lobby';
+import { LobbyPlugin } from './LobbyPlugin';
+import config from 'config';
 
 export interface WordCounterOption {
   periods: {

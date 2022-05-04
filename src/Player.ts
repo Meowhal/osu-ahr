@@ -1,5 +1,5 @@
-import { StatResult } from "./parsers";
-import { UserProfile } from "./webapi/UserProfile";
+import { StatResult } from './parsers/StatParser';
+import { UserProfile } from './webapi/UserProfile';
 
 export class Player {
   id: number = 0;

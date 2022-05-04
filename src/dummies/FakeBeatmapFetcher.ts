@@ -1,6 +1,6 @@
-import { PlayMode } from "../Modes";
-import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from "../webapi/BeatmapRepository";
-import { Beatmap, Beatmapset } from "../webapi/Beatmapsets";
+import { PlayMode } from '../Modes';
+import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from '../webapi/BeatmapRepository';
+import { Beatmap, Beatmapset } from '../webapi/Beatmapsets';
 
 const MODES = ["osu", "taiko", "fruits", "mania"]
 

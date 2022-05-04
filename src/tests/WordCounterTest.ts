@@ -1,8 +1,8 @@
 import { assert } from 'chai';
-import { Lobby } from "..";
-import { DummyIrcClient } from '../dummies';
-import { WordCounter, WordCounterPeriod } from '../plugins';
-import tu from "./TestUtils";
+import { Lobby } from '../Lobby';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { WordCounter, WordCounterPeriod } from '../plugins/WordCounter';
+import tu from './TestUtils';
 
 describe("WordCounter Tests", function () {
   before(function () {
