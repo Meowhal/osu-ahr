@@ -1,7 +1,7 @@
-import * as irc from "./libs/irc";
-import { IsStatResponse } from "./parsers";
-import { EventEmitter } from "events";
-import log4js from "log4js";
+import * as irc from './libs/irc';
+import { IsStatResponse } from './parsers';
+import { EventEmitter } from 'events';
+import log4js from 'log4js';
 const ircLogger = log4js.getLogger("irc");
 const pmLogger = log4js.getLogger("PMLogger");
 
