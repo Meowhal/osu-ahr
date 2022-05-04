@@ -1,4 +1,4 @@
-import { IIrcClient } from '../IIrcClient.js';
+import { IIrcClient } from '../IIrcClient';
 
 export function applySpeedLimit(ircClient: IIrcClient, tokens: number = 10, periodMs: number = 5000): { dispose: () => void } {
     const queue: { target: string, message: string }[] = [];
