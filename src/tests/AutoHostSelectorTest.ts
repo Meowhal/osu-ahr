@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { escapeUserName, Lobby, Roles } from "..";
+import { escapeUserName, Lobby, Roles } from '..';
 import { DummyIrcClient } from '../dummies';
-import { AutoHostSelector, DENY_LIST } from "../plugins";
-import { MpSettingsCases } from "./cases/MpSettingsCases";
-import tu from "./TestUtils";
+import { AutoHostSelector, DENY_LIST } from '../plugins';
+import { MpSettingsCases } from './cases/MpSettingsCases';
+import tu from './TestUtils';
 
 
 describe("AutoHostSelectorTest", function () {

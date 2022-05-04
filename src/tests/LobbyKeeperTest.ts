@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import Sinon from 'sinon';
-import { Lobby, Roles } from "..";
+import { Lobby, Roles } from '..';
 import { DummyIrcClient } from '../dummies';
 import { Mod, ScoreMode, TeamMode } from '../Modes';
-import { LobbyKeeper, LobbyKeeperOption, SlotKeeper } from "../plugins";
-import tu from "./TestUtils";
+import { LobbyKeeper, LobbyKeeperOption, SlotKeeper } from '../plugins';
+import tu from './TestUtils';
 
 describe("LobbyKeepserTest", function () {
 

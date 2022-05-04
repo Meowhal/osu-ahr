@@ -2,9 +2,9 @@ import { assert } from 'chai';
 import { Lobby, LobbyStatus, Player, MpStatuses, Roles, Teams } from '..';
 import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
 import { StatResult, StatStatuses } from '../parsers';
-import { MpSettingsCases } from "./cases/MpSettingsCases";
-import log4js from "log4js";
-import tu from "./TestUtils";
+import { MpSettingsCases } from './cases/MpSettingsCases';
+import log4js from 'log4js';
+import tu from './TestUtils';
 
 describe("LobbyTest", function () {
   before(function () {

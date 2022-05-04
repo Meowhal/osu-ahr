@@ -1,8 +1,8 @@
 import { assert } from 'chai';
-import { Lobby, Roles } from "..";
+import { Lobby, Roles } from '..';
 import { DummyIrcClient } from '../dummies';
-import { AutoStartTimer, AutoStartTimerOption } from "../plugins";
-import tu from "./TestUtils";
+import { AutoStartTimer, AutoStartTimerOption } from '../plugins';
+import tu from './TestUtils';
 
 describe("AutoStartTimerTest", function () {
   before(function () {

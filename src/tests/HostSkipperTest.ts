@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../dummies';
-import { Lobby, Player, Roles } from "..";
-import config from "config";
-import tu from "./TestUtils";
+import { Lobby, Player, Roles } from '..';
+import config from 'config';
+import tu from './TestUtils';
 import { HostSkipper, HostSkipperOption } from '../plugins';
 import { StatResult, StatStatuses } from '../parsers';
 

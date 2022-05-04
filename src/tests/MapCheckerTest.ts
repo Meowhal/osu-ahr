@@ -5,7 +5,7 @@ import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher';
 import { PlayMode } from '../Modes';
 import { MapCheckerUncheckedOption, MapChecker } from '../plugins';
 import { BeatmapRepository } from '../webapi/BeatmapRepository';
-import tu from "./TestUtils";
+import tu from './TestUtils';
 
 describe("Map Checker Tests", function () {
   before(function () {

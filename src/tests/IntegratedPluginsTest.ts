@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { Lobby, Player } from "..";
+import { Lobby, Player } from '..';
 import { DummyIrcClient } from '../dummies';
-import { parser } from "../parsers";
+import { parser } from '../parsers';
 import { AutoHostSelector, HostSkipper, AutoHostSelectorOption, HostSkipperOption } from '../plugins';
-import tu from "./TestUtils";
+import tu from './TestUtils';
 
 describe("Integrated Plugins Tests", function () {
   before(function () {

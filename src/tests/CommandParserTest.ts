@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { Teams } from '..';
 import { parser, BanchoResponseType } from '../parsers';
-import log4js from "log4js";
+import log4js from 'log4js';
 
 describe("CommandParserTest", function () {
   before(function () {
