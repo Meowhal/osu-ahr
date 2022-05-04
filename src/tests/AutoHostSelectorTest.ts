@@ -1,11 +1,11 @@
 import { assert } from 'chai';
-import { escapeUserName } from '../Player.js'; 
-import { Lobby } from '../Lobby.js';
-import { Roles } from '../Player.js';
-import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
-import { AutoHostSelector, DENY_LIST } from '../plugins/AutoHostSelector.js';
-import { MpSettingsCases } from './cases/MpSettingsCases.js';
-import tu from './TestUtils.js';
+import { escapeUserName } from '../Player'; 
+import { Lobby } from '../Lobby';
+import { Roles } from '../Player';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { AutoHostSelector, DENY_LIST } from '../plugins/AutoHostSelector';
+import { MpSettingsCases } from './cases/MpSettingsCases';
+import tu from './TestUtils';
 
 
 describe("AutoHostSelectorTest", function () {

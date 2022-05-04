@@ -1,14 +1,14 @@
 import { assert } from 'chai';
-import { Lobby } from '../Lobby.js';
-import { Player } from '../Player.js';
-import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
-import { parser } from '../parsers/CommandParser.js';
-import { AutoHostSelector } from '../plugins/AutoHostSelector.js';
-import { HostSkipper } from '../plugins/HostSkipper.js';
-import { AutoHostSelectorOption } from '../plugins/AutoHostSelector.js';
-import { HostSkipperOption } from '../plugins/HostSkipper.js';
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { parser } from '../parsers/CommandParser';
+import { AutoHostSelector } from '../plugins/AutoHostSelector';
+import { HostSkipper } from '../plugins/HostSkipper';
+import { AutoHostSelectorOption } from '../plugins/AutoHostSelector';
+import { HostSkipperOption } from '../plugins/HostSkipper';
 
-import tu from './TestUtils.js';
+import tu from './TestUtils';
 
 describe("Integrated Plugins Tests", function () {
   before(function () {

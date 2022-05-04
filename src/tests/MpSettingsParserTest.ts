@@ -1,7 +1,7 @@
 import { assert } from 'chai';
-import { Teams } from '../Player.js';
-import { MpSettingsParser, MpSettingsResult } from '../parsers/MpSettingsParser.js';
-import { MpSettingsCases } from './cases/MpSettingsCases.js';
+import { Teams } from '../Player';
+import { MpSettingsParser, MpSettingsResult } from '../parsers/MpSettingsParser';
+import { MpSettingsCases } from './cases/MpSettingsCases';
 
 import log4js from 'log4js';
 

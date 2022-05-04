@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher.js';
-import { PlayMode } from '../Modes.js';
-import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository.js';
-import { WebApiClient } from '../webapi/WebApiClient.js';
-import tu from './TestUtils.js';
+import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher';
+import { PlayMode } from '../Modes';
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
+import { WebApiClient } from '../webapi/WebApiClient';
+import tu from './TestUtils';
 
 import fs from 'fs/promises';
 

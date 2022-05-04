@@ -1,10 +1,10 @@
-import { Lobby } from '../Lobby.js';
-import { logIrcEvent } from '../IIrcClient.js';
-import { Player, Roles } from '../Player.js';
-import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
-import { BanchoResponse, BanchoResponseType } from '../parsers/CommandParser.js';
-import { MpSettingsResult } from '../parsers/MpSettingsParser.js';
-import { TypedEvent } from '../libs/TypedEvent.js';
+import { Lobby } from '../Lobby';
+import { logIrcEvent } from '../IIrcClient';
+import { Player, Roles } from '../Player';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { BanchoResponse, BanchoResponseType } from '../parsers/CommandParser';
+import { MpSettingsResult } from '../parsers/MpSettingsParser';
+import { TypedEvent } from '../libs/TypedEvent';
 import { assert } from 'chai';
 import log4js from 'log4js';
 

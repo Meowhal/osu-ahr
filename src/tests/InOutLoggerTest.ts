@@ -1,5 +1,5 @@
-import { InOutLogger } from '../plugins/InOutLogger.js';
-import tu from './TestUtils.js';
+import { InOutLogger } from '../plugins/InOutLogger';
+import tu from './TestUtils';
 
 describe.skip("In Out Logger Tests", function () {
   before(function () {

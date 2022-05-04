@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { Lobby } from '../Lobby.js';
-import { parser, BanchoResponse } from '../parsers/CommandParser.js';
-import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
-import { LobbyTerminator } from '../plugins/LobbyTerminator.js';
-import tu from './TestUtils.js';
+import { Lobby } from '../Lobby';
+import { parser, BanchoResponse } from '../parsers/CommandParser';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { LobbyTerminator } from '../plugins/LobbyTerminator';
+import tu from './TestUtils';
 
 describe.skip("Lobby Terminator Tests", function () {
   before(function () {

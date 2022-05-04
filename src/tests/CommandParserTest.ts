@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { Teams } from '../Player.js';
-import { parser, BanchoResponseType } from '../parsers/CommandParser.js';
+import { Teams } from '../Player';
+import { parser, BanchoResponseType } from '../parsers/CommandParser';
 import log4js from 'log4js';
 
 describe("CommandParserTest", function () {

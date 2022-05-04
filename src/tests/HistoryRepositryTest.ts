@@ -1,8 +1,8 @@
 import { assert } from 'chai';
-import { DummyHistoryFecher as DummyHistoryFetcher } from '../dummies/DummyHistoryFetcher.js';
-import { HistoryRepository } from '../webapi/HistoryRepository.js';
-import { EventType } from '../webapi/HistoryTypes.js';
-import tu from './TestUtils.js';
+import { DummyHistoryFecher as DummyHistoryFetcher } from '../dummies/DummyHistoryFetcher';
+import { HistoryRepository } from '../webapi/HistoryRepository';
+import { EventType } from '../webapi/HistoryTypes';
+import tu from './TestUtils';
 
 describe("History repositry Tests", () => {
   before(function () {
