@@ -1,10 +1,11 @@
-import { Lobby, Player } from '..';
-import { LobbyPlugin } from './LobbyPlugin';
-import { MpSettingsResult } from '../parsers';
+import { Lobby } from '../Lobby.js';
+import { Player } from '../Player.js';
+import { LobbyPlugin } from './LobbyPlugin.js';
+import { MpSettingsResult } from '../parsers/MpSettingsParser.js';
 
-import { HistoryRepository } from '../webapi/HistoryRepository';
+import { HistoryRepository } from '../webapi/HistoryRepository.js';
 import config from 'config';
-import { User } from '../webapi/HistoryTypes';
+import { User } from '../webapi/HistoryTypes.js';
 
 export interface HistoryLoaderOption {
   fetch_interval_ms: number; // ヒストリー取得間隔

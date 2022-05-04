@@ -1,5 +1,5 @@
-import { Lobby } from '../Lobby';
-import { LobbyPlugin } from './LobbyPlugin';
+import { Lobby } from '../Lobby.js';
+import { LobbyPlugin } from './LobbyPlugin.js';
 import config from 'config';
 
 export interface WordCounterOption {

@@ -1,9 +1,11 @@
-import { Lobby } from '..';
-import { LobbyStatus } from '../Lobby';
-import { Player, escapeUserName } from '../Player';
-import { BanchoResponseType, MpSettingsResult, StatStatuses, StatResult } from '../parsers';
-import { LobbyPlugin } from './LobbyPlugin';
-import { VoteCounter } from './VoteCounter';
+import { Lobby } from '../Lobby.js';
+import { LobbyStatus } from '../Lobby.js';
+import { Player, escapeUserName } from '../Player.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
+import { MpSettingsResult } from '../parsers/MpSettingsParser.js';
+import { StatStatuses, StatResult } from '../parsers/StatParser.js';
+import { LobbyPlugin } from './LobbyPlugin.js';
+import { VoteCounter } from './VoteCounter.js';
 import config from 'config';
 
 export interface HostSkipperOption {

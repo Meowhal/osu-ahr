@@ -1,6 +1,7 @@
-import { LobbyPlugin } from './LobbyPlugin';
-import { Lobby, Player } from '..';
-import { BanchoResponseType } from '../parsers';
+import { LobbyPlugin } from './LobbyPlugin.js';
+import { Lobby } from '../Lobby.js';
+import { Player } from '../Player.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
 import config from 'config';
 
 export interface LobbyTerminatorOption {

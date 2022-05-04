@@ -1,10 +1,11 @@
-import { Lobby, Player } from '..';
-import { LobbyPlugin } from './LobbyPlugin';
-import { BanchoResponseType } from '../parsers';
+import { Lobby } from '../Lobby.js';
+import { Player } from '../Player.js';
+import { LobbyPlugin } from './LobbyPlugin.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
 import config from 'config';
-import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
-import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from '../webapi/ProfileRepository';
-import { WebApiClient } from '../webapi/WebApiClient';
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository.js';
+import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from '../webapi/ProfileRepository.js';
+import { WebApiClient } from '../webapi/WebApiClient.js';
 
 export interface MiscLoaderOption {
 }

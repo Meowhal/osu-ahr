@@ -1,8 +1,9 @@
-import { Lobby } from '..';
-import { BanchoResponseType, MpSettingsResult } from '../parsers';
-import { Player } from '../Player';
-import { LobbyPlugin } from './LobbyPlugin';
-import { VoteCounter } from './VoteCounter';
+import { Lobby } from '../Lobby.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
+import { MpSettingsResult } from '../parsers/MpSettingsParser.js';
+import { Player } from '../Player.js';
+import { LobbyPlugin } from './LobbyPlugin.js';
+import { VoteCounter } from './VoteCounter.js';
 import config from 'config';
 
 export interface MatchStarterOption {
