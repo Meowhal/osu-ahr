@@ -1,10 +1,10 @@
-import { IIrcClient } from '../IIrcClient.js'; 
-import { LobbyStatus } from '../Lobby.js';
-import { Player } from '../Player.js';
+import { IIrcClient } from '../IIrcClient'; 
+import { LobbyStatus } from '../Lobby';
+import { Player } from '../Player';
 import * as readline from 'readline';
 import log4js from 'log4js';
-import { parser } from '../parsers/CommandParser.js';
-import { OahrBase } from './OahrBase.js';
+import { parser } from '../parsers/CommandParser';
+import { OahrBase } from './OahrBase';
 
 const logger = log4js.getLogger("cli");
 

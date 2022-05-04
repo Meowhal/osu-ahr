@@ -1,4 +1,4 @@
-import { startLogServer } from '../web/LogServer.js';
+import { startLogServer } from '../web/LogServer';
 import config from 'config';
 
 export interface LogServerOption {
