@@ -1,7 +1,7 @@
-import { Lobby, Player } from "..";
-import { LobbyPlugin } from "./LobbyPlugin";
-import { BanchoResponseType } from "../parsers";
-import config from "config";
+import { Lobby, Player } from '..';
+import { LobbyPlugin } from './LobbyPlugin';
+import { BanchoResponseType } from '../parsers';
+import config from 'config';
 
 export interface MapRecasterOption {
 }

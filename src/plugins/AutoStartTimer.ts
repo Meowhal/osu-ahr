@@ -1,8 +1,8 @@
-import { Lobby } from "..";
-import { BanchoResponseType, BanchoResponse } from "../parsers";
-import { Player } from "../Player";
-import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
+import { Lobby } from '..';
+import { BanchoResponseType, BanchoResponse } from '../parsers';
+import { Player } from '../Player';
+import { LobbyPlugin } from './LobbyPlugin';
+import config from 'config';
 
 export interface AutoStartTimerOption {
   enabled: boolean;

@@ -1,12 +1,12 @@
-import log4js from "log4js";
-import config from "config";
-import { LobbyPlugin } from ".";
-import { Lobby, Player } from "..";
-import { validateOption } from "../libs/OptionValidator";
-import { PlayMode } from "../Modes";
-import { BanchoResponseType } from "../parsers";
-import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from "../webapi/BeatmapRepository";
-import { Beatmap, Beatmapset } from "../webapi/Beatmapsets";
+import log4js from 'log4js';
+import config from 'config';
+import { LobbyPlugin } from '.';
+import { Lobby, Player } from '..';
+import { validateOption } from '../libs/OptionValidator';
+import { PlayMode } from '../Modes';
+import { BanchoResponseType } from '../parsers';
+import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from '../webapi/BeatmapRepository';
+import { Beatmap, Beatmapset } from '../webapi/Beatmapsets';
 
 export type MapCheckerOption = {
   enabled: boolean;

@@ -1,10 +1,10 @@
-import { escapeUserName, Lobby } from "..";
-import { BanchoResponseType, MpSettingsResult } from "../parsers";
-import { Player, revealUserName, disguiseUserName } from "../Player";
-import { Disposable, TypedEvent } from "../libs";
-import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
-import log4js from "log4js";
+import { escapeUserName, Lobby } from '..';
+import { BanchoResponseType, MpSettingsResult } from '../parsers';
+import { Player, revealUserName, disguiseUserName } from '../Player';
+import { Disposable, TypedEvent } from '../libs';
+import { LobbyPlugin } from './LobbyPlugin';
+import config from 'config';
+import log4js from 'log4js';
 
 export interface AutoHostSelectorOption {
   show_host_order_after_every_match: boolean;

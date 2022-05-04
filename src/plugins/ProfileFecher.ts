@@ -1,6 +1,6 @@
-import { Lobby, Player } from "..";
-import { LobbyPlugin } from "./LobbyPlugin";
-import { WebApiClient } from "../webapi/WebApiClient";
+import { Lobby, Player } from '..';
+import { LobbyPlugin } from './LobbyPlugin';
+import { WebApiClient } from '../webapi/WebApiClient';
 
 import config from "config";
 

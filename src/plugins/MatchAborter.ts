@@ -1,9 +1,9 @@
-import { Lobby } from "..";
-import { MpSettingsResult, StatStatuses } from "../parsers";
-import { Player, MpStatuses } from "../Player";
-import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
-import { VoteCounter } from "./VoteCounter";
+import { Lobby } from '..';
+import { MpSettingsResult, StatStatuses } from '../parsers';
+import { Player, MpStatuses } from '../Player';
+import { LobbyPlugin } from './LobbyPlugin';
+import config from 'config';
+import { VoteCounter } from './VoteCounter';
 
 export interface MatchAborterOption {
   vote_rate: number; // アボート投票時の必要数/プレイヤー数

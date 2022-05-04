@@ -1,9 +1,9 @@
-import { Lobby } from "..";
-import { BanchoResponseType, MpSettingsResult } from "../parsers";
-import { Player } from "../Player";
-import { LobbyPlugin } from "./LobbyPlugin";
-import { VoteCounter } from "./VoteCounter";
-import config from "config";
+import { Lobby } from '..';
+import { BanchoResponseType, MpSettingsResult } from '../parsers';
+import { Player } from '../Player';
+import { LobbyPlugin } from './LobbyPlugin';
+import { VoteCounter } from './VoteCounter';
+import config from 'config';
 
 export interface MatchStarterOption {
   vote_rate: number; // 投票時の必要数/プレイヤー数

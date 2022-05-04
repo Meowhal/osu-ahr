@@ -1,10 +1,10 @@
-import { Lobby } from "..";
-import { LobbyStatus } from "../Lobby";
-import { Player, escapeUserName } from "../Player";
-import { BanchoResponseType, MpSettingsResult, StatStatuses, StatResult } from "../parsers";
-import { LobbyPlugin } from "./LobbyPlugin";
-import { VoteCounter } from "./VoteCounter";
-import config from "config";
+import { Lobby } from '..';
+import { LobbyStatus } from '../Lobby';
+import { Player, escapeUserName } from '../Player';
+import { BanchoResponseType, MpSettingsResult, StatStatuses, StatResult } from '../parsers';
+import { LobbyPlugin } from './LobbyPlugin';
+import { VoteCounter } from './VoteCounter';
+import config from 'config';
 
 export interface HostSkipperOption {
   vote_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
