@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { promises as fs } from 'fs';
-import { HistoryFecher } from '../webapi/HistoryFetcher.js';
-import { HistoryRepository } from '../webapi/HistoryRepository.js';
+import { HistoryFecher } from '../webapi/HistoryFetcher';
+import { HistoryRepository } from '../webapi/HistoryRepository';
 
 export async function trial() {
   await GetOrderTrial();

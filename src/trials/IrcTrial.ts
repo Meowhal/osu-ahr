@@ -1,4 +1,4 @@
-import * as irc from '../libs/irc.js';
+import * as irc from '../libs/irc';
 
 const IrcTestSettings = {
   server: "irc.dollyfish.net.nz",

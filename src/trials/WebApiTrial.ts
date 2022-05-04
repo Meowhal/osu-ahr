@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from 'config';
-import { WebApiClient } from '../webapi/WebApiClient.js';
+import { WebApiClient } from '../webapi/WebApiClient';
 export interface WebApiTrialOption {
   client_id: number,
   client_secret: string,

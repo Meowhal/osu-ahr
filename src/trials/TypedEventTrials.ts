@@ -1,4 +1,4 @@
-import { TypedEvent } from '../libs/TypedEvent.js';
+import { TypedEvent } from '../libs/TypedEvent';
 
 export function trial() {
   let e1 = new TypedEvent<number>();
