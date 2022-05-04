@@ -1,5 +1,5 @@
-import { History, Match, User, Event, EventType, Score, Game } from '../webapi/HistoryTypes';
-import { IHistoryFetcher } from '../webapi/HistoryFetcher';
+import { History, Match, User, Event, EventType, Score, Game } from '../webapi/HistoryTypes.js';
+import { IHistoryFetcher } from '../webapi/HistoryFetcher.js';
 
 export class DummyHistoryFecher implements IHistoryFetcher {
   match: Match;
