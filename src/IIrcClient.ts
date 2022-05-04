@@ -1,5 +1,5 @@
-import * as irc from './libs/irc';
-import { IsStatResponse } from './parsers';
+import * as irc from './libs/irc.js';
+import { IsStatResponse } from './parsers/StatParser.js';
 import { EventEmitter } from 'events';
 import log4js from 'log4js';
 const ircLogger = log4js.getLogger("irc");

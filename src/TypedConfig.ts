@@ -1,5 +1,5 @@
 import config from 'config';
-import { IClientOpts } from './libs/irc';
+import { IClientOpts } from './libs/irc.js';
 
 export interface IAhrConfig {
   irc: IIrcConfig;
