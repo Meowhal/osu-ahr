@@ -1,8 +1,9 @@
 import { assert } from 'chai';
-import { Lobby, Roles } from '..';
-import { DummyIrcClient } from '../dummies';
-import { MatchAborter, MatchAborterOption } from '../plugins';
-import tu from './TestUtils';
+import { Lobby } from '../Lobby.js';
+import { Roles } from '../Player.js';
+import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
+import { MatchAborter, MatchAborterOption } from '../plugins/MatchAborter.js';
+import tu from './TestUtils.js';
 
 describe("Match Aboter Tests", function () {
   before(function () {

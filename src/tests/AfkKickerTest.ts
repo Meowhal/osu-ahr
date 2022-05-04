@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { Lobby } from '..';
-import { DummyIrcClient } from '../dummies';
-import { StatResult, StatStatuses } from '../parsers';
-import { AfkKicker } from '../plugins';
-import tu from './TestUtils';
+import { Lobby } from '../Lobby.js';
+import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
+import { StatResult, StatStatuses } from '../parsers/StatParser.js';
+import { AfkKicker } from '../plugins/AfkKicker.js';
+import tu from './TestUtils.js';
 
 describe("AfkKicker Tests", function () {
     before(function () {

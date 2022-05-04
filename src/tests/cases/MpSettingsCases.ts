@@ -1,5 +1,5 @@
-import { MpSettingsResult } from '../../parsers';
-import { Teams } from '../../Player';
+import { MpSettingsResult } from '../../parsers/MpSettingsParser.js';
+import { Teams } from '../../Player.js';
 
 export interface MpSettingsCase {
   title: string,

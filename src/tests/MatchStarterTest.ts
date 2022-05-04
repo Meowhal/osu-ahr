@@ -1,9 +1,10 @@
 import { assert } from 'chai';
-import { Lobby, Roles } from '..';
-import { DummyIrcClient } from '../dummies';
-import { BanchoResponseType } from '../parsers';
-import { MatchStarter, MatchStarterOption } from '../plugins';
-import tu from './TestUtils';
+import { Lobby } from '../Lobby.js';
+import { Roles } from '../Player.js';
+import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
+import { MatchStarter, MatchStarterOption } from '../plugins/MatchStarter.js';
+import tu from './TestUtils.js';
 describe("MatchStarterTest", function () {
   before(function () {
     tu.configMochaAsSilent();

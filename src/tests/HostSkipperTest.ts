@@ -1,10 +1,11 @@
 import { assert } from 'chai';
-import { DummyIrcClient } from '../dummies';
-import { Lobby, Player, Roles } from '..';
+import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
+import { Lobby } from '../Lobby.js';
+import { Player, Roles } from '../Player.js';
 import config from 'config';
-import tu from './TestUtils';
-import { HostSkipper, HostSkipperOption } from '../plugins';
-import { StatResult, StatStatuses } from '../parsers';
+import tu from './TestUtils.js';
+import { HostSkipper, HostSkipperOption } from '../plugins/HostSkipper.js';
+import { StatResult, StatStatuses } from '../parsers/StatParser.js';
 
 describe("HostSkipperTest", function () {
   before(function () {

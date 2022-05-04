@@ -1,9 +1,10 @@
 import { assert } from 'chai';
-import { Lobby, Roles } from '..';
-import { DummyIrcClient } from '../dummies';
-import { MapRecaster } from '../plugins';
-import tu from './TestUtils';
-import { BanchoResponseType } from '../parsers';
+import { Lobby } from '../Lobby.js';
+import { Roles } from '../Player.js';
+import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
+import { MapRecaster } from '../plugins/MapRecaster.js';
+import tu from './TestUtils.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
 
 describe("Map Recaster Tests", function () {
   before(function () {

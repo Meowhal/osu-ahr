@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { StatParser, StatStatuses, StatResult } from '../parsers';
+import { StatParser, StatStatuses, StatResult } from '../parsers/StatParser.js';
 
 const testTexts = [
   "Stats for (Jason)[https://osu.ppy.sh/u/7342098] is Multiplaying:",

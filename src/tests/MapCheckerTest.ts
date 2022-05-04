@@ -1,11 +1,12 @@
 import { assert } from 'chai';
-import { Lobby, Roles } from '..';
-import { DummyIrcClient } from '../dummies';
-import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher';
-import { PlayMode } from '../Modes';
-import { MapCheckerUncheckedOption, MapChecker } from '../plugins';
-import { BeatmapRepository } from '../webapi/BeatmapRepository';
-import tu from './TestUtils';
+import { Lobby } from '../Lobby.js';
+import { Roles } from '../Player.js';
+import { DummyIrcClient } from '../dummies/DummyIrcClient.js';
+import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher.js';
+import { PlayMode } from '../Modes.js';
+import { MapCheckerUncheckedOption, MapChecker } from '../plugins/MapChecker.js';
+import { BeatmapRepository } from '../webapi/BeatmapRepository.js';
+import tu from './TestUtils.js';
 
 describe("Map Checker Tests", function () {
   before(function () {
