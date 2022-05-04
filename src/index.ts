@@ -1,3 +1,3 @@
-export * from "./Player";
-export * from "./IIrcClient";
-export * from "./Lobby";
+export * from './Player';
+export * from './IIrcClient';
+export * from './Lobby';
