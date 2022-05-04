@@ -3,9 +3,9 @@ import { FakeBeatmapFetcher } from '../dummies/FakeBeatmapFetcher';
 import { PlayMode } from '../Modes';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
 import { WebApiClient } from '../webapi/WebApiClient';
-import tu from "./TestUtils";
+import tu from './TestUtils';
 
-import fs from "fs/promises";
+import fs from 'fs/promises';
 
 describe("BeatmapRepository Tests", function () {
     before(function () {

@@ -1,4 +1,4 @@
-import { Teams } from "../Player";
+import { Teams } from '../Player';
 export interface MpSettingsResult {
   name: string;
   id: number;

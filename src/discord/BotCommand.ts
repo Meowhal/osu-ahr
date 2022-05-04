@@ -1,4 +1,4 @@
-import { ApplicationCommandData } from "discord.js";
+import { ApplicationCommandData } from 'discord.js';
 
 // coded by https://autocode.com/tools/discord/command-builder/
 export const BotCommands: ApplicationCommandData[] = [

@@ -1,6 +1,6 @@
-import { Client, ColorResolvable, MessageEmbed, MessageOptions, TextBasedChannel } from "discord.js";
-import log4js from "log4js";
-import { OahrDiscord } from "./OahrDiscord";
+import { Client, ColorResolvable, MessageEmbed, MessageOptions, TextBasedChannel } from 'discord.js';
+import log4js from 'log4js';
+import { OahrDiscord } from './OahrDiscord';
 
 let discordClient: Client | undefined;
 let ahrs: { [index: string]: OahrDiscord };

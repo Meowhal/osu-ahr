@@ -1,7 +1,8 @@
-import { Lobby, Player } from "..";
-import { StatStatuses } from "../parsers";
-import { LobbyPlugin } from "./LobbyPlugin";
-import config from "config";
+import { Lobby } from '../Lobby';
+import { Player } from '../Player';
+import { StatStatuses } from '../parsers/StatParser';
+import { LobbyPlugin } from './LobbyPlugin';
+import config from 'config';
 
 /* 
 TODO: AFK_allowedについて

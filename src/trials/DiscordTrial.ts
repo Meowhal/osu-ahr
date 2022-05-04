@@ -1,6 +1,6 @@
-import { ApplicationCommandData, Permissions, ApplicationCommandPermissionData, Client, CreateRoleOptions, Guild, GuildMember, Intents, Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import config from "config";
-import { MessageButtonStyles } from "discord.js/typings/enums";
+import { ApplicationCommandData, Permissions, ApplicationCommandPermissionData, Client, CreateRoleOptions, Guild, GuildMember, Intents, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import config from 'config';
+import { MessageButtonStyles } from 'discord.js/typings/enums';
 
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -109,4 +109,3 @@ export async function trial() {
 
 
 }
-

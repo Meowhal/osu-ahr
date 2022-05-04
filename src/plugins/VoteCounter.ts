@@ -1,4 +1,4 @@
-import { Player } from "..";
+import { Player } from '../Player';
 
 export class VoteCounter {
   readonly requiredRate: number;

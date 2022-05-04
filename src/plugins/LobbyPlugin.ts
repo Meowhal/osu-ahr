@@ -1,6 +1,6 @@
-import { Lobby } from "..";
-import log4js from "log4js";
-import { MessageActionRow } from "discord.js";
+import { Lobby } from '../Lobby';
+import log4js from 'log4js';
+import { MessageActionRow } from 'discord.js';
 
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。

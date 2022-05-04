@@ -1,10 +1,12 @@
 import { assert } from 'chai';
-import { Lobby, LobbyStatus, Player, MpStatuses, Roles, Teams } from '..';
-import { DummyIrcClient, DummyLobbyPlugin } from '../dummies';
-import { StatResult, StatStatuses } from '../parsers';
-import { MpSettingsCases } from "./cases/MpSettingsCases";
-import log4js from "log4js";
-import tu from "./TestUtils";
+import { Lobby, LobbyStatus } from '../Lobby';
+import { Player, MpStatuses, Roles, Teams } from '../Player';
+import { DummyIrcClient } from '../dummies/DummyIrcClient';
+import { DummyLobbyPlugin } from '../dummies/DummyLobbyPlugin';
+import { StatResult, StatStatuses } from '../parsers/StatParser';
+import { MpSettingsCases } from './cases/MpSettingsCases';
+import log4js from 'log4js';
+import tu from './TestUtils';
 
 describe("LobbyTest", function () {
   before(function () {
