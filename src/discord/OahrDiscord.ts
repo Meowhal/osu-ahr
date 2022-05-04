@@ -1,9 +1,9 @@
-import { IIrcClient } from '../IIrcClient.js';
-import { LobbyStatus } from '../Lobby.js';
-import { Player } from '../Player.js';
+import { IIrcClient } from '../IIrcClient';
+import { LobbyStatus } from '../Lobby';
+import { Player } from '../Player';
 import log4js from 'log4js';
-import { OahrBase } from '../cli/OahrBase.js';
-import { OahrSharedObjects } from './DiscordBot.js';
+import { OahrBase } from '../cli/OahrBase';
+import { OahrSharedObjects } from './DiscordBot';
 import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { MessageButtonStyles } from 'discord.js/typings/enums';
 
