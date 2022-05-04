@@ -1,2 +1,2 @@
-export * from "./TypedEvent";
-export * from "./DeferredAction";
+export * from './TypedEvent';
+export * from './DeferredAction';
