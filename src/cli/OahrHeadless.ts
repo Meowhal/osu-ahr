@@ -1,6 +1,6 @@
-import { IIrcClient } from '..';
+import { IIrcClient } from '../IIrcClient.js';
 import log4js from 'log4js';
-import { OahrBase } from './OahrBase';
+import { OahrBase } from './OahrBase.js';
 
 const logger = log4js.getLogger("cli");
 
