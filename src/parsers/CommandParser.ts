@@ -1,4 +1,4 @@
-import { Teams } from '../Player.js';
+import { Teams } from '../Player';
 export namespace parser {
   export function ParseBanchoResponse(message: string): BanchoResponse {
     // １文字目を整数比較してifの評価回数を減らす
