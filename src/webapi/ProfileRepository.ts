@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { UserProfile } from './UserProfile.js';
+import { UserProfile } from './UserProfile';
 
 export type ProfileCache = UserProfile & { fetchedAt: number };
 

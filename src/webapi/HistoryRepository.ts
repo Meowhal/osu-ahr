@@ -1,8 +1,8 @@
 
 import log4js from 'log4js';
-import { Event, History, Match, User, Game } from './HistoryTypes.js';
-import { TypedEvent } from '../libs/TypedEvent.js';
-import { HistoryFecher as HistoryFetcher, IHistoryFetcher as IHistoryFetcher } from './HistoryFetcher.js';
+import { Event, History, Match, User, Game } from './HistoryTypes';
+import { TypedEvent } from '../libs/TypedEvent';
+import { HistoryFecher as HistoryFetcher, IHistoryFetcher as IHistoryFetcher } from './HistoryFetcher';
 
 /* メモ
 試合中のイベントはend_timeがnullになっている

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { History } from './HistoryTypes.js';
+import { History } from './HistoryTypes';
 
 export interface IHistoryFetcher {
   /**
