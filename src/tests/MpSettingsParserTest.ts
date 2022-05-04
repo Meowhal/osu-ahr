@@ -3,7 +3,7 @@ import { Teams } from '../Player.js';
 import { MpSettingsParser, MpSettingsResult } from '../parsers/MpSettingsParser.js';
 import { MpSettingsCases } from './cases/MpSettingsCases.js';
 
-import log4js from "log4js";
+import log4js from 'log4js';
 
 describe("MpSettingsParserTest", function () {
   before(function () {
