@@ -4,5 +4,5 @@ log4js.configure("config/log_mocha.json");
 //import * as trial from './WebServerTrial.js';
 //trial.webServerTrial();
 
-import { trial } from './DiscordTrial.js';
+import { trial } from './DiscordTrial';
 trial();
