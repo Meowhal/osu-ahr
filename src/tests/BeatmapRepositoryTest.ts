@@ -5,7 +5,7 @@ import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '.
 import { WebApiClient } from '../webapi/WebApiClient.js';
 import tu from './TestUtils.js';
 
-import fs from "fs/promises";
+import fs from 'fs/promises';
 
 describe("BeatmapRepository Tests", function () {
     before(function () {
