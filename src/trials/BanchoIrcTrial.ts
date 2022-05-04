@@ -1,7 +1,7 @@
-import * as irc from '../libs/irc';
-import { logIrcEvent } from '..';
-import { parser } from '../parsers'
-import { getIrcConfig } from '../TypedConfig';
+import * as irc from '../libs/irc.js';
+import { logIrcEvent } from '../IIrcClient.js';
+import { parser } from '../parsers/CommandParser.js'
+import { getIrcConfig } from '../TypedConfig.js';
 
 export function trial() {
   const c = getIrcConfig();
