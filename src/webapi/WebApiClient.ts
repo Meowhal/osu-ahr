@@ -6,10 +6,10 @@ import open from 'open';
 import path from 'path';
 import { URL } from 'url';
 import { promises as fs } from 'fs';
-import { UserProfile, trimProfile } from './UserProfile';
-import { Beatmap, Beatmapset } from './Beatmapsets';
-import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from './BeatmapRepository';
-import { FetchProfileError, FetchProfileErrorReason } from './ProfileRepository';
+import { UserProfile, trimProfile } from './UserProfile.js';
+import { Beatmap, Beatmapset } from './Beatmapsets.js';
+import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from './BeatmapRepository.js';
+import { FetchProfileError, FetchProfileErrorReason } from './ProfileRepository.js';
 
 export interface ApiToken {
   token_type: string,
