@@ -1,7 +1,7 @@
-import axios from "axios";
-import { PlayMode } from "../Modes";
-import { Beatmap, Beatmapset as Beatmapset } from "./Beatmapsets";
-import { WebApiClient } from "./WebApiClient";
+import axios from 'axios';
+import { PlayMode } from '../Modes';
+import { Beatmap, Beatmapset as Beatmapset } from './Beatmapsets';
+import { WebApiClient } from './WebApiClient';
 
 export type BeatmapCache = Beatmap & { fetchedAt: number };
 

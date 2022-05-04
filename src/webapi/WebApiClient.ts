@@ -1,13 +1,13 @@
 import axios from 'axios';
-import config from "config";
-import log4js from "log4js";
-import http from "http";
-import open from "open";
-import path from "path";
+import config from 'config';
+import log4js from 'log4js';
+import http from 'http';
+import open from 'open';
+import path from 'path';
 import { URL } from 'url';
 import { promises as fs } from 'fs';
-import { UserProfile, trimProfile } from "./UserProfile";
-import { Beatmap, Beatmapset } from "./Beatmapsets";
+import { UserProfile, trimProfile } from './UserProfile';
+import { Beatmap, Beatmapset } from './Beatmapsets';
 import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from './BeatmapRepository';
 import { FetchProfileError, FetchProfileErrorReason } from './ProfileRepository';
 
