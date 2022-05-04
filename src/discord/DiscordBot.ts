@@ -5,15 +5,15 @@
  * 
  */
 
-import log4js from "log4js";
-import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton, DiscordAPIError, Message, Role, TextChannel, GuildMember, ButtonInteraction } from "discord.js";
-import config from "config";
+import log4js from 'log4js';
+import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton, DiscordAPIError, Message, Role, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
+import config from 'config';
 
-import { IIrcClient, LobbyStatus, Player } from "..";
-import { OahrDiscord } from "./OahrDiscord";
-import { setContext } from "./DiscordAppender";
-import { BotCommands } from "./BotCommand";
-import { BanchoResponse, BanchoResponseType } from "../parsers";
+import { IIrcClient, LobbyStatus, Player } from '..';
+import { OahrDiscord } from './OahrDiscord';
+import { setContext } from './DiscordAppender';
+import { BotCommands } from './BotCommand';
+import { BanchoResponse, BanchoResponseType } from '../parsers';
 
 const logger = log4js.getLogger("discord");
 
