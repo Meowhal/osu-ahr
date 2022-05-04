@@ -1,9 +1,9 @@
-import { IIrcClient } from '../IIrcClient.js';
-import * as irc from '../libs/irc.js';
-import { parser, MpCommand } from '../parsers/CommandParser.js';
-import { StatResult, StatStatuses } from '../parsers/StatParser.js';
-import { escapeUserName } from '../Player.js';
-import { MpSettingsCase } from '../tests/cases/MpSettingsCases.js';
+import { IIrcClient } from '../IIrcClient';
+import * as irc from '../libs/irc';
+import { parser, MpCommand } from '../parsers/CommandParser';
+import { StatResult, StatStatuses } from '../parsers/StatParser';
+import { escapeUserName } from '../Player';
+import { MpSettingsCase } from '../tests/cases/MpSettingsCases';
 import log4js from 'log4js';
 import { EventEmitter } from 'events';
 const logger = log4js.getLogger("irc");
