@@ -1,5 +1,5 @@
-import { Lobby } from "..";
-import { LobbyPlugin } from "../plugins/LobbyPlugin";
+import { Lobby } from '..';
+import { LobbyPlugin } from '../plugins/LobbyPlugin';
 
 export class DummyLobbyPlugin extends LobbyPlugin {
 
