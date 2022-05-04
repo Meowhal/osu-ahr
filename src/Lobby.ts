@@ -1,15 +1,15 @@
-import { Player, escapeUserName, Roles, Teams, MpStatuses } from './Player.js';
-import { parser, BanchoResponseType, BanchoResponse } from './parsers/CommandParser.js';
-import { StatResult, StatParser, IsStatResponse, StatStatuses } from './parsers/StatParser.js';
-import { IIrcClient } from './IIrcClient.js';
-import { TypedEvent } from './libs/TypedEvent.js';
-import { DeferredAction } from './libs/DeferredAction.js';
-import { MpSettingsParser, MpSettingsResult } from './parsers/MpSettingsParser.js';
-import { LobbyPlugin } from './plugins/LobbyPlugin.js';
-import { HistoryRepository } from './webapi/HistoryRepository.js';
+import { Player, escapeUserName, Roles, Teams, MpStatuses } from './Player';
+import { parser, BanchoResponseType, BanchoResponse } from './parsers/CommandParser';
+import { StatResult, StatParser, IsStatResponse, StatStatuses } from './parsers/StatParser';
+import { IIrcClient } from './IIrcClient';
+import { TypedEvent } from './libs/TypedEvent';
+import { DeferredAction } from './libs/DeferredAction';
+import { MpSettingsParser, MpSettingsResult } from './parsers/MpSettingsParser';
+import { LobbyPlugin } from './plugins/LobbyPlugin';
+import { HistoryRepository } from './webapi/HistoryRepository';
 import config from 'config';
 import log4js from 'log4js';
-import { PlayMode } from './Modes.js';
+import { PlayMode } from './Modes';
 
 export enum LobbyStatus {
   Standby,
