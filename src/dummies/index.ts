@@ -1,2 +1,2 @@
-export * from "./DummyIrcClient";
-export * from "./DummyLobbyPlugin";
+export * from './DummyIrcClient';
+export * from './DummyLobbyPlugin';
