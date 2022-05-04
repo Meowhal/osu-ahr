@@ -1,6 +1,6 @@
 import { escapeUserName } from '../Player.js';
 import { Lobby } from '../Lobby.js';
-import { BanchoResponseType,  } from '../parsers/CommandParser.js';
+import { BanchoResponseType } from '../parsers/CommandParser.js';
 import { MpSettingsResult } from '../parsers/MpSettingsParser.js';
 import { Player, revealUserName, disguiseUserName } from '../Player.js';
 import { Disposable, TypedEvent } from '../libs/TypedEvent.js';
