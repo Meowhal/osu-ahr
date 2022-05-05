@@ -50,14 +50,14 @@ rules:
   no-unused-vars: 
     - "off"
   indent:
-    - error
+    - "error"
     - 4
     - SwitchCase: 1
   quotes:
-    - error
-    - double
+    - "error"
+    - "double"
   semi:
-    - error
-    - always
+    - "error"
+    - "always"
   yoda:
-    - error
+    - "error"
