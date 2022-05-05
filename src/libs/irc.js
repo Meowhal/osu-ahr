@@ -1,3 +1,4 @@
+/* eslint-disable */
 /*
     irc.js - Node JS IRC client library
 
