@@ -584,7 +584,7 @@ export class Lobby {
     if (command == "!info" || command == "!help") {
       this.showInfoMessage();
     }
-    if (command == "!version" || command == "!v"){
+    if (command == "!version" || command == "!v") {
       this.showVersionMessage();
     }
     this.ReceivedChatCommand.emit({ player, command, param });
@@ -997,7 +997,8 @@ export class Lobby {
   }
 
   private showVersionMessage(): void {
-    this.SendMessageWithCoolTime(`osu! Auto Host Rotation Bot v. ${process.env.npm_package_version}`, "versionmessage", this.option.info_message_cooltime_ms);
+    const version = this.tryGetVersion();
+    this.SendMessageWithCoolTime(`osu! Auto Host Rotation Bot v. ${version}`, "versionmessage", this.option.info_message_cooltime_ms);
   }
 
   private sendInfoMessagePM(player: Player): void {
@@ -1005,7 +1006,19 @@ export class Lobby {
   }
 
   private getInfoMessage(): string {
-    return this.option.info_message.replace("${version}", process.env.npm_package_version ?? "0.0.0");
+    const version = this.tryGetVersion();
+    return this.option.info_message.replace("${version}", version);
+  }
+
+  private tryGetVersion(): string {
+    const version = process.env.npm_package_version;
+    if (version) return version;
+    try {
+      const packag = require("../package.json");
+      return packag.version;
+    } catch {
+      return "0.0.0";
+    }
   }
 
   // ircでログインしたユーザーに権限を与える
