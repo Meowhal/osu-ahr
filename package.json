@@ -9,6 +9,7 @@
     "url": "https://github.com/Meowhal/osu-ahr.git"
   },
   "scripts": {
+    "dist": "rimraf dist && tsc",
     "clean": "rimraf dist",
     "build": "tsc",
     "start": "node dist/cli/index.js",
