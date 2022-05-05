@@ -926,12 +926,10 @@ class Lobby {
         return this.option.info_message.replace("${version}", version);
     }
     tryGetVersion() {
-        const version = process.env.npm_package_version;
-        if (version)
-            return version;
+        if (process.env.npm_package_version)
+            return process.env.npm_package_version;
         try {
-            const packag = require("../package.json");
-            return packag.version;
+            return require("../package.json").version ?? "0.0.0";
         }
         catch {
             return "0.0.0";
