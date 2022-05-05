@@ -915,13 +915,25 @@ class Lobby {
         this.SendMessageWithCoolTime(this.getInfoMessage(), "infomessage", this.option.info_message_cooltime_ms);
     }
     showVersionMessage() {
-        this.SendMessageWithCoolTime(`osu! Auto Host Rotation Bot v. ${process.env.npm_package_version}`, "versionmessage", this.option.info_message_cooltime_ms);
+        const version = this.tryGetVersion();
+        this.SendMessageWithCoolTime(`osu! Auto Host Rotation Bot v. ${version}`, "versionmessage", this.option.info_message_cooltime_ms);
     }
     sendInfoMessagePM(player) {
         this.SendPrivateMessageWithCoolTime(this.getInfoMessage(), player.escaped_name, "infomessage", this.option.info_message_cooltime_ms);
     }
     getInfoMessage() {
-        return this.option.info_message.replace("${version}", process.env.npm_package_version ?? "0.0.0");
+        const version = this.tryGetVersion();
+        return this.option.info_message.replace("${version}", version);
+    }
+    tryGetVersion() {
+        if (process.env.npm_package_version)
+            return process.env.npm_package_version;
+        try {
+            return require("../package.json").version ?? "0.0.0";
+        }
+        catch {
+            return "0.0.0";
+        }
     }
     // ircでログインしたユーザーに権限を与える
     assignCreatorRole() {
