@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const sinon_1 = __importDefault(require("sinon"));
-const __1 = require("..");
+const Player_1 = require("../Player");
 const Modes_1 = require("../Modes");
-const plugins_1 = require("../plugins");
+const LobbyKeeper_1 = require("../plugins/LobbyKeeper");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("LobbyKeepserTest", function () {
     before(function () {
@@ -26,7 +26,7 @@ describe("LobbyKeepserTest", function () {
             title: null, ...option
         };
         const li = await TestUtils_1.default.SetupLobbyAsync();
-        const keeper = new plugins_1.LobbyKeeper(li.lobby, option);
+        const keeper = new LobbyKeeper_1.LobbyKeeper(li.lobby, option);
         await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], li.ircClient);
         return { keeper, ...li };
     }
@@ -40,7 +40,7 @@ describe("LobbyKeepserTest", function () {
         });
         describe("size 4 test", () => {
             it("size over test", () => {
-                const sk = new plugins_1.SlotKeeper(4);
+                const sk = new LobbyKeeper_1.SlotKeeper(4);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkJoin(3));
@@ -48,13 +48,13 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isTrue(sk.checkJoin(5));
             });
             it("locked slot test", () => {
-                const sk = new plugins_1.SlotKeeper(4);
+                const sk = new LobbyKeeper_1.SlotKeeper(4);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isTrue(sk.checkJoin(4));
             });
             it("leave slot test", () => {
-                const sk = new plugins_1.SlotKeeper(4);
+                const sk = new LobbyKeeper_1.SlotKeeper(4);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkJoin(3));
@@ -68,7 +68,7 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isFalse(sk.checkJoin(1));
             });
             it("move slot test", () => {
-                const sk = new plugins_1.SlotKeeper(4);
+                const sk = new LobbyKeeper_1.SlotKeeper(4);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkMove(1, 4));
@@ -76,7 +76,7 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isTrue(sk.checkMove(1, 5));
             });
             it("move slot test", () => {
-                const sk = new plugins_1.SlotKeeper(4);
+                const sk = new LobbyKeeper_1.SlotKeeper(4);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkMove(1, 4));
@@ -84,7 +84,7 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isTrue(sk.checkMove(1, 5));
             });
             it("check unused slot test", () => {
-                const sk = new plugins_1.SlotKeeper(4);
+                const sk = new LobbyKeeper_1.SlotKeeper(4);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkUnused());
@@ -96,7 +96,7 @@ describe("LobbyKeepserTest", function () {
         });
         describe("size 0 tests", () => {
             it("size over test", () => {
-                const sk = new plugins_1.SlotKeeper(0);
+                const sk = new LobbyKeeper_1.SlotKeeper(0);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkJoin(3));
@@ -104,13 +104,13 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isFalse(sk.checkJoin(5));
             });
             it("locked slot test", () => {
-                const sk = new plugins_1.SlotKeeper(0);
+                const sk = new LobbyKeeper_1.SlotKeeper(0);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkJoin(4));
             });
             it("leave slot test", () => {
-                const sk = new plugins_1.SlotKeeper(0);
+                const sk = new LobbyKeeper_1.SlotKeeper(0);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkJoin(3));
@@ -124,7 +124,7 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isFalse(sk.checkJoin(1));
             });
             it("move slot test", () => {
-                const sk = new plugins_1.SlotKeeper(0);
+                const sk = new LobbyKeeper_1.SlotKeeper(0);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkMove(1, 4));
@@ -132,7 +132,7 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isFalse(sk.checkMove(1, 5));
             });
             it("move slot test", () => {
-                const sk = new plugins_1.SlotKeeper(0);
+                const sk = new LobbyKeeper_1.SlotKeeper(0);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkMove(1, 4));
@@ -140,7 +140,7 @@ describe("LobbyKeepserTest", function () {
                 chai_1.assert.isFalse(sk.checkMove(1, 5));
             });
             it("check unused slot test", () => {
-                const sk = new plugins_1.SlotKeeper(0);
+                const sk = new LobbyKeeper_1.SlotKeeper(0);
                 chai_1.assert.isFalse(sk.checkJoin(1));
                 chai_1.assert.isFalse(sk.checkJoin(2));
                 chai_1.assert.isFalse(sk.checkUnused());
@@ -362,7 +362,7 @@ describe("LobbyKeepserTest", function () {
                 mode: null
             });
             const defaultOpton = { team: Modes_1.TeamMode.HeadToHead, score: Modes_1.ScoreMode.Score };
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.mode = defaultOpton;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep mode 0 1");
             let mode = keeper.option.mode;
@@ -411,7 +411,7 @@ describe("LobbyKeepserTest", function () {
                 mode: null
             });
             const defaultOpton = { team: Modes_1.TeamMode.HeadToHead, score: Modes_1.ScoreMode.Score };
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.mode = defaultOpton;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep mode"); // no param
             chai_1.assert.equal(keeper.option.mode, defaultOpton);
@@ -433,7 +433,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 size: 4,
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.size = defaultSize;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep size 0");
             let size = keeper.option.size;
@@ -454,7 +454,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 size: 4,
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.size = defaultSize;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep size");
             chai_1.assert.equal(keeper.option.size, defaultSize);
@@ -485,7 +485,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 mods: [],
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.mods = defaultMods;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep mod hidden");
             chai_1.assert.sameMembers(keeper.option.mods, [Modes_1.Mod.Hidden]);
@@ -522,7 +522,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 mods: [],
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.mods = defaultMods;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep mods");
             chai_1.assert.equal(keeper.option.mods, defaultMods);
@@ -535,7 +535,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 password: null,
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.password = defaultPassword;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep password testtest");
             chai_1.assert.equal(keeper.option.password, "testtest");
@@ -560,7 +560,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 password: null,
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.password = defaultPassword;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep password testtest");
             chai_1.assert.equal(keeper.option.password, "testtest");
@@ -588,7 +588,7 @@ describe("LobbyKeepserTest", function () {
             const { keeper, lobby, ircClient } = await setupAsync({
                 password: null,
             });
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             keeper.option.title = defaultTitle;
             ircClient.emulateMessage("p1", ircClient.channel, "*keep title testtest");
             chai_1.assert.equal(keeper.option.title, "testtest");

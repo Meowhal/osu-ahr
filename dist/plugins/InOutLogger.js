@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InOutLogger = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 class InOutLogger extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby) {
         super(lobby, "InOutLogger", "inout");
@@ -12,10 +12,10 @@ class InOutLogger extends LobbyPlugin_1.LobbyPlugin {
     }
     onReceivedBanchoResponse(message, response) {
         switch (response.type) {
-            case parsers_1.BanchoResponseType.MatchFinished:
+            case CommandParser_1.BanchoResponseType.MatchFinished:
                 this.countUp();
-            case parsers_1.BanchoResponseType.MatchStarted:
-            case parsers_1.BanchoResponseType.AbortedMatch:
+            case CommandParser_1.BanchoResponseType.MatchStarted:
+            case CommandParser_1.BanchoResponseType.AbortedMatch:
                 this.LogInOutPlayers();
                 this.saveCurrentPlayers();
                 break;

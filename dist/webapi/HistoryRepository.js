@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HistoryRepository = void 0;
 const log4js_1 = __importDefault(require("log4js"));
-const libs_1 = require("../libs");
+const TypedEvent_1 = require("../libs/TypedEvent");
 const HistoryFetcher_1 = require("./HistoryFetcher");
 class HistoryRepository {
     constructor(lobbyId, fetcher = null) {
@@ -16,10 +16,10 @@ class HistoryRepository {
         this.currentGameEventId = 0;
         this.lobbyClosed = false;
         // Events
-        this.gotUserProfile = new libs_1.TypedEvent();
-        this.changedLobbyName = new libs_1.TypedEvent();
-        this.kickedUser = new libs_1.TypedEvent();
-        this.finishedGame = new libs_1.TypedEvent();
+        this.gotUserProfile = new TypedEvent_1.TypedEvent();
+        this.changedLobbyName = new TypedEvent_1.TypedEvent();
+        this.kickedUser = new TypedEvent_1.TypedEvent();
+        this.finishedGame = new TypedEvent_1.TypedEvent();
         this.hasError = false;
         this.errorCount = 0;
         this.fetchTask = Promise.resolve({ count: 0, filled: true, isRewind: false });

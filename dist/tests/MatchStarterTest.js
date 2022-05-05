@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
-const parsers_1 = require("../parsers");
-const plugins_1 = require("../plugins");
+const Player_1 = require("../Player");
+const CommandParser_1 = require("../parsers/CommandParser");
+const MatchStarter_1 = require("../plugins/MatchStarter");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("MatchStarterTest", function () {
     before(function () {
@@ -20,7 +20,7 @@ describe("MatchStarterTest", function () {
             vote_msg_defer_ms: 0,
             start_when_all_player_ready: true
         };
-        const starter = new plugins_1.MatchStarter(li.lobby, option);
+        const starter = new MatchStarter_1.MatchStarter(li.lobby, option);
         return { starter, ...li };
     }
     async function assertSendMpStart(lobby) {
@@ -30,7 +30,7 @@ describe("MatchStarterTest", function () {
     }
     function assertBeginTimer(lobby, time) {
         return TestUtils_1.default.assertEventFire(lobby.ReceivedBanchoResponse, a => {
-            if (a.response.type == parsers_1.BanchoResponseType.CounteddownTimer) {
+            if (a.response.type == CommandParser_1.BanchoResponseType.CounteddownTimer) {
                 chai_1.assert.equal(a.response.params[0], time);
                 return true;
             }
@@ -39,7 +39,7 @@ describe("MatchStarterTest", function () {
     }
     function assertNeverBeginTimer(lobby, timeout) {
         return TestUtils_1.default.assertEventNeverFire(lobby.ReceivedBanchoResponse, a => {
-            if (a.response.type == parsers_1.BanchoResponseType.CounteddownTimer) {
+            if (a.response.type == CommandParser_1.BanchoResponseType.CounteddownTimer) {
                 return true;
             }
             return false;
@@ -163,7 +163,7 @@ describe("MatchStarterTest", function () {
         it("auth *start test", async () => {
             const { starter, lobby, ircClient } = await setupAsync();
             const players = await TestUtils_1.default.AddPlayersAsync(5, ircClient);
-            lobby.GetOrMakePlayer(players[0]).setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer(players[0]).setRole(Player_1.Roles.Authorized);
             await TestUtils_1.default.changeHostAsync(players[1], lobby);
             chai_1.assert.isFalse(lobby.isMatching);
             await ircClient.emulateMessageAsync(players[0], ircClient.channel, "*start");
@@ -241,7 +241,7 @@ describe("MatchStarterTest", function () {
         it("!start timer from auth player test", async () => {
             const { starter, lobby, ircClient } = await setupAsync();
             const players = await TestUtils_1.default.AddPlayersAsync(5, ircClient);
-            lobby.GetOrMakePlayer(players[0]).setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer(players[0]).setRole(Player_1.Roles.Authorized);
             await TestUtils_1.default.changeHostAsync(players[1], lobby);
             chai_1.assert.isFalse(lobby.isMatching);
             chai_1.assert.isFalse(lobby.isStartTimerActive);

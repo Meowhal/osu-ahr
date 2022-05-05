@@ -5,8 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Lobby = exports.LobbyStatus = void 0;
 const Player_1 = require("./Player");
-const parsers_1 = require("./parsers");
-const libs_1 = require("./libs");
+const CommandParser_1 = require("./parsers/CommandParser");
+const StatParser_1 = require("./parsers/StatParser");
+const TypedEvent_1 = require("./libs/TypedEvent");
+const DeferredAction_1 = require("./libs/DeferredAction");
 const MpSettingsParser_1 = require("./parsers/MpSettingsParser");
 const HistoryRepository_1 = require("./webapi/HistoryRepository");
 const config_1 = __importDefault(require("config"));
@@ -39,26 +41,26 @@ class Lobby {
         this.deferredMessages = {};
         this.infoMessageAnnouncementTimeId = null;
         // Events
-        this.JoinedLobby = new libs_1.TypedEvent();
-        this.PlayerJoined = new libs_1.TypedEvent();
-        this.PlayerLeft = new libs_1.TypedEvent();
-        this.PlayerMoved = new libs_1.TypedEvent();
-        this.HostChanged = new libs_1.TypedEvent();
-        this.MatchStarted = new libs_1.TypedEvent();
-        this.PlayerFinished = new libs_1.TypedEvent();
-        this.MatchFinished = new libs_1.TypedEvent();
-        this.AbortedMatch = new libs_1.TypedEvent();
-        this.UnexpectedAction = new libs_1.TypedEvent();
-        this.NetError = new libs_1.TypedEvent();
-        this.PlayerChated = new libs_1.TypedEvent();
-        this.ReceivedChatCommand = new libs_1.TypedEvent();
-        this.PluginMessage = new libs_1.TypedEvent();
-        this.SentMessage = new libs_1.TypedEvent();
-        this.ReceivedBanchoResponse = new libs_1.TypedEvent();
-        this.ParsedStat = new libs_1.TypedEvent();
-        this.FixedSettings = new libs_1.TypedEvent();
-        this.ParsedSettings = new libs_1.TypedEvent();
-        this.LeftChannel = new libs_1.TypedEvent();
+        this.JoinedLobby = new TypedEvent_1.TypedEvent();
+        this.PlayerJoined = new TypedEvent_1.TypedEvent();
+        this.PlayerLeft = new TypedEvent_1.TypedEvent();
+        this.PlayerMoved = new TypedEvent_1.TypedEvent();
+        this.HostChanged = new TypedEvent_1.TypedEvent();
+        this.MatchStarted = new TypedEvent_1.TypedEvent();
+        this.PlayerFinished = new TypedEvent_1.TypedEvent();
+        this.MatchFinished = new TypedEvent_1.TypedEvent();
+        this.AbortedMatch = new TypedEvent_1.TypedEvent();
+        this.UnexpectedAction = new TypedEvent_1.TypedEvent();
+        this.NetError = new TypedEvent_1.TypedEvent();
+        this.PlayerChated = new TypedEvent_1.TypedEvent();
+        this.ReceivedChatCommand = new TypedEvent_1.TypedEvent();
+        this.PluginMessage = new TypedEvent_1.TypedEvent();
+        this.SentMessage = new TypedEvent_1.TypedEvent();
+        this.ReceivedBanchoResponse = new TypedEvent_1.TypedEvent();
+        this.ParsedStat = new TypedEvent_1.TypedEvent();
+        this.FixedSettings = new TypedEvent_1.TypedEvent();
+        this.ParsedSettings = new TypedEvent_1.TypedEvent();
+        this.LeftChannel = new TypedEvent_1.TypedEvent();
         this.events = {};
         if (ircClient.conn == null) {
             throw new Error("clientが未接続です");
@@ -66,14 +68,14 @@ class Lobby {
         this.option = { ...LobbyDefaultOption, ...option };
         this.status = LobbyStatus.Standby;
         this.settingParser = new MpSettingsParser_1.MpSettingsParser();
-        this.statParser = new parsers_1.StatParser();
+        this.statParser = new StatParser_1.StatParser();
         this.ircClient = ircClient;
         this.logger = log4js_1.default.getLogger("lobby");
         this.logger.addContext("channel", "lobby");
         this.chatlogger = log4js_1.default.getLogger("chat");
         this.chatlogger.addContext("channel", "lobby");
         this.historyRepository = new HistoryRepository_1.HistoryRepository(0);
-        this.transferHostTimeout = new libs_1.DeferredAction(() => this.onTimeoutedTransferHost());
+        this.transferHostTimeout = new DeferredAction_1.DeferredAction(() => this.onTimeoutedTransferHost());
         this.registerEvents();
     }
     registerEvents() {
@@ -336,7 +338,7 @@ class Lobby {
             return;
         }
         if (!(tag in this.deferredMessages)) {
-            this.deferredMessages[tag] = new libs_1.DeferredAction(msg => {
+            this.deferredMessages[tag] = new DeferredAction_1.DeferredAction(msg => {
                 this.SendMessage(msg);
             });
         }
@@ -385,11 +387,11 @@ class Lobby {
         else {
             const p = this.GetPlayer(from);
             if (p != null) {
-                if (parsers_1.parser.IsChatCommand(message)) {
+                if (CommandParser_1.parser.IsChatCommand(message)) {
                     this.RaiseReceivedChatCommand(p, message);
                 }
                 this.PlayerChated.emit({ player: p, message });
-                if ((0, parsers_1.IsStatResponse)(message)) {
+                if ((0, StatParser_1.IsStatResponse)(message)) {
                     this.chatlogger.trace("%s:%s", p.name, message);
                 }
                 else {
@@ -403,7 +405,7 @@ class Lobby {
     }
     handlePrivateMessage(from, message) {
         if (from == "BanchoBot") {
-            if ((0, parsers_1.IsStatResponse)(message)) {
+            if ((0, StatParser_1.IsStatResponse)(message)) {
                 if (this.statParser.feedLine(message)) {
                     this.RaiseParsedStat(true);
                 }
@@ -419,79 +421,79 @@ class Lobby {
         }
     }
     handleBanchoResponse(message) {
-        const c = parsers_1.parser.ParseBanchoResponse(message);
+        const c = CommandParser_1.parser.ParseBanchoResponse(message);
         switch (c.type) {
-            case parsers_1.BanchoResponseType.HostChanged:
+            case CommandParser_1.BanchoResponseType.HostChanged:
                 this.RaiseHostChanged(c.params[0]);
                 this.isClearedHost = false;
                 break;
-            case parsers_1.BanchoResponseType.UserNotFound:
+            case CommandParser_1.BanchoResponseType.UserNotFound:
                 this.OnUserNotFound();
                 break;
-            case parsers_1.BanchoResponseType.MatchFinished:
+            case CommandParser_1.BanchoResponseType.MatchFinished:
                 this.RaiseMatchFinished();
                 break;
-            case parsers_1.BanchoResponseType.MatchStarted:
+            case CommandParser_1.BanchoResponseType.MatchStarted:
                 this.isStartTimerActive = false;
                 this.RaiseMatchStarted();
                 break;
-            case parsers_1.BanchoResponseType.BeganStartTimer:
+            case CommandParser_1.BanchoResponseType.BeganStartTimer:
                 this.isStartTimerActive = true;
                 break;
-            case parsers_1.BanchoResponseType.AbortedStartTimer:
+            case CommandParser_1.BanchoResponseType.AbortedStartTimer:
                 this.isStartTimerActive = false;
                 break;
-            case parsers_1.BanchoResponseType.PlayerFinished:
+            case CommandParser_1.BanchoResponseType.PlayerFinished:
                 this.RaisePlayerFinished(c.params[0], c.params[1], c.params[2]);
                 break;
-            case parsers_1.BanchoResponseType.PlayerJoined:
+            case CommandParser_1.BanchoResponseType.PlayerJoined:
                 this.RaisePlayerJoined(c.params[0], c.params[1], c.params[2]);
                 break;
-            case parsers_1.BanchoResponseType.PlayerLeft:
+            case CommandParser_1.BanchoResponseType.PlayerLeft:
                 this.RaisePlayerLeft(c.params[0]);
                 break;
-            case parsers_1.BanchoResponseType.AbortedMatch:
-            case parsers_1.BanchoResponseType.AbortMatchFailed:
+            case CommandParser_1.BanchoResponseType.AbortedMatch:
+            case CommandParser_1.BanchoResponseType.AbortMatchFailed:
                 this.RaiseAbortedMatch();
                 break;
-            case parsers_1.BanchoResponseType.AddedReferee:
+            case CommandParser_1.BanchoResponseType.AddedReferee:
                 this.GetOrMakePlayer(c.params[0]).setRole(Player_1.Roles.Referee);
                 this.logger.trace("AddedReferee : %s", c.params[0]);
                 break;
-            case parsers_1.BanchoResponseType.RemovedReferee:
+            case CommandParser_1.BanchoResponseType.RemovedReferee:
                 this.GetOrMakePlayer(c.params[0]).removeRole(Player_1.Roles.Referee);
                 this.logger.trace("RemovedReferee : %s", c.params[0]);
                 break;
-            case parsers_1.BanchoResponseType.ListRefs:
+            case CommandParser_1.BanchoResponseType.ListRefs:
                 this.listRefStart = Date.now();
                 break;
-            case parsers_1.BanchoResponseType.PlayerMovedSlot:
+            case CommandParser_1.BanchoResponseType.PlayerMovedSlot:
                 this.RaisePlayerMoved(c.params[0], c.params[1]);
                 break;
-            case parsers_1.BanchoResponseType.TeamChanged:
+            case CommandParser_1.BanchoResponseType.TeamChanged:
                 this.GetOrMakePlayer(c.params[0]).team = c.params[1];
                 this.logger.trace("team changed : %s, %s", c.params[0], Player_1.Teams[c.params[1]]);
                 break;
-            case parsers_1.BanchoResponseType.BeatmapChanged:
-            case parsers_1.BanchoResponseType.MpBeatmapChanged:
+            case CommandParser_1.BanchoResponseType.BeatmapChanged:
+            case CommandParser_1.BanchoResponseType.MpBeatmapChanged:
                 if (this.mapId != c.params[0]) {
                     this.mapId = c.params[0];
                     this.mapTitle = c.params[1];
-                    const changer = this.host ? `(by ${c.type == parsers_1.BanchoResponseType.BeatmapChanged ? this.host.name : "bot"})` : "";
+                    const changer = this.host ? `(by ${c.type == CommandParser_1.BanchoResponseType.BeatmapChanged ? this.host.name : "bot"})` : "";
                     this.logger.info("beatmap changed%s : %s %s", changer, "https://osu.ppy.sh/b/" + this.mapId, this.mapTitle);
                 }
                 break;
-            case parsers_1.BanchoResponseType.Settings:
+            case CommandParser_1.BanchoResponseType.Settings:
                 if (this.settingParser.feedLine(message)) {
                     this.RaiseParsedSettings();
                 }
                 break;
-            case parsers_1.BanchoResponseType.Stats:
+            case CommandParser_1.BanchoResponseType.Stats:
                 if (this.statParser.feedLine(message)) {
                     this.RaiseParsedStat(false);
                 }
                 break;
-            case parsers_1.BanchoResponseType.ClearedHost:
+            case CommandParser_1.BanchoResponseType.ClearedHost:
                 this.logger.info("cleared host");
                 this.isClearedHost = true;
                 if (this.host != null) {
@@ -500,7 +502,7 @@ class Lobby {
                 this.host = null;
                 this.hostPending = null;
                 break;
-            case parsers_1.BanchoResponseType.Unhandled:
+            case CommandParser_1.BanchoResponseType.Unhandled:
                 if (this.checkListRef(message))
                     break;
                 this.logger.debug("unhandled bancho response : %s", message);
@@ -527,7 +529,7 @@ class Lobby {
         this.logger.trace("custom command %s:%s", player.name, message);
         if (player.isReferee && message.startsWith("!mp"))
             return;
-        const { command, param } = parsers_1.parser.ParseChatCommand(message);
+        const { command, param } = CommandParser_1.parser.ParseChatCommand(message);
         if (command == "!info" || command == "!help") {
             this.showInfoMessage();
         }
@@ -640,7 +642,7 @@ class Lobby {
             const p = this.GetPlayer(this.statParser.result.name);
             if (p != null) {
                 p.laststat = this.statParser.result;
-                this.logger.info("parsed stat %s -> %s", p.name, parsers_1.StatStatuses[p.laststat.status]);
+                this.logger.info("parsed stat %s -> %s", p.name, StatParser_1.StatStatuses[p.laststat.status]);
                 this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
             }
         }
@@ -704,7 +706,7 @@ class Lobby {
     EnterLobbyAsync(channel) {
         this.logger.trace("start EnterLobby");
         return new Promise((resolve, reject) => {
-            let ch = parsers_1.parser.EnsureMpChannelId(channel);
+            let ch = CommandParser_1.parser.EnsureMpChannelId(channel);
             if (ch == "") {
                 this.logger.error("invalid channel: %s", channel);
                 reject("invalid channel");

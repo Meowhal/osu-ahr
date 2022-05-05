@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HostSkipper = void 0;
 const Lobby_1 = require("../Lobby");
 const Player_1 = require("../Player");
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
+const StatParser_1 = require("../parsers/StatParser");
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const VoteCounter_1 = require("./VoteCounter");
 const config_1 = __importDefault(require("config"));
@@ -37,18 +38,18 @@ class HostSkipper extends LobbyPlugin_1.LobbyPlugin {
         this.lobby.LeftChannel.on(() => this.StopTimer());
         this.lobby.ReceivedBanchoResponse.on(a => {
             switch (a.response.type) {
-                case parsers_1.BanchoResponseType.MatchStarted:
+                case CommandParser_1.BanchoResponseType.MatchStarted:
                     this.isMapChanged = false;
                     this.voting.Clear();
                     this.StopTimer();
                     break;
-                case parsers_1.BanchoResponseType.HostChanged:
+                case CommandParser_1.BanchoResponseType.HostChanged:
                     this.Reset();
                     break;
-                case parsers_1.BanchoResponseType.BeatmapChanging:
+                case CommandParser_1.BanchoResponseType.BeatmapChanging:
                     this.StartTimer(false);
                     break;
-                case parsers_1.BanchoResponseType.BeatmapChanged:
+                case CommandParser_1.BanchoResponseType.BeatmapChanged:
                     this.StartTimer(false);
                     this.isMapChanged = true;
                     break;
@@ -86,7 +87,7 @@ class HostSkipper extends LobbyPlugin_1.LobbyPlugin {
     }
     onParsedStat(player, result, isPm) {
         if (!isPm && this.lobby.host == player && this.statIsAfk(result.status) && !this.lobby.isMatching) {
-            this.logger.trace("passed afk check %s -> %s", result.name, parsers_1.StatStatuses[result.status]);
+            this.logger.trace("passed afk check %s -> %s", result.name, StatParser_1.StatStatuses[result.status]);
             if (this.option.afk_check_do_skip) {
                 this.Skip();
             }
@@ -183,7 +184,7 @@ class HostSkipper extends LobbyPlugin_1.LobbyPlugin {
             if (!this.lobby.isMatching && this.lobby.host == target) {
                 try {
                     const stat1 = await this.lobby.RequestStatAsync(target, true, this.option.afk_check_timeout_ms);
-                    this.logger.trace("stat check phase 1 %s -> %s", stat1.name, parsers_1.StatStatuses[stat1.status]);
+                    this.logger.trace("stat check phase 1 %s -> %s", stat1.name, StatParser_1.StatStatuses[stat1.status]);
                     if (this.afkTimer != undefined && this.lobby.host == target && this.statIsAfk(stat1.status)) {
                         // double check and show stat for players
                         await this.lobby.RequestStatAsync(target, false, this.option.afk_check_timeout_ms);
@@ -207,7 +208,7 @@ class HostSkipper extends LobbyPlugin_1.LobbyPlugin {
         }
     }
     statIsAfk(stat) {
-        return stat != parsers_1.StatStatuses.Multiplayer && stat != parsers_1.StatStatuses.Multiplaying;
+        return stat != StatParser_1.StatStatuses.Multiplayer && stat != StatParser_1.StatStatuses.Multiplaying;
     }
     GetPluginStatus() {
         return `-- Host Skipper -- timer : ${this.afkTimer != undefined ? "active" : "###"}, skip_vote : ${this.voting.toString()}`;

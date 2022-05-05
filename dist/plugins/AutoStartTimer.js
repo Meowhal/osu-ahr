@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoStartTimer = void 0;
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const config_1 = __importDefault(require("config"));
 const WAITINGTIME_MIN = 15;
@@ -57,19 +57,19 @@ class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
         if (!this.option.enabled || this.option.waitingTime < WAITINGTIME_MIN)
             return;
         switch (response.type) {
-            case parsers_1.BanchoResponseType.BeatmapChanged:
+            case CommandParser_1.BanchoResponseType.BeatmapChanged:
                 if (this.lobby.players.size == 1 || response.params[0] == this.lastMapId || this.useMapValidation)
                     break;
                 this.startTimer();
                 break;
-            case parsers_1.BanchoResponseType.BeatmapChanging:
-            case parsers_1.BanchoResponseType.HostChanged:
+            case CommandParser_1.BanchoResponseType.BeatmapChanging:
+            case CommandParser_1.BanchoResponseType.HostChanged:
                 if (this.lobby.isStartTimerActive) {
                     this.lobby.SendMessage("!mp aborttimer");
                 }
                 this.SendPluginMessage("mp_abort_start");
                 break;
-            case parsers_1.BanchoResponseType.MatchStarted:
+            case CommandParser_1.BanchoResponseType.MatchStarted:
                 this.lastMapId = this.lobby.mapId;
                 break;
         }

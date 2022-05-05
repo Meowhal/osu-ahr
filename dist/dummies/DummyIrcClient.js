@@ -4,7 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DummyIrcClient = void 0;
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
+const StatParser_1 = require("../parsers/StatParser");
 const Player_1 = require("../Player");
 const log4js_1 = __importDefault(require("log4js"));
 const events_1 = require("events");
@@ -224,7 +225,7 @@ class DummyIrcClient extends events_1.EventEmitter {
     }
     onMessage(from, to, message) {
         if (this.referees.includes(from)) {
-            let mp = parsers_1.parser.ParseMPCommand(message);
+            let mp = CommandParser_1.parser.ParseMPCommand(message);
             if (mp != null) {
                 this.processMpCommand(to, message, mp);
             }
@@ -348,8 +349,8 @@ class DummyIrcClient extends events_1.EventEmitter {
         let stat = this.stats.get(ename);
         const to = toPm ? this.nick : this.channel;
         if (stat == undefined) {
-            let status = this.players.has(ename) ? parsers_1.StatStatuses.Multiplayer : parsers_1.StatStatuses.None;
-            stat = new parsers_1.StatResult(arg, 0, status);
+            let status = this.players.has(ename) ? StatParser_1.StatStatuses.Multiplayer : StatParser_1.StatStatuses.None;
+            stat = new StatParser_1.StatResult(arg, 0, status);
             this.stats.set(ename, stat);
         }
         stat.toString().split("\n").forEach(t => {

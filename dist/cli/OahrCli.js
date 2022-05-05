@@ -23,10 +23,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrCli = void 0;
-const __1 = require("..");
+const Lobby_1 = require("../Lobby");
 const readline = __importStar(require("readline"));
 const log4js_1 = __importDefault(require("log4js"));
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
 const logger = log4js_1.default.getLogger("cli");
 const mainMenuCommandsMessage = `
@@ -56,7 +56,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                 name: "",
                 prompt: "> ",
                 action: async (line) => {
-                    let l = parsers_1.parser.SplitCliCommand(line);
+                    let l = CommandParser_1.parser.SplitCliCommand(line);
                     switch (l.command) {
                         case "m":
                         case "make":
@@ -119,8 +119,8 @@ class OahrCli extends OahrBase_1.OahrBase {
                 name: "lobbyMenu",
                 prompt: "> ",
                 action: async (line) => {
-                    let l = parsers_1.parser.SplitCliCommand(line);
-                    if (this.lobby.status == __1.LobbyStatus.Left || this.client.conn == null) {
+                    let l = CommandParser_1.parser.SplitCliCommand(line);
+                    if (this.lobby.status == Lobby_1.LobbyStatus.Left || this.client.conn == null) {
                         this.scene = this.scenes.exited;
                         return;
                     }

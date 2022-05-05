@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const dummies_1 = require("../dummies");
-const parsers_1 = require("../parsers");
+const DummyIrcClient_1 = require("../dummies/DummyIrcClient");
+const CommandParser_1 = require("../parsers/CommandParser");
 const log4js_1 = __importDefault(require("log4js"));
 describe("DummyIrcClientTest", function () {
     before(function () {
@@ -13,7 +13,7 @@ describe("DummyIrcClientTest", function () {
     });
     // ロビー作成テスト
     it("make lobby test", (done) => {
-        const client = new dummies_1.DummyIrcClient("osu_irc_server", "owner");
+        const client = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "owner");
         const lobbyTitle = "testlobby";
         let f_joined = 0;
         let f_make_res = 0;
@@ -24,7 +24,7 @@ describe("DummyIrcClientTest", function () {
             client.say("BanchoBot", "!mp make " + lobbyTitle);
         });
         client.on('pm', function (nick, message) {
-            const v = parsers_1.parser.ParseMpMakeResponse(nick, message);
+            const v = CommandParser_1.parser.ParseMpMakeResponse(nick, message);
             if (v != null) {
                 f_make_res++;
                 //console.log(`--- parsed pm id=${v.id} title=${v.title}`);
@@ -48,7 +48,7 @@ describe("DummyIrcClientTest", function () {
         });
     });
     it("match test", (done) => {
-        const client = new dummies_1.DummyIrcClient("osu_irc_server", "owner");
+        const client = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "owner");
         const lobbyTitle = "testlobby";
         const players = ["p1", "p2", "p3"];
         //logIrcEvent(client);
@@ -66,7 +66,7 @@ describe("DummyIrcClientTest", function () {
         });
     });
     it("make noname lobby test", (done) => {
-        const client = new dummies_1.DummyIrcClient("osu_irc_server", "owner");
+        const client = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "owner");
         //logIrcEvent(client);
         const lobbyTitle = "";
         client.on('registered', function (message) {
@@ -78,7 +78,7 @@ describe("DummyIrcClientTest", function () {
         });
     });
     it("mphost user not found test", (done) => {
-        const client = new dummies_1.DummyIrcClient("osu_irc_server", "owner");
+        const client = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "owner");
         const lobbyTitle = "testlobby";
         const players = ["p1", "p2", "p3"];
         //logIrcEvent(client);
@@ -92,8 +92,8 @@ describe("DummyIrcClientTest", function () {
             }, 10);
         });
         client.on('message', function (from, to, msg) {
-            let r = parsers_1.parser.ParseBanchoResponse(msg);
-            if (r.type == parsers_1.BanchoResponseType.UserNotFound) {
+            let r = CommandParser_1.parser.ParseBanchoResponse(msg);
+            if (r.type == CommandParser_1.BanchoResponseType.UserNotFound) {
                 done();
             }
         });

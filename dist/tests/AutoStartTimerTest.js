@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
-const plugins_1 = require("../plugins");
+const Player_1 = require("../Player");
+const AutoStartTimer_1 = require("../plugins/AutoStartTimer");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("AutoStartTimerTest", function () {
     before(function () {
@@ -19,7 +19,7 @@ describe("AutoStartTimerTest", function () {
             waitingTime: waitingTime
         };
         const players = await TestUtils_1.default.AddPlayersAsync(3, li.ircClient);
-        const astimer = new plugins_1.AutoStartTimer(li.lobby, option);
+        const astimer = new AutoStartTimer_1.AutoStartTimer(li.lobby, option);
         return { astimer, players, ...li };
     }
     describe("auto start tests", function () {
@@ -126,7 +126,7 @@ describe("AutoStartTimerTest", function () {
             const { astimer, lobby, ircClient } = await prepare(true, false, 60);
             assertOptions(astimer, true, false, 60);
             const p1 = lobby.GetOrMakePlayer("p1");
-            p1.setRole(__1.Roles.Authorized);
+            p1.setRole(Player_1.Roles.Authorized);
             lobby.RaiseReceivedChatCommand(p1, "*autostart_disable");
             assertOptions(astimer, false, false, 60);
             lobby.RaiseReceivedChatCommand(p1, "*autostart_enable");

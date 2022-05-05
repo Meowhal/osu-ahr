@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const plugins_1 = require("../plugins");
+const WordCounter_1 = require("../plugins/WordCounter");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("WordCounter Tests", function () {
     before(function () {
@@ -15,7 +15,7 @@ describe("WordCounter Tests", function () {
         const option = {
             periods: periods
         };
-        const counter = new plugins_1.WordCounter(li.lobby, option);
+        const counter = new WordCounter_1.WordCounter(li.lobby, option);
         return { counter, ...li };
     }
     function assertPeriod(period, cpp, cppm, wpp, wppm) {
@@ -162,7 +162,7 @@ describe("WordCounter Tests", function () {
         const option = {
             periods: []
         };
-        const counter = new plugins_1.WordCounter(lobby, option);
+        const counter = new WordCounter_1.WordCounter(lobby, option);
         chai_1.assert.equal(counter.periods.length, 0);
         counter.update("test", Date.now());
     });

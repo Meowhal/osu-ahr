@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const plugins_1 = require("../plugins");
+const LobbyTerminator_1 = require("../plugins/LobbyTerminator");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe.skip("Lobby Terminator Tests", function () {
     before(function () {
@@ -11,7 +11,7 @@ describe.skip("Lobby Terminator Tests", function () {
     });
     async function setupAsync(interval = 10) {
         const { lobby, ircClient } = await TestUtils_1.default.SetupLobbyAsync();
-        const terminator = new plugins_1.LobbyTerminator(lobby);
+        const terminator = new LobbyTerminator_1.LobbyTerminator(lobby);
         terminator.multilimeMessageInterval = interval;
         return { terminator, lobby, ircClient };
     }

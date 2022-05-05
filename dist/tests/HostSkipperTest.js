@@ -4,12 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const dummies_1 = require("../dummies");
-const __1 = require("..");
+const DummyIrcClient_1 = require("../dummies/DummyIrcClient");
+const Lobby_1 = require("../Lobby");
+const Player_1 = require("../Player");
 const config_1 = __importDefault(require("config"));
 const TestUtils_1 = __importDefault(require("./TestUtils"));
-const plugins_1 = require("../plugins");
-const parsers_1 = require("../parsers");
+const HostSkipper_1 = require("../plugins/HostSkipper");
+const StatParser_1 = require("../parsers/StatParser");
 describe("HostSkipperTest", function () {
     before(function () {
         TestUtils_1.default.configMochaAsSilent();
@@ -26,7 +27,7 @@ describe("HostSkipperTest", function () {
             afk_check_interval_ms: timer_delay,
             afk_check_do_skip: true
         };
-        const skipper = new plugins_1.HostSkipper(li.lobby, option);
+        const skipper = new HostSkipper_1.HostSkipper(li.lobby, option);
         return { skipper, ...li };
     }
     async function resolveSkipAsync(lobby, callback = null) {
@@ -50,22 +51,22 @@ describe("HostSkipperTest", function () {
     }
     describe("construction test", () => {
         it("default", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-            const lobby = new __1.Lobby(ircClient);
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+            const lobby = new Lobby_1.Lobby(ircClient);
             await lobby.MakeLobbyAsync("test");
-            const skipper = new plugins_1.HostSkipper(lobby);
+            const skipper = new HostSkipper_1.HostSkipper(lobby);
             const option = config_1.default.get("HostSkipper");
             chai_1.assert.deepEqual(skipper.option, option);
         });
         it("with option partial", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-            const lobby = new __1.Lobby(ircClient);
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+            const lobby = new Lobby_1.Lobby(ircClient);
             await lobby.MakeLobbyAsync("test");
             const option = {
                 vote_rate: 2,
             };
             const defaultOption = config_1.default.get("HostSkipper");
-            const skipper = new plugins_1.HostSkipper(lobby, option);
+            const skipper = new HostSkipper_1.HostSkipper(lobby, option);
             chai_1.assert.equal(skipper.option.vote_min, defaultOption.vote_min);
             chai_1.assert.notEqual(skipper.option.vote_rate, defaultOption.vote_rate);
             chai_1.assert.equal(skipper.option.vote_rate, option.vote_rate);
@@ -93,7 +94,7 @@ describe("HostSkipperTest", function () {
         it("skip 10ms", async () => {
             const { skipper, lobby, ircClient } = await prepare(10);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             chai_1.assert.isUndefined(skipper.afkTimer);
             await TestUtils_1.default.changeHostAsync("p1", lobby);
             chai_1.assert.isDefined(skipper.afkTimer);
@@ -104,7 +105,7 @@ describe("HostSkipperTest", function () {
         it("skip time check", async () => {
             const { skipper, lobby, ircClient } = await prepare(10);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             let test = async (waitTime) => {
                 skipper.option.afk_check_interval_first_ms = waitTime;
                 skipper.option.afk_check_interval_ms = waitTime;
@@ -122,8 +123,8 @@ describe("HostSkipperTest", function () {
         it("timer reset when host changed", async () => {
             const { skipper, lobby, ircClient } = await prepare(30);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
-            ircClient.SetStat(new parsers_1.StatResult("p2", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p2", 0, StatParser_1.StatStatuses.Afk));
             const startTime = await TestUtils_1.default.changeHostAsync("p1", lobby);
             const rt = resolveSkipAsync(lobby);
             TestUtils_1.default.assertHost("p1", lobby);
@@ -138,7 +139,7 @@ describe("HostSkipperTest", function () {
         it("timer reset when host changing map", async () => {
             const { skipper, lobby, ircClient } = await prepare(10);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             const startTime = await TestUtils_1.default.changeHostAsync("p1", lobby);
             const t = rejectSkipAsync(lobby, 10);
             await TestUtils_1.default.delayAsync(5);
@@ -151,7 +152,7 @@ describe("HostSkipperTest", function () {
         it("timer stop when host chated", async () => {
             const { skipper, lobby, ircClient } = await prepare(10);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             const startTime = await TestUtils_1.default.changeHostAsync("p1", lobby);
             const t = rejectSkipAsync(lobby, 10);
             await TestUtils_1.default.delayAsync(5);
@@ -164,7 +165,7 @@ describe("HostSkipperTest", function () {
         it("if delay time is 0, timer dosent work", async () => {
             const { skipper, lobby, ircClient } = await prepare(0);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             await TestUtils_1.default.changeHostAsync("p1", lobby);
             chai_1.assert.isUndefined(skipper.afkTimer);
             await TestUtils_1.default.delayAsync(10);
@@ -175,7 +176,7 @@ describe("HostSkipperTest", function () {
         it("dosent skip if option is false", async () => {
             const { skipper, lobby, ircClient } = await prepare(10);
             skipper.option.afk_check_do_skip = false;
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
             await TestUtils_1.default.changeHostAsync("p1", lobby);
             await rejectSkipAsync(lobby, 15);
@@ -183,7 +184,7 @@ describe("HostSkipperTest", function () {
         });
         it("skip afk host when a player join", async () => {
             const { skipper, lobby, ircClient } = await prepare(10);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Afk));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
             await TestUtils_1.default.AddPlayersAsync(["p1"], ircClient);
             await TestUtils_1.default.changeHostAsync("p1", lobby);
             await resolveSkipAsync(lobby);
@@ -366,7 +367,7 @@ describe("HostSkipperTest", function () {
     describe("custom command tests", function () {
         it("*skip by authorized user test", async () => {
             const { skipper, lobby, ircClient } = await prepare();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             var t = resolveSkipAsync(lobby);
             await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             await TestUtils_1.default.changeHostAsync("p0", lobby);
@@ -375,7 +376,7 @@ describe("HostSkipperTest", function () {
         });
         it("*skip by authorized user with param test", async () => {
             const { skipper, lobby, ircClient } = await prepare();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             var t = resolveSkipAsync(lobby);
             await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             await TestUtils_1.default.changeHostAsync("p0", lobby);
@@ -384,7 +385,7 @@ describe("HostSkipperTest", function () {
         });
         it("*skip by Unauthorized test", async () => {
             const { skipper, lobby, ircClient } = await prepare();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             var t = rejectSkipAsync(lobby, 25);
             await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             await TestUtils_1.default.changeHostAsync("p0", lobby);
@@ -393,7 +394,7 @@ describe("HostSkipperTest", function () {
         });
         it("*skipto test", async () => {
             const { skipper, lobby, ircClient } = await prepare();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             var t = resolveSkiptoAsync(lobby, "p3");
             await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             await TestUtils_1.default.changeHostAsync("p0", lobby);
@@ -402,7 +403,7 @@ describe("HostSkipperTest", function () {
         });
         it("failed *skipto if param isn't userid", async () => {
             const { skipper, lobby, ircClient } = await prepare();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             var t = rejectSkiptoAsync(lobby, 25);
             await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             await TestUtils_1.default.changeHostAsync("p0", lobby);
@@ -459,7 +460,7 @@ describe("HostSkipperTest", function () {
         });
         it("*skip by authorized user test", async () => {
             const { skipper, lobby, ircClient } = await prepare();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             var t = resolveSkipAsync(lobby);
             await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             await TestUtils_1.default.changeHostAsync("p0", lobby);

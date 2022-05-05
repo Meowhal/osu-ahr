@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const parsers_1 = require("../parsers");
+const StatParser_1 = require("../parsers/StatParser");
 const testTexts = [
     "Stats for (Jason)[https://osu.ppy.sh/u/7342098] is Multiplaying:",
     "Score:    18,163,888,782 (#1631)",
@@ -25,15 +25,15 @@ const testTexts = [
     "Accuracy: 0.00%"
 ];
 const expectedResults = [
-    new parsers_1.StatResult("Jason", 7342098, parsers_1.StatStatuses.Multiplaying, 18163888782, 1631, 78245, 100, 97.36),
-    new parsers_1.StatResult("horcrux18", 8778911, parsers_1.StatStatuses.Afk, 584565786, 260177, 5695, 64, 86.94),
-    new parsers_1.StatResult("gviz", 15145414, parsers_1.StatStatuses.Multiplayer, 0, 0, 7, 2, 0),
-    new parsers_1.StatResult("Angel Arrow", 1970239, parsers_1.StatStatuses.Testing, 59315895109, 1006, 104962, 102, 98.16),
-    new parsers_1.StatResult("Foreskin", 3760263, parsers_1.StatStatuses.None, 0, 0, 1, 1, 0),
+    new StatParser_1.StatResult("Jason", 7342098, StatParser_1.StatStatuses.Multiplaying, 18163888782, 1631, 78245, 100, 97.36),
+    new StatParser_1.StatResult("horcrux18", 8778911, StatParser_1.StatStatuses.Afk, 584565786, 260177, 5695, 64, 86.94),
+    new StatParser_1.StatResult("gviz", 15145414, StatParser_1.StatStatuses.Multiplayer, 0, 0, 7, 2, 0),
+    new StatParser_1.StatResult("Angel Arrow", 1970239, StatParser_1.StatStatuses.Testing, 59315895109, 1006, 104962, 102, 98.16),
+    new StatParser_1.StatResult("Foreskin", 3760263, StatParser_1.StatStatuses.None, 0, 0, 1, 1, 0),
 ];
 it("StatParser Test", function () {
     chai_1.assert.equal(testTexts.length, expectedResults.length * 4);
-    const parser = new parsers_1.StatParser();
+    const parser = new StatParser_1.StatParser();
     chai_1.assert.isFalse(parser.isParsed);
     chai_1.assert.isFalse(parser.isParsing);
     chai_1.assert.isNull(parser.result);

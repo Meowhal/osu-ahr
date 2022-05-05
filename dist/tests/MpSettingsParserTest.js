@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
-const parsers_1 = require("../parsers");
+const Player_1 = require("../Player");
+const MpSettingsParser_1 = require("../parsers/MpSettingsParser");
 const MpSettingsCases_1 = require("./cases/MpSettingsCases");
 const log4js_1 = __importDefault(require("log4js"));
 describe("MpSettingsParserTest", function () {
@@ -13,7 +13,7 @@ describe("MpSettingsParserTest", function () {
         log4js_1.default.configure("config/log_mocha_silent.json");
     });
     it("mp settings parse test", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         let b = false;
         chai_1.assert.isFalse(p.isParsing);
         chai_1.assert.isFalse(p.isParsed);
@@ -62,11 +62,11 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[2].isHost, false);
         chai_1.assert.equal(r.players[3].isHost, false);
         chai_1.assert.equal(r.players[4].isHost, false);
-        chai_1.assert.equal(r.players[0].team, __1.Teams.None);
-        chai_1.assert.equal(r.players[1].team, __1.Teams.None);
-        chai_1.assert.equal(r.players[2].team, __1.Teams.None);
-        chai_1.assert.equal(r.players[3].team, __1.Teams.None);
-        chai_1.assert.equal(r.players[4].team, __1.Teams.None);
+        chai_1.assert.equal(r.players[0].team, Player_1.Teams.None);
+        chai_1.assert.equal(r.players[1].team, Player_1.Teams.None);
+        chai_1.assert.equal(r.players[2].team, Player_1.Teams.None);
+        chai_1.assert.equal(r.players[3].team, Player_1.Teams.None);
+        chai_1.assert.equal(r.players[4].team, Player_1.Teams.None);
         chai_1.assert.equal(r.players[0].options, "Host");
         chai_1.assert.equal(r.players[1].options, "Hidden, DoubleTime");
         chai_1.assert.equal(r.players[2].options, "");
@@ -74,7 +74,7 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[4].options, "");
     });
     it("mp settings parse with space test", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: HeadToHead, Win condition: Score"));
@@ -112,11 +112,11 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[3].isHost, false);
         chai_1.assert.equal(r.players[4].isHost, false);
         chai_1.assert.equal(r.players[0].options, "Host");
-        chai_1.assert.equal(r.players[0].team, __1.Teams.None);
+        chai_1.assert.equal(r.players[0].team, Player_1.Teams.None);
         chai_1.assert.equal(r.players[1].options, "Hidden, DoubleTime");
     });
     it("mp settings parse with blackets test", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: HeadToHead, Win condition: Score"));
@@ -157,7 +157,7 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[1].options, "Hidden, DoubleTime");
     });
     it("mp settings none orderd slot test", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: 5* (´・ω・`) host rotate, History: https://osu.ppy.sh/mp/53084403"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/853167 Silent Siren - Hachigatsu no Yoru [August]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: HeadToHead, Win condition: Score"));
@@ -198,7 +198,7 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[1].options, "Hidden, DoubleTime");
     });
     it("mp settings long name (15 characters)", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: 4-5* auto host rotaion, History: https://osu.ppy.sh/mp/54581109"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/1418503 tofubeats - CANDYYYLAND feat LIZ - Pa's Lam System Remix [Nathan's Extra]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: HeadToHead, Win condition: Score"));
@@ -243,7 +243,7 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[7].options, "Hidden");
     });
     it("mp settings host and mods", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: ahr test, History: https://osu.ppy.sh/mp/54598622"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/86920 SID - Ranbu no Melody (TV Size) [Happy's Insane]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: HeadToHead, Win condition: Score"));
@@ -262,7 +262,7 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[0].options, "Host / Hidden, HardRock");
     });
     it("mp settings twice", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: ahr test, History: https://osu.ppy.sh/mp/54598622"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/86920 SID - Ranbu no Melody (TV Size) [Happy's Insane]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: HeadToHead, Win condition: Score"));
@@ -304,7 +304,7 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.notEqual(r1, r2);
     });
     it("mp settings team", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         chai_1.assert.isTrue(p.feedLine("Room name: ahr test, History: https://osu.ppy.sh/mp/54598622"));
         chai_1.assert.isTrue(p.feedLine("Beatmap: https://osu.ppy.sh/b/86920 SID - Ranbu no Melody (TV Size) [Happy's Insane]"));
         chai_1.assert.isTrue(p.feedLine("Team mode: TeamVs, Win condition: Score"));
@@ -322,10 +322,10 @@ describe("MpSettingsParserTest", function () {
         chai_1.assert.equal(r.players[0].id, 8286882);
         chai_1.assert.equal(r.players[0].isHost, true);
         chai_1.assert.equal(r.players[0].options, "Host / Team Blue / Hidden, HardRock");
-        chai_1.assert.equal(r.players[0].team, __1.Teams.Blue);
+        chai_1.assert.equal(r.players[0].team, Player_1.Teams.Blue);
     });
     it("check cases", () => {
-        const p = new parsers_1.MpSettingsParser();
+        const p = new MpSettingsParser_1.MpSettingsParser();
         for (let key in MpSettingsCases_1.MpSettingsCases) {
             const c = MpSettingsCases_1.MpSettingsCases[key];
             for (let t of c.texts) {

@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const parsers_1 = require("../parsers");
-const plugins_1 = require("../plugins");
+const StatParser_1 = require("../parsers/StatParser");
+const AfkKicker_1 = require("../plugins/AfkKicker");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("AfkKicker Tests", function () {
     before(function () {
@@ -13,14 +13,14 @@ describe("AfkKicker Tests", function () {
     });
     async function setupAsync() {
         const li = await TestUtils_1.default.SetupLobbyAsync();
-        const kicker = new plugins_1.AfkKicker(li.lobby, { cooltime_ms: 0, threshold: 6, enabled: true });
+        const kicker = new AfkKicker_1.AfkKicker(li.lobby, { cooltime_ms: 0, threshold: 6, enabled: true });
         return { kicker, ...li };
     }
     it("stat afk test", async () => {
         let { kicker, lobby, ircClient } = await setupAsync();
         let players = (await TestUtils_1.default.AddPlayersAsync(["p1", "p2"], ircClient))
             .map(name => lobby.GetOrMakePlayer(name));
-        ircClient.SetStat(new parsers_1.StatResult(players[0].escaped_name, 100, parsers_1.StatStatuses.Afk));
+        ircClient.SetStat(new StatParser_1.StatResult(players[0].escaped_name, 100, StatParser_1.StatStatuses.Afk));
         chai_1.assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 0);
         chai_1.assert.equal(kicker.playerStats.get(players[1])?.afkPoint, 0);
         lobby.SendMessage("!stat p1");
@@ -58,7 +58,7 @@ describe("AfkKicker Tests", function () {
         let { kicker, lobby, ircClient } = await setupAsync();
         let players = (await TestUtils_1.default.AddPlayersAsync(["p1", "p2"], ircClient))
             .map(name => lobby.GetOrMakePlayer(name));
-        ircClient.SetStat(new parsers_1.StatResult(players[0].escaped_name, 100, parsers_1.StatStatuses.Afk));
+        ircClient.SetStat(new StatParser_1.StatResult(players[0].escaped_name, 100, StatParser_1.StatStatuses.Afk));
         lobby.SendMessage("!stat p1");
         chai_1.assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 3);
         chai_1.assert.equal(kicker.playerStats.get(players[1])?.afkPoint, 0);
@@ -77,7 +77,7 @@ describe("AfkKicker Tests", function () {
         let { kicker, lobby, ircClient } = await setupAsync();
         let players = (await TestUtils_1.default.AddPlayersAsync(["p1", "p2"], ircClient))
             .map(name => lobby.GetOrMakePlayer(name));
-        ircClient.SetStat(new parsers_1.StatResult(players[0].escaped_name, 100, parsers_1.StatStatuses.Afk));
+        ircClient.SetStat(new StatParser_1.StatResult(players[0].escaped_name, 100, StatParser_1.StatStatuses.Afk));
         lobby.SendMessage("!stat p1");
         chai_1.assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 3);
         lobby.SendMessage("!stat p1");
@@ -90,7 +90,7 @@ describe("AfkKicker Tests", function () {
             .map(name => lobby.GetOrMakePlayer(name));
         kicker.option.threshold = 100;
         kicker.option.cooltime_ms = 0;
-        ircClient.SetStat(new parsers_1.StatResult(players[0].escaped_name, 100, parsers_1.StatStatuses.Afk));
+        ircClient.SetStat(new StatParser_1.StatResult(players[0].escaped_name, 100, StatParser_1.StatStatuses.Afk));
         lobby.SendMessage("!stat p1");
         lobby.SendMessage("!stat p1");
         chai_1.assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 6);
@@ -107,7 +107,7 @@ describe("AfkKicker Tests", function () {
             .map(name => lobby.GetOrMakePlayer(name));
         kicker.option.threshold = 100;
         kicker.option.cooltime_ms = 0;
-        ircClient.SetStat(new parsers_1.StatResult(players[0].escaped_name, 100, parsers_1.StatStatuses.Afk));
+        ircClient.SetStat(new StatParser_1.StatResult(players[0].escaped_name, 100, StatParser_1.StatStatuses.Afk));
         lobby.SendMessage("!stat p1");
         chai_1.assert.equal(kicker.playerStats.get(players[0])?.afkPoint, 3);
         kicker.option.enabled = false;

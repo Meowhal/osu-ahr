@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
-const plugins_1 = require("../plugins");
+const Player_1 = require("../Player");
+const MatchAborter_1 = require("../plugins/MatchAborter");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("Match Aboter Tests", function () {
     before(function () {
@@ -21,7 +21,7 @@ describe("Match Aboter Tests", function () {
             auto_abort_rate: 0.5,
             auto_abort_do_abort: true,
         };
-        const ma = new plugins_1.MatchAborter(li.lobby, option);
+        const ma = new MatchAborter_1.MatchAborter(li.lobby, option);
         return { aborter: ma, ...li };
     }
     it("construction test", async () => {
@@ -114,7 +114,7 @@ describe("Match Aboter Tests", function () {
         it("authorized user aborts the match", async () => {
             const { aborter, lobby, ircClient } = await setupAsync(50);
             const players = await TestUtils_1.default.AddPlayersAsync(5, ircClient);
-            lobby.GetOrMakePlayer(players[1]).setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer(players[1]).setRole(Player_1.Roles.Authorized);
             await TestUtils_1.default.changeHostAsync(players[0], lobby);
             ircClient.emulateMatchAsync(10);
             const et = TestUtils_1.default.assertEventFire(lobby.AbortedMatch, null, 10);

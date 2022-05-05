@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapRecaster = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const config_1 = __importDefault(require("config"));
 /**
  * ホストが古いバージョンのマップを選択した際に、コマンドでマップを貼り直して最新版にする。
@@ -22,7 +22,7 @@ class MapRecaster extends LobbyPlugin_1.LobbyPlugin {
     registerEvents() {
         this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player));
         this.lobby.ReceivedBanchoResponse.on(a => {
-            if (a.response.type == parsers_1.BanchoResponseType.BeatmapChanged) {
+            if (a.response.type == CommandParser_1.BanchoResponseType.BeatmapChanged) {
                 this.canRecast = true;
             }
         });

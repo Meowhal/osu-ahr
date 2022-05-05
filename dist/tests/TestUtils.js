@@ -3,8 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const __1 = require("..");
-const dummies_1 = require("../dummies");
+const Lobby_1 = require("../Lobby");
+const IIrcClient_1 = require("../IIrcClient");
+const Player_1 = require("../Player");
+const DummyIrcClient_1 = require("../dummies/DummyIrcClient");
 const chai_1 = require("chai");
 const log4js_1 = __importDefault(require("log4js"));
 class TestUtils {
@@ -14,11 +16,11 @@ class TestUtils {
         this.loggerMode = "";
     }
     async SetupLobbyAsync(logging = false) {
-        const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", this.ownerNickname);
+        const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", this.ownerNickname);
         if (logging) {
-            (0, __1.logIrcEvent)(ircClient);
+            (0, IIrcClient_1.logIrcEvent)(ircClient);
         }
-        const lobby = new __1.Lobby(ircClient);
+        const lobby = new Lobby_1.Lobby(ircClient);
         await lobby.MakeLobbyAsync(this.lobbyName);
         return { lobby, ircClient };
     }
@@ -192,7 +194,7 @@ class TestUtils {
                 return;
             }
             chai_1.assert.isTrue(lobby.players.has(p));
-            chai_1.assert.isTrue(p.is(__1.Roles.Player));
+            chai_1.assert.isTrue(p.is(Player_1.Roles.Player));
             chai_1.assert.equal(p.isHost, r.isHost);
         }
     }

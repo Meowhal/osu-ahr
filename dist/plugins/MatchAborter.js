@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MatchAborter = void 0;
-const parsers_1 = require("../parsers");
+const StatParser_1 = require("../parsers/StatParser");
 const Player_1 = require("../Player");
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const config_1 = __importDefault(require("config"));
@@ -132,7 +132,7 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
             if (p.mpstatus == Player_1.MpStatuses.Playing) {
                 try {
                     const stat = await this.lobby.RequestStatAsync(p, true);
-                    if (stat.status == parsers_1.StatStatuses.Multiplaying) {
+                    if (stat.status == StatParser_1.StatStatuses.Multiplaying) {
                         this.startTimer();
                         return;
                     }

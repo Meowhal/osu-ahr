@@ -4,9 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
-const dummies_1 = require("../dummies");
-const parsers_1 = require("../parsers");
+const Lobby_1 = require("../Lobby");
+const Player_1 = require("../Player");
+const DummyIrcClient_1 = require("../dummies/DummyIrcClient");
+const DummyLobbyPlugin_1 = require("../dummies/DummyLobbyPlugin");
+const StatParser_1 = require("../parsers/StatParser");
 const MpSettingsCases_1 = require("./cases/MpSettingsCases");
 const log4js_1 = __importDefault(require("log4js"));
 const TestUtils_1 = __importDefault(require("./TestUtils"));
@@ -16,8 +18,8 @@ describe("LobbyTest", function () {
     });
     // テスト用にロビー作成済み、プレイヤー追加済みのロビーを作成する。
     async function PrepareLobbyWith3Players() {
-        const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-        const lobby = new __1.Lobby(ircClient);
+        const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+        const lobby = new Lobby_1.Lobby(ircClient);
         await lobby.MakeLobbyAsync("test");
         const pids = ["user1", "user2", "user3"];
         const players = [];
@@ -34,23 +36,23 @@ describe("LobbyTest", function () {
     describe("lobby management tests", function () {
         // ロビー作成、ロビー終了テスト
         it("make&close lobby test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
             //logIrcEvent(ircClient);
-            const lobby = new __1.Lobby(ircClient);
+            const lobby = new Lobby_1.Lobby(ircClient);
             const name = "test";
             const id = await lobby.MakeLobbyAsync(name);
             chai_1.assert.equal(lobby.lobbyId, id);
             chai_1.assert.equal(lobby.channel, ircClient.channel);
             chai_1.assert.equal(lobby.lobbyName, name);
-            chai_1.assert.equal(lobby.status, __1.LobbyStatus.Entered);
+            chai_1.assert.equal(lobby.status, Lobby_1.LobbyStatus.Entered);
             lobby.SendMessage("!mp password");
             lobby.SendMessage("!mp invite gnsksz");
             await lobby.CloseLobbyAsync();
         });
         // 名前無しロビーの作成
         it("try to make no name lobby test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-            const lobby = new __1.Lobby(ircClient);
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+            const lobby = new Lobby_1.Lobby(ircClient);
             const name = "";
             try {
                 await lobby.MakeLobbyAsync(name);
@@ -60,8 +62,8 @@ describe("LobbyTest", function () {
         });
         // ロビーを二回作成
         it("make lobby twice test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-            const lobby = new __1.Lobby(ircClient);
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+            const lobby = new Lobby_1.Lobby(ircClient);
             try {
                 lobby.MakeLobbyAsync("1");
                 lobby.MakeLobbyAsync("2");
@@ -71,8 +73,8 @@ describe("LobbyTest", function () {
         });
         // 無効な状態でロビーを閉じる
         it("close unopened lobby test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-            const lobby = new __1.Lobby(ircClient);
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+            const lobby = new Lobby_1.Lobby(ircClient);
             try {
                 await lobby.CloseLobbyAsync();
                 chai_1.assert.fail();
@@ -83,9 +85,9 @@ describe("LobbyTest", function () {
     describe("join left tests", function () {
         // プレイヤーの入室
         it("player join test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
             //logIrcEvent(ircClient);
-            const lobby = new __1.Lobby(ircClient);
+            const lobby = new Lobby_1.Lobby(ircClient);
             await lobby.MakeLobbyAsync("test");
             // プレイヤー追加
             const players = ["user1", "user 2", "user_3"];
@@ -109,13 +111,13 @@ describe("LobbyTest", function () {
                 // 参加者が一致しているか調べる
                 chai_1.assert.isTrue(players.includes(p.name));
                 // プレイヤーの状態をチェック
-                chai_1.assert.equal(p.role, __1.Roles.Player);
+                chai_1.assert.equal(p.role, Player_1.Roles.Player);
                 chai_1.assert.isFalse(p.isAuthorized);
                 chai_1.assert.isFalse(p.isCreator);
                 chai_1.assert.isFalse(p.isHost);
                 chai_1.assert.isFalse(p.isReferee);
-                chai_1.assert.equal(p.mpstatus, __1.MpStatuses.InLobby);
-                chai_1.assert.equal(p.team, __1.Teams.None);
+                chai_1.assert.equal(p.mpstatus, Player_1.MpStatuses.InLobby);
+                chai_1.assert.equal(p.team, Player_1.Teams.None);
             }
         });
         // プレイヤーの退出　一人
@@ -138,9 +140,9 @@ describe("LobbyTest", function () {
         });
         // 入退出
         it("player join&left test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
             //logIrcEvent(ircClient);
-            const lobby = new __1.Lobby(ircClient);
+            const lobby = new Lobby_1.Lobby(ircClient);
             await lobby.MakeLobbyAsync("test");
             const players = ["user1", "user 2", "user_3"];
             await ircClient.emulateAddPlayerAsync(players[0]);
@@ -157,8 +159,8 @@ describe("LobbyTest", function () {
         });
         // 想定外の入室/退室
         it("unexpected join and left test", async () => {
-            const ircClient = new dummies_1.DummyIrcClient("osu_irc_server", "creator");
-            const lobby = new __1.Lobby(ircClient);
+            const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", "creator");
+            const lobby = new Lobby_1.Lobby(ircClient);
             await lobby.MakeLobbyAsync("test");
             let f = 0;
             lobby.UnexpectedAction.on(err => {
@@ -579,7 +581,7 @@ describe("LobbyTest", function () {
             await TestUtils_1.default.AddPlayersAsync([ircClient.nick], ircClient);
             const players = await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             const t = TestUtils_1.default.assertEventFire(lobby.ParsedStat, null, 10);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Multiplayer));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Multiplayer));
             ircClient.emulateChatAsync("p1", "!stats p1");
             await t;
         });
@@ -588,7 +590,7 @@ describe("LobbyTest", function () {
             await TestUtils_1.default.AddPlayersAsync([ircClient.nick], ircClient);
             const players = await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             const t = TestUtils_1.default.assertEventNeverFire(lobby.ParsedStat, null, 10);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Multiplayer));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Multiplayer));
             ircClient.emulateChatAsync("p1", "!stats p100");
             await t;
         });
@@ -597,14 +599,14 @@ describe("LobbyTest", function () {
             await TestUtils_1.default.AddPlayersAsync([ircClient.nick], ircClient);
             const players = await TestUtils_1.default.AddPlayersAsync(5, ircClient);
             const t = TestUtils_1.default.assertEventFire(lobby.ParsedStat, null, 10);
-            ircClient.SetStat(new parsers_1.StatResult("p1", 0, parsers_1.StatStatuses.Multiplayer));
+            ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Multiplayer));
             ircClient.emulateChatAsync(ircClient.nick, "!stats p1");
             await t;
         });
     });
     it.skip("plugin test", async () => {
         const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
-        const lp = new dummies_1.DummyLobbyPlugin(lobby);
+        const lp = new DummyLobbyPlugin_1.DummyLobbyPlugin(lobby);
         console.log(lobby.GetLobbyStatus());
     });
     // mpコマンドの実行状況に応じて変更される状態に関するテスト

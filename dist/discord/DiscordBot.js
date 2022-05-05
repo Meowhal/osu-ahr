@@ -16,7 +16,7 @@ const config_1 = __importDefault(require("config"));
 const OahrDiscord_1 = require("./OahrDiscord");
 const DiscordAppender_1 = require("./DiscordAppender");
 const BotCommand_1 = require("./BotCommand");
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const logger = log4js_1.default.getLogger("discord");
 const ADMIN_ROLE = {
     name: "ahr-admin",
@@ -385,11 +385,11 @@ class DiscordBot {
         let lid = ahr.lobby.channel;
         const updateHandler = (a) => {
             switch (a.response.type) {
-                case parsers_1.BanchoResponseType.BeatmapChanged:
-                case parsers_1.BanchoResponseType.MatchStarted:
-                case parsers_1.BanchoResponseType.MatchFinished:
-                case parsers_1.BanchoResponseType.AbortedMatch:
-                case parsers_1.BanchoResponseType.HostChanged:
+                case CommandParser_1.BanchoResponseType.BeatmapChanged:
+                case CommandParser_1.BanchoResponseType.MatchStarted:
+                case CommandParser_1.BanchoResponseType.MatchFinished:
+                case CommandParser_1.BanchoResponseType.AbortedMatch:
+                case CommandParser_1.BanchoResponseType.HostChanged:
                     this.updateMatchSummary(ahr);
                     break;
             }

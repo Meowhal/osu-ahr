@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
+const Player_1 = require("../Player");
 const FakeBeatmapFetcher_1 = require("../dummies/FakeBeatmapFetcher");
 const Modes_1 = require("../Modes");
-const plugins_1 = require("../plugins");
+const MapChecker_1 = require("../plugins/MapChecker");
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("Map Checker Tests", function () {
@@ -30,7 +30,7 @@ describe("Map Checker Tests", function () {
         };
         option = { ...defaultOption, ...option };
         const li = await TestUtils_1.default.SetupLobbyAsync();
-        const checker = new plugins_1.MapChecker(li.lobby, option);
+        const checker = new MapChecker_1.MapChecker(li.lobby, option);
         await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], li.ircClient);
         return { checker, ...li };
     }
@@ -278,7 +278,7 @@ describe("Map Checker Tests", function () {
     describe("owner command tests", () => {
         it("command: enabled ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.enabled = true;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation enabled");
             chai_1.assert.equal(checker.option.enabled, true);
@@ -291,7 +291,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: num_violations_allowed ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.num_violations_allowed = 1;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation num_violations_allowed 3");
             chai_1.assert.equal(checker.option.num_violations_allowed, 3);
@@ -313,7 +313,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: star_min ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.star_min = 1;
             checker.option.star_max = 5;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation star_min 3");
@@ -351,7 +351,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: star_max ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.star_min = 3;
             checker.option.star_max = 5;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation star_max 4");
@@ -391,7 +391,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: length_min ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.length_min = 1;
             checker.option.length_max = 5;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation length_min 3");
@@ -429,7 +429,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: length_max ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.length_min = 3;
             checker.option.length_max = 5;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation length_max 4");
@@ -469,7 +469,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: gamemode ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             let initialValue = Modes_1.PlayMode.OsuMania;
             checker.option.gamemode = initialValue;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation gamemode osu");
@@ -526,7 +526,7 @@ describe("Map Checker Tests", function () {
         });
         it("command: allow_convert ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.allow_convert = false;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation allow_convert");
             chai_1.assert.equal(checker.option.allow_convert, true);
@@ -539,7 +539,7 @@ describe("Map Checker Tests", function () {
         });
         it("command  statement ", async () => {
             const { checker, lobby, ircClient } = await setup();
-            lobby.GetOrMakePlayer("p1").setRole(__1.Roles.Authorized);
+            lobby.GetOrMakePlayer("p1").setRole(Player_1.Roles.Authorized);
             checker.option.allow_convert = false;
             ircClient.emulateMessage("p1", ircClient.channel, "*regulation starmax=10 starmin=1 maxlen=100 lenmin = 20 gamemode= osu");
             chai_1.assert.equal(checker.option.gamemode, Modes_1.PlayMode.Osu);

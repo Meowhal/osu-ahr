@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logPrivateMessage = exports.logIrcEvent = void 0;
-const parsers_1 = require("./parsers");
+const StatParser_1 = require("./parsers/StatParser");
 const log4js_1 = __importDefault(require("log4js"));
 const ircLogger = log4js_1.default.getLogger("irc");
 const pmLogger = log4js_1.default.getLogger("PMLogger");
@@ -48,7 +48,7 @@ exports.logIrcEvent = logIrcEvent;
 function logPrivateMessage(client) {
     client.on("message", (from, to, message) => {
         if (to == client.nick) {
-            if ((0, parsers_1.IsStatResponse)(message)) {
+            if ((0, StatParser_1.IsStatResponse)(message)) {
                 pmLogger.trace(`pm ${from} -> ${message}`);
             }
             else {

@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrDiscord = void 0;
-const __1 = require("..");
+const Lobby_1 = require("../Lobby");
 const log4js_1 = __importDefault(require("log4js"));
 const OahrBase_1 = require("../cli/OahrBase");
 const discord_js_1 = require("discord.js");
@@ -60,7 +60,7 @@ class OahrDiscord extends OahrBase_1.OahrBase {
         const name = lobby.lobbyName ?? "";
         const host = lobby.host?.name ?? "none";
         const embed = new discord_js_1.MessageEmbed().setColor("BLURPLE").setTitle("Lobby Information - " + name).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
-        embed.addField("lobby", `id:${lid}, status:${__1.LobbyStatus[lobby.status]}, host:${host}, players:${lobby.players.size}, name:${name}`);
+        embed.addField("lobby", `id:${lid}, status:${Lobby_1.LobbyStatus[lobby.status]}, host:${host}, players:${lobby.players.size}, name:${name}`);
         const refs = Array.from(lobby.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(",");
         if (refs) {
             embed.addField("referee", refs, false);
@@ -85,7 +85,7 @@ class OahrDiscord extends OahrBase_1.OahrBase {
     }
     createSummaryInfoEmbed() {
         const lobby = this.lobby;
-        const stat = lobby.status == __1.LobbyStatus.Left ? LOBBY_STAT.closed : lobby.isMatching ? LOBBY_STAT.match : LOBBY_STAT.idle;
+        const stat = lobby.status == Lobby_1.LobbyStatus.Left ? LOBBY_STAT.closed : lobby.isMatching ? LOBBY_STAT.match : LOBBY_STAT.idle;
         const lid = lobby.lobbyId ?? "";
         const name = lobby.lobbyName ?? "";
         const host = lobby.host?.name ?? "none";

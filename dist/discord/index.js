@@ -25,16 +25,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const log4js_1 = __importDefault(require("log4js"));
 const DiscordBot_1 = require("./DiscordBot");
-const __1 = require("..");
+const IIrcClient_1 = require("../IIrcClient");
 const irc = __importStar(require("../libs/irc"));
 const TypedConfig_1 = require("../TypedConfig");
-const IIrcClient_1 = require("../IIrcClient");
+const IIrcClient_2 = require("../IIrcClient");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
 const logger = log4js_1.default.getLogger("cli");
 console.log("starting up...");
 const config_path = "./config/log_discord.json";
+log4js_1.default.configure(config_path);
 try {
-    log4js_1.default.configure(config_path);
     const c = (0, TypedConfig_1.getIrcConfig)();
     if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
         logger.error("you must enter your account name and irc password in the config file. ");
@@ -51,8 +51,8 @@ try {
         }
     });
     (0, ChatLimiter_1.applySpeedLimit)(ircClient, 10, 5000);
-    (0, __1.logIrcEvent)(ircClient);
-    (0, IIrcClient_1.logPrivateMessage)(ircClient);
+    (0, IIrcClient_1.logIrcEvent)(ircClient);
+    (0, IIrcClient_2.logPrivateMessage)(ircClient);
     let discordClient = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
     const bot = new DiscordBot_1.DiscordBot(ircClient, discordClient);
     bot.start();

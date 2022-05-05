@@ -5,12 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseMapcheckerOwnerCommand = exports.MapValidator = exports.secToTimeNotation = exports.MapChecker = void 0;
 const config_1 = __importDefault(require("config"));
-const _1 = require(".");
+const LobbyPlugin_1 = require("./LobbyPlugin");
 const OptionValidator_1 = require("../libs/OptionValidator");
 const Modes_1 = require("../Modes");
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
-class MapChecker extends _1.LobbyPlugin {
+class MapChecker extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "MapChecker", "mapChecker");
         this.lastMapId = 0;
@@ -30,16 +30,16 @@ class MapChecker extends _1.LobbyPlugin {
         this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player));
         this.lobby.ReceivedBanchoResponse.on(a => {
             switch (a.response.type) {
-                case parsers_1.BanchoResponseType.BeatmapChanged:
+                case CommandParser_1.BanchoResponseType.BeatmapChanged:
                     this.onBeatmapChanged(a.response.params[0], a.response.params[1]);
                     break;
-                case parsers_1.BanchoResponseType.HostChanged:
+                case CommandParser_1.BanchoResponseType.HostChanged:
                     this.cancelCheck();
                     break;
-                case parsers_1.BanchoResponseType.BeatmapChanging:
+                case CommandParser_1.BanchoResponseType.BeatmapChanging:
                     this.checkingMapId = 0;
                     break;
-                case parsers_1.BanchoResponseType.MatchStarted:
+                case CommandParser_1.BanchoResponseType.MatchStarted:
                     this.onMatchStarted();
                     break;
             }

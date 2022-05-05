@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const __1 = require("..");
-const plugins_1 = require("../plugins");
+const Player_1 = require("../Player");
+const AutoHostSelector_1 = require("../plugins/AutoHostSelector");
 const MpSettingsCases_1 = require("./cases/MpSettingsCases");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe("AutoHostSelectorTest", function () {
@@ -13,11 +13,11 @@ describe("AutoHostSelectorTest", function () {
         TestUtils_1.default.configMochaAsSilent();
     });
     this.afterEach(() => {
-        plugins_1.DENY_LIST.players.clear();
+        AutoHostSelector_1.DENY_LIST.players.clear();
     });
     async function prepareSelector(logIrc = false) {
         const { lobby, ircClient } = await TestUtils_1.default.SetupLobbyAsync();
-        return { selector: new plugins_1.AutoHostSelector(lobby, { deny_list: [] }), lobby, ircClient };
+        return { selector: new AutoHostSelector_1.AutoHostSelector(lobby, { deny_list: [] }), lobby, ircClient };
     }
     function assertStateIs(state, s) {
         const l = s.lobby;
@@ -782,7 +782,7 @@ describe("AutoHostSelectorTest", function () {
     describe("denylist tests", function () {
         it("denied player should ignore test", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             chai_1.assert.equal(selector.hostQueue.length, 4);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p1"));
@@ -793,7 +793,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("transfer host to denied player test", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             chai_1.assert.equal(selector.hostQueue.length, 4);
             TestUtils_1.default.assertHost("p1", lobby);
@@ -809,8 +809,8 @@ describe("AutoHostSelectorTest", function () {
         });
         it("only denied player test", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             chai_1.assert.equal(selector.hostQueue.length, 3);
             TestUtils_1.default.assertHost("p1", lobby);
@@ -828,8 +828,8 @@ describe("AutoHostSelectorTest", function () {
         });
         it("only denied player -> join someone test", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             chai_1.assert.equal(selector.hostQueue.length, 3);
             await ircClient.emulateRemovePlayerAsync("p1");
@@ -843,7 +843,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("skipto command test", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             selector.SendPluginMessage("skipto", ["p3"]);
             TestUtils_1.default.assertHost("p3", lobby);
@@ -856,7 +856,7 @@ describe("AutoHostSelectorTest", function () {
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             TestUtils_1.default.assertHost("p1", lobby);
             chai_1.assert.equal(selector.hostQueue.length, 5);
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
             chai_1.assert.equal(selector.hostQueue.length, 4);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p1"));
             chai_1.assert.equal(selector.hostQueue[1], lobby.GetOrMakePlayer("p2"));
@@ -868,7 +868,7 @@ describe("AutoHostSelectorTest", function () {
             const { selector, lobby, ircClient } = await prepareSelector();
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             TestUtils_1.default.assertHost("p1", lobby);
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p1"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p1"));
             TestUtils_1.default.assertHost("p2", lobby);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p2"));
             chai_1.assert.equal(selector.hostQueue[1], lobby.GetOrMakePlayer("p3"));
@@ -885,9 +885,9 @@ describe("AutoHostSelectorTest", function () {
             await ircClient.emulateRemovePlayerAsync("p2");
             await ircClient.emulateRemovePlayerAsync("p3");
             TestUtils_1.default.assertHost("p4", lobby);
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
             TestUtils_1.default.assertHost("p4", lobby);
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
             chai_1.assert.equal(selector.hostQueue.length, 0);
             chai_1.assert.isNull(lobby.host);
             lobby.destroy();
@@ -895,10 +895,10 @@ describe("AutoHostSelectorTest", function () {
         it("remove player from denlylist test", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
             TestUtils_1.default.assertHost("p1", lobby);
             chai_1.assert.equal(selector.hostQueue.length, 4);
-            plugins_1.DENY_LIST.removePlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.removePlayer(lobby.GetOrMakePlayer("p3"));
             chai_1.assert.equal(selector.hostQueue.length, 5);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p1"));
             chai_1.assert.equal(selector.hostQueue[1], lobby.GetOrMakePlayer("p2"));
@@ -910,13 +910,13 @@ describe("AutoHostSelectorTest", function () {
         it("remove player from denlylist test - no one in queue", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p1"));
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p2"));
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p1"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p2"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
             chai_1.assert.equal(selector.hostQueue.length, 0);
-            plugins_1.DENY_LIST.removePlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.removePlayer(lobby.GetOrMakePlayer("p3"));
             chai_1.assert.equal(selector.hostQueue.length, 1);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p3"));
             TestUtils_1.default.assertHost("p3", lobby);
@@ -924,7 +924,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("slotbase reoder test1", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             chai_1.assert.equal(selector.hostQueue.length, 4);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p1"));
@@ -935,7 +935,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("slotbase reoder test2", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p4"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_2);
             chai_1.assert.equal(selector.hostQueue.length, 4);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p3"));
@@ -946,7 +946,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("slotbase reoder test - host is denied", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p3"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_2);
             chai_1.assert.equal(selector.hostQueue.length, 4);
             chai_1.assert.equal(selector.hostQueue[0], lobby.GetOrMakePlayer("p1"));
@@ -957,7 +957,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("modify order test - stay", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p5"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_3);
             chai_1.assert.equal(selector.hostQueue.length, 4);
@@ -969,7 +969,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("modify order test - leave", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p1"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p1"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_3);
             chai_1.assert.equal(selector.hostQueue.length, 5);
@@ -982,7 +982,7 @@ describe("AutoHostSelectorTest", function () {
         });
         it("modify order test - join", async () => {
             const { selector, lobby, ircClient } = await prepareSelector();
-            plugins_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p7"));
+            AutoHostSelector_1.DENY_LIST.addPlayer(lobby.GetOrMakePlayer("p7"));
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
             await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_3);
             chai_1.assert.equal(selector.hostQueue.length, 4);
@@ -996,78 +996,78 @@ describe("AutoHostSelectorTest", function () {
             it("add test", async () => {
                 const { selector, lobby, ircClient } = await prepareSelector();
                 await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 0);
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 0);
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p1");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 1);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, "p1");
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 1);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, "p1");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p2 sfd");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 2);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2 sfd"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 2);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2 sfd"));
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 2);
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 2);
                 let un = "asdf    hello";
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist     add    " + un);
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 3);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)(un));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 3);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)(un));
                 lobby.destroy();
             });
             it("add twice test", async () => {
                 const { selector, lobby, ircClient } = await prepareSelector();
                 await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 0);
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 0);
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p1");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 1);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, "p1");
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 1);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, "p1");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p1");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 1);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, "p1");
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 1);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, "p1");
                 lobby.destroy();
             });
             it("remove test", async () => {
                 const { selector, lobby, ircClient } = await prepareSelector();
                 await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 0);
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 0);
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p1");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p2 piyo");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p3 HOGE");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 3);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p1"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2 piyo"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p3 HOGE"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 3);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p1"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2 piyo"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p3 HOGE"));
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist remove p1");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 2);
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p1"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2 piyo"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p3 HOGE"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 2);
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p1"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2 piyo"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p3 HOGE"));
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist remove p2 piyo");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 1);
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p1"));
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2 piyo"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p3 HOGE"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 1);
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p1"));
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2 piyo"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p3 HOGE"));
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist    remove     p3 hoge");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 0);
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p1"));
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2 piyo"));
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p3 HOGE"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 0);
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p1"));
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2 piyo"));
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p3 HOGE"));
                 lobby.destroy();
             });
             it("remove twice test", async () => {
                 const { selector, lobby, ircClient } = await prepareSelector();
                 await ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1);
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 0);
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 0);
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p1");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p2");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist add p3");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 3);
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p1"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p3"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 3);
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p1"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p3"));
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist remove p1");
                 TestUtils_1.default.sendMessageAsOwner(lobby, "*denylist remove p1");
-                chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 2);
-                chai_1.assert.notInclude(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p1"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p2"));
-                chai_1.assert.include(plugins_1.DENY_LIST.players, (0, __1.escapeUserName)("p3"));
+                chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 2);
+                chai_1.assert.notInclude(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p1"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p2"));
+                chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)("p3"));
                 lobby.destroy();
             });
         });
@@ -1076,15 +1076,15 @@ describe("AutoHostSelectorTest", function () {
             const b = await prepareSelector();
             await a.ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_1); // p1 p2 p3 p4 p5
             await b.ircClient.emulateMpSettings(MpSettingsCases_1.MpSettingsCases.case1_3); // p6 p2 p4 p5 p7
-            chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 0);
+            chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 0);
             chai_1.assert.equal(a.selector.hostQueue.length, 5);
             chai_1.assert.equal(b.selector.hostQueue.length, 5);
-            plugins_1.DENY_LIST.addPlayer(a.lobby.GetOrMakePlayer("p1"));
-            chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 1);
+            AutoHostSelector_1.DENY_LIST.addPlayer(a.lobby.GetOrMakePlayer("p1"));
+            chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 1);
             chai_1.assert.equal(a.selector.hostQueue.length, 4);
             chai_1.assert.equal(b.selector.hostQueue.length, 5);
-            plugins_1.DENY_LIST.addPlayer(a.lobby.GetOrMakePlayer("p2"));
-            chai_1.assert.equal(plugins_1.DENY_LIST.players.size, 2);
+            AutoHostSelector_1.DENY_LIST.addPlayer(a.lobby.GetOrMakePlayer("p2"));
+            chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 2);
             chai_1.assert.equal(a.selector.hostQueue.length, 3);
             chai_1.assert.equal(b.selector.hostQueue.length, 4);
             chai_1.assert.equal(a.selector.hostQueue[0], a.lobby.GetOrMakePlayer("p3"));

@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoHostSelector = exports.DENY_LIST = void 0;
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const Player_1 = require("../Player");
-const libs_1 = require("../libs");
+const TypedEvent_1 = require("../libs/TypedEvent");
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const config_1 = __importDefault(require("config"));
 const log4js_1 = __importDefault(require("log4js"));
@@ -17,8 +17,8 @@ const log4js_1 = __importDefault(require("log4js"));
 class DenyList {
     constructor() {
         this.players = new Set();
-        this.playerAdded = new libs_1.TypedEvent();
-        this.playerRemoved = new libs_1.TypedEvent();
+        this.playerAdded = new TypedEvent_1.TypedEvent();
+        this.playerRemoved = new TypedEvent_1.TypedEvent();
         this.logger = log4js_1.default.getLogger("DenyList");
     }
     addPlayer(player) {
@@ -55,7 +55,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         this.hostQueue = [];
         this.needsRotate = true;
         this.mapChanger = null;
-        this.orderChanged = new libs_1.TypedEvent();
+        this.orderChanged = new TypedEvent_1.TypedEvent();
         this.eventDisposers = [];
         const d = config_1.default.get(this.pluginName);
         this.option = { ...d, ...option };
@@ -76,13 +76,13 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         this.eventDisposers.push(this.lobby.FixedSettings.on(a => this.onFixedSettings(a.result, a.playersIn, a.playersOut, a.hostChanged)));
         this.eventDisposers.push(this.lobby.ReceivedBanchoResponse.on(a => {
             switch (a.response.type) {
-                case parsers_1.BanchoResponseType.BeatmapChanging:
+                case CommandParser_1.BanchoResponseType.BeatmapChanging:
                     this.onBeatmapChanging();
                     break;
-                case parsers_1.BanchoResponseType.MatchStarted:
+                case CommandParser_1.BanchoResponseType.MatchStarted:
                     this.onMatchStarted();
                     break;
-                case parsers_1.BanchoResponseType.MatchFinished:
+                case CommandParser_1.BanchoResponseType.MatchFinished:
                     this.onMatchFinished();
                     break;
             }

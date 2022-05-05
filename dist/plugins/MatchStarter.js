@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MatchStarter = void 0;
-const parsers_1 = require("../parsers");
+const CommandParser_1 = require("../parsers/CommandParser");
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const VoteCounter_1 = require("./VoteCounter");
 const config_1 = __importDefault(require("config"));
@@ -24,10 +24,10 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         this.lobby.PluginMessage.on(a => this.onPluginMessage(a.type, a.args, a.src));
         this.lobby.ReceivedBanchoResponse.on(a => {
             switch (a.response.type) {
-                case parsers_1.BanchoResponseType.AllPlayerReady:
+                case CommandParser_1.BanchoResponseType.AllPlayerReady:
                     this.onAllPlayerReady();
                     break;
-                case parsers_1.BanchoResponseType.MatchStarted:
+                case CommandParser_1.BanchoResponseType.MatchStarted:
                     this.stopTimer();
                     break;
             }

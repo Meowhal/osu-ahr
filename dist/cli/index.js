@@ -25,10 +25,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const OahrCli_1 = require("./OahrCli");
 const OahrHeadless_1 = require("./OahrHeadless");
 const irc = __importStar(require("../libs/irc"));
-const __1 = require("..");
+const IIrcClient_1 = require("../IIrcClient");
 const TypedConfig_1 = require("../TypedConfig");
 const log4js_1 = __importDefault(require("log4js"));
-const IIrcClient_1 = require("../IIrcClient");
+const IIrcClient_2 = require("../IIrcClient");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
 const logger = log4js_1.default.getLogger("cli");
 console.log("starting up...");
@@ -53,8 +53,8 @@ try {
         }
     });
     (0, ChatLimiter_1.applySpeedLimit)(client, 10, 5000);
-    (0, __1.logIrcEvent)(client);
-    (0, IIrcClient_1.logPrivateMessage)(client);
+    (0, IIrcClient_1.logIrcEvent)(client);
+    (0, IIrcClient_2.logPrivateMessage)(client);
     if (process.argv.length > 2) {
         const command = process.argv[2];
         const oahr = new OahrHeadless_1.OahrHeadless(client);

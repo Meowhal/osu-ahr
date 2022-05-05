@@ -4,11 +4,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrBase = void 0;
-const __1 = require("..");
+const Lobby_1 = require("../Lobby");
 const config_1 = __importDefault(require("config"));
 const log4js_1 = __importDefault(require("log4js"));
-const plugins_1 = require("../plugins");
-const parsers_1 = require("../parsers");
+const AutoHostSelector_1 = require("../plugins/AutoHostSelector");
+const MatchStarter_1 = require("../plugins/MatchStarter");
+const HostSkipper_1 = require("../plugins/HostSkipper");
+const LobbyTerminator_1 = require("../plugins/LobbyTerminator");
+const MatchAborter_1 = require("../plugins/MatchAborter");
+const WordCounter_1 = require("../plugins/WordCounter");
+const MapRecaster_1 = require("../plugins/MapRecaster");
+const InOutLogger_1 = require("../plugins/InOutLogger");
+const AutoStartTimer_1 = require("../plugins/AutoStartTimer");
+const HistoryLoader_1 = require("../plugins/HistoryLoader");
+const MapChecker_1 = require("../plugins/MapChecker");
+const LobbyKeeper_1 = require("../plugins/LobbyKeeper");
+const AfkKicker_1 = require("../plugins/AfkKicker");
+const MiscLoader_1 = require("../plugins/MiscLoader");
+const CommandParser_1 = require("../parsers/CommandParser");
 const CacheCleaner_1 = require("../plugins/CacheCleaner");
 const logger = log4js_1.default.getLogger("cli");
 const OahrCliDefaultOption = config_1.default.get("OahrCli");
@@ -16,21 +29,21 @@ class OahrBase {
     constructor(client) {
         this.option = OahrCliDefaultOption;
         this.client = client;
-        this.lobby = new __1.Lobby(this.client);
-        this.selector = new plugins_1.AutoHostSelector(this.lobby);
-        this.starter = new plugins_1.MatchStarter(this.lobby);
-        this.skipper = new plugins_1.HostSkipper(this.lobby);
-        this.terminator = new plugins_1.LobbyTerminator(this.lobby);
-        this.aborter = new plugins_1.MatchAborter(this.lobby);
-        this.wordCounter = new plugins_1.WordCounter(this.lobby);
-        this.inoutLogger = new plugins_1.InOutLogger(this.lobby);
-        this.autoTimer = new plugins_1.AutoStartTimer(this.lobby);
-        this.recaster = new plugins_1.MapRecaster(this.lobby);
-        this.history = new plugins_1.HistoryLoader(this.lobby);
-        this.miscLoader = new plugins_1.MiscLoader(this.lobby);
-        this.checker = new plugins_1.MapChecker(this.lobby);
-        this.keeper = new plugins_1.LobbyKeeper(this.lobby);
-        this.afkkicker = new plugins_1.AfkKicker(this.lobby);
+        this.lobby = new Lobby_1.Lobby(this.client);
+        this.selector = new AutoHostSelector_1.AutoHostSelector(this.lobby);
+        this.starter = new MatchStarter_1.MatchStarter(this.lobby);
+        this.skipper = new HostSkipper_1.HostSkipper(this.lobby);
+        this.terminator = new LobbyTerminator_1.LobbyTerminator(this.lobby);
+        this.aborter = new MatchAborter_1.MatchAborter(this.lobby);
+        this.wordCounter = new WordCounter_1.WordCounter(this.lobby);
+        this.inoutLogger = new InOutLogger_1.InOutLogger(this.lobby);
+        this.autoTimer = new AutoStartTimer_1.AutoStartTimer(this.lobby);
+        this.recaster = new MapRecaster_1.MapRecaster(this.lobby);
+        this.history = new HistoryLoader_1.HistoryLoader(this.lobby);
+        this.miscLoader = new MiscLoader_1.MiscLoader(this.lobby);
+        this.checker = new MapChecker_1.MapChecker(this.lobby);
+        this.keeper = new LobbyKeeper_1.LobbyKeeper(this.lobby);
+        this.afkkicker = new AfkKicker_1.AfkKicker(this.lobby);
         this.cleaner = new CacheCleaner_1.CacheCleaner(this.lobby);
         this.lobby.RaisePluginsLoaded();
     }
@@ -69,7 +82,7 @@ class OahrBase {
     async enterLobbyAsync(id) {
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
-        const channel = parsers_1.parser.EnsureMpChannelId(id);
+        const channel = CommandParser_1.parser.EnsureMpChannelId(id);
         logger.info("Entering lobby, channel : %s", channel);
         await this.lobby.EnterLobbyAsync(channel);
         await this.lobby.LoadMpSettingsAsync();

@@ -21,8 +21,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConnectionServerTrial = exports.trial = void 0;
 const irc = __importStar(require("../libs/irc"));
-const __1 = require("..");
-const parsers_1 = require("../parsers");
+const IIrcClient_1 = require("../IIrcClient");
+const CommandParser_1 = require("../parsers/CommandParser");
 const TypedConfig_1 = require("../TypedConfig");
 function trial() {
     const c = (0, TypedConfig_1.getIrcConfig)();
@@ -35,7 +35,7 @@ function trial() {
     });
     bot.on('pm', function (nick, message) {
         console.log('Got private message from %s: %s', nick, message);
-        const v = parsers_1.parser.ParseMpMakeResponse(nick, message);
+        const v = CommandParser_1.parser.ParseMpMakeResponse(nick, message);
         if (v != null) {
             console.log(`--- parsed pm id=${v.id} title=${v.title}`);
         }
@@ -71,7 +71,7 @@ exports.trial = trial;
 function ConnectionServerTrial() {
     const c = (0, TypedConfig_1.getIrcConfig)();
     const bot = new irc.Client(c.server, c.nick, c.opt);
-    (0, __1.logIrcEvent)(bot);
+    (0, IIrcClient_1.logIrcEvent)(bot);
     console.log("hostmask => " + bot.hostMask);
     bot.connect();
     bot.addListener('registered', function (message) {
