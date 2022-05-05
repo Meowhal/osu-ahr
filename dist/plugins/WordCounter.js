@@ -16,6 +16,7 @@ class WordCounter extends LobbyPlugin_1.LobbyPlugin {
         this.lastLogTime = 0;
         const d = config_1.default.get(this.pluginName);
         this.option = { ...d, ...option };
+        this.loadEnvSettings(this.option);
         this.periods = this.option.periods.map(a => {
             return {
                 symbol: a.symbol,

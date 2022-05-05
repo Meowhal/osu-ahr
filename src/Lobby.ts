@@ -7,9 +7,9 @@ import { DeferredAction } from './libs/DeferredAction';
 import { MpSettingsParser, MpSettingsResult } from './parsers/MpSettingsParser';
 import { LobbyPlugin } from './plugins/LobbyPlugin';
 import { HistoryRepository } from './webapi/HistoryRepository';
-import config from 'config';
 import log4js from 'log4js';
 import { PlayMode } from './Modes';
+import { getConfig } from './TypedConfig';
 
 export enum LobbyStatus {
   Standby,
@@ -30,8 +30,6 @@ export interface LobbyOption {
   info_message_announcement_interval_ms: number,
   transferhost_timeout_ms: number
 }
-
-const LobbyDefaultOption = config.get<LobbyOption>("Lobby");
 
 export class Lobby {
   // Members
@@ -90,7 +88,7 @@ export class Lobby {
     if (ircClient.conn == null) {
       throw new Error("clientが未接続です");
     }
-    this.option = { ...LobbyDefaultOption, ...option } as LobbyOption;
+    this.option = getConfig("Lobby", option) as LobbyOption;
     this.status = LobbyStatus.Standby;
     this.settingParser = new MpSettingsParser();
     this.statParser = new StatParser();
@@ -584,7 +582,7 @@ export class Lobby {
     if (command == "!info" || command == "!help") {
       this.showInfoMessage();
     }
-    if (command == "!version" || command == "!v"){
+    if (command == "!version" || command == "!v") {
       this.showVersionMessage();
     }
     this.ReceivedChatCommand.emit({ player, command, param });

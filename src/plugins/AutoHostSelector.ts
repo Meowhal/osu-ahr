@@ -1,12 +1,11 @@
-import { escapeUserName } from '../Player';
 import { Lobby } from '../Lobby';
 import { BanchoResponseType } from '../parsers/CommandParser';
 import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { Player, revealUserName, disguiseUserName } from '../Player';
 import { Disposable, TypedEvent } from '../libs/TypedEvent';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
 import log4js from 'log4js';
+import { getConfig } from '../TypedConfig';
 
 export interface AutoHostSelectorOption {
   show_host_order_after_every_match: boolean;
@@ -66,8 +65,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<AutoHostSelectorOption> = {}) {
     super(lobby, "AutoHostSelector", "selector");
-    const d = config.get<AutoHostSelectorOption>(this.pluginName);
-    this.option = { ...d, ...option } as AutoHostSelectorOption;
+    this.option = getConfig(this.pluginName, option) as AutoHostSelectorOption;
 
     if (Array.isArray(this.option.deny_list)) {
       this.option.deny_list.map(s => this.lobby.GetOrMakePlayer(s)).forEach(p => DENY_LIST.addPlayer(p));

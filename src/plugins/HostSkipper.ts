@@ -2,15 +2,14 @@ import { Lobby } from '../Lobby';
 import { LobbyStatus } from '../Lobby';
 import { Player, escapeUserName } from '../Player';
 import { BanchoResponseType } from '../parsers/CommandParser';
-import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { StatStatuses, StatResult } from '../parsers/StatParser';
 import { LobbyPlugin } from './LobbyPlugin';
 import { VoteCounter } from './VoteCounter';
-import config from 'config';
+import { getConfig } from '../TypedConfig';
 
 export interface HostSkipperOption {
   vote_rate: number; // ホストスキップ投票時の必要数/プレイヤー数
-  vote_min: number;　// 最低投票数
+  vote_min: number; // 最低投票数
   vote_cooltime_ms: number; // 投票受付までの猶予時間 前回の巻き込み投票防止
   vote_msg_defer_ms: number; // 投票メッセージの延期時間
   afk_check_timeout_ms: number; // statcheckのタイムアウト時間
@@ -37,8 +36,7 @@ export class HostSkipper extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<HostSkipperOption> = {}) {
     super(lobby, "HostSkipper", "skipper");
-    const d = config.get<HostSkipperOption>(this.pluginName);
-    this.option = { ...d, ...option } as HostSkipperOption;
+    this.option = getConfig(this.pluginName, option) as HostSkipperOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }

@@ -1,8 +1,7 @@
 import { LobbyPlugin } from './LobbyPlugin';
 import { Lobby } from '../Lobby';
 import { Player } from '../Player';
-import { BanchoResponseType } from '../parsers/CommandParser';
-import config from 'config';
+import { getConfig } from '../TypedConfig';
 
 export interface LobbyTerminatorOption {
   terminate_time_ms: number;
@@ -15,8 +14,7 @@ export class LobbyTerminator extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<LobbyTerminatorOption> = {}) {
     super(lobby, "LobbyTerminator", "terminator");
-    const d = config.get<LobbyTerminatorOption>(this.pluginName);
-    this.option = { ...d, ...option } as LobbyTerminatorOption;
+    this.option = getConfig(this.pluginName, option) as LobbyTerminatorOption;
     this.registerEvents();
   }
 

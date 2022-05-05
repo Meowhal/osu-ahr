@@ -2,10 +2,10 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
 import { Game, User } from '../webapi/HistoryTypes';
 import { Mod, ScoreMode, TeamMode } from '../Modes';
 import { Logger } from 'log4js';
+import { getConfig } from '../TypedConfig';
 
 export interface LobbyKeeperOption {
   /**
@@ -45,13 +45,11 @@ export class LobbyKeeper extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<LobbyKeeperOption> = {}) {
     super(lobby, "LobbyKeeper", "keeper");
-    const d = config.get<LobbyKeeperOption>(this.pluginName);
-    this.option = { ...d, ...option } as LobbyKeeperOption;
+    this.option = getConfig(this.pluginName, option) as LobbyKeeperOption;
     this.kickedUsers = new Set();
     this.mpKickedUsers = new Set();
     this.slotKeeper = new SlotKeeper(this.option.size, this.logger);
     this.convertOptions();
-
     this.registerEvents();
   }
 

@@ -1,18 +1,14 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfileFecher = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const WebApiClient_1 = require("../webapi/WebApiClient");
-const config_1 = __importDefault(require("config"));
+const TypedConfig_1 = require("../TypedConfig");
 class ProfileFecher extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "profile", "profile");
         this.hasError = false;
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.profileMap = new Map();
         this.pendingNames = new Set();
         this.task = this.initializeAsync();

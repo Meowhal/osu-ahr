@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.regSwitch = exports.LobbyPlugin = void 0;
 const log4js_1 = __importDefault(require("log4js"));
+const TypedConfig_1 = require("../TypedConfig");
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。
  */
@@ -37,6 +38,15 @@ class LobbyPlugin {
     OnLoaded() {
     }
     OnConfig(target, name, value) {
+    }
+    loadEnvSettings(option) {
+        try {
+            (0, TypedConfig_1.loadEnvConfig)(this.pluginName, option);
+        }
+        catch (e) {
+            this.logger.error(e);
+            process.exit(1);
+        }
     }
 }
 exports.LobbyPlugin = LobbyPlugin;

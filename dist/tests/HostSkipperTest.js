@@ -120,7 +120,7 @@ describe("HostSkipperTest", function () {
             await test(50);
             await test(100);
         });
-        it("timer reset when host changed", async () => {
+        it("timer reset when host changed", async function () {
             const { skipper, lobby, ircClient } = await prepare(30);
             await TestUtils_1.default.AddPlayersAsync(["p1", "p2", "p3"], ircClient);
             ircClient.SetStat(new StatParser_1.StatResult("p1", 0, StatParser_1.StatStatuses.Afk));
@@ -133,7 +133,7 @@ describe("HostSkipperTest", function () {
             const endTime = await rt;
             TestUtils_1.default.assertHost("p2", lobby);
             const elapsed = endTime - startTime;
-            chai_1.assert.closeTo(elapsed, 10 + 30, 20);
+            chai_1.assert.closeTo(elapsed, 10 + 30, 50);
             skipper.StopTimer();
         });
         it("timer reset when host changing map", async () => {

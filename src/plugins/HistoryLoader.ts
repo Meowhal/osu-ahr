@@ -2,10 +2,9 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
 import { MpSettingsResult } from '../parsers/MpSettingsParser';
-
 import { HistoryRepository } from '../webapi/HistoryRepository';
-import config from 'config';
 import { User } from '../webapi/HistoryTypes';
+import { getConfig } from '../TypedConfig';
 
 export interface HistoryLoaderOption {
   fetch_interval_ms: number; // ヒストリー取得間隔
@@ -21,8 +20,7 @@ export class HistoryLoader extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<HistoryLoaderOption> = {}) {
     super(lobby, "HistoryLoader", "history");
-    const d = config.get<HistoryLoaderOption>(this.pluginName);
-    this.option = { ...d, ...option } as HistoryLoaderOption;
+    this.option = getConfig(this.pluginName, option) as HistoryLoaderOption;
     this.repository = lobby.historyRepository;
     this.registerEvents();
   }

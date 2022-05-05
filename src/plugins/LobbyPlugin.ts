@@ -1,6 +1,6 @@
 import { Lobby } from '../Lobby';
 import log4js from 'log4js';
-import { MessageActionRow } from 'discord.js';
+import { loadEnvConfig } from '../TypedConfig';
 
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。
@@ -42,6 +42,15 @@ export class LobbyPlugin {
   }
 
   OnConfig(target: string, name: string, value: string): void {
+  }
+
+  loadEnvSettings(option: any) {
+    try {
+      loadEnvConfig(this.pluginName, option);
+    } catch (e) {
+      this.logger.error(e);
+      process.exit(1);
+    }
   }
 }
 

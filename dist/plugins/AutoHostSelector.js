@@ -8,8 +8,8 @@ const CommandParser_1 = require("../parsers/CommandParser");
 const Player_1 = require("../Player");
 const TypedEvent_1 = require("../libs/TypedEvent");
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const config_1 = __importDefault(require("config"));
 const log4js_1 = __importDefault(require("log4js"));
+const TypedConfig_1 = require("../TypedConfig");
 /**
  * 拒否リスト
  * 各ロビーで共有することを想定しているので、プレイヤーオブジェクトではなくエスケープ名を保持する
@@ -57,8 +57,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         this.mapChanger = null;
         this.orderChanged = new TypedEvent_1.TypedEvent();
         this.eventDisposers = [];
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         if (Array.isArray(this.option.deny_list)) {
             this.option.deny_list.map(s => this.lobby.GetOrMakePlayer(s)).forEach(p => exports.DENY_LIST.addPlayer(p));
         }

@@ -1,17 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SlotKeeper = exports.LobbyKeeper = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const config_1 = __importDefault(require("config"));
 const Modes_1 = require("../Modes");
+const TypedConfig_1 = require("../TypedConfig");
 class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "LobbyKeeper", "keeper");
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.kickedUsers = new Set();
         this.mpKickedUsers = new Set();
         this.slotKeeper = new SlotKeeper(this.option.size, this.logger);
