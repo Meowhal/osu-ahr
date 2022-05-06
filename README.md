@@ -74,7 +74,7 @@ Discord
 
 # Recent Changes
 
-## 1.6.00
+## 1.6.0
 
 + Enviroment Variable Supports
   + Almost all configs that can be set in local.json can also be set from environment variables.
