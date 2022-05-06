@@ -30,8 +30,7 @@ export interface DiscordBotConfig {
 }
 
 type GuildCommandInteraction = CommandInteraction & { guildId: string; }
-export type OahrSharedObjects = {
-}
+export type OahrSharedObjects = Record<string, unknown>;
 
 export class DiscordBot {
   ircClient: IIrcClient;
