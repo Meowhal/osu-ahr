@@ -19,14 +19,14 @@ import { MiscLoader } from '../plugins/MiscLoader';
 import { parser } from '../parsers/CommandParser';
 import { CacheCleaner } from '../plugins/CacheCleaner';
 
-const logger = log4js.getLogger("cli");
+const logger = log4js.getLogger('cli');
 
 export interface OahrCliOption {
   invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
   password: string; // デフォルトのパスワード, 空文字でパスワードなし。
 }
 
-const OahrCliDefaultOption = config.get<OahrCliOption>("OahrCli");
+const OahrCliDefaultOption = config.get<OahrCliOption>('OahrCli');
 
 export class OahrBase {
   client: IIrcClient;
@@ -70,7 +70,7 @@ export class OahrBase {
   }
 
   get isRegistered(): boolean {
-    return this.client.hostMask != "";
+    return this.client.hostMask != '';
   }
 
   displayInfo(): void {
@@ -80,9 +80,9 @@ export class OahrBase {
   ensureRegisteredAsync(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.isRegistered) {
-        logger.trace("waiting for registration from bancho");
-        this.client.once("registered", () => {
-          logger.trace("registerd");
+        logger.trace('waiting for registration from bancho');
+        this.client.once('registered', () => {
+          logger.trace('registerd');
           resolve();
         });
       } else {
@@ -92,13 +92,13 @@ export class OahrBase {
   }
 
   async makeLobbyAsync(name: string): Promise<void> {
-    name = name.replace(/[^ -/:-@\[-~0-9a-zA-Z]/g, "");
+    name = name.replace(/[^ -/:-@\[-~0-9a-zA-Z]/g, '');
     if (!this.isRegistered) await this.ensureRegisteredAsync();
-    logger.info("Making lobby, name : " + name);
+    logger.info('Making lobby, name : ' + name);
     await this.lobby.MakeLobbyAsync(name);
-    this.lobby.SendMessage("!mp password " + this.option.password);
-    for (let p of this.option.invite_users) {
-      this.lobby.SendMessage("!mp invite " + p);
+    this.lobby.SendMessage('!mp password ' + this.option.password);
+    for (const p of this.option.invite_users) {
+      this.lobby.SendMessage('!mp invite ' + p);
     }
     logger.info(`Made lobby : ${this.lobby.channel}`);
   }
@@ -106,7 +106,7 @@ export class OahrBase {
   async enterLobbyAsync(id: string): Promise<void> {
     if (!this.isRegistered) await this.ensureRegisteredAsync();
     const channel = parser.EnsureMpChannelId(id);
-    logger.info("Entering lobby, channel : %s", channel);
+    logger.info('Entering lobby, channel : %s', channel);
     await this.lobby.EnterLobbyAsync(channel);
     await this.lobby.LoadMpSettingsAsync();
 

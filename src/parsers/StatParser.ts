@@ -20,7 +20,7 @@ export class StatResult {
     this.date = date;
   }
   toString(): string {
-    return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status == StatStatuses.None ? "" : " is " + StatStatuses[this.status]}:
+    return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status == StatStatuses.None ? '' : ' is ' + StatStatuses[this.status]}:
 Score:    ${this.score} (#${this.rank})
 Plays:    ${this.plays} (lv${this.level})
 Accuracy: ${this.accuracy}%`;
@@ -69,7 +69,7 @@ export class StatParser {
 
     const line2 = message.match(/Score:\s+([\d,]+)\s+\(#(\d+)\)/);
     if (line2) {
-      this.result.score = parseInt(line2[1].replace(/,/g, ""));
+      this.result.score = parseInt(line2[1].replace(/,/g, ''));
       this.result.rank = parseInt(line2[2]);
       return true;
     }

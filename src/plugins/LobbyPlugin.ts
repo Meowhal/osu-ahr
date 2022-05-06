@@ -10,12 +10,12 @@ export class LobbyPlugin {
   logger: log4js.Logger;
   pluginName: string;
 
-  constructor(lobby: Lobby, pluginName: string, loggerTag: string = "default") {
+  constructor(lobby: Lobby, pluginName: string, loggerTag: string = 'default') {
     this.lobby = lobby;
     this.lobby.plugins.push(this);
     this.pluginName = pluginName;
     this.logger = log4js.getLogger(loggerTag);
-    this.logger.addContext("channel", "lobby");
+    this.logger.addContext('channel', 'lobby');
   }
 
   /**
@@ -32,7 +32,7 @@ export class LobbyPlugin {
    * プラグインごとのステータスメッセージを取得する
    */
   GetPluginStatus(): string {
-    return "";
+    return '';
   }
 
   /**
@@ -55,8 +55,8 @@ export class LobbyPlugin {
 }
 
 export function regSwitch(val: string, cases: { case: RegExp, action: (m: RegExpExecArray) => void }[]) {
-  for (let c of cases) {
-    let ea = c.case.exec(val);
+  for (const c of cases) {
+    const ea = c.case.exec(val);
     if (ea) {
       c.action(ea);
       return;

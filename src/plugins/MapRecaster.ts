@@ -15,13 +15,13 @@ export class MapRecaster extends LobbyPlugin {
   option: MapRecasterOption;
   canRecast: boolean = true;
   constructor(lobby: Lobby, option: Partial<MapRecasterOption> = {}) {
-    super(lobby, "MapRecaster", "recaster");
+    super(lobby, 'MapRecaster', 'recaster');
     this.option = getConfig(this.pluginName, option) as MapRecasterOption;
     this.registerEvents();
   }
 
   private registerEvents(): void {
-    this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player))
+    this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player));
     this.lobby.ReceivedBanchoResponse.on(a => {
       if (a.response.type == BanchoResponseType.BeatmapChanged) {
         this.canRecast = true;
@@ -30,10 +30,10 @@ export class MapRecaster extends LobbyPlugin {
   }
 
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
-    if (command == "!update") {
+    if (command == '!update') {
       if (this.canRecast) {
         this.canRecast = false;
-        this.lobby.SendMessage("!mp map " + this.lobby.mapId);
+        this.lobby.SendMessage('!mp map ' + this.lobby.mapId);
       }
     }
   }

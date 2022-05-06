@@ -10,23 +10,23 @@ import { HostSkipperOption } from '../plugins/HostSkipper';
 
 import tu from './TestUtils';
 
-describe("Integrated Plugins Tests", function () {
+describe('Integrated Plugins Tests', function () {
   before(function () {
     tu.configMochaAsSilent();
   });
-  describe("selector and skipper tests", function () {
+  describe('selector and skipper tests', function () {
     async function setup(selectorOption: Partial<AutoHostSelectorOption> = {}, skipperOption: Partial<HostSkipperOption> = { afk_check_interval_ms: 0 }):
       Promise<{ selector: AutoHostSelector, skipper: HostSkipper, lobby: Lobby, ircClient: DummyIrcClient }> {
       const li = await tu.SetupLobbyAsync();
       const selector = new AutoHostSelector(li.lobby, selectorOption);
       const skipper = new HostSkipper(li.lobby, skipperOption);
       return { selector, skipper, ...li };
-    };
+    }
 
-    it("skip to test", async () => {
+    it('skip to test', async () => {
       const { selector, skipper, lobby, ircClient } = await setup();
       const ownerId = tu.ownerNickname;
-      await tu.AddPlayersAsync([ownerId, "p2", "p3", "p4"], ircClient);
+      await tu.AddPlayersAsync([ownerId, 'p2', 'p3', 'p4'], ircClient);
       let owner = lobby.GetPlayer(ownerId);
       assert.isNotNull(owner);
       owner = owner as Player;
@@ -36,14 +36,14 @@ describe("Integrated Plugins Tests", function () {
 
       await ircClient.emulateMatchAsync(0);
 
-      tu.assertHost("p2", lobby);
-      let m = "*skipto p4";
+      tu.assertHost('p2', lobby);
+      let m = '*skipto p4';
       assert.isTrue(parser.IsChatCommand(m));
       lobby.RaiseReceivedChatCommand(owner, m);
       await tu.delayAsync(10);
-      tu.assertHost("p4", lobby);
+      tu.assertHost('p4', lobby);
 
-      m = "*skipto " + owner.name;
+      m = '*skipto ' + owner.name;
       assert.isTrue(parser.IsChatCommand(m));
       lobby.RaiseReceivedChatCommand(owner, m);
       await tu.delayAsync(10);

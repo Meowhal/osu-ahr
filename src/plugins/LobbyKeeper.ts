@@ -38,12 +38,12 @@ export interface LobbyKeeperOption {
 }
 
 const OPTION_TYPE_HINTS: ConfigTypeHint[] = [
-  { key: "mode", nullable: true, type: "string" },
-  { key: "size", nullable: true, type: "number" },
-  { key: "password", nullable: true, type: "string" },
-  { key: "mods", nullable: true, type: "string" },
-  { key: "hostkick_tolerance", nullable: false, type: "number" },
-  { key: "title", nullable: true, type: "string" },
+  { key: 'mode', nullable: true, type: 'string' },
+  { key: 'size', nullable: true, type: 'number' },
+  { key: 'password', nullable: true, type: 'string' },
+  { key: 'mods', nullable: true, type: 'string' },
+  { key: 'hostkick_tolerance', nullable: false, type: 'number' },
+  { key: 'title', nullable: true, type: 'string' },
 ];
 
 export class LobbyKeeper extends LobbyPlugin {
@@ -53,7 +53,7 @@ export class LobbyKeeper extends LobbyPlugin {
   slotKeeper: SlotKeeper;
 
   constructor(lobby: Lobby, option: Partial<LobbyKeeperOption> = {}) {
-    super(lobby, "LobbyKeeper", "keeper");
+    super(lobby, 'LobbyKeeper', 'keeper');
     this.option = getConfig(this.pluginName, option, OPTION_TYPE_HINTS) as LobbyKeeperOption;
     this.kickedUsers = new Set();
     this.mpKickedUsers = new Set();
@@ -63,7 +63,7 @@ export class LobbyKeeper extends LobbyPlugin {
   }
 
   private registerEvents(): void {
-    this.lobby.JoinedLobby.on(a => this.onJoined())
+    this.lobby.JoinedLobby.on(a => this.onJoined());
     this.lobby.HostChanged.on(a => this.onHostChanged(a.player));
     this.lobby.MatchFinished.on(() => this.onMatchFinished());
     this.lobby.ReceivedChatCommand.on(a => this.onChatCommand(a.player, a.command, a.param));
@@ -83,22 +83,22 @@ export class LobbyKeeper extends LobbyPlugin {
   }
 
   private setModeOption(mode: any) {
-    if (mode == null || mode == "null" || mode == "") {
+    if (mode == null || mode == 'null' || mode == '') {
       this.option.mode = null;
       return;
     }
 
-    if (typeof mode == "string") {
+    if (typeof mode == 'string') {
       const r = this.tryParseModeParams(mode);
       if (r) {
         this.option.mode = r;
         return;
       } else {
-        throw new Error("Invalid Option. LobbyKeeper.mode : " + mode);
+        throw new Error('Invalid Option. LobbyKeeper.mode : ' + mode);
       }
     }
 
-    if ("team" in mode && "score" in mode) {
+    if ('team' in mode && 'score' in mode) {
       if ((mode.team instanceof TeamMode) && (mode.score instanceof ScoreMode)) {
         this.option.mode = mode;
       } else {
@@ -110,34 +110,34 @@ export class LobbyKeeper extends LobbyPlugin {
       return;
     }
 
-    throw new Error("Invalid Option. LobbyKeeper.mode : " + mode);
+    throw new Error('Invalid Option. LobbyKeeper.mode : ' + mode);
   }
 
   private setSizeOption(size: any) {
-    if (size == null || size == "null" || size == "") {
+    if (size == null || size == 'null' || size == '') {
       size = 0;
     }
-    if (typeof size == "string") {
+    if (typeof size == 'string') {
       size = parseInt(size);
     }
 
-    if (typeof size != "number") {
-      throw new Error("invalid size " + size);
+    if (typeof size != 'number') {
+      throw new Error('invalid size ' + size);
     }
 
-    if (size < 0 || 16 < size || isNaN(size)) {
-      throw new Error("invalid size " + size);
+    if (size < 0 || size > 16 || isNaN(size)) {
+      throw new Error('invalid size ' + size);
     }
     this.option.size = size;
     this.slotKeeper.size = size;
   }
 
   private setModsOption(mods: any) {
-    if (mods == null || mods == "null") {
+    if (mods == null || mods == 'null') {
       this.option.mods = null;
       return;
     }
-    if (typeof mods == "string") {
+    if (typeof mods == 'string') {
       this.option.mods = Mod.parseMods(mods);
       return;
     }
@@ -146,7 +146,7 @@ export class LobbyKeeper extends LobbyPlugin {
       this.option.mods = Mod.removeInvalidCombinations(mods);
       return;
     }
-    throw new Error("Invalid Option. LobbyKeeper.mods : " + mods);
+    throw new Error('Invalid Option. LobbyKeeper.mods : ' + mods);
   }
 
   private tryParseModeParams(param: string) {
@@ -178,7 +178,7 @@ export class LobbyKeeper extends LobbyPlugin {
       return { team: this.option.mode?.team ?? TeamMode.HeadToHead, score };
     } catch { }
 
-    throw new Error("Invalid Option. LobbyKeeper.mode : " + param);
+    throw new Error('Invalid Option. LobbyKeeper.mode : ' + param);
   }
 
   private checkMode(teamMode: TeamMode, scoreMode: ScoreMode) {
@@ -240,7 +240,7 @@ export class LobbyKeeper extends LobbyPlugin {
 
   private fixMods(): void {
     if (this.option.mods != null) {
-      this.lobby.SendMessage(`!mp mods ${this.option.mods.map(m => m.value).join(" ")}`)
+      this.lobby.SendMessage(`!mp mods ${this.option.mods.map(m => m.value).join(' ')}`);
     }
   }
 
@@ -269,7 +269,7 @@ export class LobbyKeeper extends LobbyPlugin {
       }
 
     } catch (e: any) {
-      this.logger.error("@LobbyKeeper#onParsedSettings " + e?.message);
+      this.logger.error('@LobbyKeeper#onParsedSettings ' + e?.message);
     }
   }
 
@@ -314,7 +314,7 @@ export class LobbyKeeper extends LobbyPlugin {
 
   private onChatCommand(player: Player, command: string, param: string): void {
     if (player.isAuthorized) {
-      if (command.startsWith("*keep") || command.startsWith("*no")) {
+      if (command.startsWith('*keep') || command.startsWith('*no')) {
         const msg = this.processCommand(command, param);
         if (msg != null) {
           this.lobby.SendMessage(msg);
@@ -331,7 +331,7 @@ export class LobbyKeeper extends LobbyPlugin {
     }
     if (this.option.title != null || this.option.mode != null || this.option.mods != null) {
       this.lobby.LoadMpSettingsAsync().catch((e: any) => {
-        this.logger.error("lobbyKeeper#onMatchFinished failed to LoadMpSettingsAsync");
+        this.logger.error('lobbyKeeper#onMatchFinished failed to LoadMpSettingsAsync');
       });
     }
   }
@@ -341,11 +341,11 @@ export class LobbyKeeper extends LobbyPlugin {
   }
 
   private processCommand(command: string, param: string): string | null {
-    if (command == "*keep") {
+    if (command == '*keep') {
       const matchMode = /^mode(\s+(.+))?\s*$/.exec(param);
       if (matchMode) {
         if (matchMode[2] == undefined) {
-          this.logger.warn("missing parameters. *keep mode [0-3] [0-3] e.g. *keep mode 0 0");
+          this.logger.warn('missing parameters. *keep mode [0-3] [0-3] e.g. *keep mode 0 0');
           return null;
         }
         try {
@@ -354,10 +354,10 @@ export class LobbyKeeper extends LobbyPlugin {
             this.fixLobbyModeAndSize();
             return `Keep lobby mode ${this.option.mode.team.name}, ${this.option.mode.score.name}`;
           } else {
-            return `Disabled keeping lobby mode`;
+            return 'Disabled keeping lobby mode';
           }
         } catch (e: any) {
-          this.logger.warn(e?.message ?? "failed to parse mode params");
+          this.logger.warn(e?.message ?? 'failed to parse mode params');
           return null;
         }
       }
@@ -365,7 +365,7 @@ export class LobbyKeeper extends LobbyPlugin {
       const matchSize = /^size(\s+(\d+))?\s*$/.exec(param);
       if (matchSize) {
         if (matchSize[2] == undefined) {
-          this.logger.warn("missing parameter. *keep size [1-16]");
+          this.logger.warn('missing parameter. *keep size [1-16]');
           return null;
         }
         try {
@@ -374,11 +374,11 @@ export class LobbyKeeper extends LobbyPlugin {
             this.fixLobbyModeAndSize();
             return `Keep lobby size ${this.option.size}`;
           } else {
-            return `Disabled keeping lobby size.`;
+            return 'Disabled keeping lobby size.';
           }
 
         } catch (e: any) {
-          this.logger.warn(e?.message ?? "failed to parse size params");
+          this.logger.warn(e?.message ?? 'failed to parse size params');
           return null;
         }
       }
@@ -386,68 +386,68 @@ export class LobbyKeeper extends LobbyPlugin {
       const matchMods = /^mods?(\s+(.+))?\s*$/.exec(param);
       if (matchMods) {
         if (matchMods[2] == undefined) {
-          this.logger.warn("missing parameters. *keep mods [mod] ([mod]) ([mod]) ...");
+          this.logger.warn('missing parameters. *keep mods [mod] ([mod]) ([mod]) ...');
           return null;
         }
         try {
           this.setModsOption(matchMods[2]);
           if (this.option.mods) {
             this.fixMods();
-            return `Keep mods ${this.option.mods == null || this.option.mods.length == 0 ? "None" : this.option.mods.map(m => m.name).join(", ")}`;
+            return `Keep mods ${this.option.mods == null || this.option.mods.length == 0 ? 'None' : this.option.mods.map(m => m.name).join(', ')}`;
           } else {
-            return `Disabled keeping lobby mods.`;
+            return 'Disabled keeping lobby mods.';
           }
         } catch (e: any) {
-          this.logger.warn(e?.message ?? "failed to parse mods");
+          this.logger.warn(e?.message ?? 'failed to parse mods');
           return null;
         }
       }
 
       const matchPassword = /^password(\s+(.+))?\s*$/.exec(param);
       if (matchPassword) {
-        this.option.password = matchPassword[2] !== undefined ? matchPassword[2] : "";
+        this.option.password = matchPassword[2] !== undefined ? matchPassword[2] : '';
         this.fixPassword();
-        return `Keep lobby password ${this.option.password != "" ? this.option.password : "[empty]"}`;
+        return `Keep lobby password ${this.option.password != '' ? this.option.password : '[empty]'}`;
       }
 
       const matchTitle = /^(title|name)(\s+(.+))?\s*$/.exec(param);
       if (matchTitle) {
-        this.option.title = matchTitle[3] !== undefined ? matchTitle[3] : "";
+        this.option.title = matchTitle[3] !== undefined ? matchTitle[3] : '';
         this.fixTitle();
-        return `Keep lobby title ${this.option.title !== "" ? this.option.title : "[empty]"}`;
+        return `Keep lobby title ${this.option.title !== '' ? this.option.title : '[empty]'}`;
       }
 
-      this.logger.warn("missing parameters. *keep <mode|size|mods|password|title> ...params");
+      this.logger.warn('missing parameters. *keep <mode|size|mods|password|title> ...params');
     }
 
-    if (command == "*no") {
-      if (param == "keep mode" && this.option.mode != null) {
+    if (command == '*no') {
+      if (param == 'keep mode' && this.option.mode != null) {
         this.setModeOption(null);
-        return "disabled keeping teammode and scoremode";
+        return 'disabled keeping teammode and scoremode';
       }
-      if (param == "keep size" && this.option.size != 0) {
+      if (param == 'keep size' && this.option.size != 0) {
         this.setSizeOption(0);
-        return "disabled keeping lobby size";
+        return 'disabled keeping lobby size';
       }
-      if ((param == "keep mod" || param == "keep mods") && this.option.mods != null) {
+      if ((param == 'keep mod' || param == 'keep mods') && this.option.mods != null) {
         this.setModsOption(null);
-        return "disabled keeping mods";
+        return 'disabled keeping mods';
       }
-      if (param == "keep password" && this.option.password != null) {
-        if (this.option.password != "") {
-          this.option.password = "";
+      if (param == 'keep password' && this.option.password != null) {
+        if (this.option.password != '') {
+          this.option.password = '';
           this.fixPassword();
         }
         this.option.password = null;
-        return "disabled keeping lobby password";
+        return 'disabled keeping lobby password';
       }
-      if ((param == "keep title" || param == "keep name") && this.option.title != null) {
+      if ((param == 'keep title' || param == 'keep name') && this.option.title != null) {
         this.option.title = null;
-        return "disabled keeping room title";
+        return 'disabled keeping room title';
       }
 
-      if (param.startsWith("keep")) {
-        this.logger.warn("missing parameters. *no keep <mode|size|mods|password|title>");
+      if (param.startsWith('keep')) {
+        this.logger.warn('missing parameters. *no keep <mode|size|mods|password|title>');
       }
     }
 
@@ -464,23 +464,23 @@ export class LobbyKeeper extends LobbyPlugin {
     }
 
     if (this.option.password) {
-      keeps.push(`password: ${this.option.password != "" ? this.option.password : "(empty)"}`);
+      keeps.push(`password: ${this.option.password != '' ? this.option.password : '(empty)'}`);
     }
 
     if (this.option.mods) {
-      keeps.push(`mods: ${this.option.mods.map(m => m.value).join(" ")}`);
+      keeps.push(`mods: ${this.option.mods.map(m => m.value).join(' ')}`);
     }
 
     if (this.option.title) {
       keeps.push(`title: ${this.option.title}`);
     }
 
-    return keeps.join(", ");
+    return keeps.join(', ');
   }
 
   GetPluginStatus(): string {
     return `-- Lobby Keeper --
-  ${this.getDescription()}`
+  ${this.getDescription()}`;
   }
 }
 

@@ -39,10 +39,10 @@ class WebApiClientClass implements IBeatmapFetcher {
   token: ApiToken | undefined;
 
   constructor(option: Partial<WebApiClientOption> = {}) {
-    const WebApiDefaultOption = config.get<WebApiClientOption>("WebApi");
+    const WebApiDefaultOption = config.get<WebApiClientOption>('WebApi');
     this.option = { ...WebApiDefaultOption, ...option } as WebApiClientOption;
-    this.logger = log4js.getLogger("webapi");
-    this.available = this.option.client_id != 0 && this.option.client_secret != "***";
+    this.logger = log4js.getLogger('webapi');
+    this.available = this.option.client_id != 0 && this.option.client_secret != '***';
   }
 
   async updateToken(): Promise<boolean> {
@@ -66,25 +66,25 @@ class WebApiClientClass implements IBeatmapFetcher {
   }
 
   private getTokenPath(asGuest: boolean) {
-    return path.join(this.option.token_store_dir, asGuest ? "guest_token.json" : "token.json");
+    return path.join(this.option.token_store_dir, asGuest ? 'guest_token.json' : 'token.json');
   }
 
   private async storeToken(token: ApiToken): Promise<boolean> {
-    if (this.option.token_store_dir == "") return false;
+    if (this.option.token_store_dir == '') return false;
     try {
       const p = this.getTokenPath(token.isGuest);
       await fs.mkdir(path.dirname(p), { recursive: true });
-      await fs.writeFile(p, JSON.stringify(token), { encoding: "utf8", flag: "w" });
-      this.logger.info("stored token to : " + p);
+      await fs.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
+      this.logger.info('stored token to : ' + p);
       return true;
     } catch (e) {
-      this.logger.error("storeToken error : " + e);
+      this.logger.error('storeToken error : ' + e);
       return false;
     }
   }
 
   private async loadStoredToken(asGuest: boolean): Promise<ApiToken | undefined> {
-    if (this.option.token_store_dir == "") return;
+    if (this.option.token_store_dir == '') return;
     const p = this.getTokenPath(asGuest);
     try {
       await fs.access(p);
@@ -93,16 +93,16 @@ class WebApiClientClass implements IBeatmapFetcher {
     }
 
     try {
-      const j = await fs.readFile(p, "utf8");
+      const j = await fs.readFile(p, 'utf8');
       const token = JSON.parse(j) as ApiToken;
       if (!isExpired(token)) {
-        this.logger.info("loaded stored token from : " + p);
+        this.logger.info('loaded stored token from : ' + p);
         return token;
       }
       this.deleteStoredToken(asGuest);
-      this.logger.info("deleted expired stored token");
+      this.logger.info('deleted expired stored token');
     } catch (e) {
-      this.logger.error("loadStoredToken error : " + e);
+      this.logger.error('loadStoredToken error : ' + e);
     }
   }
 
@@ -116,23 +116,23 @@ class WebApiClientClass implements IBeatmapFetcher {
     try {
       fs.unlink(p);
     } catch (e) {
-      this.logger.error("load token error : " + e);
+      this.logger.error('load token error : ' + e);
     }
   }
 
   private async getAuthorizedToken(): Promise<ApiToken | undefined> {
     try {
       const code = await this.getAuthorizeCode();
-      const response = await axios.post("https://osu.ppy.sh/oauth/token", {
-        "client_id": "" + this.option.client_id,
-        "client_secret": this.option.client_secret,
-        "code": code,
-        "grant_type": "authorization_code",
-        "redirect_uri": this.option.callback
+      const response = await axios.post('https://osu.ppy.sh/oauth/token', {
+        'client_id': '' + this.option.client_id,
+        'client_secret': this.option.client_secret,
+        'code': code,
+        'grant_type': 'authorization_code',
+        'redirect_uri': this.option.callback
       });
       response.data.isGuest = false;
       response.data.expires_in += Date.now() / 1000;
-      this.logger.info("get Authorized token");
+      this.logger.info('get Authorized token');
       return response.data;
     } catch (e) {
       this.logger.error(`getAuthorizedToken error : ${e}`);
@@ -143,58 +143,58 @@ class WebApiClientClass implements IBeatmapFetcher {
     return new Promise((resoleve, reject) => {
       const server = http.createServer();
       let code: string | null = null;
-      server.once("request", (req: http.IncomingMessage, res: http.ServerResponse) => {
+      server.once('request', (req: http.IncomingMessage, res: http.ServerResponse) => {
         res.setHeader('Content-Type', 'text/html');
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         if (!req.url) {
-          res.end("missing req.url");
+          res.end('missing req.url');
           return;
         }
         const url = new URL(req.url, `http://${req.headers.host}`);
-        code = url.searchParams.get("code");
+        code = url.searchParams.get('code');
         if (code == null) {
-          res.end("missing code");
+          res.end('missing code');
           return;
         }
-        res.end("ok : " + code);
-        this.logger.trace("got code! " + code);
+        res.end('ok : ' + code);
+        this.logger.trace('got code! ' + code);
         server.close(() => {
-          this.logger.trace("closed callback");
+          this.logger.trace('closed callback');
         });
         if (res.connection) {
           res.connection.end();
           res.connection.destroy();
         } else {
-          reject("no connection");
+          reject('no connection');
         }
 
       });
-      server.once("close", () => {
-        this.logger.trace("closed event");
+      server.once('close', () => {
+        this.logger.trace('closed event');
         if (code == null) {
-          reject("no code");
+          reject('no code');
         } else {
-          this.logger.info("get Authorized code");
+          this.logger.info('get Authorized code');
           resoleve(code);
         }
       });
       server.listen(this.option.callback_port);
-      const nurl = new URL("https://osu.ppy.sh/oauth/authorize");
-      nurl.searchParams.set("client_id", this.option.client_id.toString());
-      nurl.searchParams.set("redirect_uri", this.option.callback);
-      nurl.searchParams.set("response_type", "code");
-      nurl.searchParams.set("scope", "public");
+      const nurl = new URL('https://osu.ppy.sh/oauth/authorize');
+      nurl.searchParams.set('client_id', this.option.client_id.toString());
+      nurl.searchParams.set('redirect_uri', this.option.callback);
+      nurl.searchParams.set('response_type', 'code');
+      nurl.searchParams.set('scope', 'public');
       open(nurl.toString());
     });
   }
 
   private async getGuestToken(): Promise<ApiToken | undefined> {
     try {
-      const response = await axios.post("https://osu.ppy.sh/oauth/token", {
-        "grant_type": "client_credentials",
-        "client_id": "" + this.option.client_id,
-        "client_secret": this.option.client_secret,
-        "scope": "public"
+      const response = await axios.post('https://osu.ppy.sh/oauth/token', {
+        'grant_type': 'client_credentials',
+        'client_id': '' + this.option.client_id,
+        'client_secret': this.option.client_secret,
+        'scope': 'public'
       });
       response.data.isGuest = true;
       response.data.expires_in += Date.now() / 1000;
@@ -207,13 +207,13 @@ class WebApiClientClass implements IBeatmapFetcher {
   async accessApi(url: string, config: any = {}, tryCount: number = 2): Promise<any> {
     while (tryCount-- > 0) {
       if (!await this.updateToken() || !this.token) {
-        throw new Error(`accessApi error : couldn't get valid token`);
+        throw new Error('accessApi error : couldn\'t get valid token');
       }
 
       config.headers = {
-        "Authorization": `Bearer ${this.token.access_token}`,
-        "Accept": "application/json",
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${this.token.access_token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
       };
 
       try {
@@ -225,7 +225,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       } catch (e: any) {
         switch (e.response?.status) {
           case 401:
-            this.logger.info(`api access failed, delete current token.`);
+            this.logger.info('api access failed, delete current token.');
             this.deleteStoredToken(this.option.asGuest);
             this.token = undefined;
             break;
@@ -234,43 +234,43 @@ class WebApiClientClass implements IBeatmapFetcher {
         }
       }
     }
-    throw new Error("couldn't access api");
+    throw new Error('couldn\'t access api');
   }
 
   async getChatUpdates() {
-    const data = await this.accessApi("https://osu.ppy.sh/api/v2/chat/updates", {
-      method: "GET",
+    const data = await this.accessApi('https://osu.ppy.sh/api/v2/chat/updates', {
+      method: 'GET',
       params: {
-        "since": "0"
+        'since': '0'
       }
     });
     return data;
   }
 
   async getChannels() {
-    const data = await this.accessApi("https://osu.ppy.sh/api/v2/chat/channels", {
-      method: "GET"
+    const data = await this.accessApi('https://osu.ppy.sh/api/v2/chat/channels', {
+      method: 'GET'
     });
     return data;
   }
 
   async getMe() {
-    const data = await this.accessApi("https://osu.ppy.sh/api/v2/me/osu", {
-      method: "GET"
+    const data = await this.accessApi('https://osu.ppy.sh/api/v2/me/osu', {
+      method: 'GET'
     });
     return data;
   }
 
   async getNotifications() {
-    const data = await this.accessApi("https://osu.ppy.sh/api/v2/notifications", {
-      method: "GET"
+    const data = await this.accessApi('https://osu.ppy.sh/api/v2/notifications', {
+      method: 'GET'
     });
     return data;
   }
 
   async getUserRecentActivity(id: number) {
     const data = await this.accessApi(`https://osu.ppy.sh/api/v2/users/${id}/recent_activity`, {
-      method: "GET"
+      method: 'GET'
     });
     return data;
   }
@@ -278,7 +278,7 @@ class WebApiClientClass implements IBeatmapFetcher {
   async getUser(id: number | string): Promise<UserProfile | null> {
     try {
       const data = await this.accessApi(`https://osu.ppy.sh/api/v2/users/${id}/osu`, {
-        method: "GET"
+        method: 'GET'
       });
       data.get_time = Date.now();
       return trimProfile(data);
@@ -293,7 +293,7 @@ class WebApiClientClass implements IBeatmapFetcher {
   async getPlayer(userID: number, mode: string): Promise<UserProfile> {
     try {
       const data = await this.accessApi(`https://osu.ppy.sh/api/v2/users/${userID}/${mode}`, {
-        method: "GET"
+        method: 'GET'
       });
       data.get_time = Date.now();
       return data;
@@ -307,7 +307,7 @@ class WebApiClientClass implements IBeatmapFetcher {
 
   async lookupBeatmap(mapid: number): Promise<Beatmap> {
     const data = await this.accessApi(`https://osu.ppy.sh/api/v2/beatmaps/lookup?id=${mapid}`, {
-      method: "GET"
+      method: 'GET'
     });
     data.get_time = Date.now();
     return data;
@@ -315,7 +315,7 @@ class WebApiClientClass implements IBeatmapFetcher {
 
   async lookupBeatmapset(mapid: number): Promise<Beatmapset> {
     const data = await this.accessApi(`https://osu.ppy.sh/api/v2/beatmapsets/lookup?beatmap_id=${mapid}`, {
-      method: "GET"
+      method: 'GET'
     });
     data.get_time = Date.now();
     return data;

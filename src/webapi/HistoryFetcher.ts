@@ -18,7 +18,7 @@ export class HistoryFecher implements IHistoryFetcher {
     const url = `https://osu.ppy.sh/community/matches/${matchId}`;
     const params: any = {
       'limit': limit,
-    }
+    };
     if (before) {
       params.before = before;
     }

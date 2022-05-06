@@ -1,9 +1,9 @@
 import * as irc from '../libs/irc';
 
 const IrcTestSettings = {
-  server: "irc.dollyfish.net.nz",
-  nick: "ohr",
-  channel: "#test"
+  server: 'irc.dollyfish.net.nz',
+  nick: 'ohr',
+  channel: '#test'
 };
 
 export function trial() {
@@ -57,6 +57,6 @@ export function trial() {
 
   bot.addListener('registered', function (message) {
     console.log('registered %s', message);
-    bot.join("#test");
+    bot.join('#test');
   });
 }

@@ -17,7 +17,7 @@ export class AutoStartTimer extends LobbyPlugin {
   lastMapId: number;
   useMapValidation: boolean = false;
   constructor(lobby: Lobby, option: Partial<AutoStartTimerOption> = {}) {
-    super(lobby, "AutoStartTimer", "autostart");
+    super(lobby, 'AutoStartTimer', 'autostart');
     this.option = getConfig(this.pluginName, option) as AutoStartTimerOption;
     this.lastMapId = 0;
     this.registerEvents();
@@ -33,16 +33,16 @@ export class AutoStartTimer extends LobbyPlugin {
     if (this.lobby.isMatching) return;
     if (!player.isAuthorized) return;
     switch (command) {
-      case "*autostart_enable":
+      case '*autostart_enable':
         this.option.enabled = true;
         break;
-      case "*autostart_disable":
+      case '*autostart_disable':
         this.option.enabled = false;
         break;
-      case "*autostart_time":
+      case '*autostart_time':
         let ct = parseInt(param);
         if (Number.isNaN(ct)) {
-          this.logger.warn("invalid *autostart_time param : %s", param);
+          this.logger.warn('invalid *autostart_time param : %s', param);
           return;
         }
         if (ct < WAITINGTIME_MIN) {
@@ -50,10 +50,10 @@ export class AutoStartTimer extends LobbyPlugin {
         }
         this.option.waitingTime = ct;
         break;
-      case "*autostart_clearhost_enable":
+      case '*autostart_clearhost_enable':
         this.option.doClearHost = true;
         break;
-      case "*atuostart_clearhost_disable":
+      case '*atuostart_clearhost_disable':
         this.option.doClearHost = false;
         break;
     }
@@ -70,9 +70,9 @@ export class AutoStartTimer extends LobbyPlugin {
       case BanchoResponseType.BeatmapChanging:
       case BanchoResponseType.HostChanged:
         if (this.lobby.isStartTimerActive) {
-          this.lobby.SendMessage("!mp aborttimer");
+          this.lobby.SendMessage('!mp aborttimer');
         }
-        this.SendPluginMessage("mp_abort_start");
+        this.SendPluginMessage('mp_abort_start');
         break;
       case BanchoResponseType.MatchStarted:
         this.lastMapId = this.lobby.mapId;
@@ -82,21 +82,21 @@ export class AutoStartTimer extends LobbyPlugin {
 
   private startTimer() {
     if (!this.option.enabled || this.option.waitingTime < WAITINGTIME_MIN) return;
-    this.SendPluginMessage("mp_start", [this.option.waitingTime.toString(), "withhelp"]);
+    this.SendPluginMessage('mp_start', [this.option.waitingTime.toString(), 'withhelp']);
     if (this.option.doClearHost) {
-      this.lobby.SendMessage(`!mp clearhost`);
+      this.lobby.SendMessage('!mp clearhost');
     }
   }
 
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
     switch (type) {
-      case "enabledMapChecker":
+      case 'enabledMapChecker':
         this.useMapValidation = true;
         break;
-      case "disabledMapChecker":
+      case 'disabledMapChecker':
         this.useMapValidation = false;
         break;
-      case "validatedMap":
+      case 'validatedMap':
         this.startTimer();
         break;
     }

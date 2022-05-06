@@ -3,21 +3,21 @@ import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { parser, BanchoResponseType } from '../parsers/CommandParser';
 import log4js from 'log4js';
 
-describe("DummyIrcClientTest", function () {
+describe('DummyIrcClientTest', function () {
   before(function () {
-    log4js.configure("config/log_mocha_silent.json");
+    log4js.configure('config/log_mocha_silent.json');
   });
   // ロビー作成テスト
-  it("make lobby test", (done) => {
-    const client = new DummyIrcClient("osu_irc_server", "owner");
-    const lobbyTitle = "testlobby";
+  it('make lobby test', (done) => {
+    const client = new DummyIrcClient('osu_irc_server', 'owner');
+    const lobbyTitle = 'testlobby';
     let f_joined = 0;
     let f_make_res = 0;
     let f_registered = 0;
     //logIrcEvent(client);
     client.on('registered', function (message) {
       f_registered++;
-      client.say("BanchoBot", "!mp make " + lobbyTitle);
+      client.say('BanchoBot', '!mp make ' + lobbyTitle);
     });
     client.on('pm', function (nick, message) {
       const v = parser.ParseMpMakeResponse(nick, message);
@@ -32,7 +32,7 @@ describe("DummyIrcClientTest", function () {
     client.on('join', function (channel, who) {
       f_joined++;
       setTimeout(() => {
-        client.say(channel, "!mp close");
+        client.say(channel, '!mp close');
       }, 10);
     });
     client.on('part', function (channel, who, reason) {
@@ -43,19 +43,19 @@ describe("DummyIrcClientTest", function () {
     });
   });
 
-  it("match test", (done) => {
-    const client = new DummyIrcClient("osu_irc_server", "owner");
-    const lobbyTitle = "testlobby";
-    const players = ["p1", "p2", "p3"];
+  it('match test', (done) => {
+    const client = new DummyIrcClient('osu_irc_server', 'owner');
+    const lobbyTitle = 'testlobby';
+    const players = ['p1', 'p2', 'p3'];
 
     //logIrcEvent(client);
     client.on('registered', function (message) {
-      client.say("BanchoBot", "!mp make " + lobbyTitle);
+      client.say('BanchoBot', '!mp make ' + lobbyTitle);
     });
     client.on('join', function (channel, who) {
       players.forEach((v, i, a) => client.emulateAddPlayerAsync(v));
       setTimeout(() => {
-        client.say(channel, "!mp close");
+        client.say(channel, '!mp close');
       }, 10);
     });
     client.on('part', function (channel, who, reason) {
@@ -63,36 +63,36 @@ describe("DummyIrcClientTest", function () {
     });
   });
 
-  it("make noname lobby test", (done) => {
-    const client = new DummyIrcClient("osu_irc_server", "owner");
+  it('make noname lobby test', (done) => {
+    const client = new DummyIrcClient('osu_irc_server', 'owner');
     //logIrcEvent(client);
-    const lobbyTitle = "";
+    const lobbyTitle = '';
     client.on('registered', function (message) {
-      client.say("BanchoBot", "!mp make " + lobbyTitle);
+      client.say('BanchoBot', '!mp make ' + lobbyTitle);
     });
     client.on('pm', function (nick, message) {
-      assert.equal(message, "No name provided");
+      assert.equal(message, 'No name provided');
       done();
     });
   });
 
-  it("mphost user not found test", (done) => {
-    const client = new DummyIrcClient("osu_irc_server", "owner");
-    const lobbyTitle = "testlobby";
-    const players = ["p1", "p2", "p3"];
+  it('mphost user not found test', (done) => {
+    const client = new DummyIrcClient('osu_irc_server', 'owner');
+    const lobbyTitle = 'testlobby';
+    const players = ['p1', 'p2', 'p3'];
 
     //logIrcEvent(client);
     client.on('registered', function (message) {
-      client.say("BanchoBot", "!mp make " + lobbyTitle);
+      client.say('BanchoBot', '!mp make ' + lobbyTitle);
     });
     client.on('join', function (channel, who) {
       players.forEach((v, i, a) => client.emulateAddPlayerAsync(v));
       setTimeout(() => {
-        client.say(channel, "!mp host p4");
+        client.say(channel, '!mp host p4');
       }, 10);
     });
     client.on('message', function (from, to, msg) {
-      let r = parser.ParseBanchoResponse(msg);
+      const r = parser.ParseBanchoResponse(msg);
       if (r.type == BanchoResponseType.UserNotFound) {
         done();
       }

@@ -6,7 +6,7 @@ import { escapeUserName } from '../Player';
 import { MpSettingsCase } from '../tests/cases/MpSettingsCases';
 import log4js from 'log4js';
 import { EventEmitter } from 'events';
-const logger = log4js.getLogger("irc");
+const logger = log4js.getLogger('irc');
 
 // テスト用の実際に通信を行わないダミーIRCクライアント
 export class DummyIrcClient extends EventEmitter implements IIrcClient {
@@ -18,7 +18,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   stats: Map<string, StatResult>;
   conn: boolean | null;
   isMatching: boolean;
-  hostMask: string = "";
+  hostMask: string = '';
   latency: number = 0;
   referees: string[];
 
@@ -29,7 +29,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   ) {
     super();
     this.nick = nick;
-    this.channel = "";
+    this.channel = '';
     this.connected = false;
     this.players = new Set<string>();
     this.stats = new Map<string, StatResult>();
@@ -37,8 +37,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     this.isMatching = false;
     this.referees = [this.nick];
     this.msg = {
-      command: "dummy command",
-      rawCommand: "dummy command",
+      command: 'dummy command',
+      rawCommand: 'dummy command',
       commandType: 0 as irc.CommandType,
       args: []
     };
@@ -51,7 +51,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   // サーバーとの接続イベントを発行する
   public raiseRegistered(): void {
     this.connected = true;
-    this.hostMask = "osu!Bancho.";
+    this.hostMask = 'osu!Bancho.';
     this.emit('registered', this.msg);
   }
 
@@ -60,22 +60,22 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     if (who == this.nick) {
       this.channel = channel;
     }
-    this.emit("join", channel, who, this.msg);
-    this.emit("join" + channel, who, this.msg);
+    this.emit('join', channel, who, this.msg);
+    this.emit('join' + channel, who, this.msg);
   }
 
   // チャンネル退出イベントを発行する
   public raisePart(channel: string, who: string): void {
     if (who == this.nick) {
-      this.channel = "";
+      this.channel = '';
     }
-    this.emit("part", channel, who, this.msg);
-    this.emit("part" + channel, who, this.msg);
+    this.emit('part', channel, who, this.msg);
+    this.emit('part' + channel, who, this.msg);
   }
 
   // メッセージイベントを発行する
   public emulateMessage(from: string, to: string, message: string): void {
-    const lines = message.split("\n");
+    const lines = message.split('\n');
     if (lines.length > 1) {
       lines.forEach(v => this.emulateMessage(from, to, v));
       return;
@@ -99,7 +99,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       const body = () => {
         this.emulateMessage(from, to, message);
         resolve();
-      }
+      };
 
       if (this.latency != 0) {
         setTimeout(body, this.latency);
@@ -110,7 +110,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   }
 
   public emulateBanchoResponse(message: string): void {
-    this.emulateMessage("BanchoBot", this.channel, message);
+    this.emulateMessage('BanchoBot', this.channel, message);
   }
 
   public emulateChatAsync(from: string, message: string): Promise<void> {
@@ -119,20 +119,20 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // ロビーにプレイヤーが参加した際の動作をエミュレートする
   public async emulateAddPlayerAsync(name: string): Promise<void> {
-    let ename = escapeUserName(name);
+    const ename = escapeUserName(name);
     if (!this.players.has(ename)) {
       this.players.add(ename);
     }
-    await this.emulateMessageAsync("BanchoBot", this.channel, `${name} joined in slot ${this.players.size}.`);
+    await this.emulateMessageAsync('BanchoBot', this.channel, `${name} joined in slot ${this.players.size}.`);
   }
 
   // ロビーからプレイヤーが退出した際の動作をエミュレートする
   public async emulateRemovePlayerAsync(name: string): Promise<void> {
-    let ename = escapeUserName(name);
+    const ename = escapeUserName(name);
     if (this.players.has(ename)) {
       this.players.delete(ename);
     }
-    await this.emulateMessageAsync("BanchoBot", this.channel, `${name} left the game.`);
+    await this.emulateMessageAsync('BanchoBot', this.channel, `${name} left the game.`);
   }
 
   // async呼び出し用のディレイ関数
@@ -147,100 +147,100 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     if (mapid == 0) {
       mapid = this.mapidSeed++;
     }
-    await this.emulateMessageAsync("BanchoBot", this.channel, "Host is changing map...");
+    await this.emulateMessageAsync('BanchoBot', this.channel, 'Host is changing map...');
     await this.delay(delay);
-    await this.emulateMessageAsync("BanchoBot", this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${mapid})`);
+    await this.emulateMessageAsync('BanchoBot', this.channel, `Beatmap changed to: mapname [version] (https://osu.ppy.sh/b/${mapid})`);
   }
 
   // 全員が準備完了になった動作をエミュレートする
   public async emulateReadyAsync(): Promise<void> {
-    await this.emulateMessageAsync("BanchoBot", this.channel, "All players are ready");
+    await this.emulateMessageAsync('BanchoBot', this.channel, 'All players are ready');
   }
 
   // 試合をエミュレートする
   public async emulateMatchAsync(delay: number = 0, scores?: { name: string, score: number, passed: boolean }[]): Promise<void> {
     this.isMatching = true;
-    await this.emulateMessageAsync("BanchoBot", this.channel, "The match has started!");
+    await this.emulateMessageAsync('BanchoBot', this.channel, 'The match has started!');
     if (delay) {
       await this.delay(delay);
     }
     const tasks: Promise<void>[] = [];
     if (scores) {
-      for (let u of scores) {
+      for (const u of scores) {
         if (!this.isMatching) return;
-        tasks.push(this.emulateMessageAsync("BanchoBot", this.channel, `${u.name} finished playing (Score: ${u.score}, ${u.passed ? "PASSED" : "FAILED"}).`));
+        tasks.push(this.emulateMessageAsync('BanchoBot', this.channel, `${u.name} finished playing (Score: ${u.score}, ${u.passed ? 'PASSED' : 'FAILED'}).`));
       }
     } else {
-      for (let u of this.players) {
+      for (const u of this.players) {
         if (!this.isMatching) return;
-        tasks.push(this.emulateMessageAsync("BanchoBot", this.channel, `${u} finished playing (Score: 100000, PASSED).`));
+        tasks.push(this.emulateMessageAsync('BanchoBot', this.channel, `${u} finished playing (Score: 100000, PASSED).`));
       }
     }
 
     await Promise.all(tasks);
     if (!this.isMatching) return;
     this.isMatching = false;
-    await this.emulateMessageAsync("BanchoBot", this.channel, "The match has finished!");
+    await this.emulateMessageAsync('BanchoBot', this.channel, 'The match has finished!');
   }
 
   // 試合中断をエミュレートする
   public async emulateMatchAndAbortAsync(delay: number = 0, finishers: (number | string[]) = 0): Promise<void> {
     this.isMatching = true;
-    await this.emulateMessageAsync("BanchoBot", this.channel, "The match has started!");
+    await this.emulateMessageAsync('BanchoBot', this.channel, 'The match has started!');
     if (delay) {
       await this.delay(delay);
     }
     const tasks: Promise<void>[] = [];
     if (Array.isArray(finishers)) {
-      for (let p of finishers) {
+      for (const p of finishers) {
         tasks.push(this.emulatePlayerFinishAsync(p));
       }
     } else {
       const players = Array.from(this.players);
       for (let i = 0; i < finishers && i < players.length; i++) {
-        let p = players[i];
+        const p = players[i];
         tasks.push(this.emulatePlayerFinishAsync(p));
       }
     }
     await Promise.all(tasks);
     if (!this.isMatching) {
-      await this.emulateMessageAsync("BanchoBot", this.channel, "The match is not in progress");
+      await this.emulateMessageAsync('BanchoBot', this.channel, 'The match is not in progress');
       return;
     }
     this.isMatching = false;
-    await this.emulateMessageAsync("BanchoBot", this.channel, "Aborted the match");
+    await this.emulateMessageAsync('BanchoBot', this.channel, 'Aborted the match');
   }
 
   public async emulatePlayerFinishAsync(username: string): Promise<void> {
-    await this.emulateMessageAsync("BanchoBot", this.channel, `${username} finished playing (Score: 100000, PASSED).`)
+    await this.emulateMessageAsync('BanchoBot', this.channel, `${username} finished playing (Score: 100000, PASSED).`);
   }
 
   public async emulateMpSettings(testcase: MpSettingsCase): Promise<void> {
     this.players.clear();
-    for (let p of testcase.result.players) {
+    for (const p of testcase.result.players) {
       this.players.add(escapeUserName(p.name));
     }
-    for (let t of testcase.texts) {
+    for (const t of testcase.texts) {
       this.emulateBanchoResponse(t);
     }
   }
 
   public async emulateChangeHost(name: string): Promise<void> {
-    await this.emulateMessageAsync("BanchoBot", this.channel, `${name} became the host.`);
+    await this.emulateMessageAsync('BanchoBot', this.channel, `${name} became the host.`);
   }
 
   // IRCClientのjoin
   public join(channel: string, callback?: irc.handlers.IJoinChannel | undefined): void {
     if (callback) {
-      this.once("join", callback);
+      this.once('join', callback);
     }
-    setImmediate(() => this.raiseJoin(channel, ""));
+    setImmediate(() => this.raiseJoin(channel, ''));
   }
 
   // IRCClientのpart
   public part(channel: string, message: string, callback?: irc.handlers.IPartChannel): void {
     if (callback) {
-      this.once("part", callback);
+      this.once('part', callback);
     }
     setImmediate(() => {
       this.raisePart(channel, this.nick);
@@ -254,109 +254,109 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   private onMessage(from: string, to: string, message: string) {
     if (this.referees.includes(from)) {
-      let mp = parser.ParseMPCommand(message);
+      const mp = parser.ParseMPCommand(message);
       if (mp != null) {
         this.processMpCommand(to, message, mp);
       }
     }
-    if (message.startsWith("!stat")) {
+    if (message.startsWith('!stat')) {
       const m = message.match(/^!stats? (.+)/);
       if (m) {
-        this.sendStat(m[1], to == "BanchoBot");
+        this.sendStat(m[1], to == 'BanchoBot');
       }
     }
   }
 
   private processMpCommand(target: string, message: string, mp: MpCommand): void {
-    const m = (msg: string) => this.emulateMessageAsync("BanchoBot", this.channel, msg);
-    if (target == "BanchoBot" && mp.command == "make") {
+    const m = (msg: string) => this.emulateMessageAsync('BanchoBot', this.channel, msg);
+    if (target == 'BanchoBot' && mp.command == 'make') {
       const title = mp.arg;
-      if (title === "") {
-        this.emulateMessage("BanchoBot", this.nick, "No name provided");
+      if (title === '') {
+        this.emulateMessage('BanchoBot', this.nick, 'No name provided');
         return;
       }
       setImmediate(() => {
-        let id = "12345";
-        this.raiseJoin("#mp_" + id, this.nick);
-        this.emulateMessage("BanchoBot", this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
+        const id = '12345';
+        this.raiseJoin('#mp_' + id, this.nick);
+        this.emulateMessage('BanchoBot', this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
       });
     } else if (target == this.channel) {
       switch (mp.command) {
-        case "host":
+        case 'host':
           if (this.players.has(escapeUserName(mp.arg))) {
             m(`${mp.arg} became the host.`);
           } else {
-            m("User not found");
+            m('User not found');
           }
           break;
-        case "password":
-          if (mp.arg == "") {
-            m("Removed the match password");
+        case 'password':
+          if (mp.arg == '') {
+            m('Removed the match password');
           } else {
-            m("Changed the match password");
+            m('Changed the match password');
           }
           break;
-        case "invite":
+        case 'invite':
           m(`Invited ${mp.arg} to the room`);
           break;
-        case "close":
+        case 'close':
           setImmediate(() => {
-            this.emulateMessage("BanchoBot", this.channel, "Closed the match");
+            this.emulateMessage('BanchoBot', this.channel, 'Closed the match');
             this.raisePart(this.channel, this.nick);
           });
           break;
-        case "abort":
+        case 'abort':
           if (this.isMatching) {
             this.isMatching = false;
-            m("Aborted the match");
+            m('Aborted the match');
           } else {
-            m("The match is not in progress");
+            m('The match is not in progress');
           }
           break;
-        case "settings":
+        case 'settings':
           m('Room name: lobby name, History: https://osu.ppy.sh/mp/123');
-          m("Beatmap: https://osu.ppy.sh/b/1562893 Feryquitous feat. Aitsuki Nakuru - Kairikou [Miura's Extra]");
-          m("Team mode: HeadToHead, Win condition: Score");
-          m("Active mods: Freemod");
+          m('Beatmap: https://osu.ppy.sh/b/1562893 Feryquitous feat. Aitsuki Nakuru - Kairikou [Miura\'s Extra]');
+          m('Team mode: HeadToHead, Win condition: Score');
+          m('Active mods: Freemod');
           m(`Players: ${this.players.size}`);
 
           let i = 1;
-          for (let p of this.players) {
+          for (const p of this.players) {
             m(`Slot ${i}  Not Ready https://osu.ppy.sh/u/123 ${p}       `);
             i++;
           }
           break;
-        case "start":
-          if (mp.arg == "") {
-            m("The match has started!");
-            m("Started the match");
+        case 'start':
+          if (mp.arg == '') {
+            m('The match has started!');
+            m('Started the match');
           } else {
             // カウントダウンや分表示は面倒なので省略
-            m("Match starts in " + mp.arg + " seconds");
-            m("Queued the match to start in " + mp.arg + " seconds");
+            m('Match starts in ' + mp.arg + ' seconds');
+            m('Queued the match to start in ' + mp.arg + ' seconds');
           }
           break;
-        case "aborttimer":
-          m("Countdown aborted")
+        case 'aborttimer':
+          m('Countdown aborted');
           break;
-        case "map":
+        case 'map':
           if (mp.arg.match(/\d+/)) {
             m(`Changed beatmap to https://osu.ppy.sh/b/${mp.arg} map name`);
           } else {
-            m("Invalid map ID provided");
+            m('Invalid map ID provided');
           }
           break;
-        case "clearhost":
-          m("Cleared match host");
+        case 'clearhost':
+          m('Cleared match host');
           break;
-        case "kick":
-          let ename = escapeUserName(mp.arg);
+        case 'kick':
+          const ename = escapeUserName(mp.arg);
           if (this.players.has(ename)) {
             this.players.delete(ename);
             m(`${ename} left the game.`);
             m(`Kicked ${ename} from the match.`);
           } else {
-            m("User not found");
+            m('User not found');
           }
           break;
         default:
@@ -375,12 +375,12 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     let stat = this.stats.get(ename);
     const to = toPm ? this.nick : this.channel;
     if (stat == undefined) {
-      let status = this.players.has(ename) ? StatStatuses.Multiplayer : StatStatuses.None;
+      const status = this.players.has(ename) ? StatStatuses.Multiplayer : StatStatuses.None;
       stat = new StatResult(arg, 0, status);
       this.stats.set(ename, stat);
     }
-    stat.toString().split("\n").forEach(t => {
-      this.emulateMessage("BanchoBot", to, t);
+    stat.toString().split('\n').forEach(t => {
+      this.emulateMessage('BanchoBot', to, t);
     });
   }
 

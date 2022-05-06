@@ -5,6 +5,6 @@ export interface LogServerOption {
   port: number;
 }
 
-const options = config.get<LogServerOption>("LogServer");
+const options = config.get<LogServerOption>('LogServer');
 
 startLogServer(options.port);

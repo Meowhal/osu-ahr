@@ -8,7 +8,7 @@ export class InOutLogger extends LobbyPlugin {
   withColorTag: boolean = true;
 
   constructor(lobby: Lobby) {
-    super(lobby, "InOutLogger", "inout");
+    super(lobby, 'InOutLogger', 'inout');
     this.lobby.ReceivedBanchoResponse.on(a => this.onReceivedBanchoResponse(a.message, a.response));
   }
 
@@ -33,19 +33,19 @@ export class InOutLogger extends LobbyPlugin {
   GetInOutLog(useColor: boolean): string {
     const arr = this.GetInOutPlayers();
     const msgOut = arr.out.map(p => {
-      let num = this.players.get(p) || 0;
+      const num = this.players.get(p) || 0;
       return `${p.name}(${num})`;
-    }).join(", ");
-    const msgIn = arr.in.map(p => p.name).join(", ");
-    let msg = "";
-    const ctagIn = useColor ? "\x1b[32m" : "";
-    const ctagOut = useColor ? "\x1b[31m" : "";
-    const ctagEnd = useColor ? "\x1b[0m" : "";
-    if (msgIn != "") {
+    }).join(', ');
+    const msgIn = arr.in.map(p => p.name).join(', ');
+    let msg = '';
+    const ctagIn = useColor ? '\x1b[32m' : '';
+    const ctagOut = useColor ? '\x1b[31m' : '';
+    const ctagEnd = useColor ? '\x1b[0m' : '';
+    if (msgIn != '') {
       msg = `+${ctagIn} ${msgIn} ${ctagEnd}`;
     }
-    if (msgOut != "") {
-      if (msg != "") msg += ", "
+    if (msgOut != '') {
+      if (msg != '') msg += ', ';
       msg += `-${ctagOut} ${msgOut} ${ctagEnd}`;
     }
     return msg;
@@ -54,20 +54,20 @@ export class InOutLogger extends LobbyPlugin {
   LogInOutPlayers(): void {
     if (this.logger.isInfoEnabled()) {
       const msg = this.GetInOutLog(this.withColorTag);
-      if (msg != "") {
+      if (msg != '') {
         this.logger.info(msg);
       }
     }
   }
 
   private saveCurrentPlayers(): void {
-    for (let p of this.lobby.players) {
-      let num = this.players.get(p);
+    for (const p of this.lobby.players) {
+      const num = this.players.get(p);
       if (num === undefined) {
         this.players.set(p, 0);
       }
     }
-    for (let p of this.players.keys()) {
+    for (const p of this.players.keys()) {
       if (!this.lobby.players.has(p)) {
         this.players.delete(p);
       }
@@ -75,8 +75,8 @@ export class InOutLogger extends LobbyPlugin {
   }
 
   private countUp(): void {
-    for (let p of this.players.keys()) {
-      let num = this.players.get(p);
+    for (const p of this.players.keys()) {
+      const num = this.players.get(p);
       if (num !== undefined) {
         this.players.set(p, num + 1);
       }
@@ -85,9 +85,9 @@ export class InOutLogger extends LobbyPlugin {
 
   GetPluginStatus(): string {
     const m = Array.from(this.players.keys()).map(p => {
-      let num = this.players.get(p) || 0;
+      const num = this.players.get(p) || 0;
       return `${p.name}(${num})`;
-    }).join(", ");
+    }).join(', ');
     return `-- InOut -- 
   players: ${m}`;
   }
