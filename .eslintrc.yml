@@ -29,6 +29,12 @@ rules:
     - "off"
   "@typescript-eslint/no-inferrable-types":
     - "off"
+  "@typescript-eslint/no-this-alias":
+    - "off"
+  no-undef:
+    - "off"
+  no-prototype-builtins:
+    - "off"
   brace-style:
     - "off"
     - "1tbs"
