@@ -13,19 +13,19 @@ parserOptions:
 plugins:
   - "@typescript-eslint"
 rules:
-  "@typescript-eslint/no-var-requires": 
+  "@typescript-eslint/no-var-requires":
     - "off"
-  "@typescript-eslint/no-explicit-any": 
+  "@typescript-eslint/no-explicit-any":
     - "off"
-  "@typescript-eslint/no-unused-vars": 
+  "@typescript-eslint/no-unused-vars":
     - "off"
-  "@typescript-eslint/no-namespace": 
+  "@typescript-eslint/no-namespace":
     - "off"
-  "@typescript-eslint/ban-types": 
+  "@typescript-eslint/ban-types":
     - "off"
-  "@typescript-eslint/no-empty-function": 
+  "@typescript-eslint/no-empty-function":
     - "off"
-  "@typescript-eslint/no-empty-interface": 
+  "@typescript-eslint/no-empty-interface":
     - "off"
   "@typescript-eslint/no-inferrable-types":
     - "off"
@@ -39,14 +39,14 @@ rules:
     - "consistent"
   no-console:
     - "off"
-  no-inline-comments: 
+  no-inline-comments:
     - "off"
   comma-style:
     - "off"
   no-extra-parens:
     - "off"
     - "all"
-  no-useless-catch: 
+  no-useless-catch:
     - "off"
   no-empty:
     - "off"
@@ -60,13 +60,13 @@ rules:
     - "off"
   no-case-declarations:
     - "off"
-  prefer-const: 
+  prefer-const:
     - "off"
   no-var: 
     - "off"
-  no-control-regex: 
+  no-control-regex:
     - "off"
-  no-unused-vars: 
+  no-unused-vars:
     - "off"
   indent:
     - "error"
