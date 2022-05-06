@@ -5,24 +5,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadEnvConfig = exports.loadEnvConfigWithTypeHint = exports.generateDefaultOptionTypeHint = exports.getConfig = exports.getIrcConfig = exports.CONFIG_OPTION = void 0;
 const config_1 = __importDefault(require("config"));
+const log4js_1 = __importDefault(require("log4js"));
+const configLogger = log4js_1.default.getLogger("config");
 exports.CONFIG_OPTION = {
-    USE_ENV: false
+    USE_ENV: false,
+    PRINT_LOADED_ENV_CONFIG: true,
 };
 function getIrcConfig() {
     const d = config_1.default.get("irc");
-    const e = loadEnvConfig("irc", d);
+    const e = loadEnvConfig("irc", d, [
+        { key: "server", nullable: false, type: "string" },
+        { key: "nick", nullable: false, type: "string" },
+        { key: "port", nullable: false, type: "number" },
+        { key: "password", nullable: false, type: "string" }
+    ]);
     const c = { ...d, ...e };
+    c.opt = { ...c.opt };
+    if (typeof e.port === "number") {
+        c.opt.port = e.port;
+    }
+    if (typeof e.password === "string") {
+        c.opt.password = e.password;
+    }
     return c;
 }
 exports.getIrcConfig = getIrcConfig;
-function getConfig(tag, c) {
+/**
+ * craete a config from config files, in-code options and environment variables.
+ *   files -> Default settings, etc.
+ *   in-code options -> For setting directly from code for testing and debugging.
+ *   environment variables -> For confidential. Highest priority.
+ * @param tag
+ * @param option
+ * @returns
+ */
+function getConfig(tag, option, hints) {
     if (exports.CONFIG_OPTION.USE_ENV) {
         const d = config_1.default.get(tag);
-        const e = loadEnvConfig(tag, d);
-        return { ...d, ...c, ...e };
+        const e = loadEnvConfig(tag, d, hints);
+        return { ...d, ...option, ...e };
     }
     else {
-        return { ...config_1.default.get(tag), ...c };
+        return { ...config_1.default.get(tag), ...option };
     }
 }
 exports.getConfig = getConfig;
@@ -42,10 +66,13 @@ function generateDefaultOptionTypeHint(option) {
     return r;
 }
 exports.generateDefaultOptionTypeHint = generateDefaultOptionTypeHint;
+function genEnvKey(category, key) {
+    return `ahr_${category}_${key}`;
+}
 function loadEnvConfigWithTypeHint(category, hints, env) {
     let r = {};
     for (const hint of hints) {
-        const envKey = `ahr_${category}_${hint.key}`;
+        const envKey = genEnvKey(category, hint.key);
         let envVar = env[envKey];
         if (hint.nullable && (envVar === "null")) {
             r[hint.key] = null;
@@ -65,7 +92,7 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
                     }
                     break;
                 case "number":
-                    let num = parseInt(envVar);
+                    let num = parseFloat(envVar);
                     if (!Number.isNaN(num)) {
                         r[hint.key] = num;
                     }
@@ -90,6 +117,11 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
             }
         }
     }
+    if (exports.CONFIG_OPTION.PRINT_LOADED_ENV_CONFIG) {
+        for (const key in r) {
+            configLogger.info(`loaded env:${genEnvKey(category, key)} : ${r[key]}`);
+        }
+    }
     return r;
 }
 exports.loadEnvConfigWithTypeHint = loadEnvConfigWithTypeHint;
@@ -98,8 +130,10 @@ function isStringArray(arr) {
         return false;
     return arr.every(v => typeof v === "string");
 }
-function loadEnvConfig(category, template) {
-    const hints = generateDefaultOptionTypeHint(template);
+function loadEnvConfig(category, template, hints) {
+    if (hints === undefined) {
+        hints = generateDefaultOptionTypeHint(template);
+    }
     return loadEnvConfigWithTypeHint(category, hints, process.env);
 }
 exports.loadEnvConfig = loadEnvConfig;

@@ -4,10 +4,18 @@ exports.SlotKeeper = exports.LobbyKeeper = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const Modes_1 = require("../Modes");
 const TypedConfig_1 = require("../TypedConfig");
+const OPTION_TYPE_HINTS = [
+    { key: "mode", nullable: true, type: "string" },
+    { key: "size", nullable: true, type: "number" },
+    { key: "password", nullable: true, type: "string" },
+    { key: "mods", nullable: true, type: "string" },
+    { key: "hostkick_tolerance", nullable: false, type: "number" },
+    { key: "title", nullable: true, type: "string" },
+];
 class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "LobbyKeeper", "keeper");
-        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option, OPTION_TYPE_HINTS);
         this.kickedUsers = new Set();
         this.mpKickedUsers = new Set();
         this.slotKeeper = new SlotKeeper(this.option.size, this.logger);

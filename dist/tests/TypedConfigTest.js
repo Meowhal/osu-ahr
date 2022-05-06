@@ -109,6 +109,12 @@ describe("TypedConfigTests", function () {
             const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0", ahr_test_b: "1" });
             chai_1.assert.deepEqual(opt, { a: 0, b: 1 });
         });
+        it("load float", function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0.0125", ahr_test_b: "-0" });
+            chai_1.assert.approximately(opt["a"], 0.0125, 0.001);
+            chai_1.assert.approximately(opt["b"], 0, 0.001);
+        });
         it("load extra num", function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
             const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0", ahr_test_b: "1", ahr_test_c: "2", ahr_test_d: "3" });
