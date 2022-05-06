@@ -52,7 +52,7 @@ rules:
   no-useless-catch:
     - "off"
   no-empty:
-    - "off"
+    - "error"
   no-fallthrough:
     - "error"
   no-constant-condition:

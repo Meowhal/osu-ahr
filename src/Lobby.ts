@@ -804,8 +804,8 @@ export class Lobby {
   CloseLobbyAsync(): Promise<void> {
     this.logger.trace('start CloseLobby');
     if (this.status != LobbyStatus.Entered) {
-      this.logger.error('無効な呼び出し:CloseLobbyAsync');
-      throw new Error('閉じるロビーがありません。');
+      this.logger.error('invalid call :CloseLobbyAsync');
+      throw new Error('No lobby to close.');
     }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once('part', (channel: string, nick: string) => {
@@ -823,8 +823,8 @@ export class Lobby {
   QuitLobbyAsync(): Promise<void> {
     this.logger.trace('start QuitLobby');
     if (this.status != LobbyStatus.Entered) {
-      this.logger.error('無効な呼び出し:QuitLobbyAsync');
-      throw new Error('閉じるロビーがありません。');
+      this.logger.error('invalid call :QuitLobbyAsync');
+      throw new Error('No lobby to close.');
     }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once('part', (channel: string, nick: string) => {

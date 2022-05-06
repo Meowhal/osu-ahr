@@ -86,8 +86,7 @@ export class HistoryRepository {
     if (this.hasError) return;
 
     try {
-      while (!(await this.fetch(false)).filled && !this.lobbyClosed) {
-      }
+      while (!(await this.fetch(false)).filled && !this.lobbyClosed);
     } catch (e: any) {
       if (e instanceof Error) {
         this.logger.error('@updateToLatest : ' + e.message);

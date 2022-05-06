@@ -156,7 +156,7 @@ export class LobbyKeeper extends LobbyPlugin {
         const team = TeamMode.from(m1[1], true);
         const score = ScoreMode.from(m1[2], true);
         return { team, score };
-      } catch { }
+      } catch { /* continue to parse */ }
     }
 
     const m2 = /^(\S+)\s+(\S+)$/.exec(param);
@@ -165,20 +165,20 @@ export class LobbyKeeper extends LobbyPlugin {
         const team = TeamMode.from(m2[1], true);
         const score = ScoreMode.from(m2[2], true);
         return { team, score };
-      } catch { }
+      } catch { /* continue to parse */ }
     }
 
     try {
       const team = TeamMode.from(param, true);
       return { team, score: this.option.mode?.score ?? ScoreMode.Score };
-    } catch { }
+    } catch { /* continue to parse */ }
 
     try {
       const score = ScoreMode.from(param, true);
       return { team: this.option.mode?.team ?? TeamMode.HeadToHead, score };
-    } catch { }
-
-    throw new Error('Invalid Option. LobbyKeeper.mode : ' + param);
+    } catch {
+      throw new Error('Invalid Option. LobbyKeeper.mode : ' + param);
+    }
   }
 
   private checkMode(teamMode: TeamMode, scoreMode: ScoreMode) {

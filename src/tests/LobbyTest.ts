@@ -62,7 +62,9 @@ describe('LobbyTest', function () {
       try {
         await lobby.MakeLobbyAsync(name);
         assert.fail();
-      } catch (e) { }
+      } catch (e: any) {
+        assert.equal(e.message, 'title is empty');
+      }
     });
 
     // ロビーを二回作成
@@ -73,7 +75,9 @@ describe('LobbyTest', function () {
         lobby.MakeLobbyAsync('1');
         lobby.MakeLobbyAsync('2');
         assert.fail();
-      } catch { }
+      } catch (e: any) {
+        assert.equal(e.message, 'A lobby has already been made.');
+      }
     });
 
     // 無効な状態でロビーを閉じる
@@ -83,7 +87,9 @@ describe('LobbyTest', function () {
       try {
         await lobby.CloseLobbyAsync();
         assert.fail();
-      } catch { }
+      } catch (e: any) {
+        assert.equal(e.message, 'No lobby to close.');
+      }
     });
   });
 
