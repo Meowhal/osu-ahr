@@ -525,7 +525,7 @@ function parseNoRegulationCommand(param: string): MapCheckerUncheckedOption | un
 
 function parseRegulationSetter(param: string): MapCheckerUncheckedOption {
   const result: { [key: string]: string } = {};
-  for (const m of param.matchAll(/([0-9a-zA-Z_\-]+)\s*=\s*([^\s,]+)/g)) {
+  for (const m of param.matchAll(/([0-9a-zA-Z_-]+)\s*=\s*([^\s,]+)/g)) {
     const name = unifyParamName(m[1]);
     const value = m[2];
     result[name] = value;

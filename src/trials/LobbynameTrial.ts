@@ -6,6 +6,6 @@ export function trial() {
 }
 
 function rep(text: string): string {
-  text = text.replace(/[^ -/:-@\[-~0-9a-zA-Z]/g, '');
+  text = text.replace(/[^ -~]/g, '');
   return text;
 }

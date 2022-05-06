@@ -679,6 +679,17 @@ describe('LobbyTest', function () {
     });
   });
 
+  describe('remove invalid chars from lobby title', function () {
+    // この正規表現は OahrBase#makeLobbyAsync で利用されている
+    // OahrBaseのテストがないのでここに記す
+    it('reg', function () {
+      const cases = ['a', 'asdflkj', ' $% BN |~=', '4-5 | alt | test @join', 'あいうおaaa', 'aa\n\raa'];
+      const actual = cases.map(v => v.replace(/[^ -~]/g, ''));
+      const expected = ['a', 'asdflkj', ' $% BN |~=', '4-5 | alt | test @join', 'aaa', 'aaaa'];
+      assert.deepEqual(actual, expected);
+    });
+  });
+
   // 実際に発生したバグを再現するテスト
   describe('Bug reproduction tests', function () {
     it('some chat cant handle as chat', async () => {

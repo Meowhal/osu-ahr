@@ -45,7 +45,7 @@
   }
 
   function convertLink(log) {
-    log.message = log.message.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, '<a target=\'osubmp\' href=\'$&\'>$&</a>');
+    log.message = log.message.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/, '<a target=\'osubmp\' href=\'$&\'>$&</a>');
   }
 
   function decolateChat(log) {
@@ -53,7 +53,7 @@
     let message = '';
     let cl = '';
     if (log.tag == 'chat') {
-      const m = log.message.match(/^(\*?[^\:]+)\:(.*)$/);
+      const m = log.message.match(/^(\*?[^:]+):(.*)$/);
       sender = m[1];
       message = m[2];
       cl = (sender == 'bot') ? ' bot' : ' user';

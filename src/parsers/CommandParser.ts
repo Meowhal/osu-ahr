@@ -16,7 +16,7 @@ export namespace parser {
         }
         break;
       case 66: // B
-        const m_map = message.match(/Beatmap changed to\: (.+) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)$/);
+        const m_map = message.match(/Beatmap changed to: (.+) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)$/);
         if (m_map) {
           return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[2], m_map[1]);
         }
@@ -229,7 +229,7 @@ export namespace parser {
   }
 
   export function SplitCliCommand(line: string): { command: string, arg: string } {
-    const l = line.match(/^\s*([\!\*]?\w+)\s+(.*)/);
+    const l = line.match(/^\s*([!*]?\w+)\s+(.*)/);
     if (l == null) {
       return { command: line, arg: '' };
     } else {
@@ -260,16 +260,16 @@ export namespace parser {
     message = message.trimRight().toLowerCase();
     if (message[0] != '!' && message[0] != '*') return false;
     if (message == '!mp') return false;
-    return message.match(/^[\!\*](?!roll|stats?|where|faq|report|request)\w+/) != null;
+    return message.match(/^[!*](?!roll|stats?|where|faq|report|request)\w+/) != null;
   }
 
   export function ParseChatCommand(message: string): { command: string, param: string } {
     message = message.trimRight();
-    let m = message.match(/^\!mp\s+(\w+)\s*(.*?)$/);
+    let m = message.match(/^!mp\s+(\w+)\s*(.*?)$/);
     if (m) {
       return { command: '!' + m[1].toLowerCase(), param: m[2] };
     }
-    m = message.match(/^([\!\*]\w+)\s*(.*?)$/);
+    m = message.match(/^([!*]\w+)\s*(.*?)$/);
     if (m) {
       return { command: m[1].toLowerCase(), param: m[2] };
     } else {

@@ -24,7 +24,7 @@ describe('BeatmapRepository Tests', function () {
     it('parse website test', async () => {
       const bufSrc = await fs.readFile('./src/tests/cases/3182198.html');
       const src = bufSrc.toString();
-      const reg = new RegExp('<script id="json-beatmapset" type="application/json">\s*(.+?)\s*</script>', 'ms');
+      const reg = /<script id="json-beatmapset" type="application\/json">\s*(.+?)\s*<\/script>/ms;
       const match = reg.exec(src);
       if (match) {
         console.log(match[1]);

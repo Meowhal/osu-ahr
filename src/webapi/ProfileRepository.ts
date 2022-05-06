@@ -117,11 +117,8 @@ export class WebsiteProfileFetcher implements IProfileFetcher {
     return pro;
   }
 
-  webpreg = new RegExp('<script id="json-user" type="application/json">\s*(.+?)\s*</script>', 'ms');
-  modepreg = new RegExp(
-    '<script id="json-currentMode" type="application/json">s*(.+?)s*</script>',
-    'ms'
-  );
+  webpreg = /<script id="json-user" type="application\/json">\s*(.+?)\s*<\/script>/ms;
+  modepreg = /<script id="json-currentMode" type="application\/json">\s*(.+?)\s*<\/script>/ms;
 
   async fetchProfileFromWebsite(userID: number, mode: string): Promise<UserProfile> {
     try {

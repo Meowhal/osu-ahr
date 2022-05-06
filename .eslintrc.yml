@@ -61,7 +61,7 @@ rules:
   no-irregular-whitespace:
     - "error"
   no-useless-escape:
-    - "off"
+    - "error"
   no-case-declarations:
     - "off"
   prefer-const:

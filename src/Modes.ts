@@ -191,7 +191,8 @@ export class Mod extends Mode {
   }
 
   static parseMods(str: string): Mod[] {
-    const arrMods = str.match(/[a-zA-Z0-9\-]+/g)?.map(v => Mod.from(v));
+    // アルファベット, 数字, ハイフン（co-op用）のまとまりに分解する
+    const arrMods = str.match(/[a-zA-Z0-9-]+/g)?.map(v => Mod.from(v));
     if (arrMods) {
       const setMods = new Set(arrMods);
       return Mod.removeInvalidCombinations(setMods);

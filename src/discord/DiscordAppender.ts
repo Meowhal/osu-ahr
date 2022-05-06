@@ -73,7 +73,7 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
       }
     case 'inout':
       const min = msg.match(/\+\x1b\[32m (.+?) \x1B\[0m/);
-      const mout = msg.match(/\-\x1b\[31m (.+?) \x1B\[0m/);
+      const mout = msg.match(/-\x1b\[31m (.+?) \x1B\[0m/);
       if (min || mout) {
         let msg = '';
         if (min) {
