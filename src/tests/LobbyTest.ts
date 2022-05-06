@@ -130,7 +130,7 @@ describe('LobbyTest', function () {
       }
     });
 
-    // プレイヤーの退出　一人
+    // プレイヤーの退出 一人
     it('player left test', async () => {
       const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
 
