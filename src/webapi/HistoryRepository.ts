@@ -7,7 +7,7 @@ import { HistoryFecher as HistoryFetcher, IHistoryFetcher as IHistoryFetcher } f
 /* メモ
 試合中のイベントはend_timeがnullになっている
 試合が終わったあとにそのイベントを再取得すると試合結果などが補足される
-試合終了後に新しいイベントが発生するわけではない 
+試合終了後に新しいイベントが発生するわけではない
 
 イベントのとり方として、
 試合中のイベントを最新として更新を待つか、試合のイベントだけを取るか
@@ -109,7 +109,7 @@ export class HistoryRepository {
    * 現在の未取得分の
    * すでに所得中の場合は、取得が完了するまで待ち、さらにクールタイム分待機したあとに次のタスクを実行する
    * @param isRewind 取得済み分の過去イベントを取得する場合はtrue,未来イベントを取得する場合はfalse
-   * @returns 
+   * @returns
    */
   async fetch(isRewind: boolean = false): Promise<FetchResult> {
     await this.fetchTask;
@@ -302,7 +302,7 @@ export class HistoryRepository {
       if (ev.user_id) {
         switch (ev.detail.type) {
           case 'host-changed':
-            // clearhost実行時に id = 0 
+            // clearhost実行時に id = 0
             if (ev.user_id !== 0 && !(ev.user_id in map)) {
               map[ev.user_id] = false;
               // -1、直前の試合開始ID、直前のhostchangeIDのいずれか

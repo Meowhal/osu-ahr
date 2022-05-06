@@ -43,9 +43,9 @@ export function getIrcConfig(): IIrcConfig {
  *   files -> Default settings, etc.
  *   in-code options -> For setting directly from code for testing and debugging.
  *   environment variables -> For confidential. Highest priority.
- * @param tag 
- * @param option 
- * @returns 
+ * @param tag
+ * @param option
+ * @returns
  */
 export function getConfig<T>(tag: string, option: Partial<T>, hints?: ConfigTypeHint[]): T {
   if (CONFIG_OPTION.USE_ENV) {

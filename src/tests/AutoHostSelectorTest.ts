@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { escapeUserName } from '../Player'; 
+import { escapeUserName } from '../Player';
 import { Lobby } from '../Lobby';
 import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { AutoHostSelector, DENY_LIST } from '../plugins/AutoHostSelector';
@@ -30,7 +30,7 @@ describe('AutoHostSelectorTest', function () {
         assert.isTrue(!l.isMatching);
         assert.isTrue(l.host === null);
         break;
-      case 'hr': // has host and needs to rotate 
+      case 'hr': // has host and needs to rotate
         assert.isTrue(s.hostQueue.length > 0, 's.hostQueue.length > 0');
         assert.isTrue(!l.isMatching), '!l.isMatching';
         assert.isTrue(s.needsRotate, 's.needsRotate');

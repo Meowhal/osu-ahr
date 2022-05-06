@@ -16,10 +16,10 @@ class ProfileRepositoryClass {
   }
 
   /**
-     * 
-     * @param userID 
-     * @param mode 
-     * @returns 
+     *
+     * @param userID
+     * @param mode
+     * @returns
      * @throws FetchProfileError
      */
   async getProfile(userID: number, mode: string): Promise<ProfileCache> {
@@ -34,7 +34,7 @@ class ProfileRepositoryClass {
     if (cache) return cache;
     throw new FetchProfileError(FetchProfileErrorReason.NotFound);
   }
-    
+
   tryGetCache(userID: number, mode: string): ProfileCache | undefined {
     const profileKey = this.genKey(userID, mode);
     const cache = this.profiles.get(profileKey);
@@ -54,7 +54,7 @@ class ProfileRepositoryClass {
     cacheProfile.fetchedAt = now;
     this.profiles.set(key, cacheProfile);
   }
-    
+
   discardExpiredCache(expiredMs: number = this.cacheExpiredMs) {
     const now = Date.now();
     for (const [key, cache] of this.profiles.entries()) {
@@ -63,7 +63,7 @@ class ProfileRepositoryClass {
       }
     }
   }
-    
+
   genKey(userID: number, mode: string) {
     return `${mode}.${userID}`;
   }
@@ -101,11 +101,11 @@ export interface IProfileFetcher {
 export class WebsiteProfileFetcher implements IProfileFetcher {
 
   /**
-     * 
-     * @param userID 
-     * @param mode 
-     * @returns 
-     * @throws FetchProfileError 
+     *
+     * @param userID
+     * @param mode
+     * @returns
+     * @throws FetchProfileError
      */
   async getPlayer(userID: number, mode: string): Promise<UserProfile> {
     const pro = await this.fetchProfileFromWebsite(userID, mode);

@@ -24,11 +24,11 @@ class BeatmapRepositoryClass {
   }
 
   /**
-     * 
-     * @param mapId 
-     * @param mode 
-     * @param allowConvert 
-     * @returns 
+     *
+     * @param mapId
+     * @param mode
+     * @param allowConvert
+     * @returns
      * @throws FetchBeatmapError
      */
   async getBeatmap(mapId: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = true): Promise<BeatmapCache> {
@@ -134,12 +134,12 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
   }
 
   /**
-     * 
-     * @param id 
-     * @param mode 
-     * @param allowConvert 
-     * @returns 
-     * @throws FetchBeatmapError 
+     *
+     * @param id
+     * @param mode
+     * @param allowConvert
+     * @returns
+     * @throws FetchBeatmapError
      */
   async getBeatmap(id: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = false): Promise<Beatmap> {
     const set = await this.fetchBeatmapFromWebsite(id);

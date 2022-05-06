@@ -1,4 +1,4 @@
-import { IIrcClient } from '../IIrcClient'; 
+import { IIrcClient } from '../IIrcClient';
 import { LobbyStatus } from '../Lobby';
 import { Player } from '../Player';
 import * as readline from 'readline';

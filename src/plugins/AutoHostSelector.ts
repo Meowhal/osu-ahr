@@ -107,8 +107,8 @@ export class AutoHostSelector extends LobbyPlugin {
   /**
    * 参加したプレイヤーはホストの順番待ちキューに追加される
    * 現在部屋に誰もいない場合はホストに任命
-   * @param player 
-   * @param slot 
+   * @param player
+   * @param slot
    */
   private onPlayerJoined(player: Player, slot: number, isMpSettingResult: boolean): void {
     if (DENY_LIST.includes(player)) return;
@@ -128,7 +128,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 現在のホストなら次のホストを任命
    * ホスト任命中に退出した場合も次のホストを任命
    * 試合中なら次のホストは任命しない
-   * @param player 
+   * @param player
    */
   private onPlayerLeft(player: Player, isMpSettingResult: boolean): void {
     this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
@@ -146,7 +146,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * ユーザーが自分でホストを変更した場合
    * queueの次のホストならそのまま
    * 順番を無視していたら任命し直す
-   * @param newhost 
+   * @param newhost
    */
   private onHostChanged(newhost: Player): void {
     if (this.lobby.isMatching) return; // 試合中は何もしない
@@ -228,10 +228,10 @@ export class AutoHostSelector extends LobbyPlugin {
    * mp settingsの結果をもとにキューを再構築する
    * 現在のキューを維持しつつ、プレイヤーの出入りを反映させる
    * 現在のキューに存在しないプレイヤーがホストになった場合、キューを１から再構築する
-   * @param result 
-   * @param playersIn 
-   * @param playersOut 
-   * @param hostChanged 
+   * @param result
+   * @param playersIn
+   * @param playersOut
+   * @param hostChanged
    */
   private onFixedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
     if (!this.lobby.host) {
@@ -328,7 +328,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   /**
    * MpSettingsの結果をもとに、ロビーのスロット順にキューを構成しなおす
-   * @param result 
+   * @param result
    */
   OrderBySlotBase(result: MpSettingsResult): void {
     this.logger.info('reordered slot base order.');
@@ -375,7 +375,7 @@ export class AutoHostSelector extends LobbyPlugin {
   /**
    * 指定ユーザーまでスキップ
    * 順番は維持される
-   * @param to 
+   * @param to
    */
   SkipTo(to: string | Player): void {
     let trg: Player;
@@ -408,7 +408,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
   /**
    * キューを指定した順番に並び替える
-   * @param order 
+   * @param order
    */
   Reorder(order: Player[] | string): void {
     if (typeof (order) === 'string') {
@@ -454,7 +454,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 現在のキューの先頭をホストに任命
    * すでに先頭がホストの場合は何もしない
    * 変更中から確定までの間にユーザーが抜ける可能性を考慮する必要がある
-   * キューの先頭を末尾に 
+   * キューの先頭を末尾に
    */
   private changeHost(): void {
     if (this.hostQueue.length === 0) {

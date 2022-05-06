@@ -2,13 +2,11 @@
  * check list
  * admin roleが正しく登録される
  * admin role以外のユーザーはスラッシュコマンド、ボタンコマンドを利用できない
- * 
  */
 
 import log4js from 'log4js';
 import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton, DiscordAPIError, Message, Role, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
 import config from 'config';
- 
 import { IIrcClient } from '../IIrcClient';
 import { LobbyStatus } from '../Lobby';
 import { Player } from '../Player';
@@ -453,7 +451,7 @@ export class DiscordBot {
    * コマンドを実行したチャンネルがロビーに紐付けされていればそれを使用する。
    * チャンネル名が mp_*** の形式であれば *** 部分を使用する。
    * @param interaction 1
-   * @returns 
+   * @returns
    */
   resolveLobbyId(interaction: CommandInteraction, asNumber: boolean = false): string | undefined {
     if (!interaction.inGuild()) return;

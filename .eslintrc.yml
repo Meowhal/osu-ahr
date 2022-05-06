@@ -92,7 +92,7 @@ rules:
   eqeqeq:
     - "error"
   no-trailing-spaces:
-    - "off"
+    - "error"
   space-before-function-paren:
     - "off"
   no-use-before-define:

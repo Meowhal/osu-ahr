@@ -509,7 +509,7 @@ describe('LobbyKeepserTest', function () {
       assert.equal(mode?.score, ScoreMode.Accuracy);
 
       keeper.option.mode = defaultOpton;
-      ircClient.emulateMessage('p1', ircClient.channel, '*keep mode tag coop'); // team only, space 
+      ircClient.emulateMessage('p1', ircClient.channel, '*keep mode tag coop'); // team only, space
       mode = keeper.option.mode;
       assert.notEqual(mode, defaultOpton);
       assert.equal(mode?.team, TeamMode.TagCoop);
@@ -551,7 +551,7 @@ describe('LobbyKeepserTest', function () {
       assert.equal(keeper.option.mode, defaultOpton);
 
       keeper.option.mode = defaultOpton;
-      ircClient.emulateMessage('p1', ircClient.channel, '*keepheadtohead'); // team only, witoutspace 
+      ircClient.emulateMessage('p1', ircClient.channel, '*keepheadtohead'); // team only, witoutspace
       assert.equal(keeper.option.mode, defaultOpton);
     });
 

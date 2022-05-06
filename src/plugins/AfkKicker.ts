@@ -4,7 +4,7 @@ import { StatStatuses } from '../parsers/StatParser';
 import { LobbyPlugin } from './LobbyPlugin';
 import { getConfig } from '../TypedConfig';
 
-/* 
+/*
 TODO: AFK_allowedについて
 
 加算判定

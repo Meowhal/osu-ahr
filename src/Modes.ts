@@ -19,7 +19,7 @@ class Mode {
   /**
      * value,name,aliases と一致するか比較する
      * @param normalizedValue 検査対象文字列、 前提：標準化済みの文字列を使用すること
-     * @returns 
+     * @returns
      */
   protected _match(normalizedValue: string): boolean {
     return this.aliases.has(normalizedValue);
@@ -32,8 +32,8 @@ class Mode {
   /**
      * 比較しやすい表現に変換する
      * スペースとハイフンを取り除き、小文字にする
-     * @param v 
-     * @returns 
+     * @param v
+     * @returns
      */
   protected static normalize(v: string): string {
     return v.replace(/[ -]/g, '').toLowerCase();

@@ -33,7 +33,7 @@ describe('BeatmapRepository Tests', function () {
       } else {
         assert.fail();
       }
-            
+
     });
 
     it('fetch osu map', async () => {

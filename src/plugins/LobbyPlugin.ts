@@ -20,8 +20,8 @@ export class LobbyPlugin {
 
   /**
    * 他のプラグインにメッセージを送信する。
-   * @param type 
-   * @param args 
+   * @param type
+   * @param args
    */
   SendPluginMessage(type: string, args: string[] = []): void {
     this.lobby.PluginMessage.emit({ type, args, src: this });

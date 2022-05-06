@@ -94,4 +94,4 @@ export class StatParser {
 
 export function IsStatResponse(message: string) {
   return message.match(/^Stats for \(|Score:|Plays:|Accuracy:/);
-}  
+}

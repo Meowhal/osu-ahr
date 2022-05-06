@@ -254,7 +254,7 @@ export namespace parser {
    * ChatCommandかの判定
    * !か*で始まる、既存のコマンドではない、!mp単独ではない
    * !mp xxx は !xxx と解釈する
-   * @param message 
+   * @param message
    */
   export function IsChatCommand(message: string) {
     message = message.trimRight().toLowerCase();

@@ -223,7 +223,7 @@ export class Lobby {
    * nameに対してPlayerは一意のインスタンスで直接比較可能
    * この関数以外でPlayerを作成してはならない
    * 再入室してきたユーザーの情報を参照したい場合に備えてプレイヤーをマップで保持しておく
-   * @param username 
+   * @param username
    */
   GetOrMakePlayer(username: string): Player {
     const ename = escapeUserName(username);
@@ -242,7 +242,7 @@ export class Lobby {
   /**
    * username からプレイヤーオブジェクトを取得する
    * まだ作成されていないプレイヤーだった場合nullを返す
-   * @param username 
+   * @param username
    */
   GetPlayer(username: string): Player | null {
     const ename = escapeUserName(username);
@@ -929,7 +929,7 @@ export class Lobby {
 
   /**
    * MpSettingsの結果を取り込む。join/left/hostの発生しない
-   * @param result 
+   * @param result
    */
   private margeMpSettingsResult(result: MpSettingsResult): { playersIn: Player[], playersOut: Player[], hostChanged: boolean } {
     this.lobbyName = result.name;
