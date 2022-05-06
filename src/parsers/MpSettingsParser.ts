@@ -30,7 +30,6 @@ export class MpSettingsParser {
   get isParsed(): boolean {
     return !this.isParsing && this.result != null;
   }
-  constructor() { }
 
   feedLine(line: string): boolean {
     let m = line.match(/Room name: (.+), History: (.+?(\d+))/);

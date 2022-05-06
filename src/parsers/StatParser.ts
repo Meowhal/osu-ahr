@@ -48,7 +48,6 @@ export class StatParser {
   get isParsed(): boolean {
     return !this.isParsing && this.result != null;
   }
-  constructor() { }
 
   feedLine(message: string): boolean {
     const line1 = message.match(/Stats for \((.+)\)\[https:\/\/osu\.ppy\.sh\/u\/(\d+)\]( is (.+))?:/);

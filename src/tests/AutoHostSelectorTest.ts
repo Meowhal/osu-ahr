@@ -1217,7 +1217,4 @@ describe('AutoHostSelectorTest', function () {
       b.lobby.destroy();
     });
   });
-  describe('tests for issues', () => {
-
-  });
 });

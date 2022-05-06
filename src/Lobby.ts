@@ -831,7 +831,7 @@ export class Lobby {
         resolve();
       });
       if (this.channel != undefined) {
-        this.ircClient.part(this.channel, 'part', () => { });
+        this.ircClient.part(this.channel, 'part', () => { /* do nothing. */ });
         this.status = LobbyStatus.Leaving;
       } else {
         reject();

@@ -39,9 +39,11 @@ export class LobbyPlugin {
    * すべてのプラグインが読み込まれたあとに実行される
    */
   OnLoaded(): void {
+    /* do nothing. */
   }
 
   OnConfig(target: string, name: string, value: string): void {
+    /* do nothing. */
   }
 
   loadEnvSettings(option: any) {

@@ -195,7 +195,7 @@ export class OahrCli extends OahrBase {
     exited: {
       name: 'exited',
       prompt: 'ended',
-      action: async (line: string) => { },
+      action: async (line: string) => { /* do nothing. */ },
       completer: (line: string): readline.CompleterResult => {
         return [['exit'], line];
       }
