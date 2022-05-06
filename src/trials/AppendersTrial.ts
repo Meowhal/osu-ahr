@@ -1,11 +1,11 @@
 import log4js from 'log4js';
-import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, Intents } from 'discord.js';
+import { Client, Permissions, Guild, CommandInteraction, ApplicationCommandData, Intents } from 'discord.js';
 import config from 'config';
 import { setContext } from '../discord/DiscordAppender';
 
 type GuildCommandInteraction = CommandInteraction & { guildId: string; }
 export interface DiscordBotConfig {
-    token: string; // ボットのトークン https://discord.com/developers/applications
+  token: string; // ボットのトークン https://discord.com/developers/applications
 }
 
 const COMMANDS: ApplicationCommandData[] = [

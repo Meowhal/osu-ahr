@@ -1,6 +1,4 @@
-import { assert } from 'chai';
 import { Lobby } from '../Lobby';
-import { Roles } from '../Player';
 import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { MapRecaster } from '../plugins/MapRecaster';
 import tu from './TestUtils';

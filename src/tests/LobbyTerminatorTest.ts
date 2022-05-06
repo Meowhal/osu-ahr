@@ -1,6 +1,4 @@
-import { assert } from 'chai';
 import { Lobby } from '../Lobby';
-import { parser, BanchoResponse } from '../parsers/CommandParser';
 import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { LobbyTerminator } from '../plugins/LobbyTerminator';
 import tu from './TestUtils';

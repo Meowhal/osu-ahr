@@ -1,4 +1,4 @@
-import { ApplicationCommandData, Permissions, ApplicationCommandPermissionData, Client, CreateRoleOptions, Guild, GuildMember, Intents, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { Permissions, Client, CreateRoleOptions, GuildMember, Intents, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import config from 'config';
 import { MessageButtonStyles } from 'discord.js/typings/enums';
 
@@ -6,7 +6,7 @@ import { MessageButtonStyles } from 'discord.js/typings/enums';
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 interface DiscordOption {
-    token: string
+  token: string
 }
 
 const commands = [

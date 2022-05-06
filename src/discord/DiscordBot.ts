@@ -5,11 +5,9 @@
  */
 
 import log4js from 'log4js';
-import { Client, Permissions, Guild, GuildChannel, ThreadChannel, CommandInteraction, ApplicationCommandData, ApplicationCommandPermissionData, CreateRoleOptions, MessageEmbed, MessageActionRow, MessageButton, DiscordAPIError, Message, Role, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
+import { Client, Permissions, Guild, CommandInteraction, ApplicationCommandPermissionData, CreateRoleOptions, MessageActionRow, MessageButton, DiscordAPIError, Message, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
 import config from 'config';
 import { IIrcClient } from '../IIrcClient';
-import { LobbyStatus } from '../Lobby';
-import { Player } from '../Player';
 import { OahrDiscord } from './OahrDiscord';
 import { setContext } from './DiscordAppender';
 import { BotCommands } from './BotCommand';
@@ -64,7 +62,7 @@ export class DiscordBot {
       if (!interaction.inGuild()) return;
       if (!this.checkMemberHasAhrAdminRole(interaction.member as GuildMember)) {
         if (interaction.isButton()) {
-          await interaction.reply({content:'looking for a menu for you', ephemeral:true});
+          await interaction.reply({ content: 'looking for a menu for you', ephemeral: true });
         }
         return;
       }
@@ -332,27 +330,27 @@ export class DiscordBot {
     const lobbyId = '#mp_' + lobbyNumber;
     const ahr = this.ahrs[lobbyId];
     if (!ahr) {
-      await interaction.reply({content:`${lobbyId} - the lobby has already been unmanaged.`, ephemeral:true});
+      await interaction.reply({ content: `${lobbyId} - the lobby has already been unmanaged.`, ephemeral: true });
     }
 
     try {
       switch (command) {
         case 'menu':
           const menu = ahr.createControllButtons();
-          await interaction.reply({content:`${lobbyId} - menu`, components:[menu], ephemeral:true});
+          await interaction.reply({ content: `${lobbyId} - menu`, components: [menu], ephemeral: true });
           return;
         case 'close':
           await ahr.lobby.CloseLobbyAsync();
-          await interaction.reply({content:`${lobbyId} - closed`, ephemeral:true});
+          await interaction.reply({ content: `${lobbyId} - closed`, ephemeral: true });
           break;
         case 'startLog':
           await this.getOrCreateMatchChannel(interaction.guild, lobbyNumber);
-          await interaction.reply({content:`${lobbyId} - start transfer`, ephemeral:true});
+          await interaction.reply({ content: `${lobbyId} - start transfer`, ephemeral: true });
           this.startTransferLog(ahr, interaction.guild);
           break;
         case 'stopLog':
           ahr.stopTransferLog();
-          await interaction.reply({content:`${lobbyId} - stop transfer`, ephemeral:true});
+          await interaction.reply({ content: `${lobbyId} - stop transfer`, ephemeral: true });
           break;
       }
       await this.updateMatchSummary(ahr);
