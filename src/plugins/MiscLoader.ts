@@ -2,10 +2,10 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
 import { BanchoResponseType } from '../parsers/CommandParser';
-import config from 'config';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
-import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from '../webapi/ProfileRepository';
+import { FetchProfileError, FetchProfileErrorReason } from '../webapi/ProfileRepository';
 import { WebApiClient } from '../webapi/WebApiClient';
+import { getConfig } from '../TypedConfig';
 
 export interface MiscLoaderOption {
 }
@@ -23,11 +23,10 @@ export class MiscLoader extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<MiscLoaderOption> = {}) {
     super(lobby, "MiscLoader", "miscLoader");
-    const d = config.get<MiscLoaderOption>(this.pluginName);
-    if(WebApiClient.available){
+    if (WebApiClient.available) {
       this.canSeeRank = true;
     }
-    this.option = { ...d, ...option } as MiscLoaderOption;
+    this.option = getConfig(this.pluginName, option) as MiscLoaderOption;
     this.registerEvents();
   }
 
@@ -51,20 +50,20 @@ export class MiscLoader extends LobbyPlugin {
     }
   }
 
-  async getProfile(player: Player){
+  async getProfile(player: Player) {
     try {
-      if(!this.canSeeRank){
+      if (!this.canSeeRank) {
         return;
       }
       let currentPlayer = this.lobby.GetPlayer(player.name);
-      if(!currentPlayer)
+      if (!currentPlayer)
         return;
-      if(currentPlayer.id == 0 || this.lobby.gameMode == undefined){
+      if (currentPlayer.id == 0 || this.lobby.gameMode == undefined) {
         this.lobby.SendMessageWithCoolTime("!stats " + currentPlayer.name, "!rank", 10000);
         return;
       }
       let selectedMode = "";
-      switch(this.lobby.gameMode.value){
+      switch (this.lobby.gameMode.value) {
         case "0":
           selectedMode = "osu";
           break;
@@ -79,10 +78,10 @@ export class MiscLoader extends LobbyPlugin {
           break;
       }
       const profile = await WebApiClient.getPlayer(currentPlayer.id, selectedMode);
-    
+
       const msg = profile.username + " your rank is #" + profile.statistics.global_rank;
-      this.lobby.SendMessageWithCoolTime(msg, "!rank",5000);
-      
+      this.lobby.SendMessageWithCoolTime(msg, "!rank", 5000);
+
     } catch (e: any) {
       if (e instanceof FetchProfileError) {
         switch (e.reason) {

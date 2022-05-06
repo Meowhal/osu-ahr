@@ -37,6 +37,7 @@ const config_path = (process.env.NODE_ENV === 'production')
     : "./config/log_cli_dev.json";
 log4js_1.default.configure(config_path);
 try {
+    TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();
     if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
         logger.error("you must enter your account name and irc password in the config file. ");

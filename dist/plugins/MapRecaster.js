@@ -1,12 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapRecaster = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const CommandParser_1 = require("../parsers/CommandParser");
-const config_1 = __importDefault(require("config"));
+const TypedConfig_1 = require("../TypedConfig");
 /**
  * ホストが古いバージョンのマップを選択した際に、コマンドでマップを貼り直して最新版にする。
  * !updateコマンドなどで発動。マップ選択後に1度だけ実行できる。
@@ -15,8 +12,7 @@ class MapRecaster extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "MapRecaster", "recaster");
         this.canRecast = true;
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.registerEvents();
     }
     registerEvents() {

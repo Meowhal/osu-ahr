@@ -1,22 +1,19 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseMapcheckerOwnerCommand = exports.MapValidator = exports.secToTimeNotation = exports.MapChecker = void 0;
-const config_1 = __importDefault(require("config"));
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const OptionValidator_1 = require("../libs/OptionValidator");
 const Modes_1 = require("../Modes");
 const CommandParser_1 = require("../parsers/CommandParser");
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
+const TypedConfig_1 = require("../TypedConfig");
 class MapChecker extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "MapChecker", "mapChecker");
         this.lastMapId = 0;
         this.checkingMapId = 0;
         this.numViolations = 0;
-        const d = { ...config_1.default.get(this.pluginName), ...option };
+        const d = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         validateMapCheckerOption(d);
         this.option = d;
         if (this.option.gamemode instanceof Modes_1.PlayMode) {

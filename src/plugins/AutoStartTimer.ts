@@ -2,7 +2,7 @@ import { Lobby } from '../Lobby';
 import { BanchoResponseType, BanchoResponse } from '../parsers/CommandParser';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
+import { getConfig } from '../TypedConfig';
 
 export interface AutoStartTimerOption {
   enabled: boolean;
@@ -18,8 +18,7 @@ export class AutoStartTimer extends LobbyPlugin {
   useMapValidation: boolean = false;
   constructor(lobby: Lobby, option: Partial<AutoStartTimerOption> = {}) {
     super(lobby, "AutoStartTimer", "autostart");
-    const d = config.get<AutoStartTimerOption>(this.pluginName);
-    this.option = { ...d, ...option } as AutoStartTimerOption;
+    this.option = getConfig(this.pluginName, option) as AutoStartTimerOption;
     this.lastMapId = 0;
     this.registerEvents();
   }

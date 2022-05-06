@@ -1,14 +1,13 @@
 import { Lobby } from '../Lobby';
-import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { StatStatuses } from '../parsers/StatParser';
 import { Player, MpStatuses } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
 import { VoteCounter } from './VoteCounter';
+import { getConfig } from '../TypedConfig';
 
 export interface MatchAborterOption {
   vote_rate: number; // アボート投票時の必要数/プレイヤー数
-  vote_min: number;　// 最低投票数
+  vote_min: number; // 最低投票数
   vote_msg_defer_ms: number; // メッセージの延期時間
   auto_abort_rate: number; // 何割終了したらアボートタイマーを起動するか？
   auto_abort_delay_ms: number; // 試合終了後のアボート実行までの猶予時間
@@ -26,8 +25,7 @@ export class MatchAborter extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<MatchAborterOption> = {}) {
     super(lobby, "MatchAborter", "aborter");
-    const d = config.get<MatchAborterOption>(this.pluginName);
-    this.option = { ...d, ...option } as MatchAborterOption;
+    this.option = getConfig(this.pluginName, option) as MatchAborterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }

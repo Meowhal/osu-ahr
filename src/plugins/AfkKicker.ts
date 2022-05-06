@@ -2,7 +2,7 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { StatStatuses } from '../parsers/StatParser';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
+import { getConfig } from '../TypedConfig';
 
 /* 
 TODO: AFK_allowedについて
@@ -79,8 +79,7 @@ export class AfkKicker extends LobbyPlugin {
     playerStats: Map<Player, PlayerState>;
     constructor(lobby: Lobby, option: Partial<AfkKickerOption> = {}) {
         super(lobby, "AfkKicker", "afk");
-        const d = config.get<AfkKickerOption>(this.pluginName);
-        this.option = { ...d, ...option } as AfkKickerOption;
+        this.option = getConfig(this.pluginName, option) as AfkKickerOption;
         this.playerStats = new Map();
         this.registerEvents();
     }

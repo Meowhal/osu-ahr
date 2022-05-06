@@ -1,14 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MatchAborter = void 0;
 const StatParser_1 = require("../parsers/StatParser");
 const Player_1 = require("../Player");
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const config_1 = __importDefault(require("config"));
 const VoteCounter_1 = require("./VoteCounter");
+const TypedConfig_1 = require("../TypedConfig");
 /**
  * Abort投票を受け付けるためのプラグイン
  * 試合中に進行が止まってしまった際に復帰するため
@@ -17,8 +14,7 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "MatchAborter", "aborter");
         this.abortTimer = null;
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.voting = new VoteCounter_1.VoteCounter(this.option.vote_rate, this.option.vote_min);
         this.registerEvents();
     }

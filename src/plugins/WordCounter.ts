@@ -10,8 +10,6 @@ export interface WordCounterOption {
   log_interval_ms: number;
 }
 
-
-
 interface Sample {
   time: number;
   length: number;
@@ -39,6 +37,7 @@ export class WordCounter extends LobbyPlugin {
     super(lobby, "WordCounter", "wcounter");
     const d = config.get<WordCounterOption>(this.pluginName);
     this.option = { ...d, ...option } as WordCounterOption;
+    this.loadEnvSettings(this.option);
     this.periods = this.option.periods.map(a => {
       return {
         symbol: a.symbol,

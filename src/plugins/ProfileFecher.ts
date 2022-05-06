@@ -2,15 +2,12 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
 import { WebApiClient } from '../webapi/WebApiClient';
-
-import config from 'config';
-
 import { UserProfile } from '../webapi/UserProfile';
+import { getConfig } from '../TypedConfig';
 
 export interface ProfileFecherOption {
   profile_expired_day: number
 }
-
 
 
 export class ProfileFecher extends LobbyPlugin {
@@ -22,8 +19,7 @@ export class ProfileFecher extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<ProfileFecherOption> = {}) {
     super(lobby, "profile", "profile");
-    const d = config.get<ProfileFecherOption>(this.pluginName);
-    this.option = { ...d, ...option } as ProfileFecherOption;
+    this.option = getConfig(this.pluginName, option) as ProfileFecherOption;
     this.profileMap = new Map<string, UserProfile>();
     this.pendingNames = new Set<string>();
     this.task = this.initializeAsync();

@@ -2,10 +2,10 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
 import { Game, User } from '../webapi/HistoryTypes';
 import { Mod, ScoreMode, TeamMode } from '../Modes';
 import { Logger } from 'log4js';
+import { ConfigTypeHint, getConfig } from '../TypedConfig';
 
 export interface LobbyKeeperOption {
   /**
@@ -15,7 +15,7 @@ export interface LobbyKeeperOption {
   mode: { team: TeamMode, score: ScoreMode } | null;
 
   /**
-   * 1-16
+   * 1-16 (0 means no management)
    */
   size: number;
 
@@ -37,6 +37,15 @@ export interface LobbyKeeperOption {
   title: string | null;
 }
 
+const OPTION_TYPE_HINTS: ConfigTypeHint[] = [
+  { key: "mode", nullable: true, type: "string" },
+  { key: "size", nullable: true, type: "number" },
+  { key: "password", nullable: true, type: "string" },
+  { key: "mods", nullable: true, type: "string" },
+  { key: "hostkick_tolerance", nullable: false, type: "number" },
+  { key: "title", nullable: true, type: "string" },
+];
+
 export class LobbyKeeper extends LobbyPlugin {
   option: LobbyKeeperOption;
   kickedUsers: Set<Player>;
@@ -45,13 +54,11 @@ export class LobbyKeeper extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<LobbyKeeperOption> = {}) {
     super(lobby, "LobbyKeeper", "keeper");
-    const d = config.get<LobbyKeeperOption>(this.pluginName);
-    this.option = { ...d, ...option } as LobbyKeeperOption;
+    this.option = getConfig(this.pluginName, option, OPTION_TYPE_HINTS) as LobbyKeeperOption;
     this.kickedUsers = new Set();
     this.mpKickedUsers = new Set();
     this.slotKeeper = new SlotKeeper(this.option.size, this.logger);
     this.convertOptions();
-
     this.registerEvents();
   }
 

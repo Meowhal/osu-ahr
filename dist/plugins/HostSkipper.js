@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HostSkipper = void 0;
 const Lobby_1 = require("../Lobby");
@@ -10,7 +7,7 @@ const CommandParser_1 = require("../parsers/CommandParser");
 const StatParser_1 = require("../parsers/StatParser");
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const VoteCounter_1 = require("./VoteCounter");
-const config_1 = __importDefault(require("config"));
+const TypedConfig_1 = require("../TypedConfig");
 /**
  * スキップ処理の受付部分を担当
  * スキップが受け付けられると、pluginMessageを介して他のプラグインに処理を依頼する。
@@ -20,8 +17,7 @@ class HostSkipper extends LobbyPlugin_1.LobbyPlugin {
         super(lobby, "HostSkipper", "skipper");
         this.timeHostChanged = 0;
         this.isMapChanged = false;
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.voting = new VoteCounter_1.VoteCounter(this.option.vote_rate, this.option.vote_min);
         this.registerEvents();
     }
