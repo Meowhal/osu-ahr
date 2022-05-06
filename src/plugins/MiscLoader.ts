@@ -5,28 +5,22 @@ import { BanchoResponseType } from '../parsers/CommandParser';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
 import { FetchProfileError, FetchProfileErrorReason } from '../webapi/ProfileRepository';
 import { WebApiClient } from '../webapi/WebApiClient';
-import { getConfig } from '../TypedConfig';
-
-export interface MiscLoaderOption {
-}
 
 /**
  * Get beatmap mirror link from Beatconnect
  * Use !mirror to fetch the mirror link
  */
 export class MiscLoader extends LobbyPlugin {
-  option: MiscLoaderOption;
   canResend: boolean = true;
   beatconnectURL: string = 'https://beatconnect.io/b/${beatmapset_id}';
   kitsuURL: string = 'https://kitsu.moe/d/${beatmapset_id}';
   canSeeRank: boolean = false;
 
-  constructor(lobby: Lobby, option: Partial<MiscLoaderOption> = {}) {
+  constructor(lobby: Lobby) {
     super(lobby, 'MiscLoader', 'miscLoader');
     if (WebApiClient.available) {
       this.canSeeRank = true;
     }
-    this.option = getConfig(this.pluginName, option) as MiscLoaderOption;
     this.registerEvents();
   }
 
