@@ -1,5 +1,4 @@
 import log4js from 'log4js';
-import config from 'config';
 import { LobbyPlugin } from './LobbyPlugin';
 import { Lobby } from '../Lobby';
 import { Player } from '../Player';
@@ -8,6 +7,7 @@ import { PlayMode } from '../Modes';
 import { BanchoResponseType } from '../parsers/CommandParser';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from '../webapi/BeatmapRepository';
 import { Beatmap, Beatmapset } from '../webapi/Beatmapsets';
+import { getConfig } from '../TypedConfig';
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -33,10 +33,11 @@ export class MapChecker extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<MapCheckerUncheckedOption> = {}) {
     super(lobby, "MapChecker", "mapChecker");
-    const d = { ...config.get<MapCheckerUncheckedOption>(this.pluginName), ...option } as MapCheckerUncheckedOption;
+    const d = getConfig(this.pluginName, option) as MapCheckerUncheckedOption;
     validateMapCheckerOption(d);
     this.option = d as MapCheckerOption;
-    if(this.option.gamemode instanceof PlayMode){
+
+    if (this.option.gamemode instanceof PlayMode) {
       this.lobby.gameMode = this.option.gamemode;
     }
     this.validator = new MapValidator(this.option, this.logger);
@@ -403,7 +404,7 @@ function validateMapCheckerOption(option: MapCheckerUncheckedOption): option is 
     if (typeof option.gamemode == "string") {
       try {
         option.gamemode = PlayMode.from(option.gamemode, true);
-        
+
       } catch {
         throw new Error("option MapChecker#gamemode must be [osu | fruits | taiko | mania].");
       }

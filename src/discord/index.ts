@@ -3,7 +3,7 @@ import log4js from 'log4js';
 import { DiscordBot } from './DiscordBot';
 import { logIrcEvent } from '../IIrcClient';
 import * as irc from '../libs/irc';
-import { getIrcConfig } from '../TypedConfig';
+import { CONFIG_OPTION, getIrcConfig } from '../TypedConfig';
 import { logPrivateMessage } from '../IIrcClient';
 import { applySpeedLimit } from '../libs/ChatLimiter';
 
@@ -16,6 +16,7 @@ const config_path = "./config/log_discord.json";
 log4js.configure(config_path);
 
 try {
+    CONFIG_OPTION.USE_ENV = true;
     const c = getIrcConfig();
     if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
         logger.error("you must enter your account name and irc password in the config file. ");

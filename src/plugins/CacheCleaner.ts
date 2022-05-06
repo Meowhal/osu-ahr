@@ -1,10 +1,9 @@
 import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
-import config from 'config';
 import { BeatmapRepository } from '../webapi/BeatmapRepository';
 import { ProfileRepository } from '../webapi/ProfileRepository';
-
+import { getConfig } from '../TypedConfig';
 
 export interface CacheCleanerOption {
 
@@ -24,8 +23,7 @@ export class CacheCleaner extends LobbyPlugin {
 
     constructor(lobby: Lobby, option: Partial<CacheCleanerOption> = {}) {
         super(lobby, "CacheCleaner", "cleaner");
-        const d = config.get<CacheCleanerOption>(this.pluginName);
-        this.option = { ...d, ...option } as CacheCleanerOption;
+        this.option = getConfig(this.pluginName, option) as CacheCleanerOption;
         this.cleanedAt = Date.now();
         this.lastHeapSize = process.memoryUsage().heapUsed;
         this.cleaning = false;

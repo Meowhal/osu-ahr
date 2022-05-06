@@ -1,18 +1,14 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CacheCleaner = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const config_1 = __importDefault(require("config"));
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
 const ProfileRepository_1 = require("../webapi/ProfileRepository");
+const TypedConfig_1 = require("../TypedConfig");
 class CacheCleaner extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
         super(lobby, "CacheCleaner", "cleaner");
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.cleanedAt = Date.now();
         this.lastHeapSize = process.memoryUsage().heapUsed;
         this.cleaning = false;

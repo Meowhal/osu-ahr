@@ -1,15 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiscLoader = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const CommandParser_1 = require("../parsers/CommandParser");
-const config_1 = __importDefault(require("config"));
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
 const ProfileRepository_1 = require("../webapi/ProfileRepository");
 const WebApiClient_1 = require("../webapi/WebApiClient");
+const TypedConfig_1 = require("../TypedConfig");
 /**
  * Get beatmap mirror link from Beatconnect
  * Use !mirror to fetch the mirror link
@@ -21,11 +18,10 @@ class MiscLoader extends LobbyPlugin_1.LobbyPlugin {
         this.beatconnectURL = "https://beatconnect.io/b/${beatmapset_id}";
         this.kitsuURL = "https://kitsu.moe/d/${beatmapset_id}";
         this.canSeeRank = false;
-        const d = config_1.default.get(this.pluginName);
         if (WebApiClient_1.WebApiClient.available) {
             this.canSeeRank = true;
         }
-        this.option = { ...d, ...option };
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.registerEvents();
     }
     registerEvents() {

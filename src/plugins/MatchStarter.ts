@@ -1,10 +1,9 @@
 import { Lobby } from '../Lobby';
 import { BanchoResponseType } from '../parsers/CommandParser';
-import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
 import { VoteCounter } from './VoteCounter';
-import config from 'config';
+import { getConfig } from '../TypedConfig';
 
 export interface MatchStarterOption {
   vote_rate: number; // 投票時の必要数/プレイヤー数
@@ -19,8 +18,7 @@ export class MatchStarter extends LobbyPlugin {
 
   constructor(lobby: Lobby, option: Partial<MatchStarterOption> = {}) {
     super(lobby, "MatchStarter", "starter");
-    const d = config.get<MatchStarterOption>(this.pluginName);
-    this.option = { ...d, ...option } as MatchStarterOption;
+    this.option = getConfig(this.pluginName, option) as MatchStarterOption;
     this.voting = new VoteCounter(this.option.vote_rate, this.option.vote_min);
     this.registerEvents();
   }
@@ -156,23 +154,23 @@ export class MatchStarter extends LobbyPlugin {
     let strSec = "";
 
     if (min > 1) {
-        strMin = min.toString() + " minutes";
+      strMin = min.toString() + " minutes";
     } else if (min == 1) {
-        strMin = "1 minute"
+      strMin = "1 minute"
     }
 
     if (min > 0 && sec > 0) {
-        strAnd = " and "
+      strAnd = " and "
     }
 
     if (sec > 1) {
-        strSec = sec.toString() + " seconds";
+      strSec = sec.toString() + " seconds";
     } else if (sec == 1) {
-        strSec = "1 second";
+      strSec = "1 second";
     }
 
     return `${strMin}${strAnd}${strSec}`;
-}
+  }
 
   private start(): void {
     this.stopTimer();

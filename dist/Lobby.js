@@ -11,8 +11,8 @@ const TypedEvent_1 = require("./libs/TypedEvent");
 const DeferredAction_1 = require("./libs/DeferredAction");
 const MpSettingsParser_1 = require("./parsers/MpSettingsParser");
 const HistoryRepository_1 = require("./webapi/HistoryRepository");
-const config_1 = __importDefault(require("config"));
 const log4js_1 = __importDefault(require("log4js"));
+const TypedConfig_1 = require("./TypedConfig");
 var LobbyStatus;
 (function (LobbyStatus) {
     LobbyStatus[LobbyStatus["Standby"] = 0] = "Standby";
@@ -23,7 +23,6 @@ var LobbyStatus;
     LobbyStatus[LobbyStatus["Leaving"] = 5] = "Leaving";
     LobbyStatus[LobbyStatus["Left"] = 6] = "Left";
 })(LobbyStatus = exports.LobbyStatus || (exports.LobbyStatus = {}));
-const LobbyDefaultOption = config_1.default.get("Lobby");
 class Lobby {
     constructor(ircClient, option = {}) {
         this.mapTitle = "";
@@ -65,7 +64,7 @@ class Lobby {
         if (ircClient.conn == null) {
             throw new Error("clientが未接続です");
         }
-        this.option = { ...LobbyDefaultOption, ...option };
+        this.option = (0, TypedConfig_1.getConfig)("Lobby", option);
         this.status = LobbyStatus.Standby;
         this.settingParser = new MpSettingsParser_1.MpSettingsParser();
         this.statParser = new StatParser_1.StatParser();

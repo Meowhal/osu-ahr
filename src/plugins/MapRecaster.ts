@@ -2,12 +2,10 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
 import { BanchoResponseType } from '../parsers/CommandParser';
-import config from 'config';
+import { getConfig } from '../TypedConfig';
 
 export interface MapRecasterOption {
 }
-
-
 
 /**
  * ホストが古いバージョンのマップを選択した際に、コマンドでマップを貼り直して最新版にする。
@@ -18,8 +16,7 @@ export class MapRecaster extends LobbyPlugin {
   canRecast: boolean = true;
   constructor(lobby: Lobby, option: Partial<MapRecasterOption> = {}) {
     super(lobby, "MapRecaster", "recaster");
-    const d = config.get<MapRecasterOption>(this.pluginName);
-    this.option = { ...d, ...option } as MapRecasterOption;
+    this.option = getConfig(this.pluginName, option) as MapRecasterOption;
     this.registerEvents();
   }
 
