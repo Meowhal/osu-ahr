@@ -343,6 +343,7 @@ describe('History repositry Tests', () => {
         switch (a) {
           case 0:
             assert.fail();
+            break;
           case 1:
             b++;
             assert.equal(e.newName, 'newname 1');
@@ -350,6 +351,7 @@ describe('History repositry Tests', () => {
             break;
           case 2:
             assert.fail();
+            break;
           case 3:
             b++;
             assert.equal(e.newName, 'newname 2');

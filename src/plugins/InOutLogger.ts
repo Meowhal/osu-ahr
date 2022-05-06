@@ -16,6 +16,9 @@ export class InOutLogger extends LobbyPlugin {
     switch (response.type) {
       case BanchoResponseType.MatchFinished:
         this.countUp();
+        this.LogInOutPlayers();
+        this.saveCurrentPlayers();
+        break;
       case BanchoResponseType.MatchStarted:
       case BanchoResponseType.AbortedMatch:
         this.LogInOutPlayers();
