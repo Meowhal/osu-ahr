@@ -74,14 +74,23 @@ Discord
 
 # Recent Changes
 
-## 1.5.11
+## 1.6.00
 
-+ Improved Discord Integration.
-  + The "matches" channel now displays an information panel that allows you to check the status of each match.
-  + The permissions have been changed, so if you are already using the bot, please re-invite the bot again.
-  + To start forwarding in-game chat, you need to press the "Start Forwarding" button.
-+ Added chat speed limiter.
-  + The risk of your bot being silenced is reduced.
++ Enviroment Variable Supports
+  + Almost all configs that can be set in local.json can also be set from environment variables.
+  + The environment variable name should be in the form `ahr_[category]_[config_name]`.
+
+e.g. bash
+
+```bash
+> ahr_irc_nick=meowhal
+> ahr_irc_password=1234abcd
+> npm run start
+
+starting up...
+[INFO] config - loaded env:ahr_irc_nick : meowhal
+[INFO] config - loaded env:ahr_irc_password : 1234abcd
+```
 
 # Setup
 
@@ -140,6 +149,8 @@ Note: You can also run your bot on discord. See the [Discord Integration](#disco
 # Configuration
 
 You can edit local.json to configure the bot's behavior.
+It is also possible to set values via environment variables.
+The format of environment variable name is `ahr_[section_name]_[config_name]`.
 
 ## IRC Section
 
@@ -147,6 +158,8 @@ You can edit local.json to configure the bot's behavior.
 + `nick` : `string` Your osu! account name
 + `opt.port` : `number`
 + `opt.password` : `string` Your IRC password. You can get it from [https://osu.ppy.sh/p/irc](https://osu.ppy.sh/p/irc).
+
+local.json
 
 ```json
 {
@@ -161,6 +174,15 @@ You can edit local.json to configure the bot's behavior.
 ...
 ```
 
+env
+
+```bash
+ahr_irc_server="irc.ppy.sh"
+ahr_irc_nick=meowhal
+ahr_irc_port=6667
+ahr_irc_password=123456
+```
+
 ## Lobby Section
 
 + `authorized_users` : `string[]`
@@ -171,6 +193,8 @@ You can edit local.json to configure the bot's behavior.
 + `info_message_cooltime_ms` : `number` Cool down period for !info command (milliseconds).
 + `stat_timeout_ms` : `number` Sets the time in milliseconds to wait for a response from BanchoBot when typing "!stats".
 + `info_message_announcement_interval_ms` : `number` Set above 180000 if you want to send info messages periodically.
+
+local.json
 
 ```json
 "Lobby": {
@@ -185,6 +209,14 @@ You can edit local.json to configure the bot's behavior.
   "stat_timeout_ms": 5000,
   "info_message_announcement_interval_ms": 0
 }
+```
+
+env
+
+```bash
+ahr_Lobby_authorized_users='["peppy", "abcedf"]'
+listref_duration_ms=1000
+info_message='["welcome to ahr lobby!", "The second item is displayed on the second line.","Too many lines will result in a silent penalty"]'
 ```
 
 ## AfkKicker Section
