@@ -1,7 +1,7 @@
 export const validateOption = {
   number: function (name: string, value: any, min?: number, max?: number) {
     let v = value;
-    if (typeof v != 'number') {
+    if (typeof v !== 'number') {
       v = parseFloat(v);
     }
     if (isNaN(v)) {
@@ -18,11 +18,11 @@ export const validateOption = {
 
   bool: function (name: string, value: any) {
     let v = value;
-    if (typeof v == 'string') {
+    if (typeof v === 'string') {
       v = v.toLocaleLowerCase().trim();
-      if (v == 'false') {
+      if (v === 'false') {
         v = false;
-      } else if (v == 'true') {
+      } else if (v === 'true') {
         v = true;
       } else {
         throw new Error(`${name} (${value}) is not a boolean`);

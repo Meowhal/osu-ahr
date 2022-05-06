@@ -76,7 +76,7 @@ export class OahrDiscord extends OahrBase {
     }
 
     const ho = this.getPlayerOrders();
-    if (ho != '') {
+    if (ho !== '') {
       embed.addField('host order', ho, false);
     }
 
@@ -84,7 +84,7 @@ export class OahrDiscord extends OahrBase {
     embed.addField('selector', `changer:${this.selector.mapChanger?.name ?? 'none'}, rflag:${this.selector.needsRotate ? 'true' : 'false'}`, false);
 
     const denylist = this.selector.getDeniedPlayerNames();
-    if (denylist.length != 0) {
+    if (denylist.length !== 0) {
       embed.addField('denylist', `${denylist.join(', ')}`);
     }
 
@@ -92,7 +92,7 @@ export class OahrDiscord extends OahrBase {
     embed.addField('regulation', this.checker.getRegulationDescription(), false);
 
     const keeps = this.keeper.getDescription();
-    if (keeps != '') {
+    if (keeps !== '') {
       embed.addField('keeps', keeps, false);
     }
 
@@ -101,7 +101,7 @@ export class OahrDiscord extends OahrBase {
 
   createSummaryInfoEmbed() {
     const lobby = this.lobby;
-    const stat = lobby.status == LobbyStatus.Left ? LOBBY_STAT.closed : lobby.isMatching ? LOBBY_STAT.match : LOBBY_STAT.idle;
+    const stat = lobby.status === LobbyStatus.Left ? LOBBY_STAT.closed : lobby.isMatching ? LOBBY_STAT.match : LOBBY_STAT.idle;
     const lid = lobby.lobbyId ?? '';
     const name = lobby.lobbyName ?? '';
     const host = lobby.host?.name ?? 'none';
@@ -113,11 +113,11 @@ export class OahrDiscord extends OahrBase {
     embed.addField('regulation', this.checker.getRegulationDescription(), true);
     embed.addField(`map - ${lobby.mapTitle}`, `https://osu.ppy.sh/b/${lobby.mapId}`, false);
     const ho = this.getPlayerOrders();
-    if (ho != '') {
+    if (ho !== '') {
       embed.addField('host order', ho, false);
     }
     const keeps = this.keeper.getDescription();
-    if (keeps != '') {
+    if (keeps !== '') {
       embed.addField('keeps', keeps, false);
     }
     embed.setTimestamp();
@@ -126,13 +126,13 @@ export class OahrDiscord extends OahrBase {
 
   createMenuButton() {
     const cid = this.lobby.channel; // #mp_xxxx
-    if (cid == undefined) throw new Error('invalid ahr lobby state. channel is undefined');
+    if (!cid) throw new Error('invalid ahr lobby state. channel is undefined');
     return new MessageActionRow().addComponents(new MessageButton().setLabel('Menu').setStyle(MessageButtonStyles.PRIMARY).setCustomId('menu,' + cid));
   }
 
   createControllButtons() {
     const cid = this.lobby.channel; // #mp_xxxx
-    if (cid == undefined) throw new Error('invalid ahr lobby state. channel is undefined');
+    if (!cid) throw new Error('invalid ahr lobby state. channel is undefined');
     const btn1 = new MessageButton();
     const btn2 = new MessageButton().setLabel('close').setStyle(MessageButtonStyles.DANGER).setCustomId('close,' + cid); // close,#mp_xxxx
 

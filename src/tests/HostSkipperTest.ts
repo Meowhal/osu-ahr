@@ -29,8 +29,8 @@ describe('HostSkipperTest', function () {
   }
 
   async function resolveSkipAsync(lobby: Lobby, callback: (() => void) | null = null): Promise<number> {
-    const t = tu.assertEventFire(lobby.PluginMessage, a => a.type == 'skip');
-    if (callback != null) {
+    const t = tu.assertEventFire(lobby.PluginMessage, a => a.type === 'skip');
+    if (callback !== null) {
       t.then(a => {
         callback();
         return a;
@@ -40,15 +40,15 @@ describe('HostSkipperTest', function () {
   }
 
   async function rejectSkipAsync(lobby: Lobby, timeout: number): Promise<number> {
-    return tu.assertEventNeverFire(lobby.PluginMessage, a => a.type == 'skip', timeout);
+    return tu.assertEventNeverFire(lobby.PluginMessage, a => a.type === 'skip', timeout);
   }
 
   async function resolveSkiptoAsync(lobby: Lobby, userid: string): Promise<number> {
-    return tu.assertEventFire(lobby.PluginMessage, a => a.type == 'skipto' && a.args[0] == userid);
+    return tu.assertEventFire(lobby.PluginMessage, a => a.type === 'skipto' && a.args[0] === userid);
   }
 
   async function rejectSkiptoAsync(lobby: Lobby, timeout: number): Promise<number> {
-    return tu.assertEventNeverFire(lobby.PluginMessage, a => a.type == 'skipto', timeout);
+    return tu.assertEventNeverFire(lobby.PluginMessage, a => a.type === 'skipto', timeout);
   }
 
   describe('construction test', () => {

@@ -12,7 +12,7 @@ export function applySpeedLimit(ircClient: IIrcClient, tokens: number = 10, peri
   };
 
   const queueMessage = (target: string, message: string) => {
-    if (timeId != undefined) {
+    if (timeId) {
       queue.push({ target, message });
       return;
     }
@@ -28,7 +28,7 @@ export function applySpeedLimit(ircClient: IIrcClient, tokens: number = 10, peri
   };
 
   const waitAndSay = () => {
-    if (queue.length == 0) return;
+    if (queue.length === 0) return;
     let wt = lastChatAt + waitTime - Date.now();
     if (wt < 0) wt = 0;
     timeId = setTimeout(() => {

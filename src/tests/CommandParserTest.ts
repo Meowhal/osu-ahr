@@ -11,7 +11,7 @@ describe('CommandParserTest', function () {
     let message = 'Created the tournament match https://osu.ppy.sh/mp/52612489 irctestroom';
     let v = parser.ParseMpMakeResponse('BanchoBot', message);
     assert.isNotNull(v);
-    if (v == null) {
+    if (v === null) {
       assert.fail();
     } else {
       assert.equal(v.id, '52612489');
@@ -20,7 +20,7 @@ describe('CommandParserTest', function () {
 
     message = 'Created the tournament match https://osu.ppy.sh/mp/52849259 irctest_room^^';
     v = parser.ParseMpMakeResponse('BanchoBot', message);
-    if (v == null) {
+    if (v === null) {
       assert.fail();
     } else {
       assert.equal(v.id, '52849259');
@@ -29,7 +29,7 @@ describe('CommandParserTest', function () {
 
     message = 'Created the tournament match https://osu.ppy.sh/mp/52849326 irc test room 1';
     v = parser.ParseMpMakeResponse('BanchoBot', message);
-    if (v == null) {
+    if (v === null) {
       assert.fail();
     } else {
       assert.equal(v.id, '52849326');
@@ -40,7 +40,7 @@ describe('CommandParserTest', function () {
   it('ParseMPCommandTest', () => {
     let message = '!mp host xxx';
     let v = parser.ParseMPCommand(message);
-    if (v == null) {
+    if (v === null) {
       assert.fail();
     } else {
       assert.equal(v.command, 'host');
@@ -49,7 +49,7 @@ describe('CommandParserTest', function () {
 
     message = '!mp make xxx';
     v = parser.ParseMPCommand(message);
-    if (v == null) {
+    if (v === null) {
       assert.fail();
     } else {
       assert.equal(v.command, 'make');
@@ -58,7 +58,7 @@ describe('CommandParserTest', function () {
 
     message = 'xx!mp make xxx';
     v = parser.ParseMPCommand(message);
-    if (v != null) {
+    if (v !== null) {
       assert.fail();
     }
   });

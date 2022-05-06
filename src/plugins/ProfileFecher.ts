@@ -58,7 +58,7 @@ export class ProfileFecher extends LobbyPlugin {
       try {
         const profile = await this.getProfileFromWebApi(player);
 
-        if (profile != null) {
+        if (profile !== null) {
           player.id = profile.id;
           player.profile = profile;
           this.logger.info('fetch profile :' + player.name);

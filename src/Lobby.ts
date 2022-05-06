@@ -85,7 +85,7 @@ export class Lobby {
   events: { [eventtype: string]: any } = {};
 
   constructor(ircClient: IIrcClient, option: Partial<LobbyOption> = {}) {
-    if (ircClient.conn == null) {
+    if (!ircClient.conn) {
       throw new Error('clientが未接続です');
     }
     this.option = getConfig('Lobby', option) as LobbyOption;
@@ -106,12 +106,12 @@ export class Lobby {
   private registerEvents(): void {
     this.events = {
       message: (from: any, to: any, message: any) => {
-        if (to == this.channel) {
+        if (to === this.channel) {
           this.handleMessage(from, to, message);
         }
       },
       action: (from: any, to: any, message: any) => {
-        if (to == this.channel) {
+        if (to === this.channel) {
           this.handleAction(from, to, message);
         }
       },
@@ -119,7 +119,7 @@ export class Lobby {
         this.RaiseNetError(err);
       },
       registered: async () => {
-        if (this.status == LobbyStatus.Entered && this.channel) {
+        if (this.status === LobbyStatus.Entered && this.channel) {
           this.logger.warn('network reconnection detected!');
           await this.LoadMpSettingsAsync();
         }
@@ -131,7 +131,7 @@ export class Lobby {
         this.logger.info('%s was kicked from %s by %s: %s', who, channel, by, reason);
       },
       part: (channel: string, nick: string) => {
-        if (channel == this.channel) {
+        if (channel === this.channel) {
           this.stopInfoMessageAnnouncement();
           this.CancelAllDeferredMessages();
           this.historyRepository.lobbyClosed = true;
@@ -142,7 +142,7 @@ export class Lobby {
         }
       },
       selfMessage: (target: string, toSend: any) => {
-        if (target == this.channel) {
+        if (target === this.channel) {
           const r = toSend.replace(/\[http\S+\s([^\]]+)\]/g, '[http... $1]');
           this.chatlogger.info('bot:%s', r);
         }
@@ -155,7 +155,7 @@ export class Lobby {
 
     this.events.join = (channel: string, who: string) => {
       this.logger.trace('raised join event');
-      if (who == this.ircClient.nick && this.status != LobbyStatus.Entered) {
+      if (who === this.ircClient.nick && this.status !== LobbyStatus.Entered) {
         this.RaiseJoinedLobby(channel);
       }
     };
@@ -180,7 +180,7 @@ export class Lobby {
   get playersFinished(): number {
     let i = 0;
     for (const p of this.players) {
-      if (p.mpstatus == MpStatuses.Finished) i++;
+      if (p.mpstatus === MpStatuses.Finished) i++;
     }
     return i;
   }
@@ -191,7 +191,7 @@ export class Lobby {
   get playersInGame(): number {
     let i = 0;
     for (const p of this.players) {
-      if (p.mpstatus == MpStatuses.Finished || p.mpstatus == MpStatuses.Playing) i++;
+      if (p.mpstatus === MpStatuses.Finished || p.mpstatus === MpStatuses.Playing) i++;
     }
     return i;
   }
@@ -267,7 +267,7 @@ export class Lobby {
 
       const d1 = this.HostChanged.on((a: { player: Player }) => {
         dispose();
-        if (a.player == user) {
+        if (a.player === user) {
           resolve();
         } else {
           reject('Another player became host.');
@@ -275,7 +275,7 @@ export class Lobby {
       });
 
       const d2 = this.PlayerLeft.on((a: { player: Player }) => {
-        if (a.player == user) {
+        if (a.player === user) {
           dispose();
           reject('Pending host left the lobby.');
         }
@@ -300,7 +300,7 @@ export class Lobby {
 
     this.hostPending = user;
     this.transferHostTimeout.start(this.option.transferhost_timeout_ms);
-    if (user.id != 0) {
+    if (user.id !== 0) {
       this.SendMessage('!mp host #' + user.id);
     } else {
       this.SendMessage('!mp host ' + user.name);
@@ -324,7 +324,7 @@ export class Lobby {
   }
 
   SendMessage(message: string): void {
-    if (this.channel != undefined) {
+    if (this.channel) {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit('sentMessage', this.channel, message);
       this.SentMessage.emit({ message });
@@ -347,7 +347,7 @@ export class Lobby {
       }
     }
     this.coolTimes[tag] = now;
-    if (typeof message == 'function') {
+    if (typeof message === 'function') {
       message = message();
     }
     this.SendMessage(message);
@@ -362,7 +362,7 @@ export class Lobby {
       }
     }
     this.coolTimes[tag] = now;
-    if (typeof message == 'function') {
+    if (typeof message === 'function') {
       message = message();
     }
     this.SendPrivateMessage(message, target);
@@ -379,7 +379,7 @@ export class Lobby {
   }
 
   DeferMessage(message: string, tag: string, delayMs: number, resetTimer: boolean = false): void {
-    if (message == '') {
+    if (message === '') {
       this.CancelDeferredMessage(tag);
       return;
     }
@@ -409,18 +409,18 @@ export class Lobby {
         reject('stat timeout');
       }, timeout);
       const d = this.ParsedStat.on(({ result }) => {
-        if (escapeUserName(result.name) == player.escaped_name) {
+        if (escapeUserName(result.name) === player.escaped_name) {
           clearTimeout(tm);
           d.dispose();
           resolve(result);
         }
       });
-      this.ircClient.say(byPm || this.channel == null ? 'BanchoBot' : this.channel, '!stat ' + player.escaped_name);
+      this.ircClient.say(byPm || !this.channel ? 'BanchoBot' : this.channel, '!stat ' + player.escaped_name);
     });
   }
 
   async SendMultilineMessageWithInterval(lines: string[], intervalMs: number, tag: string, cooltimeMs: number): Promise<void> {
-    if (lines.length == 0) return;
+    if (lines.length === 0) return;
     const totalTime = lines.length * intervalMs + cooltimeMs;
     if (this.SendMessageWithCoolTime(lines[0], tag, totalTime)) {
       for (let i = 1; i < lines.length; i++) {
@@ -432,11 +432,11 @@ export class Lobby {
   // #region message handling
 
   private handleMessage(from: string, to: string, message: string): void {
-    if (from == 'BanchoBot') {
+    if (from === 'BanchoBot') {
       this.handleBanchoResponse(message);
     } else {
       const p = this.GetPlayer(from);
-      if (p != null) {
+      if (p) {
         if (parser.IsChatCommand(message)) {
           this.RaiseReceivedChatCommand(p, message);
         }
@@ -455,7 +455,7 @@ export class Lobby {
   }
 
   private handlePrivateMessage(from: string, message: string): void {
-    if (from == 'BanchoBot') {
+    if (from === 'BanchoBot') {
       if (IsStatResponse(message)) {
         if (this.statParser.feedLine(message)) {
           this.RaiseParsedStat(true);
@@ -464,7 +464,7 @@ export class Lobby {
     } else {
       const user = this.GetPlayer(from);
       if (!user) return;
-      if ((message == '!info' || message == '!help') && this.players.has(user)) {
+      if ((message === '!info' || message === '!help') && this.players.has(user)) {
         this.sendInfoMessagePM(user);
       }
     }
@@ -526,10 +526,10 @@ export class Lobby {
         break;
       case BanchoResponseType.BeatmapChanged:
       case BanchoResponseType.MpBeatmapChanged:
-        if (this.mapId != c.params[0]) {
+        if (this.mapId !== c.params[0]) {
           this.mapId = c.params[0];
           this.mapTitle = c.params[1];
-          const changer = this.host ? `(by ${c.type == BanchoResponseType.BeatmapChanged ? this.host.name : 'bot'})` : '';
+          const changer = this.host ? `(by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'bot'})` : '';
           this.logger.info('beatmap changed%s : %s %s', changer, 'https://osu.ppy.sh/b/' + this.mapId, this.mapTitle);
         }
         break;
@@ -546,7 +546,7 @@ export class Lobby {
       case BanchoResponseType.ClearedHost:
         this.logger.info('cleared host');
         this.isClearedHost = true;
-        if (this.host != null) {
+        if (this.host) {
           this.host.removeRole(Roles.Host);
         }
         this.host = null;
@@ -561,7 +561,7 @@ export class Lobby {
   }
 
   private checkListRef(message: string): boolean {
-    if (this.listRefStart != 0) {
+    if (this.listRefStart !== 0) {
       if (Date.now() < this.listRefStart + this.option.listref_duration_ms) {
         const p = this.GetOrMakePlayer(message);
         p.setRole(Roles.Referee);
@@ -579,10 +579,10 @@ export class Lobby {
     this.logger.trace('custom command %s:%s', player.name, message);
     if (player.isReferee && message.startsWith('!mp')) return;
     const { command, param } = parser.ParseChatCommand(message);
-    if (command == '!info' || command == '!help') {
+    if (command === '!info' || command === '!help') {
       this.showInfoMessage();
     }
-    if (command == '!version' || command == '!v') {
+    if (command === '!version' || command === '!v') {
       this.showVersionMessage();
     }
     this.ReceivedChatCommand.emit({ player, command, param });
@@ -686,11 +686,11 @@ export class Lobby {
   }
 
   RaiseParsedSettings(): void {
-    if (!this.settingParser.isParsing && this.settingParser.result != null) {
+    if (!this.settingParser.isParsing && this.settingParser.result) {
       this.logger.info('parsed mp settings');
       const result = this.settingParser.result;
       const r = this.margeMpSettingsResult(result);
-      if (r.hostChanged || r.playersIn.length != 0 || r.playersOut.length != 0) {
+      if (r.hostChanged || r.playersIn.length !== 0 || r.playersOut.length !== 0) {
         this.logger.info('applied mp settings');
         this.FixedSettings.emit({ result, ...r });
       }
@@ -699,9 +699,9 @@ export class Lobby {
   }
 
   RaiseParsedStat(isPm: boolean): void {
-    if (!this.statParser.isParsing && this.statParser.result != null) {
+    if (!this.statParser.isParsing && this.statParser.result) {
       const p = this.GetPlayer(this.statParser.result.name);
-      if (p != null) {
+      if (p) {
         p.laststat = this.statParser.result;
         this.logger.info('parsed stat %s -> %s', p.name, StatStatuses[p.laststat.status]);
         this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
@@ -719,7 +719,7 @@ export class Lobby {
   }
 
   OnUserNotFound(): void {
-    if (this.hostPending != null) {
+    if (this.hostPending) {
       const p = this.hostPending;
       this.logger.warn('occured OnUserNotFound : ' + p.name);
       this.hostPending = null;
@@ -734,13 +734,13 @@ export class Lobby {
     if (title === '') {
       throw new Error('title is empty');
     }
-    if (this.status != LobbyStatus.Standby) {
+    if (this.status !== LobbyStatus.Standby) {
       throw new Error('A lobby has already been made.');
     }
     this.status = LobbyStatus.Making;
     this.logger.trace('start makeLobby');
     return new Promise<string>(resolve => {
-      if (this.ircClient.hostMask != '') {
+      if (this.ircClient.hostMask !== '') {
         this.makeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
         this.logger.trace('waiting registered');
@@ -774,7 +774,7 @@ export class Lobby {
     this.logger.trace('start EnterLobby');
     return new Promise<string>((resolve, reject) => {
       const ch = parser.EnsureMpChannelId(channel);
-      if (ch == '') {
+      if (ch === '') {
         this.logger.error('invalid channel: %s', channel);
         reject('invalid channel');
         return;
@@ -803,7 +803,7 @@ export class Lobby {
 
   CloseLobbyAsync(): Promise<void> {
     this.logger.trace('start CloseLobby');
-    if (this.status != LobbyStatus.Entered) {
+    if (this.status !== LobbyStatus.Entered) {
       this.logger.error('invalid call :CloseLobbyAsync');
       throw new Error('No lobby to close.');
     }
@@ -811,7 +811,7 @@ export class Lobby {
       this.ircClient.once('part', (channel: string, nick: string) => {
         resolve();
       });
-      if (this.channel != undefined) {
+      if (this.channel !== undefined) {
         this.SendMessage('!mp close');
         this.status = LobbyStatus.Leaving;
       } else {
@@ -822,7 +822,7 @@ export class Lobby {
 
   QuitLobbyAsync(): Promise<void> {
     this.logger.trace('start QuitLobby');
-    if (this.status != LobbyStatus.Entered) {
+    if (this.status !== LobbyStatus.Entered) {
       this.logger.error('invalid call :QuitLobbyAsync');
       throw new Error('No lobby to close.');
     }
@@ -830,7 +830,7 @@ export class Lobby {
       this.ircClient.once('part', (channel: string, nick: string) => {
         resolve();
       });
-      if (this.channel != undefined) {
+      if (this.channel) {
         this.ircClient.part(this.channel, 'part', () => { /* do nothing. */ });
         this.status = LobbyStatus.Leaving;
       } else {
@@ -840,7 +840,7 @@ export class Lobby {
   }
 
   LoadMpSettingsAsync(): Promise<void> {
-    if (this.status != LobbyStatus.Entered) {
+    if (this.status !== LobbyStatus.Entered) {
       return Promise.reject('invalid lobby status @LoadMpSettingsAsync');
     }
     if (this.SendMessageWithCoolTime('!mp settings', 'mpsettings', 15000)) {
@@ -890,10 +890,10 @@ export class Lobby {
 
     if (this.players.has(player)) {
       this.players.delete(player);
-      if (this.host == player) {
+      if (this.host === player) {
         this.host = null;
       }
-      if (this.hostPending == player) {
+      if (this.hostPending === player) {
         this.logger.warn('pending中にユーザーが離脱した pending host: %s', player.name);
         this.hostPending = null;
       }
@@ -912,14 +912,14 @@ export class Lobby {
       return false;
     }
 
-    if (this.hostPending == player) {
+    if (this.hostPending === player) {
       this.transferHostTimeout.cancel();
       this.hostPending = null;
-    } else if (this.hostPending != null) {
+    } else if (this.hostPending !== null) {
       this.logger.warn('pending中に別のユーザーがホストになった pending: %s, host: %s', this.hostPending.name, player.name);
-    } // pending == null は有効
+    } // pending === null は有効
 
-    if (this.host != null) {
+    if (this.host) {
       this.host.removeRole(Roles.Host);
     }
     this.host = player;
@@ -960,7 +960,7 @@ export class Lobby {
         p.slot = r.slot;
         p.team = r.team;
       }
-      if (r.isHost && p != this.host) {
+      if (r.isHost && p !== this.host) {
         this.setAsHost(p);
         hostChanged = true;
       }
@@ -983,7 +983,7 @@ export class Lobby {
 
     for (const p of this.plugins) {
       const ps = p.GetPluginStatus();
-      if (ps != '') {
+      if (ps !== '') {
         s += '\n' + ps;
       }
     }
@@ -1039,7 +1039,7 @@ export class Lobby {
       this.logger.trace('started InfoMessageAnnouncement. interval = ' + this.option.info_message_announcement_interval_ms);
       this.infoMessageAnnouncementTimeId = setInterval(() => {
         this.showInfoMessage();
-        if (this.status != LobbyStatus.Entered) {
+        if (this.status !== LobbyStatus.Entered) {
           this.stopInfoMessageAnnouncement();
         }
       }, this.option.info_message_announcement_interval_ms);
@@ -1047,7 +1047,7 @@ export class Lobby {
   }
 
   private stopInfoMessageAnnouncement(): void {
-    if (this.infoMessageAnnouncementTimeId != null) {
+    if (this.infoMessageAnnouncementTimeId !== null) {
       this.logger.trace('stopped InfoMessageAnnouncement.');
       clearInterval(this.infoMessageAnnouncementTimeId);
       this.infoMessageAnnouncementTimeId = null;

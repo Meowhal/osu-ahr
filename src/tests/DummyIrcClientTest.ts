@@ -21,7 +21,7 @@ describe('DummyIrcClientTest', function () {
     });
     client.on('pm', function (nick, message) {
       const v = parser.ParseMpMakeResponse(nick, message);
-      if (v != null) {
+      if (v !== null) {
         f_make_res++;
         //console.log(`--- parsed pm id=${v.id} title=${v.title}`);
         assert.equal(v.title, lobbyTitle);
@@ -93,7 +93,7 @@ describe('DummyIrcClientTest', function () {
     });
     client.on('message', function (from, to, msg) {
       const r = parser.ParseBanchoResponse(msg);
-      if (r.type == BanchoResponseType.UserNotFound) {
+      if (r.type === BanchoResponseType.UserNotFound) {
         done();
       }
     });

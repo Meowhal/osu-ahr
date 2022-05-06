@@ -70,7 +70,7 @@ export class OahrBase {
   }
 
   get isRegistered(): boolean {
-    return this.client.hostMask != '';
+    return this.client.hostMask !== '';
   }
 
   displayInfo(): void {

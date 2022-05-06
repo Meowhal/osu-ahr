@@ -84,9 +84,9 @@ export class DiscordBot {
     try {
       await this.discordClient.login(this.cfg.token);
     } catch (e: any) {
-      if (e?.code == 'TOKEN_INVALID' && e.message) {
+      if (e?.code === 'TOKEN_INVALID' && e.message) {
         logger.error(e.message);
-        if (this.cfg.token == '') {
+        if (this.cfg.token === '') {
           logger.error('your token is Empty');
         } else {
           logger.error(`your token is invalid. "${this.cfg.token}"`);
@@ -102,7 +102,7 @@ export class DiscordBot {
   }
 
   checkMemberHasAhrAdminRole(member: GuildMember) {
-    return member.roles.cache.find(f => f.name == ADMIN_ROLE.name) !== undefined;
+    return member.roles.cache.find(f => f.name === ADMIN_ROLE.name) !== undefined;
   }
 
   async registerCommandsAndRoles(guild: Guild) {
@@ -122,7 +122,7 @@ export class DiscordBot {
   }
 
   async registerRole(guild: Guild) {
-    let role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+    let role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
     if (!role) {
       role = await guild.roles.create(ADMIN_ROLE);
     }
@@ -223,7 +223,7 @@ export class DiscordBot {
       this.registeAhr(ahr, interaction);
       // ロビー用チャンネルからenterコマンドを引数無しで呼び出している場合はそのチャンネルでログ転送を開始する
       const ch = interaction.guild?.channels.cache.get(interaction.channelId);
-      if (ch && lobbyId == ('#' + ch.name)) {
+      if (ch && lobbyId === ('#' + ch.name)) {
         ahr.startTransferLog(ch.id);
       }
       await this.updateMatchSummary(ahr);
@@ -365,9 +365,9 @@ export class DiscordBot {
 
   async getOrCreateMatchChannel(guild: Guild, lobbyNumber: string): Promise<TextChannel> {
     const lobbyId = 'mp_' + lobbyNumber;
-    const dc = guild.channels.cache.find(c => c.name == lobbyId);
+    const dc = guild.channels.cache.find(c => c.name === lobbyId);
     if (dc) return dc as TextChannel;
-    const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+    const role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
     return await guild.channels.create(lobbyId, {
       type: 'GUILD_TEXT',
       topic: `created by ${this.discordClient.user?.username}. [history](https://osu.ppy.sh/community/matches/${lobbyNumber})`,
@@ -389,9 +389,9 @@ export class DiscordBot {
   }
 
   async getOrCreateMatchesChannel(guild: Guild): Promise<TextChannel> {
-    const dc = guild.channels.cache.find(c => c.name.toLowerCase() == 'matches');
+    const dc = guild.channels.cache.find(c => c.name.toLowerCase() === 'matches');
     if (dc) return dc as TextChannel;
-    const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+    const role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
     return await guild.channels.create('matches', {
       type: 'GUILD_TEXT',
       topic: `created by ${this.discordClient.user?.username}.`,
@@ -511,8 +511,8 @@ export class DiscordBot {
   async updateMatchSummary(ahr: OahrDiscord) {
     if (!ahr.updateSummaryMessage) return;
     try {
-      const guild = this.discordClient.guilds.cache.find(f => f.id == ahr.guildId);
-      if (guild == undefined) throw new Error('guild not found');
+      const guild = this.discordClient.guilds.cache.find(f => f.id === ahr.guildId);
+      if (guild === undefined) throw new Error('guild not found');
       const channel = await this.getOrCreateMatchesChannel(guild);
       const embed = ahr.createSummaryInfoEmbed();
       const btns = ahr.createMenuButton();
@@ -525,7 +525,7 @@ export class DiscordBot {
       ahr.matchSummaryMessageId = message.id;
     } catch (e: any) {
       if (e instanceof DiscordAPIError) {
-        if (e.message == 'Missing Permissions') {
+        if (e.message === 'Missing Permissions') {
           logger.error(`Missing Permissions. Invite this bot again. invite link => ${this.generateInviteLink()}`);
           return;
         }
@@ -537,12 +537,12 @@ export class DiscordBot {
 
   async findMatchSummaryMessage(channel: TextChannel, ahr: OahrDiscord) {
     let message: Message | undefined;
-    if (ahr.matchSummaryMessageId != '') {
+    if (ahr.matchSummaryMessageId !== '') {
       message = await channel.messages.fetch(ahr.matchSummaryMessageId);
     }
     if (message) return message;
     const msgs = await channel.messages.fetch({ limit: 10 });
-    const recent = msgs.find(f => (f.embeds && f.embeds.length > 0 && f.embeds[0].title == `#mp_${ahr.lobby.lobbyId ?? ''}`));
+    const recent = msgs.find(f => (f.embeds && f.embeds.length > 0 && f.embeds[0].title === `#mp_${ahr.lobby.lobbyId ?? ''}`));
     if (recent) return recent;
   }
 

@@ -106,9 +106,9 @@ export class AfkKicker extends LobbyPlugin {
     this.lobby.MatchFinished.on(() => {
       for (const [player, stat] of this.playerStats.entries()) {
         if (stat.isPlaying) {
-          if (stat.score == -1) {
+          if (stat.score === -1) {
             this.changeAfkPoint(player, stat, POINT_NO_MAP, 'NO_MAP');
-          } else if (stat.score == 0) {
+          } else if (stat.score === 0) {
             this.changeAfkPoint(player, stat, POINT_NO_SCORE, 'NO_SCORE');
           } else {
             this.changeAfkPoint(player, stat, POINT_HAS_SCORE, 'HAS_SCORE');
@@ -126,7 +126,7 @@ export class AfkKicker extends LobbyPlugin {
     });
     this.lobby.ParsedStat.on(({ player, result }) => {
       const stat = this.playerStats.get(player);
-      if (stat && result.status == StatStatuses.Afk) {
+      if (stat && result.status === StatStatuses.Afk) {
         this.changeAfkPoint(player, stat, POINT_STAT_AFK, 'AFK_STAT');
       }
     });

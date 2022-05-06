@@ -4,10 +4,10 @@ export namespace parser {
     // １文字目を整数比較してifの評価回数を減らす
     switch (message.charCodeAt(0)) {
       case 65: // A
-        if (message == 'Aborted the match') {
+        if (message === 'Aborted the match') {
           return makeBanchoResponse(BanchoResponseType.AbortedMatch);
         }
-        if (message == 'All players are ready') {
+        if (message === 'All players are ready') {
           return makeBanchoResponse(BanchoResponseType.AllPlayerReady);
         }
         const m_add_ref = message.match(/Added (.+) to the match referees/);
@@ -18,20 +18,20 @@ export namespace parser {
       case 66: // B
         const m_map = message.match(/Beatmap changed to: (.+) \(https:\/\/osu.ppy.sh\/b\/(\d+)\)$/);
         if (m_map) {
-          return makeBanchoResponse(BanchoResponseType.BeatmapChanged, m_map[2], m_map[1]);
+          return makeBanchoResponse(BanchoResponseType.BeatmapChanged, parseInt(m_map[2]), m_map[1]);
         }
         break;
       case 67: // C
-        if (message == 'Changed the match password') {
+        if (message === 'Changed the match password') {
           return makeBanchoResponse(BanchoResponseType.PasswordChanged);
         }
-        if (message == 'Cleared match host') {
+        if (message === 'Cleared match host') {
           return makeBanchoResponse(BanchoResponseType.ClearedHost);
         }
-        if (message == 'Closed the match') {
+        if (message === 'Closed the match') {
           return makeBanchoResponse(BanchoResponseType.ClosedMatch);
         }
-        if (message == 'Countdown aborted') {
+        if (message === 'Countdown aborted') {
           return makeBanchoResponse(BanchoResponseType.AbortedStartTimer);
         }
         const m_size = message.match(/Changed match to size (\d+)/);
@@ -40,7 +40,7 @@ export namespace parser {
         }
         const m_mpmap = message.match(/Changed beatmap to https:\/\/osu.ppy.sh\/b\/(\d+) (.+)/);
         if (m_mpmap) {
-          return makeBanchoResponse(BanchoResponseType.MpBeatmapChanged, m_mpmap[1], m_mpmap[2]);
+          return makeBanchoResponse(BanchoResponseType.MpBeatmapChanged, parseInt(m_mpmap[1]), m_mpmap[2]);
         }
         const m_mphost = message.match(/Changed match host to (.+)/);
         if (m_mphost) {
@@ -52,23 +52,23 @@ export namespace parser {
         }
         break;
       case 71: // G
-        if (message == 'Good luck, have fun!') {
+        if (message === 'Good luck, have fun!') {
           return makeBanchoResponse(BanchoResponseType.FinishStartTimer);
         }
         break;
       case 72: // H
-        if (message == 'Host is changing map...') {
+        if (message === 'Host is changing map...') {
           return makeBanchoResponse(BanchoResponseType.BeatmapChanging);
         }
         break;
       case 73: // I
-        if (message == 'Invalid map ID provided') {
+        if (message === 'Invalid map ID provided') {
           return makeBanchoResponse(BanchoResponseType.MpInvalidMapId);
         }
-        if (message == 'Invalid or no settings provided') {
+        if (message === 'Invalid or no settings provided') {
           return makeBanchoResponse(BanchoResponseType.MpInvalidSettings);
         }
-        if (message == 'Invalid or no size provided') {
+        if (message === 'Invalid or no size provided') {
           return makeBanchoResponse(BanchoResponseType.MpInvalidSize);
         }
         const m_invite = message.match(/Invited (.*) to the room/);
@@ -83,12 +83,12 @@ export namespace parser {
         }
         break;
       case 76: // L
-        if (message == 'Locked the match') {
+        if (message === 'Locked the match') {
           return makeBanchoResponse(BanchoResponseType.LockedMatch);
         }
         break;
       case 77: // M
-        if (message == 'Match referees:') {
+        if (message === 'Match referees:') {
           return makeBanchoResponse(BanchoResponseType.ListRefs);
         }
         if (message.startsWith('Match starts in ')) {
@@ -105,7 +105,7 @@ export namespace parser {
         }
         break;
       case 78: // N
-        if (message == 'No user specified') {
+        if (message === 'No user specified') {
           return makeBanchoResponse(BanchoResponseType.NoUserSpecified);
         }
         break;
@@ -124,7 +124,7 @@ export namespace parser {
         }
         break;
       case 82: // R
-        if (message == 'Removed the match password') {
+        if (message === 'Removed the match password') {
           return makeBanchoResponse(BanchoResponseType.PasswordRemoved);
         }
         const m_rm_ref = message.match(/Removed (.+) from the match referees/);
@@ -133,29 +133,29 @@ export namespace parser {
         }
         break;
       case 83: // S
-        if (message == 'Started the match') {
+        if (message === 'Started the match') {
           return makeBanchoResponse(BanchoResponseType.MpMatchStarted);
         }
         break;
       case 84: //T
-        if (message == 'The match has started!') {
+        if (message === 'The match has started!') {
           return makeBanchoResponse(BanchoResponseType.MatchStarted);
         }
-        if (message == 'The match has already been started') {
+        if (message === 'The match has already been started') {
           return makeBanchoResponse(BanchoResponseType.MpMatchAlreadyStarted);
         }
-        if (message == 'The match has finished!') {
+        if (message === 'The match has finished!') {
           return makeBanchoResponse(BanchoResponseType.MatchFinished);
         }
-        if (message == 'The match is not in progress') {
+        if (message === 'The match is not in progress') {
           return makeBanchoResponse(BanchoResponseType.AbortMatchFailed);
         }
         break;
       case 85: // U
-        if (message == 'User not found') {
+        if (message === 'User not found') {
           return makeBanchoResponse(BanchoResponseType.UserNotFound);
         }
-        if (message == 'Unlocked the match') {
+        if (message === 'Unlocked the match') {
           return makeBanchoResponse(BanchoResponseType.UnlockedMatch);
         }
         break;
@@ -163,7 +163,7 @@ export namespace parser {
 
     const m_joined = message.match(/^(.+) joined in slot (\d+)( for team (blue|red))?\./);
     if (m_joined) {
-      const team = m_joined[4] == undefined ? Teams.None : m_joined[4] == 'blue' ? Teams.Blue : Teams.Red;
+      const team = m_joined[4] === undefined ? Teams.None : m_joined[4] === 'blue' ? Teams.Blue : Teams.Red;
       return makeBanchoResponse(BanchoResponseType.PlayerJoined, m_joined[1], parseInt(m_joined[2]), team);
     }
 
@@ -185,7 +185,7 @@ export namespace parser {
     const m_finish = message.match(/^(.+) finished playing \(Score: (\d+), (PASSED|FAILED)\)\./);
     if (m_finish) {
       return makeBanchoResponse(BanchoResponseType.PlayerFinished,
-        m_finish[1], parseInt(m_finish[2]), m_finish[3] == 'PASSED');
+        m_finish[1], parseInt(m_finish[2]), m_finish[3] === 'PASSED');
     }
 
     const m_roll = message.match(/^(.+) rolls (\d+) point\(s\)/);
@@ -195,7 +195,7 @@ export namespace parser {
 
     const m_team_change = message.match(/^(.+) changed to (Blue|Red)/);
     if (m_team_change) {
-      return makeBanchoResponse(BanchoResponseType.TeamChanged, m_team_change[1], (m_team_change[2] == 'Blue' ? Teams.Blue : Teams.Red));
+      return makeBanchoResponse(BanchoResponseType.TeamChanged, m_team_change[1], (m_team_change[2] === 'Blue' ? Teams.Blue : Teams.Red));
     }
 
     const m_stat = message.match(/^(Stats for \(|Score:\s+\d|Plays:\s+\d|Accuracy:\s+\d)/);
@@ -211,7 +211,7 @@ export namespace parser {
   }
 
   export function ParseMpMakeResponse(nick: string, message: string): { id: string, title: string } | null {
-    if (nick != 'BanchoBot') return null;
+    if (nick !== 'BanchoBot') return null;
     const reg = /Created the tournament match https:\/\/osu.ppy.sh\/mp\/(\d+) (.+)/;
     const res = message.match(reg);
     if (res) {
@@ -230,7 +230,7 @@ export namespace parser {
 
   export function SplitCliCommand(line: string): { command: string, arg: string } {
     const l = line.match(/^\s*([!*]?\w+)\s+(.*)/);
-    if (l == null) {
+    if (l === null) {
       return { command: line, arg: '' };
     } else {
       return {
@@ -241,7 +241,7 @@ export namespace parser {
   }
 
   export function EnsureMpChannelId(id: string): string {
-    if (id == null || id == '') return '';
+    if (!id || id === '') return '';
     if (id.match(/^#mp_\d+$/)) return id;
     if (id.match(/^\d+$/)) return '#mp_' + id;
     const m = id.match(/^https:\/\/osu\.ppy\.sh\/mp\/(\d+)$/);
@@ -258,9 +258,9 @@ export namespace parser {
    */
   export function IsChatCommand(message: string) {
     message = message.trimRight().toLowerCase();
-    if (message[0] != '!' && message[0] != '*') return false;
-    if (message == '!mp') return false;
-    return message.match(/^[!*](?!roll|stats?|where|faq|report|request)\w+/) != null;
+    if (message[0] !== '!' && message[0] !== '*') return false;
+    if (message === '!mp') return false;
+    return message.match(/^[!*](?!roll|stats?|where|faq|report|request)\w+/) !== null;
   }
 
   export function ParseChatCommand(message: string): { command: string, param: string } {

@@ -50,7 +50,7 @@ export class MatchStarter extends LobbyPlugin {
     if (this.lobby.isMatching) return;
 
     this.checkVoteCount();
-    if (this.lobby.players.size == 0) {
+    if (this.lobby.players.size === 0) {
       this.stopTimer();
     }
   }
@@ -72,7 +72,7 @@ export class MatchStarter extends LobbyPlugin {
 
     switch (command) {
       case '!start':
-        if (param == '') {
+        if (param === '') {
           if (player.isHost) {
             this.start();
           } else {
@@ -99,15 +99,15 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
-    if (type == 'mp_start') {
-      if (args.length == 0) {
+    if (type === 'mp_start') {
+      if (args.length === 0) {
         this.start();
       } else {
         const count = parseInt(args[0]);
         const withhelp = args[1] !== undefined && args[1] === 'withhelp';
         this.startTimer(count, withhelp);
       }
-    } else if (type == 'mp_abort_start') {
+    } else if (type === 'mp_abort_start') {
       this.stopTimer();
     }
   }
@@ -124,7 +124,7 @@ export class MatchStarter extends LobbyPlugin {
 
   // 投票状況を確認して、必要数に達している場合は試合を開始する
   private checkVoteCount(showMessage: boolean = false): void {
-    if (this.voting.count != 0 && showMessage) {
+    if (this.voting.count !== 0 && showMessage) {
       this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, 'match start vote', this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
@@ -134,7 +134,7 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   private startTimer(count: number, withHint: boolean = false): void {
-    if (count == 0) {
+    if (count === 0) {
       this.start();
     } else {
       this.lobby.SendMessage(`Queued the match to start in ${this.secsToCountdownText(count)}${withHint ? '. (Host can stop the timer with !stop command.)' : ''}`);
@@ -155,7 +155,7 @@ export class MatchStarter extends LobbyPlugin {
 
     if (min > 1) {
       strMin = min.toString() + ' minutes';
-    } else if (min == 1) {
+    } else if (min === 1) {
       strMin = '1 minute';
     }
 
@@ -165,7 +165,7 @@ export class MatchStarter extends LobbyPlugin {
 
     if (sec > 1) {
       strSec = sec.toString() + ' seconds';
-    } else if (sec == 1) {
+    } else if (sec === 1) {
       strSec = '1 second';
     }
 

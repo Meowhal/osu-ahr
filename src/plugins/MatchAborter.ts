@@ -49,7 +49,7 @@ export class MatchAborter extends LobbyPlugin {
     this.checkAutoAbort();
 
     // 誰もいなくなったらタイマーを止める
-    if (this.lobby.players.size == 0) {
+    if (this.lobby.players.size === 0) {
       this.voting.Clear();
       this.stopTimer();
     }
@@ -72,15 +72,15 @@ export class MatchAborter extends LobbyPlugin {
 
   private onChatCommand(player: Player, command: string, param: string): void {
     if (!this.lobby.isMatching) return;
-    if (command == '!abort') {
-      if (player == this.lobby.host) {
+    if (command === '!abort') {
+      if (player === this.lobby.host) {
         this.logger.trace('host(%s) sent !abort command', player.name);
         this.doAbort();
       } else {
         this.vote(player);
       }
     } else if (player.isAuthorized) {
-      if (command == '*abort') {
+      if (command === '*abort') {
         this.doAbort();
       }
     }
@@ -98,7 +98,7 @@ export class MatchAborter extends LobbyPlugin {
 
   // 投票数を確認して必要数に達していたら試合中断
   private checkVoteCount(showMessage: boolean = false): void {
-    if (this.voting.count != 0 && showMessage) {
+    if (this.voting.count !== 0 && showMessage) {
       this.lobby.DeferMessage(`bot : match abort progress: ${this.voting.toString()}`, 'aborter vote', this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
@@ -115,7 +115,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private checkAutoAbort(): void {
-    if (this.abortTimer == null) {
+    if (this.abortTimer === null) {
       if (this.autoAbortRequired <= this.lobby.playersFinished) { // 半数以上終了したらタイマー起動
         this.startTimer();
       }
@@ -134,11 +134,11 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private startTimer(): void {
-    if (this.option.auto_abort_delay_ms == 0) return;
+    if (this.option.auto_abort_delay_ms === 0) return;
     this.stopTimer();
     this.logger.trace('start timer');
     this.abortTimer = setTimeout(() => {
-      if (this.abortTimer != null && this.lobby.isMatching) {
+      if (this.abortTimer !== null && this.lobby.isMatching) {
         this.logger.trace('abort timer action');
         this.doAutoAbortAsync();
       }
@@ -146,12 +146,12 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private async doAutoAbortAsync(): Promise<void> {
-    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus == MpStatuses.Playing);
+    const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus === MpStatuses.Playing);
     for (const p of playersStillPlaying) {
-      if (p.mpstatus == MpStatuses.Playing) {
+      if (p.mpstatus === MpStatuses.Playing) {
         try {
           const stat = await this.lobby.RequestStatAsync(p, true);
-          if (stat.status == StatStatuses.Multiplaying) {
+          if (stat.status === StatStatuses.Multiplaying) {
             this.startTimer();
             return;
           }
@@ -169,7 +169,7 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   private stopTimer(): void {
-    if (this.abortTimer != null) {
+    if (this.abortTimer !== null) {
       this.logger.trace('stop timer');
       clearTimeout(this.abortTimer);
       this.abortTimer = null;
@@ -177,6 +177,6 @@ export class MatchAborter extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- Match Aborter -- timer : ${this.abortTimer != null ? 'active' : '###'}, vote : ${this.voting.toString()}`;
+    return `-- Match Aborter -- timer : ${this.abortTimer !== null ? 'active' : '###'}, vote : ${this.voting.toString()}`;
   }
 }

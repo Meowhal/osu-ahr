@@ -52,13 +52,13 @@ export function logIrcEvent(client: IIrcClient) {
     ircLogger.debug('@action  %s => %s: %s', from, to, text);
   });
   client.on('selfMessage', (target: string, toSend) => {
-    ircLogger.debug('@sent bot => %s: %s', target, toSend);    
+    ircLogger.debug('@sent bot => %s: %s', target, toSend);
   });
 }
 
 export function logPrivateMessage(client: IIrcClient) {
   client.on('message', (from, to, message) => {
-    if (to == client.nick) {
+    if (to === client.nick) {
       if (IsStatResponse(message)) {
         pmLogger.trace(`pm ${from} -> ${message}`);
       } else {

@@ -53,7 +53,7 @@ export class OahrCli extends OahrBase {
         switch (l.command) {
           case 'm':
           case 'make':
-            if (l.arg == '') {
+            if (l.arg === '') {
               logger.info('make command needs lobby name. ex:make testlobby');
               return;
             }
@@ -68,7 +68,7 @@ export class OahrCli extends OahrBase {
           case 'e':
           case 'enter':
             try {
-              if (l.arg == '') {
+              if (l.arg === '') {
                 logger.info('enter command needs lobby id. ex:enter 123456');
                 return;
               }
@@ -111,7 +111,7 @@ export class OahrCli extends OahrBase {
       prompt: '> ',
       action: async (line: string) => {
         const l = parser.SplitCliCommand(line);
-        if (this.lobby.status == LobbyStatus.Left || this.client.conn == null) {
+        if (this.lobby.status === LobbyStatus.Left || !this.client.conn) {
           this.scene = this.scenes.exited;
           return;
         }
@@ -140,7 +140,7 @@ export class OahrCli extends OahrBase {
             break;
           case 'c':
           case 'close':
-            if (l.arg == 'now') {
+            if (l.arg === 'now') {
               // close now
               await this.lobby.CloseLobbyAsync();
               this.scene = this.scenes.exited;
@@ -211,7 +211,7 @@ export class OahrCli extends OahrBase {
   }
 
   start(rl: readline.Interface | null) {
-    if (rl == null) {
+    if (!rl) {
       rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -245,9 +245,9 @@ export class OahrCli extends OahrBase {
       });
     });
     r.on('close', () => {
-      if (this.client != null) {
+      if (this.client) {
         logger.info('readline closed');
-        if (this.client.conn != null && !this.client.conn.requestedDisconnect) {
+        if (this.client.conn && !this.client.conn.requestedDisconnect) {
           this.client.disconnect('goodby', () => {
             logger.info('ircClient disconnected');
             process.exit(0);

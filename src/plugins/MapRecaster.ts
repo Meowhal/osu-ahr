@@ -17,14 +17,14 @@ export class MapRecaster extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player));
     this.lobby.ReceivedBanchoResponse.on(a => {
-      if (a.response.type == BanchoResponseType.BeatmapChanged) {
+      if (a.response.type === BanchoResponseType.BeatmapChanged) {
         this.canRecast = true;
       }
     });
   }
 
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
-    if (command == '!update') {
+    if (command === '!update') {
       if (this.canRecast) {
         this.canRecast = false;
         this.lobby.SendMessage('!mp map ' + this.lobby.mapId);

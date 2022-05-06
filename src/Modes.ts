@@ -99,7 +99,7 @@ export class TeamMode extends Mode {
   }
 
   isTeamMatch(): boolean {
-    return this == TeamMode.TeamVs || this == TeamMode.TagTeamVs;
+    return this === TeamMode.TeamVs || this === TeamMode.TagTeamVs;
   }
 }
 
@@ -117,7 +117,7 @@ export class PlayMode extends Mode {
 
   protected constructor(value: string | number, name: string, officialName: string, aliases: string[] = []) {
     super(value.toString(), name, aliases);
-    this.id = typeof value == 'number' ? value : parseInt(value);
+    this.id = typeof value === 'number' ? value : parseInt(value);
     this.officialName = officialName;
     PlayMode.Values.push(this);
   }

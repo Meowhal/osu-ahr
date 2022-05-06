@@ -37,7 +37,7 @@ export class LobbyTerminator extends LobbyPlugin {
   }
 
   private onPlayerLeft(p: Player): void {
-    if (this.lobby.players.size == 0) {
+    if (this.lobby.players.size === 0) {
       if (this.terminateTimer) {
         clearTimeout(this.terminateTimer);
       }
@@ -50,8 +50,8 @@ export class LobbyTerminator extends LobbyPlugin {
   }
 
   CloseLobby(time_ms: number = 0): void {
-    if (time_ms == 0) {
-      if (this.lobby.players.size == 0) {
+    if (time_ms === 0) {
+      if (this.lobby.players.size === 0) {
         this.logger.info('terminated lobby');
         this.lobby.CloseLobbyAsync();
       } else {

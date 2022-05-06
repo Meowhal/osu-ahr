@@ -71,6 +71,6 @@ async function promiseTrial() {
 }
 
 async function delayAsync(ms: number): Promise<void> {
-  if (ms == 0) return Promise.resolve();
+  if (ms === 0) return Promise.resolve();
   return new Promise(resolve => setTimeout(resolve, ms));
 }

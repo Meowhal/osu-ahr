@@ -329,7 +329,7 @@ describe('History repositry Tests', () => {
       let count = 0;
       const t = tu.assertEventFire(hr.gotUserProfile, (e) => {
         count++;
-        return count == 15;
+        return count === 15;
       }, 100);
       await hr.updateToLatest();
       await t;

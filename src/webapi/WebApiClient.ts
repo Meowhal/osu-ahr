@@ -19,7 +19,7 @@ export interface ApiToken {
 }
 
 function isExpired(token: ApiToken | undefined): boolean {
-  if (token == undefined) return true;
+  if (token === undefined) return true;
   return Date.now() / 1000 > token.expires_in;
 }
 
@@ -42,7 +42,7 @@ class WebApiClientClass implements IBeatmapFetcher {
     const WebApiDefaultOption = config.get<WebApiClientOption>('WebApi');
     this.option = { ...WebApiDefaultOption, ...option } as WebApiClientOption;
     this.logger = log4js.getLogger('webapi');
-    this.available = this.option.client_id != 0 && this.option.client_secret != '***';
+    this.available = this.option.client_id !== 0 && this.option.client_secret !== '***';
   }
 
   async updateToken(): Promise<boolean> {
@@ -70,7 +70,7 @@ class WebApiClientClass implements IBeatmapFetcher {
   }
 
   private async storeToken(token: ApiToken): Promise<boolean> {
-    if (this.option.token_store_dir == '') return false;
+    if (this.option.token_store_dir === '') return false;
     try {
       const p = this.getTokenPath(token.isGuest);
       await fs.mkdir(path.dirname(p), { recursive: true });
@@ -84,7 +84,7 @@ class WebApiClientClass implements IBeatmapFetcher {
   }
 
   private async loadStoredToken(asGuest: boolean): Promise<ApiToken | undefined> {
-    if (this.option.token_store_dir == '') return;
+    if (this.option.token_store_dir === '') return;
     const p = this.getTokenPath(asGuest);
     try {
       await fs.access(p);
@@ -152,7 +152,7 @@ class WebApiClientClass implements IBeatmapFetcher {
         }
         const url = new URL(req.url, `http://${req.headers.host}`);
         code = url.searchParams.get('code');
-        if (code == null) {
+        if (code === null) {
           res.end('missing code');
           return;
         }
@@ -171,7 +171,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       });
       server.once('close', () => {
         this.logger.trace('closed event');
-        if (code == null) {
+        if (code === null) {
           reject('no code');
         } else {
           this.logger.info('get Authorized code');
@@ -218,7 +218,7 @@ class WebApiClientClass implements IBeatmapFetcher {
 
       try {
         const response = await axios(url, config);
-        if (response.status != 200) {
+        if (response.status !== 200) {
           this.logger.error(`accessApi error: ${url}, status: ${response.status}, msg: ${response.statusText}`);
         }
         return response.data;
@@ -283,7 +283,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       data.get_time = Date.now();
       return trimProfile(data);
     } catch (e: any) {
-      if (e.response?.status == 404) {
+      if (e.response?.status === 404) {
         return null;
       }
       throw e;
@@ -298,7 +298,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       data.get_time = Date.now();
       return data;
     } catch (e: any) {
-      if (e.response?.status == 404) {
+      if (e.response?.status === 404) {
         throw new FetchProfileError(FetchProfileErrorReason.NotFound);
       }
       throw new FetchProfileError(FetchProfileErrorReason.Unknown, e.message);
@@ -326,7 +326,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       return await this.lookupBeatmapset(mapId);
     } catch (e: any) {
       if (axios.isAxiosError(e)) {
-        if (e.response?.status == 404) {
+        if (e.response?.status === 404) {
           throw new FetchBeatmapError(FetchBeatmapErrorReason.NotFound);
         }
       }

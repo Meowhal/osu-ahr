@@ -108,7 +108,7 @@ describe('LobbyTest', function () {
         lobby.PlayerJoined.on(({ player, slot }) => {
           assert.isTrue(joiningPlayers.has(player.name));
           joiningPlayers.delete(player.name);
-          if (joiningPlayers.size == 0) {
+          if (joiningPlayers.size === 0) {
             resolve();
           }
         });

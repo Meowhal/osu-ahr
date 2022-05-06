@@ -72,7 +72,7 @@ export class HostSkipper extends LobbyPlugin {
     this.voting.AddVoter(player);
 
     // 一人だけいるプレイヤーがAFKなら新しく入ってきた人をホストにする
-    if (this.lobby.players.size == 2 && this.lobby.host && this.lobby.host.laststat) {
+    if (this.lobby.players.size === 2 && this.lobby.host && this.lobby.host.laststat) {
       const ls = this.lobby.host.laststat;
       if (this.statIsAfk(ls.status) && Date.now() - ls.date < this.option.afk_check_interval_ms) {
         // 他のプラグインが join の処理を完了したあとに実行したい。
@@ -89,21 +89,21 @@ export class HostSkipper extends LobbyPlugin {
     this.checkSkipCount();
 
     // 誰もいなくなったらタイマーを止める
-    if (this.lobby.players.size == 0) {
+    if (this.lobby.players.size === 0) {
       this.voting.Clear();
       this.StopTimer();
     }
   }
 
   private onPlayerChated(player: Player): void {
-    if (this.lobby.host == player) {
+    if (this.lobby.host === player) {
       // reset current timer and restart
       this.StartTimer(false);
     }
   }
 
   private onParsedStat(player: Player, result: StatResult, isPm: boolean): void {
-    if (!isPm && this.lobby.host == player && this.statIsAfk(result.status) && !this.lobby.isMatching) {
+    if (!isPm && this.lobby.host === player && this.statIsAfk(result.status) && !this.lobby.isMatching) {
       this.logger.trace('passed afk check %s -> %s', result.name, StatStatuses[result.status]);
       if (this.option.afk_check_do_skip) {
         this.Skip();
@@ -121,13 +121,13 @@ export class HostSkipper extends LobbyPlugin {
   private onChatCommand(player: Player, command: string, param: string): void {
     if (this.lobby.isMatching) return;
 
-    if (command == '!skip') {
-      if (param != '' && this.lobby.host != null && escapeUserName(param) != this.lobby.host.escaped_name) return; // 関係ないユーザーのスキップは無視
+    if (command === '!skip') {
+      if (param !== '' && this.lobby.host && escapeUserName(param) !== this.lobby.host.escaped_name) return; // 関係ないユーザーのスキップは無視
       this.vote(player);
     } else if (player.isAuthorized) {
-      if (command == '*skip') {
+      if (command === '*skip') {
         this.Skip();
-      } else if (command == '*skipto' && param != '') {
+      } else if (command === '*skipto' && param !== '') {
         this.SkipTo(param);
       }
     }
@@ -157,7 +157,7 @@ export class HostSkipper extends LobbyPlugin {
 
   // スキップ状況を確認して、必要数に達している場合は
   private checkSkipCount(showMessage: boolean = false): void {
-    if (this.voting.count != 0 && showMessage) {
+    if (this.voting.count !== 0 && showMessage) {
       this.lobby.DeferMessage(`bot : Host skip progress: ${this.voting.toString()}`, 'checkSkipCount', this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
@@ -190,16 +190,16 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   StartTimer(isFirst: boolean): void {
-    if (this.option.afk_check_interval_ms == 0 || this.lobby.host == null || this.lobby.status != LobbyStatus.Entered || this.lobby.isMatching) return;
+    if (this.option.afk_check_interval_ms === 0 || !this.lobby.host || this.lobby.status !== LobbyStatus.Entered || this.lobby.isMatching) return;
     this.StopTimer();
     this.logger.trace('start afk check timer');
     const target = this.lobby.host;
     this.afkTimer = setTimeout(async () => {
-      if (!this.lobby.isMatching && this.lobby.host == target) {
+      if (!this.lobby.isMatching && this.lobby.host === target) {
         try {
           const stat1 = await this.lobby.RequestStatAsync(target, true, this.option.afk_check_timeout_ms);
           this.logger.trace('stat check phase 1 %s -> %s', stat1.name, StatStatuses[stat1.status]);
-          if (this.afkTimer != undefined && this.lobby.host == target && this.statIsAfk(stat1.status)) {
+          if (this.afkTimer !== undefined && this.lobby.host === target && this.statIsAfk(stat1.status)) {
             // double check and show stat for players
             await this.lobby.RequestStatAsync(target, false, this.option.afk_check_timeout_ms);
           }
@@ -207,7 +207,7 @@ export class HostSkipper extends LobbyPlugin {
           this.logger.warn('stat check timeout!');
         }
         // StopTimerが呼び出されていない、かつホストがターゲットと同じならタイマー再開
-        if (this.afkTimer != undefined && this.lobby.host == target) {
+        if (this.afkTimer !== undefined && this.lobby.host === target) {
           this.StartTimer(false);
         }
       }
@@ -215,7 +215,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   StopTimer(): void {
-    if (this.afkTimer != undefined) {
+    if (this.afkTimer !== undefined) {
       this.logger.trace('stop timer');
       clearTimeout(this.afkTimer);
       this.afkTimer = undefined;
@@ -223,10 +223,10 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   private statIsAfk(stat: StatStatuses) {
-    return stat != StatStatuses.Multiplayer && stat != StatStatuses.Multiplaying;
+    return stat !== StatStatuses.Multiplayer && stat !== StatStatuses.Multiplaying;
   }
 
   GetPluginStatus(): string {
-    return `-- Host Skipper -- timer : ${this.afkTimer != undefined ? 'active' : '###'}, skip_vote : ${this.voting.toString()}`;
+    return `-- Host Skipper -- timer : ${this.afkTimer !== undefined ? 'active' : '###'}, skip_vote : ${this.voting.toString()}`;
   }
 }

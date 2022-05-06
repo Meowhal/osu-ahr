@@ -64,7 +64,7 @@ export class AutoStartTimer extends LobbyPlugin {
 
     switch (response.type) {
       case BanchoResponseType.BeatmapChanged:
-        if (this.lobby.players.size == 1 || response.params[0] == this.lastMapId || this.useMapValidation) break;
+        if (this.lobby.players.size === 1 || response.params[0] === this.lastMapId || this.useMapValidation) break;
         this.startTimer();
         break;
       case BanchoResponseType.BeatmapChanging:

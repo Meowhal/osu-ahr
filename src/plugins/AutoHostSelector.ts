@@ -116,7 +116,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
     this.hostQueue.push(player);
     this.logger.trace('added %s', player.name);
-    if (this.hostQueue.length == 1) {
+    if (this.hostQueue.length === 1) {
       this.logger.trace('appoint first player to host');
       this.changeHost();
     }
@@ -134,8 +134,8 @@ export class AutoHostSelector extends LobbyPlugin {
     this.removeFromQueue(player); // キューの先頭がホストならここで取り除かれるのでローテーションは不要になる
     if (this.lobby.isMatching) return;
     if (isMpSettingResult) return;
-    if (this.hostQueue.length == 0) return;
-    if (this.lobby.host == null && this.lobby.hostPending == null && !this.lobby.isClearedHost) { // ホストがいない、かつ承認待ちのホストがいない、!mp clearhostが実行されていない
+    if (this.hostQueue.length === 0) return;
+    if (!this.lobby.host && !this.lobby.hostPending && !this.lobby.isClearedHost) { // ホストがいない、かつ承認待ちのホストがいない、!mp clearhostが実行されていない
       this.logger.info('host has left');
       this.changeHost();
     }
@@ -151,18 +151,18 @@ export class AutoHostSelector extends LobbyPlugin {
   private onHostChanged(newhost: Player): void {
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
-    if (this.hostQueue[0] == newhost) {
+    if (this.hostQueue[0] === newhost) {
       this.logger.trace('a new host has been appointed:%s', newhost.name);
     } else {
       // ホストがキューの先頭以外に変更された場合
-      if (this.lobby.hostPending == null) {
+      if (!this.lobby.hostPending) {
         this.logger.trace('the host may have manually changed by the previous host');
         this.rotateQueue();
       }
       this.changeHost();
     }
 
-    if (this.mapChanger != null && this.mapChanger != newhost) { // 前任のホストがマップを変更している
+    if (this.mapChanger && this.mapChanger !== newhost) { // 前任のホストがマップを変更している
       this.needsRotate = false;
       this.logger.info('host is appointed after map change');
     }
@@ -172,7 +172,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * マップ変更者の記録と!abort後にマップ変更しようとしたホストのスキップ
    */
   private onBeatmapChanging(): void {
-    if (this.hostQueue[0] != this.lobby.host) {
+    if (this.hostQueue[0] !== this.lobby.host) {
       // アボートで中断後にマップ変更しようとした場合は次のホストに変更
       this.logger.info('host changed map after abort the match');
       this.changeHost();
@@ -188,7 +188,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 試合が始まったらキューを回す
    */
   private onMatchStarted(): void {
-    if (this.lobby.hostPending == null && this.needsRotate) {
+    if (!this.lobby.hostPending && this.needsRotate) {
       this.rotateQueue();
     } else {
       this.logger.info('rotation skipped.');
@@ -208,11 +208,11 @@ export class AutoHostSelector extends LobbyPlugin {
   }
 
   private onMatchAborted(playersFinished: number, playersInGame: number): void {
-    if (playersFinished != 0) { // 誰か一人でも試合終了している場合は通常の終了処理
+    if (playersFinished !== 0) { // 誰か一人でも試合終了している場合は通常の終了処理
       this.logger.trace('The match was aborted after several players were Finished. call normal match finish process');
       this.onMatchFinished();
     } else {
-      if (this.lobby.host != null) {
+      if (this.lobby.host) {
         // 誰も終了していない場合は試合再開許可モードへ
         this.needsRotate = false;
         this.logger.trace('The match was aborted before any Player Finished.');
@@ -234,17 +234,17 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param hostChanged 
    */
   private onFixedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): void {
-    if (this.lobby.host == null) {
+    if (!this.lobby.host) {
       this.hostQueue = [];
     }
-    if (this.hostQueue.length == 0 || this.lobby.host == null || !this.hostQueue.includes(this.lobby.host)) {
+    if (this.hostQueue.length === 0 || !this.lobby.host || !this.hostQueue.includes(this.lobby.host)) {
       // キューが空、ホストがいない、ホストが新しく入った人の場合はスロットベースで再構築する
       this.OrderBySlotBase(result);
     } else {
       this.ModifyOderByMpSettingsResult(result, playersIn, playersOut, hostChanged);
     }
 
-    if (this.lobby.host != null) {
+    if (this.lobby.host) {
       if (DENY_LIST.includes(this.lobby.host)) {
         this.changeHost();
       } else {
@@ -263,13 +263,13 @@ export class AutoHostSelector extends LobbyPlugin {
     if (command.startsWith('!q')) {
       this.ShowHostQueue();
     } else if (player.isAuthorized) {
-      if (command == '*reorder' || command == '*order') {
-        if (param != '') {
+      if (command === '*reorder' || command === '*order') {
+        if (param !== '') {
           this.Reorder(param);
           return;
         }
       }
-      if (command == '*denylist') {
+      if (command === '*denylist') {
         const matAdd = param.match(/^add\s+(.+)/);
         if (matAdd) {
           const p = this.lobby.GetOrMakePlayer(matAdd[1]);
@@ -288,7 +288,7 @@ export class AutoHostSelector extends LobbyPlugin {
   private onDenylistAdded(name: string) {
     const player = this.lobby.GetOrMakePlayer(name);
     if (this.hostQueue.includes(player)) {
-      this.hostQueue = this.hostQueue.filter(p => p != player);
+      this.hostQueue = this.hostQueue.filter(p => p !== player);
       this.logger.info(`removed ${player.name} from hostqueue`);
       if (player.isHost) {
         this.changeHost();
@@ -306,11 +306,11 @@ export class AutoHostSelector extends LobbyPlugin {
 
   // 別のプラグインからskipの要請があった場合に実行する
   private onPluginMessage(type: string, args: string[], src: LobbyPlugin | null): void {
-    if (type == 'skip') {
+    if (type === 'skip') {
       this.Skip();
-    } else if (type == 'skipto') {
+    } else if (type === 'skipto') {
       this.logger.trace('received plugin message skipto');
-      if (args.length != 1) {
+      if (args.length !== 1) {
         this.logger.error('skipto invalid arguments length');
         return;
       }
@@ -320,7 +320,7 @@ export class AutoHostSelector extends LobbyPlugin {
         return;
       }
       this.SkipTo(to);
-    } else if (type == 'reorder') {
+    } else if (type === 'reorder') {
       this.logger.trace('received plugin message reorder');
       this.Reorder(args[0]);
     }
@@ -379,20 +379,20 @@ export class AutoHostSelector extends LobbyPlugin {
    */
   SkipTo(to: string | Player): void {
     let trg: Player;
-    if (typeof to == 'string') {
+    if (typeof to === 'string') {
       trg = this.lobby.GetOrMakePlayer(to);
     } else {
       trg = to;
     }
 
     // キューにいないプレイヤーの場合は何もしない
-    if (!this.hostQueue.find(p => p == trg)) {
+    if (!this.hostQueue.find(p => p === trg)) {
       this.logger.error(`couldn't skip to who isn't in queue. ${trg.name}`);
       return;
     }
 
     let c = 0;
-    while (this.hostQueue[0] != trg) {
+    while (this.hostQueue[0] !== trg) {
       this.rotateQueue(false);
       if (c++ > 16) {
         this.logger.error('infinity loop detected');
@@ -411,9 +411,9 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param order 
    */
   Reorder(order: Player[] | string): void {
-    if (typeof (order) == 'string') {
-      const players = order.split(',').map(t => this.lobby.GetPlayer(revealUserName(t.trim()))).filter(p => p != null) as Player[];
-      if (players.length == 0) {
+    if (typeof (order) === 'string') {
+      const players = order.split(',').map(t => this.lobby.GetPlayer(revealUserName(t.trim()))).filter(p => p !== null) as Player[];
+      if (players.length === 0) {
         this.logger.info('Faild reorder, invalid order string : %s', order);
       } else {
         this.Reorder(players);
@@ -457,13 +457,13 @@ export class AutoHostSelector extends LobbyPlugin {
    * キューの先頭を末尾に 
    */
   private changeHost(): void {
-    if (this.hostQueue.length == 0) {
-      if (this.lobby.host != null) {
+    if (this.hostQueue.length === 0) {
+      if (this.lobby.host) {
         this.lobby.SendMessage('!mp clearhost');
       }
       return;
     }
-    if (this.hostQueue[0] != this.lobby.host) {
+    if (this.hostQueue[0] !== this.lobby.host) {
       this.lobby.TransferHost(this.hostQueue[0]);
       this.logger.trace('sent !mp host %s', this.hostQueue[0].name);
     } else {
@@ -489,7 +489,7 @@ export class AutoHostSelector extends LobbyPlugin {
    */
   private removeFromQueue(player: Player): boolean {
     const i = this.hostQueue.indexOf(player);
-    if (i != -1) {
+    if (i !== -1) {
       this.hostQueue.splice(i, 1);
       this.logger.trace('removed %s', player.name);
       this.raiseOrderChanged('removed');
@@ -508,7 +508,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const b = this.getDeniedPlayerNames().join(',');
     return `-- AutoHostSelector --
   queue : ${m}
-  mapChanger : ${this.mapChanger == null ? 'null' : this.mapChanger.name}, needsRotate : ${this.needsRotate}
+  mapChanger : ${!this.mapChanger ? 'null' : this.mapChanger.name}, needsRotate : ${this.needsRotate}
   denyList : ${b}`;
   }
 

@@ -32,7 +32,7 @@ class BeatmapRepositoryClass {
      * @throws FetchBeatmapError
      */
   async getBeatmap(mapId: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = true): Promise<BeatmapCache> {
-    if (this.fetcher == WebApiClient) {
+    if (this.fetcher === WebApiClient) {
       if (!WebApiClient.available) {
         this.fetcher = this.websiteFetcher;
       }
@@ -42,7 +42,7 @@ class BeatmapRepositoryClass {
     if (cache) return cache;
 
     const set = await this.fetcher.getBeatmapset(mapId);
-    if (set.availability.download_disabled == true || set.availability.more_information != null) {
+    if (set.availability.download_disabled || set.availability.more_information) {
       throw new FetchBeatmapError(FetchBeatmapErrorReason.NotAvailable);
     }
     this.cacheMaps(set);
@@ -59,7 +59,7 @@ class BeatmapRepositoryClass {
 
     if (cache) {
       if (Date.now() < cache.fetchedAt + this.cacheExpiredMs) {
-        if (mode == PlayMode.Osu || allowConvert || !cache.convert) {
+        if (mode === PlayMode.Osu || allowConvert || !cache.convert) {
           return cache;
         }
       } else {
@@ -90,7 +90,7 @@ class BeatmapRepositoryClass {
   }
 
   genKey(mapid: number, mode: string | PlayMode) {
-    if (typeof mode == 'string') {
+    if (typeof mode === 'string') {
       mode = PlayMode.from(mode);
     }
     return `${mode.id}.${mapid}`;
@@ -143,9 +143,9 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
      */
   async getBeatmap(id: number, mode: PlayMode = PlayMode.Osu, allowConvert: boolean = false): Promise<Beatmap> {
     const set = await this.fetchBeatmapFromWebsite(id);
-    let map = set.beatmaps?.find(v => v.id == id && v.mode_int.toString() == mode.value);
+    let map = set.beatmaps?.find(v => v.id === id && v.mode_int.toString() === mode.value);
     if (map === undefined && allowConvert) {
-      map = set.converts?.find(v => v.id == id && v.mode_int.toString() == mode.value);
+      map = set.converts?.find(v => v.id === id && v.mode_int.toString() === mode.value);
     }
 
     if (!map) {
@@ -177,7 +177,7 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
         throw e;
       }
       if (axios.isAxiosError(e)) {
-        if (e.response?.status == 404) {
+        if (e.response?.status === 404) {
           throw new FetchBeatmapError(FetchBeatmapErrorReason.NotFound);
         }
         throw new FetchBeatmapError(FetchBeatmapErrorReason.Unknown, e.message);

@@ -32,9 +32,9 @@ describe('AutoStartTimerTest', function () {
         c++;
       });
       lobby.PluginMessage.on(a => {
-        if (d == 0) {
+        if (d === 0) {
           assert.equal(a.type, 'mp_abort_start');
-        } else if (d == 1) {
+        } else if (d === 1) {
           assert.equal(a.type, 'mp_start');
           assert.equal(a.args[0], '60');
         }
@@ -52,9 +52,9 @@ describe('AutoStartTimerTest', function () {
         c++;
       });
       lobby.PluginMessage.on(a => {
-        if (d == 0) {
+        if (d === 0) {
           assert.equal(a.type, 'mp_abort_start');
-        } else if (d == 1) {
+        } else if (d === 1) {
           assert.equal(a.type, 'mp_start');
           assert.equal(a.args[0], '60');
         }
@@ -77,9 +77,9 @@ describe('AutoStartTimerTest', function () {
       const { lobby, ircClient } = await prepare(true, false, 60);
       let d = 0;
       lobby.PluginMessage.on(a => {
-        if (d == 0 || d == 2) {
+        if (d === 0 || d === 2) {
           assert.equal(a.type, 'mp_abort_start');
-        } else if (d == 1 || d == 3) {
+        } else if (d === 1 || d === 3) {
           assert.equal(a.type, 'mp_start');
           assert.equal(a.args[0], '60');
         }
@@ -93,15 +93,15 @@ describe('AutoStartTimerTest', function () {
       const { players, lobby, ircClient } = await prepare(true, true, 60);
       let c = 0;
       lobby.SentMessage.on(a => {
-        if (c == 2 || c == 5) {
+        if (c === 2 || c === 5) {
           assert.equal(a.message, '!mp clearhost');
         }
         c++;
       });
       lobby.PluginMessage.on(a => {
-        if (c == 0 || c == 3) {
+        if (c === 0 || c === 3) {
           assert.equal(a.type, 'mp_abort_start');
-        } else if (c == 1 || c == 4) {
+        } else if (c === 1 || c === 4) {
           assert.equal(a.type, 'mp_start');
           assert.equal(a.args[0], '60');
         }

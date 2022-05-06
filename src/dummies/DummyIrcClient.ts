@@ -43,7 +43,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       args: []
     };
 
-    if (opts == null || !opts.autoConnect) {
+    // autoConnect default:true
+    if (opts?.autoConnect !== false) {
       this.connect();
     }
   }
@@ -57,7 +58,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // チャンネル参加イベントを発行する
   public raiseJoin(channel: string, who: string): void {
-    if (who == this.nick) {
+    if (who === this.nick) {
       this.channel = channel;
     }
     this.emit('join', channel, who, this.msg);
@@ -66,7 +67,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // チャンネル退出イベントを発行する
   public raisePart(channel: string, who: string): void {
-    if (who == this.nick) {
+    if (who === this.nick) {
       this.channel = '';
     }
     this.emit('part', channel, who, this.msg);
@@ -82,13 +83,13 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     }
 
     this.onMessage(from, to, message);
-    if (from == this.nick) return;
+    if (from === this.nick) return;
     this.emit('message', from, to, message, this.msg);
-    if (to == this.channel) {
+    if (to === this.channel) {
       this.emit('message#', from, to, message, this.msg);
       this.emit('message' + to, from, message, this.msg);
     }
-    if (to == this.nick) {
+    if (to === this.nick) {
       this.emit('pm', from, message, this.msg);
     }
   }
@@ -101,7 +102,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
         resolve();
       };
 
-      if (this.latency != 0) {
+      if (this.latency !== 0) {
         setTimeout(body, this.latency);
       } else {
         body();
@@ -137,14 +138,14 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
 
   // async呼び出し用のディレイ関数
   private delay(ms: number): Promise<void> {
-    if (ms == 0) return Promise.resolve();
+    if (ms === 0) return Promise.resolve();
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   mapidSeed: number = 1000;
   // ホストがマップを変更する動作をエミュレートする
   public async emulateChangeMapAsync(delay: number = 0, mapid: number = 0): Promise<void> {
-    if (mapid == 0) {
+    if (mapid === 0) {
       mapid = this.mapidSeed++;
     }
     await this.emulateMessageAsync('BanchoBot', this.channel, 'Host is changing map...');
@@ -255,21 +256,21 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
   private onMessage(from: string, to: string, message: string) {
     if (this.referees.includes(from)) {
       const mp = parser.ParseMPCommand(message);
-      if (mp != null) {
+      if (mp) {
         this.processMpCommand(to, message, mp);
       }
     }
     if (message.startsWith('!stat')) {
       const m = message.match(/^!stats? (.+)/);
       if (m) {
-        this.sendStat(m[1], to == 'BanchoBot');
+        this.sendStat(m[1], to === 'BanchoBot');
       }
     }
   }
 
   private processMpCommand(target: string, message: string, mp: MpCommand): void {
     const m = (msg: string) => this.emulateMessageAsync('BanchoBot', this.channel, msg);
-    if (target == 'BanchoBot' && mp.command == 'make') {
+    if (target === 'BanchoBot' && mp.command === 'make') {
       const title = mp.arg;
       if (title === '') {
         this.emulateMessage('BanchoBot', this.nick, 'No name provided');
@@ -280,7 +281,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
         this.raiseJoin('#mp_' + id, this.nick);
         this.emulateMessage('BanchoBot', this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
       });
-    } else if (target == this.channel) {
+    } else if (target === this.channel) {
       switch (mp.command) {
         case 'host':
           if (this.players.has(escapeUserName(mp.arg))) {
@@ -290,7 +291,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           }
           break;
         case 'password':
-          if (mp.arg == '') {
+          if (mp.arg === '') {
             m('Removed the match password');
           } else {
             m('Changed the match password');
@@ -327,7 +328,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
           }
           break;
         case 'start':
-          if (mp.arg == '') {
+          if (mp.arg === '') {
             m('The match has started!');
             m('Started the match');
           } else {
@@ -374,7 +375,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     const ename = escapeUserName(arg);
     let stat = this.stats.get(ename);
     const to = toPm ? this.nick : this.channel;
-    if (stat == undefined) {
+    if (stat === undefined) {
       const status = this.players.has(ename) ? StatStatuses.Multiplayer : StatStatuses.None;
       stat = new StatResult(arg, 0, status);
       this.stats.set(ename, stat);

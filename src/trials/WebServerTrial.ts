@@ -26,7 +26,7 @@ function startTestServer() {
   app.get('/api/user/:id', (req, res, next) => {
     const tid = parseInt(req.params.id);
     if (isNaN(tid)) return res.json({});
-    const usr = historyData.users.find((v: any) => v.id.toString() == req.params.id);
+    const usr = historyData.users.find((v: any) => v.id.toString() === req.params.id);
     return res.json(usr);
   });
 

@@ -1,7 +1,6 @@
 import { assert } from 'chai';
 import { escapeUserName } from '../Player'; 
 import { Lobby } from '../Lobby';
-import { Roles } from '../Player';
 import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { AutoHostSelector, DENY_LIST } from '../plugins/AutoHostSelector';
 import { MpSettingsCases } from './cases/MpSettingsCases';
@@ -29,19 +28,19 @@ describe('AutoHostSelectorTest', function () {
       case 's1': // no host
         assert.isTrue(s.hostQueue.length > 0);
         assert.isTrue(!l.isMatching);
-        assert.isTrue(l.host == null);
+        assert.isTrue(l.host === null);
         break;
       case 'hr': // has host and needs to rotate 
         assert.isTrue(s.hostQueue.length > 0, 's.hostQueue.length > 0');
         assert.isTrue(!l.isMatching), '!l.isMatching';
         assert.isTrue(s.needsRotate, 's.needsRotate');
-        assert.isTrue(l.host != null, 'l.host != null');
+        assert.isTrue(l.host !== null, 'l.host !== null');
         break;
       case 'hn': // has host and no needs to rotate
         assert.isTrue(s.hostQueue.length > 0);
         assert.isTrue(!l.isMatching);
         assert.isFalse(s.needsRotate);
-        assert.isTrue(l.host != null);
+        assert.isTrue(l.host !== null);
         break;
       case 'm': // matching
         assert.isTrue(s.hostQueue.length > 0);
@@ -648,7 +647,7 @@ describe('AutoHostSelectorTest', function () {
       for (let i = 0; i < selector.hostQueue.length; i++) {
         assert.equal(selector.hostQueue[i].name, q2[i]);
       }
-      if (lobby.host == null) return;
+      if (lobby.host === null) return;
       assert.isTrue(lobby.host.isHost);
       assert.equal(lobby.host.name, 'p3');
       ircClient.emulateMpSettings(c);
@@ -673,7 +672,7 @@ describe('AutoHostSelectorTest', function () {
         assert.equal(selector.hostQueue[i].name, q2[i], `${i} a-${selector.hostQueue[i].name} e-${q2[i]}`);
       }
 
-      if (lobby.host == null) assert.fail();
+      if (lobby.host === null) assert.fail();
       else assert.equal(lobby.host.name, 'p4');
     });
     it('reset queue test', async () => {
@@ -693,7 +692,7 @@ describe('AutoHostSelectorTest', function () {
         assert.equal(selector.hostQueue[i].name, q1[i], `${i} a-${selector.hostQueue[i].name} e-${q2[i]}`);
       }
 
-      if (lobby.host == null) assert.fail();
+      if (lobby.host === null) assert.fail();
       else assert.equal(lobby.host.name, 'p1');
     });
   });

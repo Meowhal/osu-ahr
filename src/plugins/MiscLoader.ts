@@ -27,19 +27,19 @@ export class MiscLoader extends LobbyPlugin {
   private registerEvents(): void {
     this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player));
     this.lobby.ReceivedBanchoResponse.on(a => {
-      if (a.response.type == BanchoResponseType.BeatmapChanged) {
+      if (a.response.type === BanchoResponseType.BeatmapChanged) {
         this.canResend = true;
       }
     });
   }
 
   private async onReceivedChatCommand(command: string, param: string, player: Player): Promise<void> {
-    if (command == '!mirror') {
+    if (command === '!mirror') {
       if (this.canResend) {
         this.checkMirror(this.lobby.mapId);
       }
     }
-    if (command == '!rank') {
+    if (command === '!rank') {
       this.getProfile(player);
     }
   }
@@ -52,7 +52,7 @@ export class MiscLoader extends LobbyPlugin {
       const currentPlayer = this.lobby.GetPlayer(player.name);
       if (!currentPlayer)
         return;
-      if (currentPlayer.id == 0 || this.lobby.gameMode == undefined) {
+      if (currentPlayer.id === 0 || this.lobby.gameMode === undefined) {
         this.lobby.SendMessageWithCoolTime('!stats ' + currentPlayer.name, '!rank', 10000);
         return;
       }

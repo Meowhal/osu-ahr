@@ -104,8 +104,6 @@ export async function trial() {
   }
 
   function checkMemberHasAhrAdminRole(member: GuildMember) {
-    return member.roles.cache.find(f => f.name == ADMIN_ROLE.name) !== undefined;
+    return member.roles.cache.find(f => f.name === ADMIN_ROLE.name) !== undefined;
   }
-
-
 }

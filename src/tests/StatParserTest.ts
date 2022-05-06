@@ -43,14 +43,14 @@ it('StatParser Test', function () {
     assert.isFalse(parser.isParsing);
     for (let j = 0; j < 4; j++) {
       assert.isTrue(parser.feedLine(testTexts[i * 4 + j]));
-      if (j != 3) {
+      if (j !== 3) {
         assert.isTrue(parser.isParsing);
         assert.isFalse(parser.isParsed);
       }
     }
     assert.isFalse(parser.isParsing);
     assert.isTrue(parser.isParsed);
-    if (parser.result != null) parser.result.date = 0;
+    if (parser.result !== null) parser.result.date = 0;
     assert.deepEqual(parser.result, expectedResults[i]);
   }
 });

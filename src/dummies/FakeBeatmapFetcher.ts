@@ -130,7 +130,7 @@ export class FakeBeatmapFetcher implements IBeatmapFetcher {
     set.beatmaps = [map];
     set.converts = [];
 
-    if (mode == PlayMode.Osu) {
+    if (mode === PlayMode.Osu) {
       set.converts.push({ ...map, mode: MODES[1], mode_int: 1, convert: true });
       set.converts.push({ ...map, mode: MODES[2], mode_int: 2, convert: true });
       set.converts.push({ ...map, mode: MODES[3], mode_int: 3, convert: true });
@@ -143,7 +143,7 @@ export class FakeBeatmapFetcher implements IBeatmapFetcher {
 
   async getBeatmapset(id: number): Promise<Beatmapset> {
 
-    if (this.id != id) {
+    if (this.id !== id) {
       throw new FetchBeatmapError(FetchBeatmapErrorReason.NotFound);
     }
 

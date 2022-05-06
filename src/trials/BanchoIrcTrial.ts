@@ -18,7 +18,7 @@ export function trial() {
   bot.on('pm', function (nick, message) {
     console.log('Got private message from %s: %s', nick, message);
     const v = parser.ParseMpMakeResponse(nick, message);
-    if (v != null) {
+    if (v !== null) {
       console.log(`--- parsed pm id=${v.id} title=${v.title}`);
     }
   });

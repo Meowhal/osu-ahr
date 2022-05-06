@@ -48,7 +48,7 @@ export class HistoryLoader extends LobbyPlugin {
   }
 
   onMatchStarted() {
-    if (this.fetchInvervalId == null) {
+    if (this.fetchInvervalId === null) {
       this.repository.updateToLatest();
     }
   }

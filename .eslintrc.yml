@@ -90,7 +90,7 @@ rules:
   camelcase:
     - "off"
   eqeqeq:
-    - "off"
+    - "error"
   no-trailing-spaces:
     - "off"
   space-before-function-paren:

@@ -66,7 +66,7 @@ export class WordCounter extends LobbyPlugin {
   }
 
   public update(message: string, now: number): boolean {
-    if (this.periods.length == 0) return false;
+    if (this.periods.length === 0) return false;
 
     const ns = { time: now, length: message.length };
     let changedMax = false;

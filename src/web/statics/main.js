@@ -18,7 +18,7 @@
   function* filterLogs(logs) {
     if (!logs) return;
     for (const l of logs) {
-      if (l.tag == 'mapChecker') {
+      if (l.tag === 'mapChecker') {
         continue;
       }
       yield l;
@@ -52,12 +52,12 @@
     let sender = 'system';
     let message = '';
     let cl = '';
-    if (log.tag == 'chat') {
+    if (log.tag === 'chat') {
       const m = log.message.match(/^(\*?[^:]+):(.*)$/);
       sender = m[1];
       message = m[2];
-      cl = (sender == 'bot') ? ' bot' : ' user';
-    } else if (log.tag == 'inout') {
+      cl = (sender === 'bot') ? ' bot' : ' user';
+    } else if (log.tag === 'inout') {
       for (const v of log.message.split('\x1b')) {
         const m = v.match(/^\[(\d+)m(.*)/);
         if (m) {

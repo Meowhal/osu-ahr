@@ -28,7 +28,7 @@ export class MpSettingsParser {
   result: MpSettingsResult | null = null;
   isParsing: boolean = false;
   get isParsed(): boolean {
-    return !this.isParsing && this.result != null;
+    return !this.isParsing && this.result !== null;
   }
 
   feedLine(line: string): boolean {
@@ -50,7 +50,7 @@ export class MpSettingsParser {
       this.isParsing = true;
       return true;
     }
-    if (this.result == null) return false;
+    if (this.result === null) return false;
 
     m = line.match(/Beatmap: (\S+?(\d+)) (.+)/);
     if (m) {
@@ -73,12 +73,12 @@ export class MpSettingsParser {
     m = line.match(/Players: (\d+)/);
     if (m) {
       this.result.numPlayers = parseInt(m[1]);
-      this.isParsing = this.result.numPlayers != 0;
+      this.isParsing = this.result.numPlayers !== 0;
       return true;
     }
     m = line.match(/^Slot (\d+)\s+(.+) https:\/\/osu\.ppy\.sh\/u\/(\d+) (.{15})\s*(\[(.+)\])?$/);
     if (m) {
-      const team = m[6] == undefined || !m[6].includes('Team') ? Teams.None
+      const team = m[6] === undefined || !m[6].includes('Team') ? Teams.None
         : m[6].includes('Blue') ? Teams.Blue : Teams.Red;
 
       const p: PlayerSettings = {
@@ -87,12 +87,12 @@ export class MpSettingsParser {
         id: parseInt(m[3]),
         profile: 'https://osu.ppy.sh/u/' + m[3],
         name: m[4].trim(),
-        isHost: m[6] == undefined ? false : m[6].includes('Host'),
+        isHost: m[6] === undefined ? false : m[6].includes('Host'),
         team: team,
-        options: m[6] == undefined ? '' : m[6].trim()
+        options: m[6] === undefined ? '' : m[6].trim()
       };
       this.result.players.push(p);
-      this.isParsing = this.result.players.length != this.result.numPlayers;
+      this.isParsing = this.result.players.length !== this.result.numPlayers;
       return true;
     }
     return false;

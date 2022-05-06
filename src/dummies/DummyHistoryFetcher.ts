@@ -64,7 +64,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
 
   addGameEvent(member: number[], title?: string) {
     this.timestamp += 1000;
-    if (member.length == 0) return;
+    if (member.length === 0) return;
     const scores = this.createDummyScores(member);
     const game = this.createDummyGame(1, true);
     game.scores = scores;
@@ -134,7 +134,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   }
 
   createDummyUserIfNotExist(userId: number | null): void {
-    if (userId != null && !this.existsUser(userId)) {
+    if (userId && !this.existsUser(userId)) {
       this.users.push({
         avatar_url: null,
         country_code: 'AA',
@@ -157,6 +157,6 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   }
 
   existsUser(userId: number): boolean {
-    return this.users.find(v => v.id == userId) != undefined;
+    return this.users.find(v => v.id === userId) !== undefined;
   }
 }

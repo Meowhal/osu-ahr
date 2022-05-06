@@ -44,11 +44,11 @@ export class InOutLogger extends LobbyPlugin {
     const ctagIn = useColor ? '\x1b[32m' : '';
     const ctagOut = useColor ? '\x1b[31m' : '';
     const ctagEnd = useColor ? '\x1b[0m' : '';
-    if (msgIn != '') {
+    if (msgIn !== '') {
       msg = `+${ctagIn} ${msgIn} ${ctagEnd}`;
     }
-    if (msgOut != '') {
-      if (msg != '') msg += ', ';
+    if (msgOut !== '') {
+      if (msg !== '') msg += ', ';
       msg += `-${ctagOut} ${msgOut} ${ctagEnd}`;
     }
     return msg;
@@ -57,7 +57,7 @@ export class InOutLogger extends LobbyPlugin {
   LogInOutPlayers(): void {
     if (this.logger.isInfoEnabled()) {
       const msg = this.GetInOutLog(this.withColorTag);
-      if (msg != '') {
+      if (msg !== '') {
         this.logger.info(msg);
       }
     }

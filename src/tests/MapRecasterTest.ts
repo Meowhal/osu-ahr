@@ -22,7 +22,7 @@ describe('Map Recaster Tests', function () {
     const players = await tu.AddPlayersAsync(3, ircClient);
     await ircClient.emulateChangeMapAsync(0);
     const mapid = lobby.mapId;
-    const t1 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] == mapid), 10);
+    const t1 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] === mapid), 10);
     ircClient.emulateMessage(players[0], ircClient.channel, '!update');
     await t1;
   });
@@ -32,11 +32,11 @@ describe('Map Recaster Tests', function () {
     const players = await tu.AddPlayersAsync(3, ircClient);
     await ircClient.emulateChangeMapAsync(0);
     const mapid = lobby.mapId;
-    const t1 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] == mapid), 10);
+    const t1 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] === mapid), 10);
     ircClient.emulateMessage(players[0], ircClient.channel, '!update');
     await t1;
 
-    const t2 = tu.assertBanchoNotRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] == mapid), 10);
+    const t2 = tu.assertBanchoNotRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] === mapid), 10);
     ircClient.emulateMessage(players[1], ircClient.channel, '!update');
     await t2;
   });
@@ -46,17 +46,17 @@ describe('Map Recaster Tests', function () {
     const players = await tu.AddPlayersAsync(3, ircClient);
     await ircClient.emulateChangeMapAsync(0);
     let mapid = lobby.mapId;
-    const t1 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] == mapid), 10);
+    const t1 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] === mapid), 10);
     ircClient.emulateMessage(players[0], ircClient.channel, '!update');
     await t1;
     await ircClient.emulateChangeMapAsync(0);
     mapid = lobby.mapId;
-    const t2 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] == mapid), 10);
+    const t2 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] === mapid), 10);
     ircClient.emulateMessage(players[1], ircClient.channel, '!update');
     await t2;
     await ircClient.emulateChangeMapAsync(0);
     mapid = lobby.mapId;
-    const t3 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] == mapid), 10);
+    const t3 = tu.assertBanchoRespond(lobby, BanchoResponseType.MpBeatmapChanged, (b => b.params[0] === mapid), 10);
     ircClient.emulateMessage(players[1], ircClient.channel, '!update');
     await t3;
   });

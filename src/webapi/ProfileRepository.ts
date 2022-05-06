@@ -141,7 +141,7 @@ export class WebsiteProfileFetcher implements IProfileFetcher {
         throw e;
       }
       if (axios.isAxiosError(e)) {
-        if (e.response?.status == 404) {
+        if (e.response?.status === 404) {
           throw new FetchProfileError(FetchProfileErrorReason.NotFound);
         }
         throw new FetchProfileError(FetchProfileErrorReason.Unknown, e.message);

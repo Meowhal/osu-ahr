@@ -66,7 +66,7 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
   const color = COLOR_MAP[ev.level.colour] ?? 'DEFAULT';
   switch (ev.categoryName) {
     case 'chat':
-      if (ev.data.length == 3) {
+      if (ev.data.length === 3) {
         return `> **${ev.data[1]}**: ${ev.data[2]}`;
       } else {
         return '> ' + msg;

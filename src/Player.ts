@@ -17,7 +17,7 @@ export class Player {
     this.escaped_name = escapeUserName(name);
   }
   is(r: Roles): boolean {
-    return (this.role & r) != 0;
+    return (this.role & r) !== 0;
   }
   get isPlayer(): boolean {
     return this.is(Roles.Player);

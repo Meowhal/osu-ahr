@@ -86,7 +86,7 @@ export class MapChecker extends LobbyPlugin {
   }
 
   private onReceivedChatCommand(command: string, param: string, player: Player): void {
-    if (command == '!r' || command == '!regulation') {
+    if (command === '!r' || command === '!regulation') {
       this.lobby.SendMessageWithCoolTime(this.getRegulationDescription(), 'regulation', 10000);
       return;
     }
@@ -166,7 +166,7 @@ export class MapChecker extends LobbyPlugin {
   }
 
   SetEnabled(v: boolean): void {
-    if (v == this.option.enabled) return;
+    if (v === this.option.enabled) return;
 
     if (v) {
       this.SendPluginMessage('enabledMapChecker');
@@ -186,11 +186,11 @@ export class MapChecker extends LobbyPlugin {
   }
 
   private async check(mapId: number, mapTitle: string): Promise<void> {
-    if (mapId == this.lastMapId) return;
+    if (mapId === this.lastMapId) return;
     try {
       const map = await BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
 
-      if (mapId != this.checkingMapId) {
+      if (mapId !== this.checkingMapId) {
         this.logger.info(`target map is already changed. checked:${mapId}, current:${this.checkingMapId}`);
         return;
       }
@@ -247,7 +247,7 @@ export class MapChecker extends LobbyPlugin {
 
     this.checkingMapId = 0;
 
-    if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {
+    if (this.option.num_violations_allowed !== 0 && this.option.num_violations_allowed <= this.numViolations) {
       this.skipHost();
     }
   }
@@ -299,7 +299,7 @@ export class MapValidator {
     const violationMsgs = [];
 
     const mapmode = PlayMode.from(map.mode);
-    if (mapmode != this.option.gamemode && this.option.gamemode != null) {
+    if (mapmode !== this.option.gamemode && this.option.gamemode !== null) {
       violationMsgs.push(`gamemode is not ${this.option.gamemode.officialName}.`);
       rate += 1;
     }
@@ -327,7 +327,7 @@ export class MapValidator {
     if (rate > 0) {
       let message;
       const mapDesc = `[${map.url} ${map.beatmapset?.title}] (Star Rating: ${map.difficulty_rating} Duration: ${secToTimeNotation(map.total_length)})`;
-      if (violationMsgs.length == 1) {
+      if (violationMsgs.length === 1) {
         message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
       } else {
         message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => '- ' + m).join('\n')}`;
@@ -342,7 +342,7 @@ export class MapValidator {
     let d_star = '';
     let d_length = '';
     let d_gamemode = `mode: ${this.option.gamemode.officialName}`;
-    if (this.option.gamemode != PlayMode.Osu) {
+    if (this.option.gamemode !== PlayMode.Osu) {
       if (this.option.allow_convert) {
         d_gamemode += ' (converts allowed)';
       }
@@ -367,7 +367,7 @@ export class MapValidator {
       d_length = `length <= ${secToTimeNotation(this.option.length_max)}`;
     }
 
-    return [d_star, d_length, d_gamemode].filter(d => d != '').join(', ');
+    return [d_star, d_length, d_gamemode].filter(d => d !== '').join(', ');
   }
 }
 
@@ -401,7 +401,7 @@ function validateMapCheckerOption(option: MapCheckerUncheckedOption): option is 
   }
 
   if (option.gamemode !== undefined) {
-    if (typeof option.gamemode == 'string') {
+    if (typeof option.gamemode === 'string') {
       try {
         option.gamemode = PlayMode.from(option.gamemode, true);
 
@@ -438,31 +438,31 @@ function validateMapCheckerOption(option: MapCheckerUncheckedOption): option is 
 export function parseMapcheckerOwnerCommand(command: string, param: string): Partial<MapCheckerOption> | undefined {
   let option: undefined | MapCheckerUncheckedOption = undefined;
   command = command.toLocaleLowerCase();
-  if (command == '*mapchecker_enable') {
+  if (command === '*mapchecker_enable') {
     return { enabled: true };
   }
-  if (command == '*mapchecker_disable') {
+  if (command === '*mapchecker_disable') {
     option = { enabled: false };
   }
 
   if (command.startsWith('*regulation')) {
-    if (param.indexOf('=') != -1) {
+    if (param.indexOf('=') !== -1) {
       option = parseRegulationSetter(param);
     } else {
-      const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s != '');
+      const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s !== '');
       option = parseRegulationCommand(params);
     }
   }
 
-  if (command == '*no' && param.startsWith('regulation')) {
-    const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s != '');
-    if (params.length == 1) {
+  if (command === '*no' && param.startsWith('regulation')) {
+    const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s !== '');
+    if (params.length === 1) {
       option = { enabled: false };
     } else {
       option = parseNoRegulationCommand(params[1]);
     }
   }
-  if (option != undefined) {
+  if (option !== undefined) {
     validateMapCheckerOption(option);
   }
   return option;
@@ -552,11 +552,11 @@ function unifyParamName(name: string): string {
     return 'enabled';
   } else if (name.startsWith('disable')) {
     return 'disabled';
-  } else if (name == 'num_violations_to_skip' || name.includes('violations')) {
+  } else if (name === 'num_violations_to_skip' || name.includes('violations')) {
     return 'num_violations_allowed';
-  } else if (name == 'allowconvert') {
+  } else if (name === 'allowconvert') {
     return 'allow_convert';
-  } else if (name == 'disallowconvert') {
+  } else if (name === 'disallowconvert') {
     return 'disallow_convert';
   }
   return name;
