@@ -84,3 +84,20 @@ rules:
     - "always"
   yoda:
     - "error"
+  no-duplicate-imports:
+    - "error"
+    - "includeExports": true
+  camelcase:
+    - "off"
+  eqeqeq:
+    - "off"
+  no-trailing-spaces:
+    - "off"
+  space-before-function-paren:
+    - "off"
+  no-use-before-define:
+    - "off"
+  no-multiple-empty-lines:
+    - "off"
+  padded-blocks:
+    - "off"

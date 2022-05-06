@@ -1,5 +1,4 @@
-import { Lobby } from '../Lobby';
-import { LobbyStatus } from '../Lobby';
+import { Lobby, LobbyStatus } from '../Lobby';
 import { Player, escapeUserName } from '../Player';
 import { BanchoResponseType } from '../parsers/CommandParser';
 import { StatStatuses, StatResult } from '../parsers/StatParser';

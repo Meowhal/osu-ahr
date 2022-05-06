@@ -1,10 +1,9 @@
 import { Client, Intents } from 'discord.js';
 import log4js from 'log4js';
 import { DiscordBot } from './DiscordBot';
-import { logIrcEvent } from '../IIrcClient';
+import { logIrcEvent, logPrivateMessage } from '../IIrcClient';
 import * as irc from '../libs/irc';
 import { CONFIG_OPTION, getIrcConfig } from '../TypedConfig';
-import { logPrivateMessage } from '../IIrcClient';
 import { applySpeedLimit } from '../libs/ChatLimiter';
 
 const logger = log4js.getLogger('cli');
