@@ -27,6 +27,25 @@ rules:
     - "off"
   "@typescript-eslint/no-empty-interface": 
     - "off"
+  "@typescript-eslint/no-inferrable-types":
+    - "off"
+  brace-style:
+    - "off"
+    - "1tbs"
+    - "allowSingleLine": true
+  curly:
+    - "off"
+    - "multi-line"
+    - "consistent"
+  no-console:
+    - "off"
+  no-inline-comments: 
+    - "off"
+  comma-style:
+    - "off"
+  no-extra-parens:
+    - "off"
+    - "all"
   no-useless-catch: 
     - "off"
   no-empty:
