@@ -6,12 +6,12 @@
 
 import log4js from 'log4js';
 import { Client, Permissions, Guild, CommandInteraction, ApplicationCommandPermissionData, CreateRoleOptions, MessageActionRow, MessageButton, DiscordAPIError, Message, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
-import config from 'config';
 import { IIrcClient } from '../IIrcClient';
 import { OahrDiscord } from './OahrDiscord';
 import { setContext } from './DiscordAppender';
 import { BotCommands } from './BotCommand';
 import { BanchoResponse, BanchoResponseType } from '../parsers/CommandParser';
+import { getConfig } from '../TypedConfig';
 
 const logger = log4js.getLogger('discord');
 
@@ -38,7 +38,7 @@ export class DiscordBot {
   constructor(client: IIrcClient, discordClient: Client) {
     this.ircClient = client;
     this.discordClient = discordClient;
-    this.cfg = config.get<DiscordBotConfig>('Discord');
+    this.cfg = getConfig('Discord', {});
     this.ahrs = {};
     this.sharedObjects = {};
   }
