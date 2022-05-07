@@ -112,9 +112,9 @@ export class DiscordBot {
       },
     ];
 
-    results.forEach(c => {
-      c.permissions.add({ permissions });
-    });
+    for(const [_, c] of results) {
+      await c.permissions.add({permissions});
+    }
   }
 
   async registerRole(guild: Guild) {
