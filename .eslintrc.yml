@@ -98,6 +98,6 @@ rules:
   no-use-before-define:
     - "off"
   no-multiple-empty-lines:
-    - "off"
+    - "error"
   padded-blocks:
     - "off"

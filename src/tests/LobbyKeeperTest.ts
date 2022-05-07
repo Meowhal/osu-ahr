@@ -813,7 +813,6 @@ describe('LobbyKeepserTest', function () {
 
 
   describe('slotkeeper on lobbykeeper tests', () => {
-
     it('size over test', async () => {
       const { keeper, lobby, ircClient } = await setupAsync({
         size: 4,
@@ -821,12 +820,6 @@ describe('LobbyKeepserTest', function () {
 
       const spy = Sinon.spy(lobby);
       await ircClient.emulateAddPlayerAsync('player4');
-
-
-
-
     });
-
   });
-
 });
