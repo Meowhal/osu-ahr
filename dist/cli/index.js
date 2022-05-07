@@ -28,38 +28,37 @@ const irc = __importStar(require("../libs/irc"));
 const IIrcClient_1 = require("../IIrcClient");
 const TypedConfig_1 = require("../TypedConfig");
 const log4js_1 = __importDefault(require("log4js"));
-const IIrcClient_2 = require("../IIrcClient");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-const logger = log4js_1.default.getLogger("cli");
-console.log("starting up...");
+const logger = log4js_1.default.getLogger('cli');
+console.log('starting up...');
 const config_path = (process.env.NODE_ENV === 'production')
-    ? "./config/log_cli_prod.json"
-    : "./config/log_cli_dev.json";
+    ? './config/log_cli_prod.json'
+    : './config/log_cli_dev.json';
 log4js_1.default.configure(config_path);
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();
-    if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
-        logger.error("you must enter your account name and irc password in the config file. ");
-        logger.error("you can get the password from 'https://osu.ppy.sh/p/irc' ");
-        logger.error("Copy config/default.json to config/local.json, and enter your id and irc password.");
+    if (c.nick === 'your account id' || c.opt.password === 'you can get password from \'https://osu.ppy.sh/p/irc\'') {
+        logger.error('you must enter your account name and irc password in the config file. ');
+        logger.error('you can get the password from \'https://osu.ppy.sh/p/irc\' ');
+        logger.error('Copy config/default.json to config/local.json, and enter your id and irc password.');
         process.exit(1);
     }
-    let client = new irc.Client(c.server, c.nick, c.opt);
-    client.on("error", err => {
-        if (err.command == "err_passwdmismatch") {
+    const client = new irc.Client(c.server, c.nick, c.opt);
+    client.on('error', err => {
+        if (err.command === 'err_passwdmismatch') {
             logger.error('%s: %s', err.command, err.args.join(' '));
-            logger.error("check your account id and password.");
+            logger.error('check your account id and password.');
             process.exit(1);
         }
     });
     (0, ChatLimiter_1.applySpeedLimit)(client, 10, 5000);
     (0, IIrcClient_1.logIrcEvent)(client);
-    (0, IIrcClient_2.logPrivateMessage)(client);
+    (0, IIrcClient_1.logPrivateMessage)(client);
     if (process.argv.length > 2) {
         const command = process.argv[2];
         const oahr = new OahrHeadless_1.OahrHeadless(client);
-        const arg = process.argv.slice(3).join(" ");
+        const arg = process.argv.slice(3).join(' ');
         oahr.start(command, arg);
     }
     else {

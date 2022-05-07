@@ -6,15 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logPrivateMessage = exports.logIrcEvent = void 0;
 const StatParser_1 = require("./parsers/StatParser");
 const log4js_1 = __importDefault(require("log4js"));
-const ircLogger = log4js_1.default.getLogger("irc");
-const pmLogger = log4js_1.default.getLogger("PMLogger");
+const ircLogger = log4js_1.default.getLogger('irc');
+const pmLogger = log4js_1.default.getLogger('PMLogger');
 function logIrcEvent(client) {
     client.on('error', function (message) {
         ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);
     });
     client.on('registered', function (message) {
         const args = message.args;
-        ircLogger.debug('@reg %s', args?.join(", "));
+        ircLogger.debug('@reg %s', args?.join(', '));
     });
     client.on('message', function (from, to, message) {
         ircLogger.debug('@msg  %s => %s: %s', from, to, message);
@@ -40,14 +40,14 @@ function logIrcEvent(client) {
     client.on('action', function (from, to, text, message) {
         ircLogger.debug('@action  %s => %s: %s', from, to, text);
     });
-    client.on("selfMessage", (target, toSend) => {
+    client.on('selfMessage', (target, toSend) => {
         ircLogger.debug('@sent bot => %s: %s', target, toSend);
     });
 }
 exports.logIrcEvent = logIrcEvent;
 function logPrivateMessage(client) {
-    client.on("message", (from, to, message) => {
-        if (to == client.nick) {
+    client.on('message', (from, to, message) => {
+        if (to === client.nick) {
             if ((0, StatParser_1.IsStatResponse)(message)) {
                 pmLogger.trace(`pm ${from} -> ${message}`);
             }

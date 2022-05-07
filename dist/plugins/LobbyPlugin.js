@@ -10,12 +10,12 @@ const TypedConfig_1 = require("../TypedConfig");
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。
  */
 class LobbyPlugin {
-    constructor(lobby, pluginName, loggerTag = "default") {
+    constructor(lobby, pluginName, loggerTag = 'default') {
         this.lobby = lobby;
         this.lobby.plugins.push(this);
         this.pluginName = pluginName;
         this.logger = log4js_1.default.getLogger(loggerTag);
-        this.logger.addContext("channel", "lobby");
+        this.logger.addContext('channel', 'lobby');
     }
     /**
      * 他のプラグインにメッセージを送信する。
@@ -30,14 +30,16 @@ class LobbyPlugin {
      * プラグインごとのステータスメッセージを取得する
      */
     GetPluginStatus() {
-        return "";
+        return '';
     }
     /**
      * すべてのプラグインが読み込まれたあとに実行される
      */
     OnLoaded() {
+        /* do nothing. */
     }
     OnConfig(target, name, value) {
+        /* do nothing. */
     }
     loadEnvSettings(option) {
         try {
@@ -51,8 +53,8 @@ class LobbyPlugin {
 }
 exports.LobbyPlugin = LobbyPlugin;
 function regSwitch(val, cases) {
-    for (let c of cases) {
-        let ea = c.case.exec(val);
+    for (const c of cases) {
+        const ea = c.case.exec(val);
         if (ea) {
             c.action(ea);
             return;

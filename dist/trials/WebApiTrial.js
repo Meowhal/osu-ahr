@@ -7,7 +7,7 @@ exports.fetchUpdateTrial = exports.getTokenTrial = exports.getGuestTokenTrial = 
 const axios_1 = __importDefault(require("axios"));
 const config_1 = __importDefault(require("config"));
 const WebApiClient_1 = require("../webapi/WebApiClient");
-const oAuthConfig = config_1.default.get("WebApi");
+const oAuthConfig = config_1.default.get('WebApi');
 async function trial() {
     //getTokenTrial();
     const client = WebApiClient_1.WebApiClient;
@@ -17,11 +17,11 @@ async function trial() {
 exports.trial = trial;
 async function getGuestTokenTrial() {
     try {
-        const response = await axios_1.default.post("https://osu.ppy.sh/oauth/token", {
-            "grant_type": "client_credentials",
-            "client_id": "" + oAuthConfig.client_id,
-            "client_secret": oAuthConfig.client_secret,
-            "scope": "public"
+        const response = await axios_1.default.post('https://osu.ppy.sh/oauth/token', {
+            'grant_type': 'client_credentials',
+            'client_id': '' + oAuthConfig.client_id,
+            'client_secret': oAuthConfig.client_secret,
+            'scope': 'public'
         });
         const c = response.data;
         console.log(c);
@@ -33,12 +33,12 @@ async function getGuestTokenTrial() {
 exports.getGuestTokenTrial = getGuestTokenTrial;
 async function getTokenTrial() {
     try {
-        const response = await axios_1.default.post("https://osu.ppy.sh/oauth/token", {
-            "grant_type": "authorization_code",
-            "client_id": "" + oAuthConfig.client_id,
-            "client_secret": oAuthConfig.client_secret,
-            "code": oAuthConfig.code,
-            "redirect_uri": oAuthConfig.callback
+        const response = await axios_1.default.post('https://osu.ppy.sh/oauth/token', {
+            'grant_type': 'authorization_code',
+            'client_id': '' + oAuthConfig.client_id,
+            'client_secret': oAuthConfig.client_secret,
+            'code': oAuthConfig.code,
+            'redirect_uri': oAuthConfig.callback
         });
         const c = response.data;
         console.log(c);
@@ -50,14 +50,14 @@ async function getTokenTrial() {
 exports.getTokenTrial = getTokenTrial;
 function objectToURLSearchParams(obj) {
     const param = new URLSearchParams();
-    for (let key in obj) {
+    for (const key in obj) {
         param.append(key, obj[key]);
     }
     return obj;
 }
 async function fetchUpdateTrial() {
     try {
-        const r = await axios_1.default.get("https://osu.ppy.sh/community/chat/updates?since=2065115911");
+        const r = await axios_1.default.get('https://osu.ppy.sh/community/chat/updates?since=2065115911');
         const c = r.data;
         console.log(c);
     }

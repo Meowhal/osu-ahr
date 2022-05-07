@@ -7,7 +7,7 @@ const TypedConfig_1 = require("../TypedConfig");
 const WAITINGTIME_MIN = 15;
 class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "AutoStartTimer", "autostart");
+        super(lobby, 'AutoStartTimer', 'autostart');
         this.useMapValidation = false;
         this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.lastMapId = 0;
@@ -24,16 +24,16 @@ class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
         if (!player.isAuthorized)
             return;
         switch (command) {
-            case "*autostart_enable":
+            case '*autostart_enable':
                 this.option.enabled = true;
                 break;
-            case "*autostart_disable":
+            case '*autostart_disable':
                 this.option.enabled = false;
                 break;
-            case "*autostart_time":
+            case '*autostart_time':
                 let ct = parseInt(param);
                 if (Number.isNaN(ct)) {
-                    this.logger.warn("invalid *autostart_time param : %s", param);
+                    this.logger.warn('invalid *autostart_time param : %s', param);
                     return;
                 }
                 if (ct < WAITINGTIME_MIN) {
@@ -41,10 +41,10 @@ class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
                 }
                 this.option.waitingTime = ct;
                 break;
-            case "*autostart_clearhost_enable":
+            case '*autostart_clearhost_enable':
                 this.option.doClearHost = true;
                 break;
-            case "*atuostart_clearhost_disable":
+            case '*atuostart_clearhost_disable':
                 this.option.doClearHost = false;
                 break;
         }
@@ -54,16 +54,16 @@ class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
             return;
         switch (response.type) {
             case CommandParser_1.BanchoResponseType.BeatmapChanged:
-                if (this.lobby.players.size == 1 || response.params[0] == this.lastMapId || this.useMapValidation)
+                if (this.lobby.players.size === 1 || response.params[0] === this.lastMapId || this.useMapValidation)
                     break;
                 this.startTimer();
                 break;
             case CommandParser_1.BanchoResponseType.BeatmapChanging:
             case CommandParser_1.BanchoResponseType.HostChanged:
                 if (this.lobby.isStartTimerActive) {
-                    this.lobby.SendMessage("!mp aborttimer");
+                    this.lobby.SendMessage('!mp aborttimer');
                 }
-                this.SendPluginMessage("mp_abort_start");
+                this.SendPluginMessage('mp_abort_start');
                 break;
             case CommandParser_1.BanchoResponseType.MatchStarted:
                 this.lastMapId = this.lobby.mapId;
@@ -73,20 +73,20 @@ class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
     startTimer() {
         if (!this.option.enabled || this.option.waitingTime < WAITINGTIME_MIN)
             return;
-        this.SendPluginMessage("mp_start", [this.option.waitingTime.toString(), "withhelp"]);
+        this.SendPluginMessage('mp_start', [this.option.waitingTime.toString(), 'withhelp']);
         if (this.option.doClearHost) {
-            this.lobby.SendMessage(`!mp clearhost`);
+            this.lobby.SendMessage('!mp clearhost');
         }
     }
     onPluginMessage(type, args, src) {
         switch (type) {
-            case "enabledMapChecker":
+            case 'enabledMapChecker':
                 this.useMapValidation = true;
                 break;
-            case "disabledMapChecker":
+            case 'disabledMapChecker':
                 this.useMapValidation = false;
                 break;
-            case "validatedMap":
+            case 'validatedMap':
                 this.startTimer();
                 break;
         }

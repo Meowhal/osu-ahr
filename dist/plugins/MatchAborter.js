@@ -12,7 +12,7 @@ const TypedConfig_1 = require("../TypedConfig");
  */
 class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "MatchAborter", "aborter");
+        super(lobby, 'MatchAborter', 'aborter');
         this.abortTimer = null;
         this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.voting = new VoteCounter_1.VoteCounter(this.option.vote_rate, this.option.vote_min);
@@ -35,14 +35,14 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
         this.checkVoteCount();
         this.checkAutoAbort();
         // 誰もいなくなったらタイマーを止める
-        if (this.lobby.players.size == 0) {
+        if (this.lobby.players.size === 0) {
             this.voting.Clear();
             this.stopTimer();
         }
     }
     onMatchStarted() {
         this.voting.RemoveAllVoters();
-        for (let p of this.lobby.players) {
+        for (const p of this.lobby.players) {
             this.voting.AddVoter(p);
         }
     }
@@ -55,9 +55,9 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
     onChatCommand(player, command, param) {
         if (!this.lobby.isMatching)
             return;
-        if (command == "!abort") {
-            if (player == this.lobby.host) {
-                this.logger.trace("host(%s) sent !abort command", player.name);
+        if (command === '!abort') {
+            if (player === this.lobby.host) {
+                this.logger.trace('host(%s) sent !abort command', player.name);
                 this.doAbort();
             }
             else {
@@ -65,7 +65,7 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
             }
         }
         else if (player.isAuthorized) {
-            if (command == "*abort") {
+            if (command === '*abort') {
                 this.doAbort();
             }
         }
@@ -74,20 +74,20 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
         if (this.voting.passed)
             return;
         if (this.voting.Vote(player)) {
-            this.logger.trace("accept abort request from %s (%s)", player.name, this.voting.toString());
+            this.logger.trace('accept abort request from %s (%s)', player.name, this.voting.toString());
             this.checkVoteCount(true);
         }
         else {
-            this.logger.trace("vote from %s was ignored", player.name);
+            this.logger.trace('vote from %s was ignored', player.name);
         }
     }
     // 投票数を確認して必要数に達していたら試合中断
     checkVoteCount(showMessage = false) {
-        if (this.voting.count != 0 && showMessage) {
-            this.lobby.DeferMessage(`bot : match abort progress: ${this.voting.toString()}`, "aborter vote", this.option.vote_msg_defer_ms, false);
+        if (this.voting.count !== 0 && showMessage) {
+            this.lobby.DeferMessage(`bot : match abort progress: ${this.voting.toString()}`, 'aborter vote', this.option.vote_msg_defer_ms, false);
         }
         if (this.voting.passed) {
-            this.lobby.DeferMessage(`bot : passed abort vote: ${this.voting.toString()}`, "aborter vote", 100, true);
+            this.lobby.DeferMessage(`bot : passed abort vote: ${this.voting.toString()}`, 'aborter vote', 100, true);
             this.doAbort();
         }
     }
@@ -96,7 +96,7 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
         return Math.ceil(Math.max(this.lobby.playersInGame * this.option.vote_rate, this.option.vote_min));
     }
     checkAutoAbort() {
-        if (this.abortTimer == null) {
+        if (this.abortTimer === null) {
             if (this.autoAbortRequired <= this.lobby.playersFinished) { // 半数以上終了したらタイマー起動
                 this.startTimer();
             }
@@ -106,35 +106,35 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
         return Math.ceil(this.lobby.playersInGame * this.option.auto_abort_rate);
     }
     doAbort() {
-        this.logger.info("do abort");
+        this.logger.info('do abort');
         this.stopTimer();
         this.lobby.AbortMatch();
     }
     startTimer() {
-        if (this.option.auto_abort_delay_ms == 0)
+        if (this.option.auto_abort_delay_ms === 0)
             return;
         this.stopTimer();
-        this.logger.trace("start timer");
+        this.logger.trace('start timer');
         this.abortTimer = setTimeout(() => {
-            if (this.abortTimer != null && this.lobby.isMatching) {
-                this.logger.trace("abort timer action");
+            if (this.abortTimer !== null && this.lobby.isMatching) {
+                this.logger.trace('abort timer action');
                 this.doAutoAbortAsync();
             }
         }, this.option.auto_abort_delay_ms);
     }
     async doAutoAbortAsync() {
-        const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus == Player_1.MpStatuses.Playing);
-        for (let p of playersStillPlaying) {
-            if (p.mpstatus == Player_1.MpStatuses.Playing) {
+        const playersStillPlaying = Array.from(this.lobby.players).filter(v => v.mpstatus === Player_1.MpStatuses.Playing);
+        for (const p of playersStillPlaying) {
+            if (p.mpstatus === Player_1.MpStatuses.Playing) {
                 try {
                     const stat = await this.lobby.RequestStatAsync(p, true);
-                    if (stat.status == StatParser_1.StatStatuses.Multiplaying) {
+                    if (stat.status === StatParser_1.StatStatuses.Multiplaying) {
                         this.startTimer();
                         return;
                     }
                 }
                 catch {
-                    this.logger.warn("couldn't get players status. AutoAbortCheck was canceled.");
+                    this.logger.warn('couldn\'t get players status. AutoAbortCheck was canceled.');
                 }
             }
         }
@@ -144,18 +144,18 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
             this.doAbort();
         }
         else {
-            this.lobby.SendMessage("bot : if the game is stuck, abort the game with !abort vote.");
+            this.lobby.SendMessage('bot : if the game is stuck, abort the game with !abort vote.');
         }
     }
     stopTimer() {
-        if (this.abortTimer != null) {
-            this.logger.trace("stop timer");
+        if (this.abortTimer !== null) {
+            this.logger.trace('stop timer');
             clearTimeout(this.abortTimer);
             this.abortTimer = null;
         }
     }
     GetPluginStatus() {
-        return `-- Match Aborter -- timer : ${this.abortTimer != null ? "active" : "###"}, vote : ${this.voting.toString()}`;
+        return `-- Match Aborter -- timer : ${this.abortTimer !== null ? 'active' : '###'}, vote : ${this.voting.toString()}`;
     }
 }
 exports.MatchAborter = MatchAborter;

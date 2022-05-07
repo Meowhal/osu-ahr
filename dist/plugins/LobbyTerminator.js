@@ -5,7 +5,7 @@ const LobbyPlugin_1 = require("./LobbyPlugin");
 const TypedConfig_1 = require("../TypedConfig");
 class LobbyTerminator extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "LobbyTerminator", "terminator");
+        super(lobby, 'LobbyTerminator', 'terminator');
         this.multilimeMessageInterval = 1000;
         this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.registerEvents();
@@ -23,43 +23,43 @@ class LobbyTerminator extends LobbyPlugin_1.LobbyPlugin {
         if (this.terminateTimer) {
             clearTimeout(this.terminateTimer);
             this.terminateTimer = undefined;
-            this.logger.trace("terminate_timer canceled");
+            this.logger.trace('terminate_timer canceled');
         }
     }
     onPlayerLeft(p) {
-        if (this.lobby.players.size == 0) {
+        if (this.lobby.players.size === 0) {
             if (this.terminateTimer) {
                 clearTimeout(this.terminateTimer);
             }
-            this.logger.trace("terminate_timer start");
+            this.logger.trace('terminate_timer start');
             this.terminateTimer = setTimeout(() => {
-                this.logger.info("terminated lobby");
+                this.logger.info('terminated lobby');
                 this.lobby.CloseLobbyAsync();
             }, this.option.terminate_time_ms);
         }
     }
     CloseLobby(time_ms = 0) {
-        if (time_ms == 0) {
-            if (this.lobby.players.size == 0) {
-                this.logger.info("terminated lobby");
+        if (time_ms === 0) {
+            if (this.lobby.players.size === 0) {
+                this.logger.info('terminated lobby');
                 this.lobby.CloseLobbyAsync();
             }
             else {
                 this.lobby.SendMultilineMessageWithInterval([
-                    "!mp password closed",
-                    "This lobby will be closed after everyone leaves.",
-                    "Thank you for playing with the auto host rotation lobby."
-                ], this.multilimeMessageInterval, "close lobby announcement", 100000);
+                    '!mp password closed',
+                    'This lobby will be closed after everyone leaves.',
+                    'Thank you for playing with the auto host rotation lobby.'
+                ], this.multilimeMessageInterval, 'close lobby announcement', 100000);
                 this.option.terminate_time_ms = 1000;
             }
         }
         else {
             this.lobby.SendMultilineMessageWithInterval([
-                "!mp password closed",
+                '!mp password closed',
                 `This lobby will be closed in ${(time_ms / 1000).toFixed(0)}sec(s).`,
-                "Thank you for playing with the auto host rotation lobby."
-            ], this.multilimeMessageInterval, "close lobby announcement", 100000)
-                .then(() => this.sendMessageWithDelay("!mp close", time_ms));
+                'Thank you for playing with the auto host rotation lobby.'
+            ], this.multilimeMessageInterval, 'close lobby announcement', 100000)
+                .then(() => this.sendMessageWithDelay('!mp close', time_ms));
         }
     }
     sendMessageWithDelay(message, delay) {

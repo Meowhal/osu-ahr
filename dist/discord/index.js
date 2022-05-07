@@ -28,33 +28,32 @@ const DiscordBot_1 = require("./DiscordBot");
 const IIrcClient_1 = require("../IIrcClient");
 const irc = __importStar(require("../libs/irc"));
 const TypedConfig_1 = require("../TypedConfig");
-const IIrcClient_2 = require("../IIrcClient");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-const logger = log4js_1.default.getLogger("cli");
-console.log("starting up...");
-const config_path = "./config/log_discord.json";
+const logger = log4js_1.default.getLogger('cli');
+console.log('starting up...');
+const config_path = './config/log_discord.json';
 log4js_1.default.configure(config_path);
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();
-    if (c.nick == "your account id" || c.opt.password == "you can get password from 'https://osu.ppy.sh/p/irc'") {
-        logger.error("you must enter your account name and irc password in the config file. ");
-        logger.error("you can get the password from 'https://osu.ppy.sh/p/irc' ");
-        logger.error("Copy config/default.json to config/local.json, and enter your id and irc password.");
+    if (c.nick === 'your account id' || c.opt.password === 'you can get password from \'https://osu.ppy.sh/p/irc\'') {
+        logger.error('you must enter your account name and irc password in the config file. ');
+        logger.error('you can get the password from \'https://osu.ppy.sh/p/irc\' ');
+        logger.error('Copy config/default.json to config/local.json, and enter your id and irc password.');
         process.exit(1);
     }
-    let ircClient = new irc.Client(c.server, c.nick, c.opt);
-    ircClient.on("error", err => {
-        if (err.command == "err_passwdmismatch") {
+    const ircClient = new irc.Client(c.server, c.nick, c.opt);
+    ircClient.on('error', err => {
+        if (err.command === 'err_passwdmismatch') {
             logger.error('%s: %s', err.command, err.args.join(' '));
-            logger.error("check your account id and password.");
+            logger.error('check your account id and password.');
             process.exit(1);
         }
     });
     (0, ChatLimiter_1.applySpeedLimit)(ircClient, 10, 5000);
     (0, IIrcClient_1.logIrcEvent)(ircClient);
-    (0, IIrcClient_2.logPrivateMessage)(ircClient);
-    let discordClient = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
+    (0, IIrcClient_1.logPrivateMessage)(ircClient);
+    const discordClient = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
     const bot = new DiscordBot_1.DiscordBot(ircClient, discordClient);
     bot.start();
 }

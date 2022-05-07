@@ -20,15 +20,15 @@ class BeatmapRepositoryClass {
         }
     }
     /**
-     *
-     * @param mapId
-     * @param mode
-     * @param allowConvert
-     * @returns
-     * @throws FetchBeatmapError
-     */
+       *
+       * @param mapId
+       * @param mode
+       * @param allowConvert
+       * @returns
+       * @throws FetchBeatmapError
+       */
     async getBeatmap(mapId, mode = Modes_1.PlayMode.Osu, allowConvert = true) {
-        if (this.fetcher == WebApiClient_1.WebApiClient) {
+        if (this.fetcher === WebApiClient_1.WebApiClient) {
             if (!WebApiClient_1.WebApiClient.available) {
                 this.fetcher = this.websiteFetcher;
             }
@@ -37,7 +37,7 @@ class BeatmapRepositoryClass {
         if (cache)
             return cache;
         const set = await this.fetcher.getBeatmapset(mapId);
-        if (set.availability.download_disabled == true || set.availability.more_information != null) {
+        if (set.availability.download_disabled || set.availability.more_information) {
             throw new FetchBeatmapError(FetchBeatmapErrorReason.NotAvailable);
         }
         this.cacheMaps(set);
@@ -51,7 +51,7 @@ class BeatmapRepositoryClass {
         const cache = this.maps.get(mapKey);
         if (cache) {
             if (Date.now() < cache.fetchedAt + this.cacheExpiredMs) {
-                if (mode == Modes_1.PlayMode.Osu || allowConvert || !cache.convert) {
+                if (mode === Modes_1.PlayMode.Osu || allowConvert || !cache.convert) {
                     return cache;
                 }
             }
@@ -80,7 +80,7 @@ class BeatmapRepositoryClass {
         }
     }
     genKey(mapid, mode) {
-        if (typeof mode == "string") {
+        if (typeof mode === 'string') {
             mode = Modes_1.PlayMode.from(mode);
         }
         return `${mode.id}.${mapid}`;
@@ -95,7 +95,7 @@ var FetchBeatmapErrorReason;
     FetchBeatmapErrorReason[FetchBeatmapErrorReason["NotAvailable"] = 4] = "NotAvailable";
 })(FetchBeatmapErrorReason = exports.FetchBeatmapErrorReason || (exports.FetchBeatmapErrorReason = {}));
 function isFetchBeatmapError(err) {
-    return "isFetchBeatmapError" in err;
+    return 'isFetchBeatmapError' in err;
 }
 exports.isFetchBeatmapError = isFetchBeatmapError;
 class FetchBeatmapError extends Error {
@@ -103,7 +103,7 @@ class FetchBeatmapError extends Error {
         super(message ?? FetchBeatmapErrorReason[reason]);
         this.isFetchBeatmapError = true;
         this.reason = reason;
-        this.name = "FetchBeatmapError";
+        this.name = 'FetchBeatmapError';
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, FetchBeatmapError);
         }
@@ -112,24 +112,24 @@ class FetchBeatmapError extends Error {
 exports.FetchBeatmapError = FetchBeatmapError;
 class WebsiteBeatmapFecher {
     constructor() {
-        this.webpreg = new RegExp('<script id="json-beatmapset" type="application/json">\s*(.+?)\s*</script>', "ms");
+        this.webpreg = /<script id="json-beatmapset" type="application\/json">\s*(.+?)\s*<\/script>/ms;
     }
     getBeatmapsets(id) {
         return this.fetchBeatmapFromWebsite(id);
     }
     /**
-     *
-     * @param id
-     * @param mode
-     * @param allowConvert
-     * @returns
-     * @throws FetchBeatmapError
-     */
+       *
+       * @param id
+       * @param mode
+       * @param allowConvert
+       * @returns
+       * @throws FetchBeatmapError
+       */
     async getBeatmap(id, mode = Modes_1.PlayMode.Osu, allowConvert = false) {
         const set = await this.fetchBeatmapFromWebsite(id);
-        let map = set.beatmaps?.find(v => v.id == id && v.mode_int.toString() == mode.value);
+        let map = set.beatmaps?.find(v => v.id === id && v.mode_int.toString() === mode.value);
         if (map === undefined && allowConvert) {
-            map = set.converts?.find(v => v.id == id && v.mode_int.toString() == mode.value);
+            map = set.converts?.find(v => v.id === id && v.mode_int.toString() === mode.value);
         }
         if (!map) {
             throw new FetchBeatmapError(FetchBeatmapErrorReason.PlayModeMismatched);
@@ -143,7 +143,7 @@ class WebsiteBeatmapFecher {
     }
     async fetchBeatmapFromWebsite(id) {
         try {
-            const target = "https://osu.ppy.sh/b/" + id;
+            const target = 'https://osu.ppy.sh/b/' + id;
             const res = await axios_1.default.get(target);
             const match = this.webpreg.exec(res.data);
             if (match) {
@@ -157,7 +157,7 @@ class WebsiteBeatmapFecher {
                 throw e;
             }
             if (axios_1.default.isAxiosError(e)) {
-                if (e.response?.status == 404) {
+                if (e.response?.status === 404) {
                     throw new FetchBeatmapError(FetchBeatmapErrorReason.NotFound);
                 }
                 throw new FetchBeatmapError(FetchBeatmapErrorReason.Unknown, e.message);
