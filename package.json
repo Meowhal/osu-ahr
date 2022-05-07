@@ -12,6 +12,8 @@
     "dist": "rimraf dist && tsc",
     "clean": "rimraf dist",
     "build": "tsc",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "start": "node dist/cli/index.js",
     "start:discord": "node dist/discord/index.js",
     "node:cli": "node dist/cli/index.js",
