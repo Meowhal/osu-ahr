@@ -6,25 +6,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadEnvConfig = exports.loadEnvConfigWithTypeHint = exports.generateDefaultOptionTypeHint = exports.getConfig = exports.getIrcConfig = exports.CONFIG_OPTION = void 0;
 const config_1 = __importDefault(require("config"));
 const log4js_1 = __importDefault(require("log4js"));
-const configLogger = log4js_1.default.getLogger("config");
+const configLogger = log4js_1.default.getLogger('config');
 exports.CONFIG_OPTION = {
     USE_ENV: false,
     PRINT_LOADED_ENV_CONFIG: true,
 };
 function getIrcConfig() {
-    const d = config_1.default.get("irc");
-    const e = loadEnvConfig("irc", d, [
-        { key: "server", nullable: false, type: "string" },
-        { key: "nick", nullable: false, type: "string" },
-        { key: "port", nullable: false, type: "number" },
-        { key: "password", nullable: false, type: "string" }
+    const d = config_1.default.get('irc');
+    const e = loadEnvConfig('irc', d, [
+        { key: 'server', nullable: false, type: 'string' },
+        { key: 'nick', nullable: false, type: 'string' },
+        { key: 'port', nullable: false, type: 'number' },
+        { key: 'password', nullable: false, type: 'string' }
     ]);
     const c = { ...d, ...e };
     c.opt = { ...c.opt };
-    if (typeof e.port === "number") {
+    if (typeof e.port === 'number') {
         c.opt.port = e.port;
     }
-    if (typeof e.password === "string") {
+    if (typeof e.password === 'string') {
         c.opt.password = e.password;
     }
     return c;
@@ -51,13 +51,13 @@ function getConfig(tag, option, hints) {
 }
 exports.getConfig = getConfig;
 function generateDefaultOptionTypeHint(option) {
-    let r = [];
+    const r = [];
     for (const key in option) {
         if (option[key] === null || option[key] === undefined) {
-            r.push({ key, nullable: true, type: "number" });
+            r.push({ key, nullable: true, type: 'number' });
         }
         else if (Array.isArray(option[key])) {
-            r.push({ key, nullable: false, type: "array" });
+            r.push({ key, nullable: false, type: 'array' });
         }
         else {
             r.push({ key, nullable: false, type: typeof option[key] });
@@ -70,29 +70,29 @@ function genEnvKey(category, key) {
     return `ahr_${category}_${key}`;
 }
 function loadEnvConfigWithTypeHint(category, hints, env) {
-    let r = {};
+    const r = {};
     for (const hint of hints) {
         const envKey = genEnvKey(category, hint.key);
-        let envVar = env[envKey];
-        if (hint.nullable && (envVar === "null")) {
+        const envVar = env[envKey];
+        if (hint.nullable && (envVar === 'null')) {
             r[hint.key] = null;
         }
         else if (envVar !== undefined) {
             switch (hint.type) {
-                case "boolean":
-                    let bool = envVar.toLowerCase();
-                    if (bool === "true") {
+                case 'boolean':
+                    const bool = envVar.toLowerCase();
+                    if (bool === 'true') {
                         r[hint.key] = true;
                     }
-                    else if (bool === "false") {
+                    else if (bool === 'false') {
                         r[hint.key] = false;
                     }
                     else {
                         throw new Error(`env:${envKey} type mismatched. ${hint.key} must be true/false but "${envVar}"`);
                     }
                     break;
-                case "number":
-                    let num = parseFloat(envVar);
+                case 'number':
+                    const num = parseFloat(envVar);
                     if (!Number.isNaN(num)) {
                         r[hint.key] = num;
                     }
@@ -100,11 +100,11 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
                         throw new Error(`env:${envKey} type mismatched. ${hint.key} must be number but "${envVar}"`);
                     }
                     break;
-                case "string":
+                case 'string':
                     r[hint.key] = envVar;
                     break;
-                case "array":
-                    let arr = JSON.parse(envVar);
+                case 'array':
+                    const arr = JSON.parse(envVar);
                     if (isStringArray(arr)) {
                         r[hint.key] = arr;
                     }
@@ -128,7 +128,7 @@ exports.loadEnvConfigWithTypeHint = loadEnvConfigWithTypeHint;
 function isStringArray(arr) {
     if (!Array.isArray(arr))
         return false;
-    return arr.every(v => typeof v === "string");
+    return arr.every(v => typeof v === 'string');
 }
 function loadEnvConfig(category, template, hints) {
     if (hints === undefined) {

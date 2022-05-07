@@ -10,21 +10,21 @@ const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
 const WebApiClient_1 = require("../webapi/WebApiClient");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 const promises_1 = __importDefault(require("fs/promises"));
-describe("BeatmapRepository Tests", function () {
+describe('BeatmapRepository Tests', function () {
     before(function () {
         TestUtils_1.default.configMochaAsSilent();
     });
     afterEach(function () {
         BeatmapRepository_1.BeatmapRepository.maps.clear();
     });
-    describe.skip("fetch beatmap form osu.ppy.sh tests", () => {
+    describe.skip('fetch beatmap form osu.ppy.sh tests', () => {
         before(function () {
             BeatmapRepository_1.BeatmapRepository.fetcher = BeatmapRepository_1.BeatmapRepository.websiteFetcher;
         });
-        it("parse website test", async () => {
-            const bufSrc = await promises_1.default.readFile("./src/tests/cases/3182198.html");
+        it('parse website test', async () => {
+            const bufSrc = await promises_1.default.readFile('./src/tests/cases/3182198.html');
             const src = bufSrc.toString();
-            const reg = new RegExp('<script id="json-beatmapset" type="application/json">\s*(.+?)\s*</script>', "ms");
+            const reg = /<script id="json-beatmapset" type="application\/json">\s*(.+?)\s*<\/script>/ms;
             const match = reg.exec(src);
             if (match) {
                 console.log(match[1]);
@@ -35,14 +35,14 @@ describe("BeatmapRepository Tests", function () {
                 chai_1.assert.fail();
             }
         });
-        it("fetch osu map", async () => {
+        it('fetch osu map', async () => {
             const mapid = 3182198;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid);
-            chai_1.assert.equal(b.mode, "osu");
+            chai_1.assert.equal(b.mode, 'osu');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "aquamarine");
+            chai_1.assert.equal(b.beatmapset?.title, 'aquamarine');
         });
-        it("fetch invalid map id", async () => {
+        it('fetch invalid map id', async () => {
             const mapid = 737157;
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko);
@@ -57,35 +57,35 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("fetch taiko map", async () => {
+        it('fetch taiko map', async () => {
             const mapid = 2938202;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko);
-            chai_1.assert.equal(b.mode, "taiko");
+            chai_1.assert.equal(b.mode, 'taiko');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "The Old Blood");
+            chai_1.assert.equal(b.beatmapset?.title, 'The Old Blood');
         });
-        it("fetch fruits map", async () => {
+        it('fetch fruits map', async () => {
             const mapid = 3175483;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.CatchTheBeat);
-            chai_1.assert.equal(b.mode, "fruits");
+            chai_1.assert.equal(b.mode, 'fruits');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "Otter Pop (feat. Hollis)");
+            chai_1.assert.equal(b.beatmapset?.title, 'Otter Pop (feat. Hollis)');
         });
-        it("fetch mania map", async () => {
+        it('fetch mania map', async () => {
             const mapid = 3259543;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.OsuMania);
-            chai_1.assert.equal(b.mode, "mania");
+            chai_1.assert.equal(b.mode, 'mania');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "Hanshoku-ki (Cut Ver.)");
+            chai_1.assert.equal(b.beatmapset?.title, 'Hanshoku-ki (Cut Ver.)');
         });
-        it("fetch converted taiko map", async () => {
+        it('fetch converted taiko map', async () => {
             const mapid = 3182198;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, true);
-            chai_1.assert.equal(b.mode, "taiko");
+            chai_1.assert.equal(b.mode, 'taiko');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "aquamarine");
+            chai_1.assert.equal(b.beatmapset?.title, 'aquamarine');
         });
-        it("fail to fetch taiko map", async () => {
+        it('fail to fetch taiko map', async () => {
             const mapid = 3182198;
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, false);
@@ -100,7 +100,7 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("fail to fetch osu map", async () => {
+        it('fail to fetch osu map', async () => {
             const mapid = 2938202;
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Osu);
@@ -115,7 +115,7 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("cache test", async () => {
+        it('cache test', async () => {
             const mapid = 3182198;
             BeatmapRepository_1.BeatmapRepository.maps.clear();
             const b1 = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid);
@@ -124,21 +124,21 @@ describe("BeatmapRepository Tests", function () {
             chai_1.assert.equal(b1, b2);
         });
     });
-    describe.skip("fetch beatmap form api tests", () => {
+    describe.skip('fetch beatmap form api tests', () => {
         before(function () {
             BeatmapRepository_1.BeatmapRepository.fetcher = WebApiClient_1.WebApiClient;
         });
         after(function () {
             BeatmapRepository_1.BeatmapRepository.fetcher = BeatmapRepository_1.BeatmapRepository.websiteFetcher;
         });
-        it("fetch osu map", async () => {
+        it('fetch osu map', async () => {
             const mapid = 3182198;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid);
-            chai_1.assert.equal(b.mode, "osu");
+            chai_1.assert.equal(b.mode, 'osu');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "aquamarine");
+            chai_1.assert.equal(b.beatmapset?.title, 'aquamarine');
         });
-        it("fetch invalid map id", async () => {
+        it('fetch invalid map id', async () => {
             const mapid = 737157;
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko);
@@ -153,35 +153,35 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("fetch taiko map", async () => {
+        it('fetch taiko map', async () => {
             const mapid = 2938202;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko);
-            chai_1.assert.equal(b.mode, "taiko");
+            chai_1.assert.equal(b.mode, 'taiko');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "The Old Blood");
+            chai_1.assert.equal(b.beatmapset?.title, 'The Old Blood');
         });
-        it("fetch fruits map", async () => {
+        it('fetch fruits map', async () => {
             const mapid = 3175483;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.CatchTheBeat);
-            chai_1.assert.equal(b.mode, "fruits");
+            chai_1.assert.equal(b.mode, 'fruits');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "Otter Pop (feat. Hollis)");
+            chai_1.assert.equal(b.beatmapset?.title, 'Otter Pop (feat. Hollis)');
         });
-        it("fetch mania map", async () => {
+        it('fetch mania map', async () => {
             const mapid = 3259543;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.OsuMania);
-            chai_1.assert.equal(b.mode, "mania");
+            chai_1.assert.equal(b.mode, 'mania');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "Hanshoku-ki (Cut Ver.)");
+            chai_1.assert.equal(b.beatmapset?.title, 'Hanshoku-ki (Cut Ver.)');
         });
-        it("fetch converted taiko map", async () => {
+        it('fetch converted taiko map', async () => {
             const mapid = 3182198;
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, true);
-            chai_1.assert.equal(b.mode, "taiko");
+            chai_1.assert.equal(b.mode, 'taiko');
             chai_1.assert.equal(b.id, mapid);
-            chai_1.assert.equal(b.beatmapset?.title, "aquamarine");
+            chai_1.assert.equal(b.beatmapset?.title, 'aquamarine');
         });
-        it("fail to fetch taiko map", async () => {
+        it('fail to fetch taiko map', async () => {
             const mapid = 3182198;
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, false);
@@ -196,7 +196,7 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("fail to fetch osu map", async () => {
+        it('fail to fetch osu map', async () => {
             const mapid = 2938202;
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Osu);
@@ -211,7 +211,7 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("cache test", async () => {
+        it('cache test', async () => {
             const mapid = 3182198;
             BeatmapRepository_1.BeatmapRepository.maps.clear();
             const b1 = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid);
@@ -220,7 +220,7 @@ describe("BeatmapRepository Tests", function () {
             chai_1.assert.equal(b1, b2);
         });
     });
-    describe("fetch beatmap form fakes tests", () => {
+    describe('fetch beatmap form fakes tests', () => {
         const originalFetcher = BeatmapRepository_1.BeatmapRepository.fetcher;
         const fakeFetcher = new FakeBeatmapFetcher_1.FakeBeatmapFetcher();
         before(function () {
@@ -229,16 +229,16 @@ describe("BeatmapRepository Tests", function () {
         after(function () {
             BeatmapRepository_1.BeatmapRepository.fetcher = originalFetcher;
         });
-        it("fetch osu map", async () => {
+        it('fetch osu map', async () => {
             const mapid = 3182198;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.Osu, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.Osu, 100, 5);
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid);
-            chai_1.assert.equal(b.mode, "osu");
+            chai_1.assert.equal(b.mode, 'osu');
             chai_1.assert.equal(b.id, mapid);
         });
-        it("fetch invalid map id", async () => {
+        it('fetch invalid map id', async () => {
             const mapid = 1000;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.Osu, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.Osu, 100, 5);
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(500, Modes_1.PlayMode.Taiko);
                 chai_1.assert.fail();
@@ -252,37 +252,37 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("fetch taiko map", async () => {
+        it('fetch taiko map', async () => {
             const mapid = 2938202;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.Taiko, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.Taiko, 100, 5);
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, false);
-            chai_1.assert.equal(b.mode, "taiko");
+            chai_1.assert.equal(b.mode, 'taiko');
             chai_1.assert.equal(b.id, mapid);
         });
-        it("fetch fruits map", async () => {
+        it('fetch fruits map', async () => {
             const mapid = 3175483;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.CatchTheBeat, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.CatchTheBeat, 100, 5);
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.CatchTheBeat, false);
-            chai_1.assert.equal(b.mode, "fruits");
+            chai_1.assert.equal(b.mode, 'fruits');
             chai_1.assert.equal(b.id, mapid);
         });
-        it("fetch mania map", async () => {
+        it('fetch mania map', async () => {
             const mapid = 3259543;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.OsuMania, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.OsuMania, 100, 5);
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.OsuMania, false);
-            chai_1.assert.equal(b.mode, "mania");
+            chai_1.assert.equal(b.mode, 'mania');
             chai_1.assert.equal(b.id, mapid);
         });
-        it("fetch converted taiko map", async () => {
+        it('fetch converted taiko map', async () => {
             const mapid = 3182198;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.Osu, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.Osu, 100, 5);
             const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, true);
-            chai_1.assert.equal(b.mode, "taiko");
+            chai_1.assert.equal(b.mode, 'taiko');
             chai_1.assert.equal(b.id, mapid);
         });
-        it("fail to fetch taiko map", async () => {
+        it('fail to fetch taiko map', async () => {
             const mapid = 3182198;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.Osu, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.Osu, 100, 5);
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Taiko, false);
                 chai_1.assert.fail();
@@ -296,9 +296,9 @@ describe("BeatmapRepository Tests", function () {
                 }
             }
         });
-        it("fail to fetch osu map", async () => {
+        it('fail to fetch osu map', async () => {
             const mapid = 2938202;
-            fakeFetcher.setBeatmapProperties(mapid, "test", Modes_1.PlayMode.Taiko, 100, 5);
+            fakeFetcher.setBeatmapProperties(mapid, 'test', Modes_1.PlayMode.Taiko, 100, 5);
             try {
                 const b = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapid, Modes_1.PlayMode.Osu);
                 chai_1.assert.fail();

@@ -7,7 +7,7 @@ const VoteCounter_1 = require("./VoteCounter");
 const TypedConfig_1 = require("../TypedConfig");
 class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "MatchStarter", "starter");
+        super(lobby, 'MatchStarter', 'starter');
         this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.voting = new VoteCounter_1.VoteCounter(this.option.vote_rate, this.option.vote_min);
         this.registerEvents();
@@ -37,7 +37,7 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         if (this.lobby.isMatching)
             return;
         this.checkVoteCount();
-        if (this.lobby.players.size == 0) {
+        if (this.lobby.players.size === 0) {
             this.stopTimer();
         }
     }
@@ -56,8 +56,8 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         if (this.lobby.isMatching)
             return;
         switch (command) {
-            case "!start":
-                if (param == "") {
+            case '!start':
+                if (param === '') {
                     if (player.isHost) {
                         this.start();
                     }
@@ -69,33 +69,33 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
                     this.startTimer(parseInt(param));
                 }
                 break;
-            case "!stop":
-            case "!abort":
+            case '!stop':
+            case '!abort':
                 if (player.isHost || player.isAuthorized) {
                     if (this.IsSelfStartTimerActive) {
-                        this.lobby.SendMessage("Aborted the match start timer");
+                        this.lobby.SendMessage('Aborted the match start timer');
                         this.stopTimer();
                     }
                 }
                 break;
-            case "*start":
+            case '*start':
                 if (player.isAuthorized) {
                     this.start();
                 }
         }
     }
     onPluginMessage(type, args, src) {
-        if (type == "mp_start") {
-            if (args.length == 0) {
+        if (type === 'mp_start') {
+            if (args.length === 0) {
                 this.start();
             }
             else {
                 const count = parseInt(args[0]);
-                const withhelp = args[1] !== undefined && args[1] === "withhelp";
+                const withhelp = args[1] !== undefined && args[1] === 'withhelp';
                 this.startTimer(count, withhelp);
             }
         }
-        else if (type == "mp_abort_start") {
+        else if (type === 'mp_abort_start') {
             this.stopTimer();
         }
     }
@@ -103,74 +103,74 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         if (this.voting.passed)
             return;
         if (this.voting.Vote(player)) {
-            this.logger.trace("accepted start request from %s", player.name);
+            this.logger.trace('accepted start request from %s', player.name);
             this.checkVoteCount(true);
         }
         else {
-            this.logger.trace("vote was ignored");
+            this.logger.trace('vote was ignored');
         }
     }
     // 投票状況を確認して、必要数に達している場合は試合を開始する
     checkVoteCount(showMessage = false) {
-        if (this.voting.count != 0 && showMessage) {
-            this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, "match start vote", this.option.vote_msg_defer_ms, false);
+        if (this.voting.count !== 0 && showMessage) {
+            this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, 'match start vote', this.option.vote_msg_defer_ms, false);
         }
         if (this.voting.passed) {
-            this.lobby.DeferMessage(`bot : passed start vote: ${this.voting.toString()}`, "match start vote", 100, true);
+            this.lobby.DeferMessage(`bot : passed start vote: ${this.voting.toString()}`, 'match start vote', 100, true);
             this.start();
         }
     }
     startTimer(count, withHint = false) {
-        if (count == 0) {
+        if (count === 0) {
             this.start();
         }
         else {
-            this.lobby.SendMessage(`Queued the match to start in ${this.secsToCountdownText(count)}${withHint ? ". (Host can stop the timer with !stop command.)" : ""}`);
-            this.lobby.DeferMessage("!mp start", "mp_start", count * 1000, true);
-            if (15 < count) {
-                this.lobby.DeferMessage("Match starts in 10 seconds", "mp_start 10 sec", (count - 10) * 1000, true);
+            this.lobby.SendMessage(`Queued the match to start in ${this.secsToCountdownText(count)}${withHint ? '. (Host can stop the timer with !stop command.)' : ''}`);
+            this.lobby.DeferMessage('!mp start', 'mp_start', count * 1000, true);
+            if (count > 15) {
+                this.lobby.DeferMessage('Match starts in 10 seconds', 'mp_start 10 sec', (count - 10) * 1000, true);
             }
         }
     }
     secsToCountdownText(secs) {
         const min = Math.floor(secs / 60);
         const sec = Math.floor(secs % 60);
-        let strMin = "";
-        let strAnd = "";
-        let strSec = "";
+        let strMin = '';
+        let strAnd = '';
+        let strSec = '';
         if (min > 1) {
-            strMin = min.toString() + " minutes";
+            strMin = min.toString() + ' minutes';
         }
-        else if (min == 1) {
-            strMin = "1 minute";
+        else if (min === 1) {
+            strMin = '1 minute';
         }
         if (min > 0 && sec > 0) {
-            strAnd = " and ";
+            strAnd = ' and ';
         }
         if (sec > 1) {
-            strSec = sec.toString() + " seconds";
+            strSec = sec.toString() + ' seconds';
         }
-        else if (sec == 1) {
-            strSec = "1 second";
+        else if (sec === 1) {
+            strSec = '1 second';
         }
         return `${strMin}${strAnd}${strSec}`;
     }
     start() {
         this.stopTimer();
-        this.lobby.SendMessageWithCoolTime("!mp start", "mp_start", 1000);
+        this.lobby.SendMessageWithCoolTime('!mp start', 'mp_start', 1000);
         this.voting.Clear();
     }
     stopTimer() {
-        this.lobby.CancelDeferredMessage("mp_start");
-        this.lobby.CancelDeferredMessage("mp_start 10 sec");
-        this.lobby.CancelDeferredMessage("match start vote");
+        this.lobby.CancelDeferredMessage('mp_start');
+        this.lobby.CancelDeferredMessage('mp_start 10 sec');
+        this.lobby.CancelDeferredMessage('match start vote');
         if (this.lobby.isStartTimerActive) {
-            this.lobby.SendMessage("!mp aborttimer");
+            this.lobby.SendMessage('!mp aborttimer');
         }
     }
     get IsSelfStartTimerActive() {
-        if ("mp_start" in this.lobby.deferredMessages) {
-            return !this.lobby.deferredMessages["mp_start"].done;
+        if ('mp_start' in this.lobby.deferredMessages) {
+            return !this.lobby.deferredMessages['mp_start'].done;
         }
         return false;
     }

@@ -18,8 +18,8 @@ export function trial() {
   bot.on('pm', function (nick, message) {
     console.log('Got private message from %s: %s', nick, message);
     const v = parser.ParseMpMakeResponse(nick, message);
-    if (v != null) {
-      console.log(`--- parsed pm id=${v.id} title=${v.title}`)
+    if (v !== null) {
+      console.log(`--- parsed pm id=${v.id} title=${v.title}`);
     }
   });
 
@@ -49,7 +49,7 @@ export function trial() {
   bot.addListener('registered', function (message) {
     console.log('registered %s', message);
     //bot.say("BanchoBot", "!mp make irc test lobby4");
-    bot.join("#lobby");
+    bot.join('#lobby');
   });
 }
 
@@ -59,12 +59,12 @@ export function ConnectionServerTrial() {
 
   logIrcEvent(bot);
 
-  console.log("hostmask => " + bot.hostMask);
+  console.log('hostmask => ' + bot.hostMask);
 
   bot.connect();
 
   bot.addListener('registered', function (message) {
-    console.log("hostmask => " + bot.hostMask);
-    bot.disconnect("goodby", () => { console.log("disconnected"); });
+    console.log('hostmask => ' + bot.hostMask);
+    bot.disconnect('goodby', () => { console.log('disconnected'); });
   });
 }

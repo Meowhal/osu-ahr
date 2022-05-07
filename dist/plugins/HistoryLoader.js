@@ -8,7 +8,7 @@ const TypedConfig_1 = require("../TypedConfig");
  */
 class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "HistoryLoader", "history");
+        super(lobby, 'HistoryLoader', 'history');
         this.fetchInvervalId = null;
         this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.repository = lobby.historyRepository;
@@ -23,8 +23,8 @@ class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
     async onFixedSettings(result, playersIn, playersOut, hostChanged) {
         if (!this.repository)
             return;
-        let order = (await this.repository.calcCurrentOrderAsName()).join(",");
-        this.SendPluginMessage("reorder", [order]);
+        const order = (await this.repository.calcCurrentOrderAsName()).join(',');
+        this.SendPluginMessage('reorder', [order]);
     }
     onJoinedLobby(channel) {
         if (this.lobby.lobbyId) {
@@ -35,12 +35,12 @@ class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
         }
     }
     onMatchStarted() {
-        if (this.fetchInvervalId == null) {
+        if (this.fetchInvervalId === null) {
             this.repository.updateToLatest();
         }
     }
     onGotUserProfile(user) {
-        let p = this.lobby.GetOrMakePlayer(user.username);
+        const p = this.lobby.GetOrMakePlayer(user.username);
         p.id = user.id;
     }
     onChangedLobbyName(newName, oldName) {
@@ -50,7 +50,7 @@ class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
     startFetch() {
         this.stopFetch();
         if (this.option.fetch_interval_ms >= 5000) {
-            this.logger.trace("start fetching");
+            this.logger.trace('start fetching');
             this.fetchInvervalId = setInterval(() => {
                 if (!this.lobby.isMatching) {
                     this.repository.updateToLatest();
@@ -60,7 +60,7 @@ class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
     }
     stopFetch() {
         if (this.fetchInvervalId) {
-            this.logger.trace("stop fetching");
+            this.logger.trace('stop fetching');
             clearInterval(this.fetchInvervalId);
             this.fetchInvervalId = null;
         }

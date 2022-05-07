@@ -14,7 +14,7 @@ class StatResult {
         this.date = date;
     }
     toString() {
-        return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status == StatStatuses.None ? "" : " is " + StatStatuses[this.status]}:
+        return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status === StatStatuses.None ? '' : ' is ' + StatStatuses[this.status]}:
 Score:    ${this.score} (#${this.rank})
 Plays:    ${this.plays} (lv${this.level})
 Accuracy: ${this.accuracy}%`;
@@ -42,7 +42,7 @@ class StatParser {
         this.isParsing = false;
     }
     get isParsed() {
-        return !this.isParsing && this.result != null;
+        return !this.isParsing && this.result !== null;
     }
     feedLine(message) {
         const line1 = message.match(/Stats for \((.+)\)\[https:\/\/osu\.ppy\.sh\/u\/(\d+)\]( is (.+))?:/);
@@ -51,7 +51,7 @@ class StatParser {
             const statStr = line1[4];
             for (let i = 0; i in StatStatuses; i++) {
                 const st = i;
-                if (statStr == StatStatuses[st]) {
+                if (statStr === StatStatuses[st]) {
                     this.result.status = st;
                     break;
                 }
@@ -59,11 +59,11 @@ class StatParser {
             this.isParsing = true;
             return true;
         }
-        if (this.result == null)
+        if (this.result === null)
             return false;
         const line2 = message.match(/Score:\s+([\d,]+)\s+\(#(\d+)\)/);
         if (line2) {
-            this.result.score = parseInt(line2[1].replace(/,/g, ""));
+            this.result.score = parseInt(line2[1].replace(/,/g, ''));
             this.result.rank = parseInt(line2[2]);
             return true;
         }

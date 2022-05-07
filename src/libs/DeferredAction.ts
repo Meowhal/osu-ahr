@@ -18,12 +18,12 @@ export class DeferredAction<T> {
    * @param resetTimer 現在の遅延時間をリセットするか
    */
   start(delay: number, param: T | undefined = undefined, resetTimer: boolean = false) {
-    if (this.timeId != null && resetTimer) {
+    if (this.timeId !== null && resetTimer) {
       clearTimeout(this.timeId);
       this.timeId = null;
     }
     this.param = param;
-    if (this.timeId == null) {
+    if (this.timeId === null) {
       this.timeId = setTimeout(() => {
         this.timeId = null;
         this.action(this.param as T);
@@ -35,7 +35,7 @@ export class DeferredAction<T> {
 
   /** 遅延実行をキャンセルする。*/
   cancel(): void {
-    if (this.timeId != null) {
+    if (this.timeId !== null) {
       clearTimeout(this.timeId);
       this.timeId = null;
       this.param = undefined;
@@ -44,6 +44,6 @@ export class DeferredAction<T> {
 
   /** 遅延実行が完了しているか */
   get done(): boolean {
-    return this.timeId == null;
+    return this.timeId === null;
   }
 }

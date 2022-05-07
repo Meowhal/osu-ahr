@@ -36,7 +36,7 @@ function trial() {
     bot.on('pm', function (nick, message) {
         console.log('Got private message from %s: %s', nick, message);
         const v = CommandParser_1.parser.ParseMpMakeResponse(nick, message);
-        if (v != null) {
+        if (v !== null) {
             console.log(`--- parsed pm id=${v.id} title=${v.title}`);
         }
     });
@@ -64,7 +64,7 @@ function trial() {
     bot.addListener('registered', function (message) {
         console.log('registered %s', message);
         //bot.say("BanchoBot", "!mp make irc test lobby4");
-        bot.join("#lobby");
+        bot.join('#lobby');
     });
 }
 exports.trial = trial;
@@ -72,11 +72,11 @@ function ConnectionServerTrial() {
     const c = (0, TypedConfig_1.getIrcConfig)();
     const bot = new irc.Client(c.server, c.nick, c.opt);
     (0, IIrcClient_1.logIrcEvent)(bot);
-    console.log("hostmask => " + bot.hostMask);
+    console.log('hostmask => ' + bot.hostMask);
     bot.connect();
     bot.addListener('registered', function (message) {
-        console.log("hostmask => " + bot.hostMask);
-        bot.disconnect("goodby", () => { console.log("disconnected"); });
+        console.log('hostmask => ' + bot.hostMask);
+        bot.disconnect('goodby', () => { console.log('disconnected'); });
     });
 }
 exports.ConnectionServerTrial = ConnectionServerTrial;

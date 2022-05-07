@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const TypedConfig_1 = require("../TypedConfig");
-describe("TypedConfigTests", function () {
+describe('TypedConfigTests', function () {
     let CONFIG_OPTION_USE_ENV_DEFAULT = false;
     before(function () {
         CONFIG_OPTION_USE_ENV_DEFAULT = TypedConfig_1.CONFIG_OPTION.USE_ENV;
@@ -11,8 +11,8 @@ describe("TypedConfigTests", function () {
     after(function () {
         TypedConfig_1.CONFIG_OPTION.USE_ENV = CONFIG_OPTION_USE_ENV_DEFAULT;
     });
-    describe("generateDefaultOptionTypeHint tests", function () {
-        it("create boolean hints", function () {
+    describe('generateDefaultOptionTypeHint tests', function () {
+        it('create boolean hints', function () {
             const hint = (0, TypedConfig_1.generateDefaultOptionTypeHint)({
                 a: false,
                 b: true
@@ -22,7 +22,7 @@ describe("TypedConfigTests", function () {
                 { key: 'b', nullable: false, type: 'boolean' }
             ]);
         });
-        it("create number typehint", function () {
+        it('create number typehint', function () {
             const hint = (0, TypedConfig_1.generateDefaultOptionTypeHint)({
                 a: 0,
                 b: 1,
@@ -38,21 +38,21 @@ describe("TypedConfigTests", function () {
                 { key: 'f', nullable: false, type: 'number' },
             ]);
         });
-        it("create string typehint", function () {
+        it('create string typehint', function () {
             const hint = (0, TypedConfig_1.generateDefaultOptionTypeHint)({
-                a: "",
-                b: "hello"
+                a: '',
+                b: 'hello'
             });
             chai_1.assert.deepEqual(hint, [
                 { key: 'a', nullable: false, type: 'string' },
                 { key: 'b', nullable: false, type: 'string' }
             ]);
         });
-        it("create array typehint", function () {
+        it('create array typehint', function () {
             const hint = (0, TypedConfig_1.generateDefaultOptionTypeHint)({
                 a: [],
-                b: ["a"],
-                c: ["a", "b"],
+                b: ['a'],
+                c: ['a', 'b'],
                 d: [1, 2, 3],
             });
             chai_1.assert.deepEqual(hint, [
@@ -62,7 +62,7 @@ describe("TypedConfigTests", function () {
                 { key: 'd', nullable: false, type: 'array' }
             ]);
         });
-        it("create nullable typehint", function () {
+        it('create nullable typehint', function () {
             const hint = (0, TypedConfig_1.generateDefaultOptionTypeHint)({
                 a: null,
                 b: undefined,
@@ -73,151 +73,151 @@ describe("TypedConfigTests", function () {
             ]);
         });
     });
-    describe("loadEnvConfigWithTypeHint", function () {
-        it("load bool", function () {
+    describe('loadEnvConfigWithTypeHint', function () {
+        it('load bool', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: false, b: true });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "false", ahr_test_b: "true" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'false', ahr_test_b: 'true' });
             chai_1.assert.deepEqual(opt, { a: false, b: true });
         });
-        it("load extra bool", function () {
+        it('load extra bool', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: false, b: true });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "false", ahr_test_b: "true", ahr_test_c: "sfd", ahr_test_d: "safsaf" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'false', ahr_test_b: 'true', ahr_test_c: 'sfd', ahr_test_d: 'safsaf' });
             chai_1.assert.deepEqual(opt, { a: false, b: true });
         });
-        it("load partial bool", function () {
+        it('load partial bool', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: false, b: true });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "false" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'false' });
             chai_1.assert.deepEqual(opt, { a: false });
         });
-        it("load invalid bool", function () {
+        it('load invalid bool', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: false, b: true });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "aaa" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'aaa' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "[]" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '[]' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_b: "100" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_b: '100' });
             });
         });
-        it("load num", function () {
+        it('load num', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0", ahr_test_b: "1" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '0', ahr_test_b: '1' });
             chai_1.assert.deepEqual(opt, { a: 0, b: 1 });
         });
-        it("load float", function () {
+        it('load float', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0.0125", ahr_test_b: "-0" });
-            chai_1.assert.approximately(opt["a"], 0.0125, 0.001);
-            chai_1.assert.approximately(opt["b"], 0, 0.001);
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '0.0125', ahr_test_b: '-0' });
+            chai_1.assert.approximately(opt['a'], 0.0125, 0.001);
+            chai_1.assert.approximately(opt['b'], 0, 0.001);
         });
-        it("load extra num", function () {
+        it('load extra num', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0", ahr_test_b: "1", ahr_test_c: "2", ahr_test_d: "3" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '0', ahr_test_b: '1', ahr_test_c: '2', ahr_test_d: '3' });
             chai_1.assert.deepEqual(opt, { a: 0, b: 1 });
         });
-        it("load partial num", function () {
+        it('load partial num', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '0' });
             chai_1.assert.deepEqual(opt, { a: 0 });
         });
-        it("load invalid num", function () {
+        it('load invalid num', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 1 });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "aaa" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'aaa' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "[]" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '[]' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_b: "NaN" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_b: 'NaN' });
             });
         });
-        it("load string", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: "", b: "aaa" });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "", ahr_test_b: "aaa" });
-            chai_1.assert.deepEqual(opt, { a: "", b: "aaa" });
+        it('load string', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: '', b: 'aaa' });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '', ahr_test_b: 'aaa' });
+            chai_1.assert.deepEqual(opt, { a: '', b: 'aaa' });
         });
-        it("load extra string", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: "", b: "aaa" });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0", ahr_test_b: "1", ahr_test_c: "2", ahr_test_d: "3" });
-            chai_1.assert.deepEqual(opt, { a: "0", b: "1" });
+        it('load extra string', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: '', b: 'aaa' });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '0', ahr_test_b: '1', ahr_test_c: '2', ahr_test_d: '3' });
+            chai_1.assert.deepEqual(opt, { a: '0', b: '1' });
         });
-        it("load partial string", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: "", b: "aaa" });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "0" });
-            chai_1.assert.deepEqual(opt, { a: "0" });
+        it('load partial string', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: '', b: 'aaa' });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '0' });
+            chai_1.assert.deepEqual(opt, { a: '0' });
         });
-        it("load array", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ["aa", "bb"] });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: '[]', ahr_test_b: '["a", "b"]' });
-            chai_1.assert.deepEqual(opt, { a: [], b: ["a", "b"] });
+        it('load array', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ['aa', 'bb'] });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '[]', ahr_test_b: '["a", "b"]' });
+            chai_1.assert.deepEqual(opt, { a: [], b: ['a', 'b'] });
         });
-        it("load extra array", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ["aa", "bb"] });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: '["0"]', ahr_test_b: '["1"]', ahr_test_c: '["2"]', ahr_test_d: '["3"]' });
-            chai_1.assert.deepEqual(opt, { a: ["0"], b: ["1"] });
+        it('load extra array', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ['aa', 'bb'] });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '["0"]', ahr_test_b: '["1"]', ahr_test_c: '["2"]', ahr_test_d: '["3"]' });
+            chai_1.assert.deepEqual(opt, { a: ['0'], b: ['1'] });
         });
-        it("load partial array", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ["aa", "bb"] });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: '["0"]' });
-            chai_1.assert.deepEqual(opt, { a: ["0"] });
+        it('load partial array', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ['aa', 'bb'] });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '["0"]' });
+            chai_1.assert.deepEqual(opt, { a: ['0'] });
         });
-        it("load invalid array", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ["aa", "bb"] });
+        it('load invalid array', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: ['aa', 'bb'] });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "aaa" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'aaa' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "[[],[]]" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: '[[],[]]' });
             });
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_b: "[1,2,3,4]" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_b: '[1,2,3,4]' });
             });
         });
     });
-    describe("nullable hints", function () {
-        it("declear nullable bool", function () {
+    describe('nullable hints', function () {
+        it('declear nullable bool', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: false, b: false });
             hints[1].nullable = true;
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "null" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'null' });
             });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_b: "null" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_b: 'null' });
             chai_1.assert.deepEqual(opt, { b: null });
         });
-        it("declear nullable number", function () {
+        it('declear nullable number', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: 0, b: 0 });
             hints[1].nullable = true;
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "null" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'null' });
             });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_b: "null" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_b: 'null' });
             chai_1.assert.deepEqual(opt, { b: null });
         });
-        it("declear nullable string", function () {
-            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: "", b: "" });
+        it('declear nullable string', function () {
+            const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: '', b: '' });
             hints[1].nullable = true;
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "null", ahr_test_b: "null" });
-            chai_1.assert.deepEqual(opt, { a: "null", b: null });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'null', ahr_test_b: 'null' });
+            chai_1.assert.deepEqual(opt, { a: 'null', b: null });
         });
-        it("declear nullable array", function () {
+        it('declear nullable array', function () {
             const hints = (0, TypedConfig_1.generateDefaultOptionTypeHint)({ a: [], b: [] });
             hints[1].nullable = true;
             chai_1.assert.throw(() => {
-                (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_a: "null" });
+                (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_a: 'null' });
             });
-            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)("test", hints, { ahr_test_b: "null" });
+            const opt = (0, TypedConfig_1.loadEnvConfigWithTypeHint)('test', hints, { ahr_test_b: 'null' });
             chai_1.assert.deepEqual(opt, { b: null });
         });
     });

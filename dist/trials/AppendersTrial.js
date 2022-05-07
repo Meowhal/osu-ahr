@@ -10,39 +10,39 @@ const config_1 = __importDefault(require("config"));
 const DiscordAppender_1 = require("../discord/DiscordAppender");
 const COMMANDS = [
     {
-        name: "test",
-        description: "execute appender test",
+        name: 'test',
+        description: 'execute appender test',
     },
 ];
 async function trial() {
     const client = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
-    const cfg = config_1.default.get("Discord");
+    const cfg = config_1.default.get('Discord');
     log4js_1.default.configure({
         appenders: {
             discord: {
-                type: "src/discord/DiscordAppender",
+                type: 'src/discord/DiscordAppender',
                 layout: {
-                    type: "pattern",
-                    pattern: "%m"
+                    type: 'pattern',
+                    pattern: '%m'
                 }
             },
         },
         categories: { default: { appenders: ['discord'], level: 'all' } }
     });
     client.once('ready', async (cl) => {
-        for (let g of cl.guilds.cache.values()) {
+        for (const g of cl.guilds.cache.values()) {
             await registerCommands(g);
         }
         console.log(`invite link => ${generateInviteLink(client)}`);
         (0, DiscordAppender_1.setContext)(cl, {});
     });
-    client.on("interactionCreate", async (interaction) => {
+    client.on('interactionCreate', async (interaction) => {
         if (!interaction.isCommand())
             return;
         if (!interaction.inGuild())
             return;
         switch (interaction.commandName) {
-            case "test":
+            case 'test':
                 await test(interaction);
                 break;
         }
@@ -51,21 +51,21 @@ async function trial() {
 }
 exports.trial = trial;
 async function test(interaction) {
-    let chatlogger = log4js_1.default.getLogger("chat");
+    const chatlogger = log4js_1.default.getLogger('chat');
     setDiscordId(interaction, chatlogger);
-    chatlogger.trace("%s:%s", "user1", "hello");
-    chatlogger.info("%s:%s", "user2", "hello");
-    let inout = log4js_1.default.getLogger("inout");
+    chatlogger.trace('%s:%s', 'user1', 'hello');
+    chatlogger.info('%s:%s', 'user2', 'hello');
+    const inout = log4js_1.default.getLogger('inout');
     setDiscordId(interaction, inout);
-    inout.trace("+\x1B[32m Gaevsk1y, Althic_ \x1B[0m, -\x1B[31m Tryeforce(2), Shinkilol(1) \x1B[0m");
-    inout.trace("+\x1B[32m Lammahs, Toga_love, m180icheui, Blobby, jjw4074, JohnsonxD \x1B[0m");
-    inout.info("-\x1B[31m popth4molly(2), KingBaLK(1), Gaevsk1y(1) \x1B[0m");
-    let lobby = log4js_1.default.getLogger("lobby");
+    inout.trace('+\x1B[32m Gaevsk1y, Althic_ \x1B[0m, -\x1B[31m Tryeforce(2), Shinkilol(1) \x1B[0m');
+    inout.trace('+\x1B[32m Lammahs, Toga_love, m180icheui, Blobby, jjw4074, JohnsonxD \x1B[0m');
+    inout.info('-\x1B[31m popth4molly(2), KingBaLK(1), Gaevsk1y(1) \x1B[0m');
+    const lobby = log4js_1.default.getLogger('lobby');
     setDiscordId(interaction, lobby);
-    lobby.info("info log");
-    lobby.warn("warn log");
-    lobby.error("error log");
-    await interaction.reply("end");
+    lobby.info('info log');
+    lobby.warn('warn log');
+    lobby.error('error log');
+    await interaction.reply('end');
 }
 function generateInviteLink(client) {
     return client.generateInvite({
@@ -80,7 +80,7 @@ async function registerCommands(guild) {
     await guild.commands.set(COMMANDS);
 }
 function setDiscordId(interaction, logger) {
-    logger.addContext("guildId", interaction.guildId);
-    logger.addContext("channelId", interaction.channelId);
+    logger.addContext('guildId', interaction.guildId);
+    logger.addContext('channelId', interaction.channelId);
 }
 //# sourceMappingURL=AppendersTrial.js.map

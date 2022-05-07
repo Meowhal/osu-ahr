@@ -14,7 +14,7 @@ class Player {
         this.escaped_name = escapeUserName(name);
     }
     is(r) {
-        return (this.role & r) != 0;
+        return (this.role & r) !== 0;
     }
     get isPlayer() {
         return this.is(Roles.Player);
@@ -77,7 +77,7 @@ exports.escapeUserName = escapeUserName;
  * @param username
  */
 function disguiseUserName(username) {
-    return username[0] + "\u{200B}" + username.substring(1);
+    return username[0] + '\u{200B}' + username.substring(1);
 }
 exports.disguiseUserName = disguiseUserName;
 /**
@@ -85,7 +85,7 @@ exports.disguiseUserName = disguiseUserName;
  * @param disguisedName
  */
 function revealUserName(disguisedName) {
-    return disguisedName.replace(/\u200B/g, "");
+    return disguisedName.replace(/\u200B/g, '');
 }
 exports.revealUserName = revealUserName;
 //# sourceMappingURL=Player.js.map

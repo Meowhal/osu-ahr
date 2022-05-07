@@ -19,7 +19,7 @@ export class HistoryLoader extends LobbyPlugin {
   fetchInvervalId: NodeJS.Timeout | null = null;
 
   constructor(lobby: Lobby, option: Partial<HistoryLoaderOption> = {}) {
-    super(lobby, "HistoryLoader", "history");
+    super(lobby, 'HistoryLoader', 'history');
     this.option = getConfig(this.pluginName, option) as HistoryLoaderOption;
     this.repository = lobby.historyRepository;
     this.registerEvents();
@@ -34,8 +34,8 @@ export class HistoryLoader extends LobbyPlugin {
 
   async onFixedSettings(result: MpSettingsResult, playersIn: Player[], playersOut: Player[], hostChanged: boolean): Promise<void> {
     if (!this.repository) return;
-    let order = (await this.repository.calcCurrentOrderAsName()).join(",");
-    this.SendPluginMessage("reorder", [order]);
+    const order = (await this.repository.calcCurrentOrderAsName()).join(',');
+    this.SendPluginMessage('reorder', [order]);
   }
 
   onJoinedLobby(channel: string): any {
@@ -48,13 +48,13 @@ export class HistoryLoader extends LobbyPlugin {
   }
 
   onMatchStarted() {
-    if (this.fetchInvervalId == null) {
+    if (this.fetchInvervalId === null) {
       this.repository.updateToLatest();
     }
   }
 
   onGotUserProfile(user: User): any {
-    let p = this.lobby.GetOrMakePlayer(user.username);
+    const p = this.lobby.GetOrMakePlayer(user.username);
     p.id = user.id;
   }
 
@@ -66,7 +66,7 @@ export class HistoryLoader extends LobbyPlugin {
   startFetch(): void {
     this.stopFetch();
     if (this.option.fetch_interval_ms >= 5000) {
-      this.logger.trace("start fetching");
+      this.logger.trace('start fetching');
       this.fetchInvervalId = setInterval(() => {
         if (!this.lobby.isMatching) {
           this.repository.updateToLatest();
@@ -77,13 +77,13 @@ export class HistoryLoader extends LobbyPlugin {
 
   stopFetch(): void {
     if (this.fetchInvervalId) {
-      this.logger.trace("stop fetching");
+      this.logger.trace('stop fetching');
       clearInterval(this.fetchInvervalId);
       this.fetchInvervalId = null;
     }
   }
 
   GetPluginStatus(): string {
-    return `-- HistoryLoader -- hasError : ${this.repository?.hasError}, latest : ${this.repository?.latestEventId} loaded events : ${this.repository?.events.length}`
+    return `-- HistoryLoader -- hasError : ${this.repository?.hasError}, latest : ${this.repository?.latestEventId} loaded events : ${this.repository?.events.length}`;
   }
 }

@@ -27,7 +27,7 @@ class VoteCounter {
         this.checkPassed();
     }
     Clear() {
-        for (let k of this.voters.keys()) {
+        for (const k of this.voters.keys()) {
             this.voters.set(k, false);
         }
         this._passed = false;

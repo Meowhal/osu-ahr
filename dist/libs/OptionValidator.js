@@ -4,7 +4,7 @@ exports.validateOption = void 0;
 exports.validateOption = {
     number: function (name, value, min, max) {
         let v = value;
-        if (typeof v != "number") {
+        if (typeof v !== 'number') {
             v = parseFloat(v);
         }
         if (isNaN(v)) {
@@ -20,12 +20,12 @@ exports.validateOption = {
     },
     bool: function (name, value) {
         let v = value;
-        if (typeof v == "string") {
+        if (typeof v === 'string') {
             v = v.toLocaleLowerCase().trim();
-            if (v == "false") {
+            if (v === 'false') {
                 v = false;
             }
-            else if (v == "true") {
+            else if (v === 'true') {
                 v = true;
             }
             else {

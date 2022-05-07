@@ -52,7 +52,7 @@ rules:
   no-useless-catch:
     - "off"
   no-empty:
-    - "off"
+    - "error"
   no-fallthrough:
     - "error"
   no-constant-condition:
@@ -61,7 +61,7 @@ rules:
   no-irregular-whitespace:
     - "error"
   no-useless-escape:
-    - "off"
+    - "error"
   no-case-declarations:
     - "off"
   prefer-const:
@@ -84,3 +84,20 @@ rules:
     - "always"
   yoda:
     - "error"
+  no-duplicate-imports:
+    - "error"
+    - "includeExports": true
+  camelcase:
+    - "off"
+  eqeqeq:
+    - "error"
+  no-trailing-spaces:
+    - "error"
+  space-before-function-paren:
+    - "off"
+  no-use-before-define:
+    - "off"
+  no-multiple-empty-lines:
+    - "error"
+  padded-blocks:
+    - "off"

@@ -33,7 +33,7 @@ export class TypedEvent<T> {
   }
 
   off(listener: Listener<T>): void {
-    var callbackIndex = this.listeners.indexOf(listener);
+    const callbackIndex = this.listeners.indexOf(listener);
     if (callbackIndex > -1) this.listeners.splice(callbackIndex, 1);
   }
 

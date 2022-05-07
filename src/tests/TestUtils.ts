@@ -9,12 +9,12 @@ import { assert } from 'chai';
 import log4js from 'log4js';
 
 class TestUtils {
-  ownerNickname: string = "creator";
-  lobbyName: string = "test";
+  ownerNickname: string = 'creator';
+  lobbyName: string = 'test';
 
   async SetupLobbyAsync(logging: boolean = false):
     Promise<{ lobby: Lobby, ircClient: DummyIrcClient }> {
-    const ircClient = new DummyIrcClient("osu_irc_server", this.ownerNickname);
+    const ircClient = new DummyIrcClient('osu_irc_server', this.ownerNickname);
     if (logging) {
       logIrcEvent(ircClient);
     }
@@ -24,11 +24,11 @@ class TestUtils {
   }
 
   async AddPlayersAsync(names: string[] | number, client: DummyIrcClient): Promise<string[]> {
-    if (typeof names == "number") {
+    if (typeof names === 'number') {
       const start = client.players.size;
       const p = [];
       for (let i = 0; i < names; i++) {
-        p[i] = "p" + (i + start)
+        p[i] = 'p' + (i + start);
         await client.emulateAddPlayerAsync(p[i]);
       }
       return p;
@@ -39,25 +39,25 @@ class TestUtils {
   }
 
   async sendMessageAsOwner(lobby: Lobby, message: string) {
-    let owner = lobby.GetOrMakePlayer(this.ownerNickname);
+    const owner = lobby.GetOrMakePlayer(this.ownerNickname);
     lobby.RaiseReceivedChatCommand(owner, message);
   }
 
   // async呼び出し用のディレイ関数
   delayAsync(ms: number): Promise<void> {
-    if (ms == 0) return Promise.resolve();
+    if (ms === 0) return Promise.resolve();
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   assertHost(username: string, lobby: Lobby): void {
     const host = lobby.host;
-    if (host == null) {
-      assert.fail("No one is host now.");
+    if (host === null) {
+      assert.fail('No one is host now.');
     } else {
       assert.equal(host.name, username);
     }
-    for (let p of lobby.players) {
-      if (p == host) {
+    for (const p of lobby.players) {
+      if (p === host) {
         assert.isTrue(p.isHost);
       } else {
         assert.isFalse(p.isHost);
@@ -74,22 +74,22 @@ class TestUtils {
     lobby.TransferHost(lobby.GetPlayer(name) as Player);
     return p;
   }
-  loggerMode = "";
+  loggerMode = '';
 
   configMochaVerbosely(): void {
-    if (this.loggerMode != "Verbosely") {
-      this.loggerMode = "Verbosely";
+    if (this.loggerMode !== 'Verbosely') {
+      this.loggerMode = 'Verbosely';
       log4js.shutdown();
-      log4js.configure("config/log_mocha.json");
+      log4js.configure('config/log_mocha.json');
     }
 
   }
 
   configMochaAsSilent(): void {
-    if (this.loggerMode != "Silent") {
-      this.loggerMode = "Silent"
+    if (this.loggerMode !== 'Silent') {
+      this.loggerMode = 'Silent';
       log4js.shutdown();
-      log4js.configure("config/log_mocha_silent.json");
+      log4js.configure('config/log_mocha_silent.json');
     }
   }
 
@@ -103,14 +103,14 @@ class TestUtils {
   async assertEventFire<T>(event: TypedEvent<T>, cb: ((a: T) => (boolean)) | null, timeout: number = 0): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       let id: NodeJS.Timeout;
-      if (timeout != 0) {
+      if (timeout !== 0) {
         id = setTimeout(() => {
           d.dispose();
-          reject("The expected event was not fired");
+          reject('The expected event was not fired');
         }, timeout);
       }
       const d = event.on(a => {
-        if (cb != null && cb(a) === false) return;
+        if (cb !== null && cb(a) === false) return;
         d.dispose();
         clearTimeout(id);
         resolve(Date.now());
@@ -131,10 +131,10 @@ class TestUtils {
         resolve(Date.now());
       }, timeout);
       const d = event.on(a => {
-        if (cb != null && cb(a) === false) return;
+        if (cb !== null && cb(a) === false) return;
         clearTimeout(id);
         d.dispose();
-        reject("The event expected not to fire was fired");
+        reject('The event expected not to fire was fired');
       });
     });
   }
@@ -149,15 +149,15 @@ class TestUtils {
   async assertBanchoRespond(lobby: Lobby, expected: BanchoResponseType, cb: ((a: BanchoResponse) => (boolean)) | null, timeout: number = 0): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       let id: NodeJS.Timeout;
-      if (timeout != 0) {
+      if (timeout !== 0) {
         id = setTimeout(() => {
           d.dispose();
-          reject("the expected response was not returned.");
+          reject('the expected response was not returned.');
         }, timeout);
       }
       const d = lobby.ReceivedBanchoResponse.on(a => {
-        if (a.response.type != expected) return;
-        if (cb != null && cb(a.response) === false) return;
+        if (a.response.type !== expected) return;
+        if (cb !== null && cb(a.response) === false) return;
         d.dispose();
         clearTimeout(id);
         resolve(Date.now());
@@ -179,20 +179,20 @@ class TestUtils {
         resolve(Date.now());
       }, timeout);
       const d = lobby.ReceivedBanchoResponse.on(a => {
-        if (a.response.type != notExpected) return;
-        if (cb != null && cb(a.response) === false) return;
+        if (a.response.type !== notExpected) return;
+        if (cb !== null && cb(a.response) === false) return;
         clearTimeout(id);
         d.dispose();
-        reject("the response not expected was returned.");
+        reject('the response not expected was returned.');
       });
     });
   }
 
   assertMpSettingsResult(lobby: Lobby, result: MpSettingsResult) {
     assert.equal(lobby.players.size, result.players.length);
-    for (let r of result.players) {
+    for (const r of result.players) {
       const p = lobby.GetPlayer(r.name);
-      if (p == null) {
+      if (p === null) {
         assert.fail();
         return;
       }

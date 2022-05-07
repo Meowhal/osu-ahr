@@ -13,12 +13,12 @@ class ProfileRepositoryClass {
         this.fetcher = new WebsiteProfileFetcher();
     }
     /**
-     *
-     * @param userID
-     * @param mode
-     * @returns
-     * @throws FetchProfileError
-     */
+       *
+       * @param userID
+       * @param mode
+       * @returns
+       * @throws FetchProfileError
+       */
     async getProfile(userID, mode) {
         let cache = this.tryGetCache(userID, mode);
         if (cache)
@@ -68,7 +68,7 @@ var FetchProfileErrorReason;
     FetchProfileErrorReason[FetchProfileErrorReason["Unknown"] = 2] = "Unknown";
 })(FetchProfileErrorReason = exports.FetchProfileErrorReason || (exports.FetchProfileErrorReason = {}));
 function isFetchProfileError(err) {
-    return "isFetchProfileError" in err;
+    return 'isFetchProfileError' in err;
 }
 exports.isFetchProfileError = isFetchProfileError;
 class FetchProfileError extends Error {
@@ -76,7 +76,7 @@ class FetchProfileError extends Error {
         super(message ?? FetchProfileErrorReason[reason]);
         this.isFetchProfileError = true;
         this.reason = reason;
-        this.name = "FetchProfileError";
+        this.name = 'FetchProfileError';
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, FetchProfileError);
         }
@@ -85,16 +85,16 @@ class FetchProfileError extends Error {
 exports.FetchProfileError = FetchProfileError;
 class WebsiteProfileFetcher {
     constructor() {
-        this.webpreg = new RegExp('<script id="json-user" type="application/json">\s*(.+?)\s*</script>', "ms");
-        this.modepreg = new RegExp('<script id="json-currentMode" type="application/json">s*(.+?)s*</script>', "ms");
+        this.webpreg = /<script id="json-user" type="application\/json">\s*(.+?)\s*<\/script>/ms;
+        this.modepreg = /<script id="json-currentMode" type="application\/json">\s*(.+?)\s*<\/script>/ms;
     }
     /**
-     *
-     * @param userID
-     * @param mode
-     * @returns
-     * @throws FetchProfileError
-     */
+       *
+       * @param userID
+       * @param mode
+       * @returns
+       * @throws FetchProfileError
+       */
     async getPlayer(userID, mode) {
         const pro = await this.fetchProfileFromWebsite(userID, mode);
         if (!pro) {
@@ -104,15 +104,15 @@ class WebsiteProfileFetcher {
     }
     async fetchProfileFromWebsite(userID, mode) {
         try {
-            const target = "https://osu.ppy.sh/users/" + userID + "/" + mode;
+            const target = 'https://osu.ppy.sh/users/' + userID + '/' + mode;
             const res = await axios_1.default.get(target);
             const match = this.webpreg.exec(res.data);
             if (match) {
                 const json = JSON.parse(match[1]);
                 const mode = this.modepreg.exec(res.data);
-                let rxes = json;
+                const rxes = json;
                 if (mode) {
-                    var regex = /"/ig;
+                    const regex = /"/ig;
                     rxes.playmode = mode[1].trim().replace(regex, '');
                 }
                 return rxes;
@@ -124,7 +124,7 @@ class WebsiteProfileFetcher {
                 throw e;
             }
             if (axios_1.default.isAxiosError(e)) {
-                if (e.response?.status == 404) {
+                if (e.response?.status === 404) {
                     throw new FetchProfileError(FetchProfileErrorReason.NotFound);
                 }
                 throw new FetchProfileError(FetchProfileErrorReason.Unknown, e.message);

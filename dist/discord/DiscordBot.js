@@ -3,7 +3,6 @@
  * check list
  * admin roleが正しく登録される
  * admin role以外のユーザーはスラッシュコマンド、ボタンコマンドを利用できない
- *
  */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -17,39 +16,39 @@ const OahrDiscord_1 = require("./OahrDiscord");
 const DiscordAppender_1 = require("./DiscordAppender");
 const BotCommand_1 = require("./BotCommand");
 const CommandParser_1 = require("../parsers/CommandParser");
-const logger = log4js_1.default.getLogger("discord");
+const logger = log4js_1.default.getLogger('discord');
 const ADMIN_ROLE = {
-    name: "ahr-admin",
-    color: "ORANGE",
-    reason: "ahr-bot administrator"
+    name: 'ahr-admin',
+    color: 'ORANGE',
+    reason: 'ahr-bot administrator'
 };
 class DiscordBot {
     constructor(client, discordClient) {
         this.ircClient = client;
         this.discordClient = discordClient;
-        this.cfg = config_1.default.get("Discord");
+        this.cfg = config_1.default.get('Discord');
         this.ahrs = {};
         this.sharedObjects = {};
     }
     async start() {
         this.discordClient.once('ready', async (cl) => {
-            for (let g of cl.guilds.cache.values()) {
+            for (const g of cl.guilds.cache.values()) {
                 await this.registerCommandsAndRoles(g);
             }
             (0, DiscordAppender_1.setContext)(cl, this.ahrs);
-            logger.info("discord bot is ready.");
+            logger.info('discord bot is ready.');
             logger.info(`invite link => ${this.generateInviteLink()}`);
         });
-        this.discordClient.on("guildCreate", async (guild) => {
-            console.log("guildCreate " + guild.name);
+        this.discordClient.on('guildCreate', async (guild) => {
+            console.log('guildCreate ' + guild.name);
             await this.registerCommandsAndRoles(guild);
         });
-        this.discordClient.on("interactionCreate", async (interaction) => {
+        this.discordClient.on('interactionCreate', async (interaction) => {
             if (!interaction.inGuild())
                 return;
             if (!this.checkMemberHasAhrAdminRole(interaction.member)) {
                 if (interaction.isButton()) {
-                    await interaction.reply({ content: "looking for a menu for you", ephemeral: true });
+                    await interaction.reply({ content: 'looking for a menu for you', ephemeral: true });
                 }
                 return;
             }
@@ -67,15 +66,15 @@ class DiscordBot {
             await this.discordClient.login(this.cfg.token);
         }
         catch (e) {
-            if (e?.code == "TOKEN_INVALID" && e.message) {
+            if (e?.code === 'TOKEN_INVALID' && e.message) {
                 logger.error(e.message);
-                if (this.cfg.token == "") {
-                    logger.error(`your token is Empty`);
+                if (this.cfg.token === '') {
+                    logger.error('your token is Empty');
                 }
                 else {
                     logger.error(`your token is invalid. "${this.cfg.token}"`);
                 }
-                logger.error("Check the setup guide -> https://github.com/Meowhal/osu-ahr#discord-integration");
+                logger.error('Check the setup guide -> https://github.com/Meowhal/osu-ahr#discord-integration');
             }
             else {
                 logger.error(e);
@@ -84,11 +83,11 @@ class DiscordBot {
         }
     }
     checkMemberHasAhrAdminRole(member) {
-        return member.roles.cache.find(f => f.name == ADMIN_ROLE.name) !== undefined;
+        return member.roles.cache.find(f => f.name === ADMIN_ROLE.name) !== undefined;
     }
     async registerCommandsAndRoles(guild) {
-        let results = await guild.commands.set(BotCommand_1.BotCommands);
-        let roleId = await this.registerRole(guild);
+        const results = await guild.commands.set(BotCommand_1.BotCommands);
+        const roleId = await this.registerRole(guild);
         const permissions = [
             {
                 id: roleId,
@@ -101,7 +100,7 @@ class DiscordBot {
         });
     }
     async registerRole(guild) {
-        let role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+        let role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
         if (!role) {
             role = await guild.roles.create(ADMIN_ROLE);
         }
@@ -109,24 +108,24 @@ class DiscordBot {
     }
     async handleCommandInteraction(interaction) {
         switch (interaction.commandName) {
-            case "make":
+            case 'make':
                 await this.make(interaction);
                 break;
-            case "enter":
+            case 'enter':
                 await this.enter(interaction);
                 break;
-            case "info":
+            case 'info':
                 await this.info(interaction);
                 break;
-            case "say":
+            case 'say':
                 await this.say(interaction);
                 break;
-            case "config":
+            case 'config':
                 break;
-            case "close":
+            case 'close':
                 await this.close(interaction);
                 break;
-            case "quit":
+            case 'quit':
                 await this.quit(interaction);
                 break;
         }
@@ -134,49 +133,49 @@ class DiscordBot {
     async make(interaction) {
         await interaction.deferReply();
         if (!interaction.guild) {
-            logger.error("interaction.guild must not be null");
-            await interaction.editReply("😫 interaction.guild must not be null");
+            logger.error('interaction.guild must not be null');
+            await interaction.editReply('😫 interaction.guild must not be null');
             return;
         }
-        let name = interaction.options.getString("lobby_name", true);
+        const name = interaction.options.getString('lobby_name', true);
         let ahr;
         try {
             ahr = new OahrDiscord_1.OahrDiscord(this.ircClient, this.sharedObjects);
             await ahr.makeLobbyAsync(name);
         }
         catch (e) {
-            logger.error("couldn't make a tournament lobby. " + e);
-            await interaction.editReply("😫 couldn't make a tournament lobby. " + e.message);
+            logger.error('couldn\'t make a tournament lobby. ' + e);
+            await interaction.editReply('😫 couldn\'t make a tournament lobby. ' + e.message);
             ahr?.lobby.destroy();
             return;
         }
         try {
-            let lobbyNumber = ahr.lobby.lobbyId ?? "new_lobby";
+            const lobbyNumber = ahr.lobby.lobbyId ?? 'new_lobby';
             this.registeAhr(ahr, interaction);
             await this.updateMatchSummary(ahr);
             await interaction.editReply(`😀 Created the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
         }
         catch (e) {
-            logger.error("couldn't make a discord channel. " + e);
-            await interaction.editReply("couldn't make a discord channel. " + e.message);
+            logger.error('couldn\'t make a discord channel. ' + e);
+            await interaction.editReply('couldn\'t make a discord channel. ' + e.message);
         }
     }
     async enter(interaction) {
         await interaction.deferReply();
-        let lobbyNumber = this.resolveLobbyId(interaction, true);
-        let lobbyId = "#mp_" + lobbyNumber;
+        const lobbyNumber = this.resolveLobbyId(interaction, true);
+        const lobbyId = '#mp_' + lobbyNumber;
         if (!lobbyNumber) {
-            await interaction.editReply("error lobby_id required.");
+            await interaction.editReply('error lobby_id required.');
             return;
         }
         if (!interaction.guild) {
-            logger.error("interaction.guild must not be null");
-            await interaction.editReply("😫 interaction.guild must not be null");
+            logger.error('interaction.guild must not be null');
+            await interaction.editReply('😫 interaction.guild must not be null');
             return;
         }
         if (this.ahrs[lobbyId]) {
-            this.ahrs[lobbyId].lobby.logger.warn(`bot has already entered the lobby`);
-            await interaction.editReply("bot has already entered the lobby.");
+            this.ahrs[lobbyId].lobby.logger.warn('bot has already entered the lobby');
+            await interaction.editReply('bot has already entered the lobby.');
             return;
         }
         let ahr;
@@ -185,8 +184,8 @@ class DiscordBot {
             await ahr.enterLobbyAsync(lobbyId);
         }
         catch (e) {
-            logger.error("couldn't enter the tournament lobby. " + e);
-            await interaction.editReply("😫 couldn't enter the tournament lobby. " + e);
+            logger.error('couldn\'t enter the tournament lobby. ' + e);
+            await interaction.editReply('😫 couldn\'t enter the tournament lobby. ' + e);
             ahr?.lobby.destroy();
             return;
         }
@@ -194,131 +193,130 @@ class DiscordBot {
             this.registeAhr(ahr, interaction);
             // ロビー用チャンネルからenterコマンドを引数無しで呼び出している場合はそのチャンネルでログ転送を開始する
             const ch = interaction.guild?.channels.cache.get(interaction.channelId);
-            if (ch && lobbyId == ("#" + ch.name)) {
+            if (ch && lobbyId === ('#' + ch.name)) {
                 ahr.startTransferLog(ch.id);
             }
             await this.updateMatchSummary(ahr);
             await interaction.editReply(`😀 Entered the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
         }
         catch (e) {
-            logger.error("couldn't make a discord channel.  " + e);
-            await interaction.editReply("😫 couldn't make a discord channel.  " + e);
+            logger.error('couldn\'t make a discord channel.  ' + e);
+            await interaction.editReply('😫 couldn\'t make a discord channel.  ' + e);
         }
     }
     async info(interaction) {
         await interaction.deferReply();
-        let lobbyId = this.resolveLobbyId(interaction);
+        const lobbyId = this.resolveLobbyId(interaction);
         if (!lobbyId) {
-            await interaction.editReply("error lobby_id required.");
+            await interaction.editReply('error lobby_id required.');
             return;
         }
         if (!interaction.guild) {
-            logger.error("interaction.guild must not be null");
-            await interaction.editReply("😫 interaction.guild must not be null");
+            logger.error('interaction.guild must not be null');
+            await interaction.editReply('😫 interaction.guild must not be null');
             return;
         }
-        let ahr = this.ahrs[lobbyId];
+        const ahr = this.ahrs[lobbyId];
         if (!ahr) {
-            await interaction.editReply("Invalid lobby specified");
+            await interaction.editReply('Invalid lobby specified');
             return;
         }
         try {
             await interaction.editReply({ embeds: [ahr.createDetailInfoEmbed()] });
         }
         catch (e) {
-            logger.error("@discordbot.info " + e);
-            await interaction.editReply("😫 error! " + e.message);
+            logger.error('@discordbot.info ' + e);
+            await interaction.editReply('😫 error! ' + e.message);
         }
     }
     async say(interaction) {
         await interaction.deferReply();
-        let lobbyId = this.resolveLobbyId(interaction);
+        const lobbyId = this.resolveLobbyId(interaction);
         if (!lobbyId) {
-            await interaction.editReply("error lobby_id required.");
+            await interaction.editReply('error lobby_id required.');
             return;
         }
-        let ahr = this.ahrs[lobbyId];
+        const ahr = this.ahrs[lobbyId];
         if (!ahr) {
-            await interaction.editReply("Invalid lobby specified");
+            await interaction.editReply('Invalid lobby specified');
             return;
         }
-        let msg = interaction.options.getString("message", true);
-        if ((msg.startsWith("!") && !msg.startsWith("!mp ")) || msg.startsWith("*")) {
+        const msg = interaction.options.getString('message', true);
+        if ((msg.startsWith('!') && !msg.startsWith('!mp ')) || msg.startsWith('*')) {
             ahr.lobby.RaiseReceivedChatCommand(ahr.lobby.GetOrMakePlayer(ahr.client.nick), msg);
-            await interaction.editReply("executed: " + msg);
+            await interaction.editReply('executed: ' + msg);
         }
         else {
             ahr.lobby.SendMessage(msg);
-            await interaction.editReply("sent: " + msg);
+            await interaction.editReply('sent: ' + msg);
         }
     }
     async close(interaction) {
         await interaction.deferReply();
-        let lobbyId = this.resolveLobbyId(interaction);
+        const lobbyId = this.resolveLobbyId(interaction);
         if (!lobbyId) {
-            await interaction.editReply("error lobby_id required.");
+            await interaction.editReply('error lobby_id required.');
             return;
         }
-        let ahr = this.ahrs[lobbyId];
+        const ahr = this.ahrs[lobbyId];
         if (!ahr) {
-            await interaction.editReply("Invalid lobby specified");
+            await interaction.editReply('Invalid lobby specified');
             return;
         }
         try {
             await ahr.lobby.CloseLobbyAsync();
-            await interaction.editReply("Closed the lobby");
+            await interaction.editReply('Closed the lobby');
         }
         catch (e) {
-            logger.error("@discordbot.close " + e);
-            await interaction.editReply("😫 error! " + e);
+            logger.error('@discordbot.close ' + e);
+            await interaction.editReply('😫 error! ' + e);
         }
     }
     async quit(interaction) {
         await interaction.deferReply();
-        let lobbyId = this.resolveLobbyId(interaction);
+        const lobbyId = this.resolveLobbyId(interaction);
         if (!lobbyId) {
-            await interaction.editReply("error lobby_id required.");
+            await interaction.editReply('error lobby_id required.');
             return;
         }
-        let ahr = this.ahrs[lobbyId];
+        const ahr = this.ahrs[lobbyId];
         if (!ahr) {
-            await interaction.editReply("Invalid lobby specified");
+            await interaction.editReply('Invalid lobby specified');
             return;
         }
         try {
             await ahr.lobby.QuitLobbyAsync();
-            await interaction.editReply("Stopped managing the lobby");
+            await interaction.editReply('Stopped managing the lobby');
         }
         catch (e) {
-            logger.error("@discordbot.quit " + e);
-            await interaction.editReply("😫 error! " + e);
+            logger.error('@discordbot.quit ' + e);
+            await interaction.editReply('😫 error! ' + e);
         }
     }
     async handleButtonInteraction(interaction, command, lobbyNumber) {
         if (!interaction.guild)
             return;
-        const lobbyId = "#mp_" + lobbyNumber;
-        let ahr = this.ahrs[lobbyId];
+        const lobbyId = '#mp_' + lobbyNumber;
+        const ahr = this.ahrs[lobbyId];
         if (!ahr) {
             await interaction.reply({ content: `${lobbyId} - the lobby has already been unmanaged.`, ephemeral: true });
         }
-        ;
         try {
             switch (command) {
-                case "menu":
+                case 'menu':
                     const menu = ahr.createControllButtons();
                     await interaction.reply({ content: `${lobbyId} - menu`, components: [menu], ephemeral: true });
                     return;
-                case "close":
+                case 'close':
                     await ahr.lobby.CloseLobbyAsync();
                     await interaction.reply({ content: `${lobbyId} - closed`, ephemeral: true });
                     break;
-                case "startLog":
+                case 'startLog':
                     await this.getOrCreateMatchChannel(interaction.guild, lobbyNumber);
                     await interaction.reply({ content: `${lobbyId} - start transfer`, ephemeral: true });
                     this.startTransferLog(ahr, interaction.guild);
                     break;
-                case "stopLog":
+                case 'stopLog':
                     ahr.stopTransferLog();
                     await interaction.reply({ content: `${lobbyId} - stop transfer`, ephemeral: true });
                     break;
@@ -326,17 +324,17 @@ class DiscordBot {
             await this.updateMatchSummary(ahr);
         }
         catch (e) {
-            logger.error("@handleButtonInteraction " + e);
+            logger.error('@handleButtonInteraction ' + e);
         }
     }
     async getOrCreateMatchChannel(guild, lobbyNumber) {
-        const lobbyId = "mp_" + lobbyNumber;
-        const dc = guild.channels.cache.find(c => c.name == lobbyId);
+        const lobbyId = 'mp_' + lobbyNumber;
+        const dc = guild.channels.cache.find(c => c.name === lobbyId);
         if (dc)
             return dc;
-        const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
+        const role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
         return await guild.channels.create(lobbyId, {
-            type: "GUILD_TEXT",
+            type: 'GUILD_TEXT',
             topic: `created by ${this.discordClient.user?.username}. [history](https://osu.ppy.sh/community/matches/${lobbyNumber})`,
             permissionOverwrites: [
                 {
@@ -344,23 +342,23 @@ class DiscordBot {
                     deny: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 },
                 {
-                    id: role ?? "",
+                    id: role ?? '',
                     allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 },
                 {
-                    id: this.discordClient.user?.id ?? "",
+                    id: this.discordClient.user?.id ?? '',
                     allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 }
             ]
         });
     }
     async getOrCreateMatchesChannel(guild) {
-        const dc = guild.channels.cache.find(c => c.name.toLowerCase() == "matches");
+        const dc = guild.channels.cache.find(c => c.name.toLowerCase() === 'matches');
         if (dc)
             return dc;
-        const role = guild.roles.cache.find(r => r.name == ADMIN_ROLE.name);
-        return await guild.channels.create("matches", {
-            type: "GUILD_TEXT",
+        const role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
+        return await guild.channels.create('matches', {
+            type: 'GUILD_TEXT',
             topic: `created by ${this.discordClient.user?.username}.`,
             permissionOverwrites: [
                 {
@@ -368,11 +366,11 @@ class DiscordBot {
                     deny: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 },
                 {
-                    id: role ?? "",
+                    id: role ?? '',
                     allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL]
                 },
                 {
-                    id: this.discordClient.user?.id ?? "",
+                    id: this.discordClient.user?.id ?? '',
                     allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 }
             ]
@@ -380,9 +378,9 @@ class DiscordBot {
     }
     registeAhr(ahr, interaction) {
         if (!ahr.lobby.channel) {
-            throw new Error("lobbyId not defined");
+            throw new Error('lobbyId not defined');
         }
-        let lid = ahr.lobby.channel;
+        const lid = ahr.lobby.channel;
         const updateHandler = (a) => {
             switch (a.response.type) {
                 case CommandParser_1.BanchoResponseType.BeatmapChanged:
@@ -406,7 +404,7 @@ class DiscordBot {
         this.ahrs[lid] = ahr;
     }
     async startTransferLog(ahr, guild) {
-        const dc = await this.getOrCreateMatchChannel(guild, ahr.lobby.lobbyId ?? "");
+        const dc = await this.getOrCreateMatchChannel(guild, ahr.lobby.lobbyId ?? '');
         ahr.startTransferLog(dc.id);
         this.ahrs[ahr.discordChannelId] = ahr;
     }
@@ -421,7 +419,7 @@ class DiscordBot {
     resolveLobbyId(interaction, asNumber = false) {
         if (!interaction.inGuild())
             return;
-        let op = interaction.options.getInteger("lobby_id", false);
+        const op = interaction.options.getInteger('lobby_id', false);
         if (op) {
             if (asNumber) {
                 return op.toString();
@@ -430,7 +428,7 @@ class DiscordBot {
                 return `#mp_${op}`;
             }
         }
-        let ahr = this.ahrs[interaction.channelId];
+        const ahr = this.ahrs[interaction.channelId];
         if (ahr && ahr.lobby.channel) {
             if (asNumber) {
                 return ahr.lobby.lobbyId;
@@ -439,14 +437,14 @@ class DiscordBot {
                 return ahr.lobby.channel;
             }
         }
-        let gc = interaction.guild?.channels.cache.get(interaction.channelId);
-        let m = gc?.name.match(/mp_(\d+)/);
+        const gc = interaction.guild?.channels.cache.get(interaction.channelId);
+        const m = gc?.name.match(/mp_(\d+)/);
         if (m) {
             if (asNumber) {
                 return m[1];
             }
             else {
-                return "#" + m[0];
+                return '#' + m[0];
             }
         }
         return undefined;
@@ -462,15 +460,15 @@ class DiscordBot {
         });
     }
     createLinkButton(lobbyNumber) {
-        return new discord_js_1.MessageActionRow().addComponents(new discord_js_1.MessageButton().setStyle("LINK").setLabel("Lobby Histroy").setURL(`https://osu.ppy.sh/community/matches/${lobbyNumber}`), new discord_js_1.MessageButton().setStyle("LINK").setLabel("Channel").setURL(``));
+        return new discord_js_1.MessageActionRow().addComponents(new discord_js_1.MessageButton().setStyle('LINK').setLabel('Lobby Histroy').setURL(`https://osu.ppy.sh/community/matches/${lobbyNumber}`), new discord_js_1.MessageButton().setStyle('LINK').setLabel('Channel').setURL(''));
     }
     async updateMatchSummary(ahr) {
         if (!ahr.updateSummaryMessage)
             return;
         try {
-            const guild = this.discordClient.guilds.cache.find(f => f.id == ahr.guildId);
-            if (guild == undefined)
-                throw new Error("guild not found");
+            const guild = this.discordClient.guilds.cache.find(f => f.id === ahr.guildId);
+            if (guild === undefined)
+                throw new Error('guild not found');
             const channel = await this.getOrCreateMatchesChannel(guild);
             const embed = ahr.createSummaryInfoEmbed();
             const btns = ahr.createMenuButton();
@@ -485,7 +483,7 @@ class DiscordBot {
         }
         catch (e) {
             if (e instanceof discord_js_1.DiscordAPIError) {
-                if (e.message == "Missing Permissions") {
+                if (e.message === 'Missing Permissions') {
                     logger.error(`Missing Permissions. Invite this bot again. invite link => ${this.generateInviteLink()}`);
                     return;
                 }
@@ -496,13 +494,13 @@ class DiscordBot {
     }
     async findMatchSummaryMessage(channel, ahr) {
         let message;
-        if (ahr.matchSummaryMessageId != "") {
+        if (ahr.matchSummaryMessageId !== '') {
             message = await channel.messages.fetch(ahr.matchSummaryMessageId);
         }
         if (message)
             return message;
         const msgs = await channel.messages.fetch({ limit: 10 });
-        const recent = msgs.find(f => (f.embeds && f.embeds.length > 0 && f.embeds[0].title == `#mp_${ahr.lobby.lobbyId ?? ""}`));
+        const recent = msgs.find(f => (f.embeds && f.embeds.length > 0 && f.embeds[0].title === `#mp_${ahr.lobby.lobbyId ?? ''}`));
         if (recent)
             return recent;
     }

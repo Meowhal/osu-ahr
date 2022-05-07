@@ -17,7 +17,7 @@ export class Player {
     this.escaped_name = escapeUserName(name);
   }
   is(r: Roles): boolean {
-    return (this.role & r) != 0;
+    return (this.role & r) !== 0;
   }
   get isPlayer(): boolean {
     return this.is(Roles.Player);
@@ -69,7 +69,7 @@ export enum MpStatuses {
 
 /**
  * Nameの表記ゆれを統一する
- * @param name 
+ * @param name
  */
 export function escapeUserName(name: string): string {
   return name.toLowerCase().replace(/ /g, '_');
@@ -77,16 +77,16 @@ export function escapeUserName(name: string): string {
 
 /**
  * UserNameを表示するときhighlightされないように名前を変更する
- * @param username 
+ * @param username
  */
 export function disguiseUserName(username: string): string {
-  return username[0] + "\u{200B}" + username.substring(1);
+  return username[0] + '\u{200B}' + username.substring(1);
 }
 
 /**
  *  disguiseUserNameで変更を加えた文字列をもとに戻す
- * @param disguisedName 
+ * @param disguisedName
  */
 export function revealUserName(disguisedName: string): string {
-  return disguisedName.replace(/\u200B/g, "");
+  return disguisedName.replace(/\u200B/g, '');
 }
