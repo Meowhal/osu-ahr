@@ -53,7 +53,7 @@ try {
     (0, ChatLimiter_1.applySpeedLimit)(ircClient, 10, 5000);
     (0, IIrcClient_1.logIrcEvent)(ircClient);
     (0, IIrcClient_1.logPrivateMessage)(ircClient);
-    const discordClient = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS, discord_js_1.Intents.FLAGS.GUILD_MEMBERS, discord_js_1.Intents.FLAGS.GUILD_MESSAGES] });
+    const discordClient = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
     const bot = new DiscordBot_1.DiscordBot(ircClient, discordClient);
     bot.start();
 }

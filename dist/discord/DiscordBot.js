@@ -11,11 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DiscordBot = void 0;
 const log4js_1 = __importDefault(require("log4js"));
 const discord_js_1 = require("discord.js");
+const config_1 = __importDefault(require("config"));
 const OahrDiscord_1 = require("./OahrDiscord");
 const DiscordAppender_1 = require("./DiscordAppender");
 const BotCommand_1 = require("./BotCommand");
 const CommandParser_1 = require("../parsers/CommandParser");
-const TypedConfig_1 = require("../TypedConfig");
 const logger = log4js_1.default.getLogger('discord');
 const ADMIN_ROLE = {
     name: 'ahr-admin',
@@ -26,7 +26,7 @@ class DiscordBot {
     constructor(client, discordClient) {
         this.ircClient = client;
         this.discordClient = discordClient;
-        this.cfg = (0, TypedConfig_1.getConfig)('Discord', {});
+        this.cfg = config_1.default.get('Discord');
         this.ahrs = {};
         this.sharedObjects = {};
     }
@@ -86,9 +86,20 @@ class DiscordBot {
         return member.roles.cache.find(f => f.name === ADMIN_ROLE.name) !== undefined;
     }
     async registerCommandsAndRoles(guild) {
-        await guild.commands.set(BotCommand_1.BotCommands);
+        const results = await guild.commands.set(BotCommand_1.BotCommands);
+        const roleId = await this.registerRole(guild);
+        const permissions = [
+            {
+                id: roleId,
+                type: 'ROLE',
+                permission: true,
+            },
+        ];
+        results.forEach(c => {
+            c.permissions.add({ permissions });
+        });
     }
-    async registerAhrAdminRole(guild) {
+    async registerRole(guild) {
         let role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
         if (!role) {
             role = await guild.roles.create(ADMIN_ROLE);
@@ -336,7 +347,7 @@ class DiscordBot {
                 },
                 {
                     id: this.discordClient.user?.id ?? '',
-                    allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES, discord_js_1.Permissions.FLAGS.MANAGE_MESSAGES]
+                    allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 }
             ]
         });
@@ -360,7 +371,7 @@ class DiscordBot {
                 },
                 {
                     id: this.discordClient.user?.id ?? '',
-                    allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES, discord_js_1.Permissions.FLAGS.MANAGE_MESSAGES]
+                    allow: [discord_js_1.Permissions.FLAGS.VIEW_CHANNEL, discord_js_1.Permissions.FLAGS.SEND_MESSAGES]
                 }
             ]
         });
@@ -444,7 +455,7 @@ class DiscordBot {
             permissions: [
                 discord_js_1.Permissions.FLAGS.MANAGE_CHANNELS,
                 discord_js_1.Permissions.FLAGS.MANAGE_ROLES,
-                discord_js_1.Permissions.FLAGS.MANAGE_MESSAGES,
+                discord_js_1.Permissions.FLAGS.MANAGE_MESSAGES
             ]
         });
     }
@@ -463,7 +474,7 @@ class DiscordBot {
             const btns = ahr.createMenuButton();
             let message = await this.findMatchSummaryMessage(channel, ahr);
             if (message) {
-                await message.edit({ embeds: [embed], components: [btns] });
+                message.edit({ embeds: [embed], components: [btns] });
             }
             else {
                 message = await channel.send({ embeds: [embed], components: [btns] });
@@ -474,10 +485,6 @@ class DiscordBot {
             if (e instanceof discord_js_1.DiscordAPIError) {
                 if (e.message === 'Missing Permissions') {
                     logger.error(`Missing Permissions. Invite this bot again. invite link => ${this.generateInviteLink()}`);
-                    return;
-                }
-                else if (e.message === 'Missing Access') {
-                    logger.error('Missing Access. The bot does not have the Permission to manage the #match channel, please delete the #match channel or give the bot editing privileges.');
                     return;
                 }
             }
