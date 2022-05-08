@@ -36,7 +36,7 @@ try {
   logIrcEvent(ircClient);
   logPrivateMessage(ircClient);
 
-  const discordClient = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS] });
+  const discordClient = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES] });
 
   const bot = new DiscordBot(ircClient, discordClient);
   bot.start();
