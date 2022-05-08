@@ -1,14 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrDiscord = void 0;
 const Lobby_1 = require("../Lobby");
-const log4js_1 = __importDefault(require("log4js"));
 const OahrBase_1 = require("../cli/OahrBase");
 const discord_js_1 = require("discord.js");
-const logger = log4js_1.default.getLogger('discord');
+const Loggers_1 = require("../Loggers");
+const logger = (0, Loggers_1.getLogger)('discord_ahr');
 const LOBBY_STAT = {
     match: {
         text: 'match',

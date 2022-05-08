@@ -18,17 +18,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrCli = void 0;
-const Lobby_1 = require("../Lobby");
 const readline = __importStar(require("readline"));
-const log4js_1 = __importDefault(require("log4js"));
+const Lobby_1 = require("../Lobby");
+const Loggers_1 = require("../Loggers");
 const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
-const logger = log4js_1.default.getLogger('cli');
+const logger = (0, Loggers_1.getLogger)('cli_ahr');
 const mainMenuCommandsMessage = `
 MainMenu Commands 
   [make <Lobby_name>] Make a lobby.  ex: 'make 5* auto host rotation'

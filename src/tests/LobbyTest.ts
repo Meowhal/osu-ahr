@@ -5,12 +5,11 @@ import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { DummyLobbyPlugin } from '../dummies/DummyLobbyPlugin';
 import { StatResult, StatStatuses } from '../parsers/StatParser';
 import { MpSettingsCases } from './cases/MpSettingsCases';
-import log4js from 'log4js';
 import tu from './TestUtils';
 
 describe('LobbyTest', function () {
   before(function () {
-    log4js.configure('config/log_mocha_silent.json');
+    tu.configMochaAsSilent();
   });
   interface LobbyTestBasicSet {
     ircClient: DummyIrcClient;

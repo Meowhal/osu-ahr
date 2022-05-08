@@ -1,13 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logPrivateMessage = exports.logIrcEvent = void 0;
 const StatParser_1 = require("./parsers/StatParser");
-const log4js_1 = __importDefault(require("log4js"));
-const ircLogger = log4js_1.default.getLogger('irc');
-const pmLogger = log4js_1.default.getLogger('PMLogger');
+const Loggers_1 = require("./Loggers");
+const ircLogger = (0, Loggers_1.getLogger)('irc');
+const pmLogger = (0, Loggers_1.getLogger)('PMLogger');
 function logIrcEvent(client) {
     client.on('error', function (message) {
         ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);

@@ -80,7 +80,7 @@ class TestUtils {
     if (this.loggerMode !== 'Verbosely') {
       this.loggerMode = 'Verbosely';
       log4js.shutdown();
-      log4js.configure('config/log_mocha.json');
+      log4js.configure('config/log_mocha_verbose.json');
     }
 
   }
@@ -89,7 +89,7 @@ class TestUtils {
     if (this.loggerMode !== 'Silent') {
       this.loggerMode = 'Silent';
       log4js.shutdown();
-      log4js.configure('config/log_mocha_silent.json');
+      log4js.configure('config/log_mocha.json');
     }
   }
 

@@ -1,11 +1,11 @@
+import * as readline from 'readline';
 import { IIrcClient } from '../IIrcClient';
 import { LobbyStatus } from '../Lobby';
-import * as readline from 'readline';
-import log4js from 'log4js';
+import { getLogger } from '../Loggers';
 import { parser } from '../parsers/CommandParser';
 import { OahrBase } from './OahrBase';
 
-const logger = log4js.getLogger('cli');
+const logger = getLogger('cli_ahr');
 
 const mainMenuCommandsMessage = `
 MainMenu Commands 

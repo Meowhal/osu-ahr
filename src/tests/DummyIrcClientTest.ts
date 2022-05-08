@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { parser, BanchoResponseType } from '../parsers/CommandParser';
-import log4js from 'log4js';
+import tu from './TestUtils';
 
 describe('DummyIrcClientTest', function () {
   before(function () {
-    log4js.configure('config/log_mocha_silent.json');
+    tu.configMochaAsSilent();
   });
   // ロビー作成テスト
   it('make lobby test', (done) => {

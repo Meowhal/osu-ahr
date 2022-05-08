@@ -1,19 +1,14 @@
+import { getLogger } from '../Loggers';
+
+import * as irc from '../libs/irc';
 import { OahrCli } from './OahrCli';
 import { OahrHeadless } from './OahrHeadless';
-import * as irc from '../libs/irc';
 import { logIrcEvent, logPrivateMessage } from '../IIrcClient';
 import { CONFIG_OPTION, getIrcConfig } from '../TypedConfig';
-import log4js from 'log4js';
 import { applySpeedLimit } from '../libs/ChatLimiter';
-const logger = log4js.getLogger('cli');
 
 console.log('starting up...');
-
-const config_path = (process.env.NODE_ENV === 'production')
-  ? './config/log_cli_prod.json'
-  : './config/log_cli_dev.json';
-
-log4js.configure(config_path);
+const logger = getLogger('index_pre');
 
 try {
   CONFIG_OPTION.USE_ENV = true;

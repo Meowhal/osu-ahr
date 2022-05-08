@@ -18,23 +18,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+const Loggers_1 = require("../Loggers");
+const irc = __importStar(require("../libs/irc"));
 const OahrCli_1 = require("./OahrCli");
 const OahrHeadless_1 = require("./OahrHeadless");
-const irc = __importStar(require("../libs/irc"));
 const IIrcClient_1 = require("../IIrcClient");
 const TypedConfig_1 = require("../TypedConfig");
-const log4js_1 = __importDefault(require("log4js"));
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-const logger = log4js_1.default.getLogger('cli');
 console.log('starting up...');
-const config_path = (process.env.NODE_ENV === 'production')
-    ? './config/log_cli_prod.json'
-    : './config/log_cli_dev.json';
-log4js_1.default.configure(config_path);
+const logger = (0, Loggers_1.getLogger)('index_pre');
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();

@@ -7,9 +7,9 @@ import { DeferredAction } from './libs/DeferredAction';
 import { MpSettingsParser, MpSettingsResult } from './parsers/MpSettingsParser';
 import { LobbyPlugin } from './plugins/LobbyPlugin';
 import { HistoryRepository } from './webapi/HistoryRepository';
-import log4js from 'log4js';
 import { PlayMode } from './Modes';
 import { getConfig } from './TypedConfig';
+import { getLogger, Logger } from './Loggers';
 
 export enum LobbyStatus {
   Standby,
@@ -54,8 +54,8 @@ export class Lobby {
   deferredMessages: { [key: string]: DeferredAction<string> } = {};
   settingParser: MpSettingsParser;
   statParser: StatParser;
-  logger: log4js.Logger;
-  chatlogger: log4js.Logger;
+  logger: Logger;
+  chatlogger: Logger;
   historyRepository: HistoryRepository;
   infoMessageAnnouncementTimeId: NodeJS.Timeout | null = null;
   transferHostTimeout: DeferredAction<void>;
@@ -94,9 +94,9 @@ export class Lobby {
     this.statParser = new StatParser();
 
     this.ircClient = ircClient;
-    this.logger = log4js.getLogger('lobby');
+    this.logger = getLogger('lobby');
     this.logger.addContext('channel', 'lobby');
-    this.chatlogger = log4js.getLogger('chat');
+    this.chatlogger = getLogger('chat');
     this.chatlogger.addContext('channel', 'lobby');
     this.historyRepository = new HistoryRepository(0);
     this.transferHostTimeout = new DeferredAction(() => this.onTimeoutedTransferHost());

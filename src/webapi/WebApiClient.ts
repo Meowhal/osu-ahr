@@ -1,6 +1,5 @@
 import axios from 'axios';
 import config from 'config';
-import log4js from 'log4js';
 import http from 'http';
 import open from 'open';
 import path from 'path';
@@ -10,6 +9,7 @@ import { UserProfile, trimProfile } from './UserProfile';
 import { Beatmap, Beatmapset } from './Beatmapsets';
 import { FetchBeatmapError, FetchBeatmapErrorReason, IBeatmapFetcher } from './BeatmapRepository';
 import { FetchProfileError, FetchProfileErrorReason } from './ProfileRepository';
+import { getLogger, Logger } from '../Loggers';
 
 export interface ApiToken {
   token_type: string,
@@ -34,14 +34,14 @@ export interface WebApiClientOption {
 
 class WebApiClientClass implements IBeatmapFetcher {
   option: WebApiClientOption;
-  logger: log4js.Logger;
+  logger: Logger;
   available: boolean;
   token: ApiToken | undefined;
 
   constructor(option: Partial<WebApiClientOption> = {}) {
     const WebApiDefaultOption = config.get<WebApiClientOption>('WebApi');
     this.option = { ...WebApiDefaultOption, ...option } as WebApiClientOption;
-    this.logger = log4js.getLogger('webapi');
+    this.logger = getLogger('webapi');
     this.available = this.option.client_id !== 0 && this.option.client_secret !== '***';
   }
 
