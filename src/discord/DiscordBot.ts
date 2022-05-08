@@ -6,12 +6,12 @@
 
 import log4js from 'log4js';
 import { Client, Permissions, Guild, CommandInteraction, ApplicationCommandPermissionData, CreateRoleOptions, MessageActionRow, MessageButton, DiscordAPIError, Message, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
-import config from 'config';
 import { IIrcClient } from '../IIrcClient';
 import { OahrDiscord } from './OahrDiscord';
 import { setContext } from './DiscordAppender';
 import { BotCommands } from './BotCommand';
 import { BanchoResponse, BanchoResponseType } from '../parsers/CommandParser';
+import { getConfig } from '../TypedConfig';
 
 const logger = log4js.getLogger('discord');
 
@@ -38,7 +38,7 @@ export class DiscordBot {
   constructor(client: IIrcClient, discordClient: Client) {
     this.ircClient = client;
     this.discordClient = discordClient;
-    this.cfg = config.get<DiscordBotConfig>('Discord');
+    this.cfg = getConfig('Discord', {});
     this.ahrs = {};
     this.sharedObjects = {};
   }
@@ -102,22 +102,10 @@ export class DiscordBot {
   }
 
   async registerCommandsAndRoles(guild: Guild) {
-    const results = await guild.commands.set(BotCommands);
-    const roleId = await this.registerRole(guild);
-    const permissions: ApplicationCommandPermissionData[] = [
-      {
-        id: roleId,
-        type: 'ROLE',
-        permission: true,
-      },
-    ];
-
-    results.forEach(c => {
-      c.permissions.add({ permissions });
-    });
+    await guild.commands.set(BotCommands);
   }
 
-  async registerRole(guild: Guild) {
+  async registerAhrAdminRole(guild: Guild) {
     let role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
     if (!role) {
       role = await guild.roles.create(ADMIN_ROLE);
@@ -125,7 +113,7 @@ export class DiscordBot {
     return role.id;
   }
 
-  async handleCommandInteraction(interaction: GuildCommandInteraction) {
+  async handleCommandInteraction(interaction: CommandInteraction<'present'>) {
     switch (interaction.commandName) {
       case 'make':
         await this.make(interaction);
@@ -378,7 +366,7 @@ export class DiscordBot {
         },
         {
           id: this.discordClient.user?.id ?? '',
-          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES]
         }
       ]
     });
@@ -402,7 +390,7 @@ export class DiscordBot {
         },
         {
           id: this.discordClient.user?.id ?? '',
-          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES]
         }
       ]
     });
@@ -492,7 +480,7 @@ export class DiscordBot {
       permissions: [
         Permissions.FLAGS.MANAGE_CHANNELS,
         Permissions.FLAGS.MANAGE_ROLES,
-        Permissions.FLAGS.MANAGE_MESSAGES
+        Permissions.FLAGS.MANAGE_MESSAGES,
       ]
     });
   }
@@ -514,7 +502,7 @@ export class DiscordBot {
       const btns = ahr.createMenuButton();
       let message: Message | undefined = await this.findMatchSummaryMessage(channel, ahr);
       if (message) {
-        message.edit({ embeds: [embed], components: [btns] });
+        await message.edit({ embeds: [embed], components: [btns] });
       } else {
         message = await channel.send({ embeds: [embed], components: [btns] });
       }
@@ -523,6 +511,9 @@ export class DiscordBot {
       if (e instanceof DiscordAPIError) {
         if (e.message === 'Missing Permissions') {
           logger.error(`Missing Permissions. Invite this bot again. invite link => ${this.generateInviteLink()}`);
+          return;
+        } else if (e.message === 'Missing Access') {
+          logger.error('Missing Access. The bot does not have the Permission to manage the #match channel, please delete the #match channel or give the bot editing privileges.');
           return;
         }
       }
