@@ -87,6 +87,7 @@ class DiscordBot {
     }
     async registerCommandsAndRoles(guild) {
         await guild.commands.set(BotCommand_1.BotCommands);
+        await this.registerAhrAdminRole(guild);
     }
     async registerAhrAdminRole(guild) {
         let role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
