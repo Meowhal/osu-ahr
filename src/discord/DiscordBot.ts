@@ -103,6 +103,7 @@ export class DiscordBot {
 
   async registerCommandsAndRoles(guild: Guild) {
     await guild.commands.set(BotCommands);
+    await this.registerAhrAdminRole(guild);
   }
 
   async registerAhrAdminRole(guild: Guild) {
