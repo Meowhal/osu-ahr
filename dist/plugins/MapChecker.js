@@ -1,22 +1,19 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseMapcheckerOwnerCommand = exports.MapValidator = exports.secToTimeNotation = exports.MapChecker = void 0;
-const config_1 = __importDefault(require("config"));
 const LobbyPlugin_1 = require("./LobbyPlugin");
 const OptionValidator_1 = require("../libs/OptionValidator");
 const Modes_1 = require("../Modes");
 const CommandParser_1 = require("../parsers/CommandParser");
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
+const TypedConfig_1 = require("../TypedConfig");
 class MapChecker extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "MapChecker", "mapChecker");
+        super(lobby, 'MapChecker', 'mapChecker');
         this.lastMapId = 0;
         this.checkingMapId = 0;
         this.numViolations = 0;
-        const d = { ...config_1.default.get(this.pluginName), ...option };
+        const d = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         validateMapCheckerOption(d);
         this.option = d;
         if (this.option.gamemode instanceof Modes_1.PlayMode) {
@@ -47,7 +44,7 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
     }
     onJoinedLobby() {
         if (this.option.enabled) {
-            this.SendPluginMessage("enabledMapChecker");
+            this.SendPluginMessage('enabledMapChecker');
         }
     }
     onMatchStarted() {
@@ -63,8 +60,8 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
         }
     }
     onReceivedChatCommand(command, param, player) {
-        if (command == "!r" || command == "!regulation") {
-            this.lobby.SendMessageWithCoolTime(this.getRegulationDescription(), "regulation", 10000);
+        if (command === '!r' || command === '!regulation') {
+            this.lobby.SendMessageWithCoolTime(this.getRegulationDescription(), 'regulation', 10000);
             return;
         }
         if (player.isAuthorized) {
@@ -81,33 +78,33 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
             }
             if (p.num_violations_allowed !== undefined) {
                 this.option.num_violations_allowed = p.num_violations_allowed;
-                this.logger.info("num_violations_allowed was set to " + p.num_violations_allowed);
+                this.logger.info('num_violations_allowed was set to ' + p.num_violations_allowed);
             }
             let changed = false;
             if (p.star_min !== undefined) {
                 this.option.star_min = p.star_min;
-                if (this.option.star_max <= this.option.star_min && 0 < this.option.star_max) {
+                if (this.option.star_max <= this.option.star_min && this.option.star_max > 0) {
                     this.option.star_max = 0;
                 }
                 changed = true;
             }
             if (p.star_max !== undefined) {
                 this.option.star_max = p.star_max;
-                if (this.option.star_max <= this.option.star_min && 0 < this.option.star_max) {
+                if (this.option.star_max <= this.option.star_min && this.option.star_max > 0) {
                     this.option.star_min = 0;
                 }
                 changed = true;
             }
             if (p.length_min !== undefined) {
                 this.option.length_min = p.length_min;
-                if (this.option.length_max <= this.option.length_min && 0 < this.option.length_max) {
+                if (this.option.length_max <= this.option.length_min && this.option.length_max > 0) {
                     this.option.length_max = 0;
                 }
                 changed = true;
             }
             if (p.length_max !== undefined) {
                 this.option.length_max = p.length_max;
-                if (this.option.length_max <= this.option.length_min && 0 < this.option.length_max) {
+                if (this.option.length_max <= this.option.length_min && this.option.length_max > 0) {
                     this.option.length_min = 0;
                 }
                 changed = true;
@@ -122,7 +119,7 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
                 changed = true;
             }
             if (changed) {
-                const m = "New regulation: " + this.validator.GetDescription();
+                const m = 'New regulation: ' + this.validator.GetDescription();
                 this.lobby.SendMessage(m);
                 this.logger.info(m);
             }
@@ -136,21 +133,21 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
             return this.validator.GetDescription();
         }
         else {
-            return "Disabled (" + this.validator.GetDescription() + ")";
+            return 'Disabled (' + this.validator.GetDescription() + ')';
         }
     }
     SetEnabled(v) {
-        if (v == this.option.enabled)
+        if (v === this.option.enabled)
             return;
         if (v) {
-            this.SendPluginMessage("enabledMapChecker");
-            this.lobby.SendMessage("mapChecker Enabled");
-            this.logger.info("mapChecker Enabled");
+            this.SendPluginMessage('enabledMapChecker');
+            this.lobby.SendMessage('mapChecker Enabled');
+            this.logger.info('mapChecker Enabled');
         }
         else {
-            this.SendPluginMessage("disabledMapChecker");
-            this.lobby.SendMessage("mapChecker Disabled");
-            this.logger.info("mapChecker Disabled");
+            this.SendPluginMessage('disabledMapChecker');
+            this.lobby.SendMessage('mapChecker Disabled');
+            this.logger.info('mapChecker Disabled');
         }
         this.option.enabled = v;
     }
@@ -159,16 +156,16 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
         this.numViolations = 0;
     }
     async check(mapId, mapTitle) {
-        if (mapId == this.lastMapId)
+        if (mapId === this.lastMapId)
             return;
         try {
             const map = await BeatmapRepository_1.BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
-            if (mapId != this.checkingMapId) {
+            if (mapId !== this.checkingMapId) {
                 this.logger.info(`target map is already changed. checked:${mapId}, current:${this.checkingMapId}`);
                 return;
             }
             const r = this.validator.RateBeatmap(map);
-            if (0 < r.rate) {
+            if (r.rate > 0) {
                 this.rejectMap(r.message, true);
             }
             else {
@@ -201,10 +198,10 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
         }
     }
     skipHost() {
-        let msg = `The number of violations has reached ${this.option.num_violations_allowed}. Skipped ${this.lobby.host?.escaped_name}`;
+        const msg = `The number of violations has reached ${this.option.num_violations_allowed}. Skipped ${this.lobby.host?.escaped_name}`;
         this.logger.info(msg);
         this.lobby.SendMessage(msg);
-        this.SendPluginMessage("skip");
+        this.SendPluginMessage('skip');
     }
     rejectMap(reason, showRegulation) {
         this.numViolations += 1;
@@ -212,18 +209,18 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
         if (showRegulation) {
             this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation: ${this.validator.GetDescription()}`);
             this.lobby.SendMessage(reason);
-            this.lobby.SendMessage("*Attention! Difficulty will not be calculated correctly if a global mod is applied.");
+            this.lobby.SendMessage('*Attention! Difficulty will not be calculated correctly if a global mod is applied.');
         }
         else {
             this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | ${reason}`);
         }
         this.checkingMapId = 0;
-        if (this.option.num_violations_allowed != 0 && this.option.num_violations_allowed <= this.numViolations) {
+        if (this.option.num_violations_allowed !== 0 && this.option.num_violations_allowed <= this.numViolations) {
             this.skipHost();
         }
     }
     acceptMap(map) {
-        this.SendPluginMessage("validatedMap");
+        this.SendPluginMessage('validatedMap');
         this.lastMapId = this.lobby.mapId;
         if (map.beatmapset) {
             const desc = this.getMapDescription(map, map.beatmapset);
@@ -248,9 +245,9 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
 }
 exports.MapChecker = MapChecker;
 function secToTimeNotation(sec) {
-    let m = Math.floor(sec / 60);
-    let s = Math.round(sec - m * 60);
-    return `${m}:${s.toString().padStart(2, "0")}`;
+    const m = Math.floor(sec / 60);
+    const s = Math.round(sec - m * 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
 }
 exports.secToTimeNotation = secToTimeNotation;
 class MapValidator {
@@ -260,123 +257,123 @@ class MapValidator {
     }
     RateBeatmap(map) {
         let rate = 0;
-        let violationMsgs = [];
+        const violationMsgs = [];
         const mapmode = Modes_1.PlayMode.from(map.mode);
-        if (mapmode != this.option.gamemode && this.option.gamemode != null) {
+        if (mapmode !== this.option.gamemode && this.option.gamemode !== null) {
             violationMsgs.push(`gamemode is not ${this.option.gamemode.officialName}.`);
             rate += 1;
         }
-        if (0 < this.option.star_min && map.difficulty_rating < this.option.star_min) {
+        if (this.option.star_min > 0 && map.difficulty_rating < this.option.star_min) {
             rate += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
-            violationMsgs.push("map star rating is lower than allowed star rating.");
+            violationMsgs.push('map star rating is lower than allowed star rating.');
         }
-        if (0 < this.option.star_max && this.option.star_max < map.difficulty_rating) {
+        if (this.option.star_max > 0 && this.option.star_max < map.difficulty_rating) {
             rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
-            violationMsgs.push("map star rating is higher than allowed star rating.");
+            violationMsgs.push('map star rating is higher than allowed star rating.');
         }
-        if (0 < this.option.length_min && map.total_length < this.option.length_min) {
+        if (this.option.length_min > 0 && map.total_length < this.option.length_min) {
             rate += (this.option.length_min - map.total_length) / 60.0;
-            violationMsgs.push("map duration is shorter than allowed duration.");
+            violationMsgs.push('map duration is shorter than allowed duration.');
         }
-        if (0 < this.option.length_max && this.option.length_max < map.total_length) {
+        if (this.option.length_max > 0 && this.option.length_max < map.total_length) {
             rate += (map.total_length - this.option.length_max) / 60.0;
-            violationMsgs.push("map duration is longer than allowed duration.");
+            violationMsgs.push('map duration is longer than allowed duration.');
         }
-        if (0 < rate) {
+        if (rate > 0) {
             let message;
             const mapDesc = `[${map.url} ${map.beatmapset?.title}] (Star Rating: ${map.difficulty_rating} Duration: ${secToTimeNotation(map.total_length)})`;
-            if (violationMsgs.length == 1) {
+            if (violationMsgs.length === 1) {
                 message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
             }
             else {
-                message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => "- " + m).join("\n")}`;
+                message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => '- ' + m).join('\n')}`;
             }
             return { rate, message };
         }
         else {
-            return { rate: 0, message: "" };
+            return { rate: 0, message: '' };
         }
     }
     GetDescription() {
-        let d_star = "";
-        let d_length = "";
+        let d_star = '';
+        let d_length = '';
         let d_gamemode = `mode: ${this.option.gamemode.officialName}`;
-        if (this.option.gamemode != Modes_1.PlayMode.Osu) {
+        if (this.option.gamemode !== Modes_1.PlayMode.Osu) {
             if (this.option.allow_convert) {
-                d_gamemode += " (converts allowed)";
+                d_gamemode += ' (converts allowed)';
             }
             else {
-                d_gamemode += " (converts disallowed)";
+                d_gamemode += ' (converts disallowed)';
             }
         }
-        if (0 < this.option.star_min && 0 < this.option.star_max) {
+        if (this.option.star_min > 0 && this.option.star_max > 0) {
             d_star = `${this.option.star_min.toFixed(2)} <= difficulty <= ${this.option.star_max.toFixed(2)}`;
         }
-        else if (0 < this.option.star_min) {
+        else if (this.option.star_min > 0) {
             d_star = `${this.option.star_min.toFixed(2)} <= difficulty`;
         }
-        else if (0 < this.option.star_max) {
+        else if (this.option.star_max > 0) {
             d_star = `difficulty <= ${this.option.star_max.toFixed(2)}`;
         }
-        if (0 < this.option.length_min && 0 < this.option.length_max) {
+        if (this.option.length_min > 0 && this.option.length_max > 0) {
             d_length = `${secToTimeNotation(this.option.length_min)} <= length <= ${secToTimeNotation(this.option.length_max)}`;
         }
-        else if (0 < this.option.length_min) {
+        else if (this.option.length_min > 0) {
             d_length = `${secToTimeNotation(this.option.length_min)} <= length`;
         }
-        else if (0 < this.option.length_max) {
+        else if (this.option.length_max > 0) {
             d_length = `length <= ${secToTimeNotation(this.option.length_max)}`;
         }
-        return [d_star, d_length, d_gamemode].filter(d => d != "").join(", ");
+        return [d_star, d_length, d_gamemode].filter(d => d !== '').join(', ');
     }
 }
 exports.MapValidator = MapValidator;
 function validateMapCheckerOption(option) {
     if (option.enabled !== undefined) {
-        option.enabled = OptionValidator_1.validateOption.bool("MapChecker.enabled", option.enabled);
+        option.enabled = OptionValidator_1.validateOption.bool('MapChecker.enabled', option.enabled);
     }
     if (option.star_min !== undefined) {
-        option.star_min = OptionValidator_1.validateOption.number("MapChecker.star_min", option.star_min, 0);
+        option.star_min = OptionValidator_1.validateOption.number('MapChecker.star_min', option.star_min, 0);
     }
     if (option.star_max !== undefined) {
-        option.star_max = OptionValidator_1.validateOption.number("MapChecker.star_max", option.star_max, 0);
+        option.star_max = OptionValidator_1.validateOption.number('MapChecker.star_max', option.star_max, 0);
     }
     if (option.length_min !== undefined) {
-        option.length_min = OptionValidator_1.validateOption.number("MapChecker.length_min", option.length_min, 0);
+        option.length_min = OptionValidator_1.validateOption.number('MapChecker.length_min', option.length_min, 0);
     }
     if (option.length_max !== undefined) {
-        option.length_max = OptionValidator_1.validateOption.number("MapChecker.length_max", option.length_max, 0);
+        option.length_max = OptionValidator_1.validateOption.number('MapChecker.length_max', option.length_max, 0);
     }
-    if (option.star_max !== undefined && option.star_min !== undefined && option.star_max <= option.star_min && 0 < option.star_max) {
+    if (option.star_max !== undefined && option.star_min !== undefined && option.star_max <= option.star_min && option.star_max > 0) {
         option.star_min = 0;
     }
-    if (option.length_max !== undefined && option.length_min !== undefined && option.length_max <= option.length_min && 0 < option.length_max) {
+    if (option.length_max !== undefined && option.length_min !== undefined && option.length_max <= option.length_min && option.length_max > 0) {
         option.length_min = 0;
     }
     if (option.gamemode !== undefined) {
-        if (typeof option.gamemode == "string") {
+        if (typeof option.gamemode === 'string') {
             try {
                 option.gamemode = Modes_1.PlayMode.from(option.gamemode, true);
             }
             catch {
-                throw new Error("option MapChecker#gamemode must be [osu | fruits | taiko | mania].");
+                throw new Error('option MapChecker#gamemode must be [osu | fruits | taiko | mania].');
             }
         }
         if (!(option.gamemode instanceof Modes_1.PlayMode)) {
-            throw new Error("option MapChecker#gamemode must be [osu | fruits | taiko | mania].");
+            throw new Error('option MapChecker#gamemode must be [osu | fruits | taiko | mania].');
         }
     }
     if (option.num_violations_to_skip !== undefined) {
         option.num_violations_allowed = option.num_violations_to_skip;
     }
     if (option.num_violations_allowed !== undefined) {
-        option.num_violations_allowed = OptionValidator_1.validateOption.number("MapChecker.num_violations_allowed", option.num_violations_allowed, 0);
+        option.num_violations_allowed = OptionValidator_1.validateOption.number('MapChecker.num_violations_allowed', option.num_violations_allowed, 0);
     }
     if (option.allowConvert !== undefined) {
         option.allow_convert = option.allowConvert;
     }
     if (option.allow_convert !== undefined) {
-        option.allow_convert = OptionValidator_1.validateOption.bool("MapChecker.allow_convert", option.allow_convert);
+        option.allow_convert = OptionValidator_1.validateOption.bool('MapChecker.allow_convert', option.allow_convert);
     }
     return true;
 }
@@ -387,31 +384,31 @@ function validateMapCheckerOption(option) {
 function parseMapcheckerOwnerCommand(command, param) {
     let option = undefined;
     command = command.toLocaleLowerCase();
-    if (command == "*mapchecker_enable") {
+    if (command === '*mapchecker_enable') {
         return { enabled: true };
     }
-    if (command == "*mapchecker_disable") {
+    if (command === '*mapchecker_disable') {
         option = { enabled: false };
     }
-    if (command.startsWith("*regulation")) {
-        if (param.indexOf("=") != -1) {
+    if (command.startsWith('*regulation')) {
+        if (param.indexOf('=') !== -1) {
             option = parseRegulationSetter(param);
         }
         else {
-            const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s != "");
+            const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s !== '');
             option = parseRegulationCommand(params);
         }
     }
-    if (command == "*no" && param.startsWith("regulation")) {
-        const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s != "");
-        if (params.length == 1) {
+    if (command === '*no' && param.startsWith('regulation')) {
+        const params = param.split(/\s+/).map(s => s.toLowerCase()).filter(s => s !== '');
+        if (params.length === 1) {
             option = { enabled: false };
         }
         else {
             option = parseNoRegulationCommand(params[1]);
         }
     }
-    if (option != undefined) {
+    if (option !== undefined) {
         validateMapCheckerOption(option);
     }
     return option;
@@ -419,67 +416,67 @@ function parseMapcheckerOwnerCommand(command, param) {
 exports.parseMapcheckerOwnerCommand = parseMapcheckerOwnerCommand;
 function parseRegulationCommand(params) {
     switch (unifyParamName(params[0])) {
-        case "enabled":
+        case 'enabled':
             return { enabled: true };
-        case "disabled":
+        case 'disabled':
             return { enabled: false };
-        case "num_violations_allowed":
+        case 'num_violations_allowed':
             if (params.length < 2)
-                throw new Error("missing parameter. *regulation num_violations_allowed [number]");
+                throw new Error('missing parameter. *regulation num_violations_allowed [number]');
             return { num_violations_allowed: params[1] };
-        case "star_min":
+        case 'star_min':
             if (params.length < 2)
-                throw new Error("missing parameter. *regulation star_min [number]");
+                throw new Error('missing parameter. *regulation star_min [number]');
             return { star_min: params[1] };
-        case "star_max":
+        case 'star_max':
             if (params.length < 2)
-                throw new Error("missing parameter. *regulation star_max [number]");
+                throw new Error('missing parameter. *regulation star_max [number]');
             return { star_max: params[1] };
-        case "length_min":
+        case 'length_min':
             if (params.length < 2)
-                throw new Error("missing parameter. *regulation length_min [number]");
+                throw new Error('missing parameter. *regulation length_min [number]');
             return { length_min: params[1] };
-        case "length_max":
+        case 'length_max':
             if (params.length < 2)
-                throw new Error("missing parameter. *regulation length_max [number]");
+                throw new Error('missing parameter. *regulation length_max [number]');
             return { length_max: params[1] };
-        case "gamemode":
+        case 'gamemode':
             if (params.length < 2)
-                throw new Error("missing parameter. *regulation gamemode [osu | fruits | taiko | mania]");
+                throw new Error('missing parameter. *regulation gamemode [osu | fruits | taiko | mania]');
             return { gamemode: params[1] };
-        case "allow_convert":
+        case 'allow_convert':
             if (params.length < 2) {
                 return { allow_convert: true };
             }
             else {
                 return { allow_convert: params[1] };
             }
-        case "disallow_convert":
+        case 'disallow_convert':
             return { allow_convert: false };
     }
-    throw new Error("missing parameter.  *regulation [enable | disable | star_min | star_max | length_min | length_max | gamemode | num_violations_allowed] <...params>");
+    throw new Error('missing parameter.  *regulation [enable | disable | star_min | star_max | length_min | length_max | gamemode | num_violations_allowed] <...params>');
 }
 function parseNoRegulationCommand(param) {
     switch (unifyParamName(param)) {
-        case "num_violations_allowed":
+        case 'num_violations_allowed':
             return { num_violations_allowed: 0 };
-        case "star_min":
+        case 'star_min':
             return { star_min: 0 };
-        case "star_max":
+        case 'star_max':
             return { star_max: 0 };
-        case "length_min":
+        case 'length_min':
             return { length_min: 0 };
-        case "length_max":
+        case 'length_max':
             return { length_max: 0 };
-        case "gamemode":
+        case 'gamemode':
             return { gamemode: Modes_1.PlayMode.Osu, allow_convert: true };
-        case "allow_convert":
+        case 'allow_convert':
             return { allow_convert: false };
     }
 }
 function parseRegulationSetter(param) {
-    let result = {};
-    for (const m of param.matchAll(/([0-9a-zA-Z_\-]+)\s*=\s*([^\s,]+)/g)) {
+    const result = {};
+    for (const m of param.matchAll(/([0-9a-zA-Z_-]+)\s*=\s*([^\s,]+)/g)) {
         const name = unifyParamName(m[1]);
         const value = m[2];
         result[name] = value;
@@ -488,36 +485,36 @@ function parseRegulationSetter(param) {
 }
 function unifyParamName(name) {
     name = name.toLowerCase();
-    if (name.includes("star") || name.includes("diff")) {
-        if (name.includes("low") || name.includes("min")) {
-            return "star_min";
+    if (name.includes('star') || name.includes('diff')) {
+        if (name.includes('low') || name.includes('min')) {
+            return 'star_min';
         }
-        else if (name.includes("up") || name.includes("max")) {
-            return "star_max";
-        }
-    }
-    else if (name.includes("len")) {
-        if (name.includes("low") || name.includes("min")) {
-            return "length_min";
-        }
-        else if (name.includes("up") || name.includes("max")) {
-            return "length_max";
+        else if (name.includes('up') || name.includes('max')) {
+            return 'star_max';
         }
     }
-    else if (name.startsWith("enable")) {
-        return "enabled";
+    else if (name.includes('len')) {
+        if (name.includes('low') || name.includes('min')) {
+            return 'length_min';
+        }
+        else if (name.includes('up') || name.includes('max')) {
+            return 'length_max';
+        }
     }
-    else if (name.startsWith("disable")) {
-        return "disabled";
+    else if (name.startsWith('enable')) {
+        return 'enabled';
     }
-    else if (name == "num_violations_to_skip" || name.includes("violations")) {
-        return "num_violations_allowed";
+    else if (name.startsWith('disable')) {
+        return 'disabled';
     }
-    else if (name == "allowconvert") {
-        return "allow_convert";
+    else if (name === 'num_violations_to_skip' || name.includes('violations')) {
+        return 'num_violations_allowed';
     }
-    else if (name == "disallowconvert") {
-        return "disallow_convert";
+    else if (name === 'allowconvert') {
+        return 'allow_convert';
+    }
+    else if (name === 'disallowconvert') {
+        return 'disallow_convert';
     }
     return name;
 }

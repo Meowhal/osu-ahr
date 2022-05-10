@@ -12,29 +12,29 @@ export class DummyHistoryFecher implements IHistoryFetcher {
     this.match = {
       end_time: null,
       id: 0,
-      name: "dummy match",
+      name: 'dummy match',
       start_time: (new Date(this.timestamp)).toUTCString()
     };
     this.events = [];
     this.users = [];
 
-    this.addEvent("match-created", creatorId);
-    this.addEvent("host-changed", creatorId);
+    this.addEvent('match-created', creatorId);
+    this.addEvent('host-changed', creatorId);
   }
 
   fetchHistory(limit: number, before: number | null, after: number | null, matchId: number = 0): Promise<History> {
-    let events = [];
+    const events = [];
 
     limit = Math.max(1, Math.min(this.limit, limit));
     if (after) {
       after = Math.max(after, -1);
-      let end = Math.min(after + limit + 1, this.events.length);
+      const end = Math.min(after + limit + 1, this.events.length);
       for (let i = after + 1; i < end; i++) {
         events.push(this.events[i]);
       }
     } else {
       before = Math.min(before ?? this.events.length, this.events.length);
-      let start = Math.max(0, before - limit);
+      const start = Math.max(0, before - limit);
       for (let i = start; i < before; i++) {
         events.push(this.events[i]);
       }
@@ -64,7 +64,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
 
   addGameEvent(member: number[], title?: string) {
     this.timestamp += 1000;
-    if (member.length == 0) return;
+    if (member.length === 0) return;
     const scores = this.createDummyScores(member);
     const game = this.createDummyGame(1, true);
     game.scores = scores;
@@ -73,7 +73,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
     this.events.push({
       id: this.events.length,
       detail: {
-        type: "other",
+        type: 'other',
         text: title
       },
       timestamp: (new Date(this.timestamp)).toUTCString(),
@@ -83,7 +83,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
 
     member.forEach(m => {
       if (!this.existsUser(m)) {
-        throw new Error("unknown member joined game");
+        throw new Error('unknown member joined game');
       }
     });
   }
@@ -94,14 +94,14 @@ export class DummyHistoryFecher implements IHistoryFetcher {
       beatmap: {},
       end_time: ended ? n : null,
       id: id,
-      mode: "osu",
+      mode: 'osu',
       mode_int: 0,
       mods: [],
       scores: [],
-      scoring_type: "score",
+      scoring_type: 'score',
       start_time: n,
-      team_type: "head-to-head"
-    }
+      team_type: 'head-to-head'
+    };
   }
 
   createDummyScores(nums: number[]): Score[] {
@@ -114,7 +114,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
       created_at: null,
       match: {
         slot: v,
-        team: "none",
+        team: 'none',
         pass: 1
       },
       max_combo: 100,
@@ -134,11 +134,11 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   }
 
   createDummyUserIfNotExist(userId: number | null): void {
-    if (userId != null && !this.existsUser(userId)) {
+    if (userId && !this.existsUser(userId)) {
       this.users.push({
         avatar_url: null,
-        country_code: "AA",
-        default_group: "default",
+        country_code: 'AA',
+        default_group: 'default',
         id: userId,
         is_active: true,
         is_bot: false,
@@ -147,16 +147,16 @@ export class DummyHistoryFecher implements IHistoryFetcher {
         last_visit: this.match.start_time,
         pm_friends_only: false,
         profile_colour: null,
-        username: "user" + userId,
+        username: 'user' + userId,
         country: {
-          code: "AA",
-          name: "AA"
+          code: 'AA',
+          name: 'AA'
         }
       });
     }
   }
 
   existsUser(userId: number): boolean {
-    return this.users.find(v => v.id == userId) != undefined;
+    return this.users.find(v => v.id === userId) !== undefined;
   }
 }

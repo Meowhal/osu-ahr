@@ -8,16 +8,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Mod = exports.Team = exports.PlayMode = exports.TeamMode = exports.ScoreMode = void 0;
 class Mode {
     constructor(value, name, aliases = []) {
-        this.type = "";
+        this.type = '';
         this.value = value;
         this.name = name;
         this.aliases = new Set(aliases.concat(value, name).map(v => Mode.normalize(v)));
     }
     /**
-     * value,name,aliases と一致するか比較する
-     * @param normalizedValue 検査対象文字列、 前提：標準化済みの文字列を使用すること
-     * @returns
-     */
+       * value,name,aliases と一致するか比較する
+       * @param normalizedValue 検査対象文字列、 前提：標準化済みの文字列を使用すること
+       * @returns
+       */
     _match(normalizedValue) {
         return this.aliases.has(normalizedValue);
     }
@@ -25,13 +25,13 @@ class Mode {
         return this.aliases.has(Mode.normalize(value));
     }
     /**
-     * 比較しやすい表現に変換する
-     * スペースとハイフンを取り除き、小文字にする
-     * @param v
-     * @returns
-     */
+       * 比較しやすい表現に変換する
+       * スペースとハイフンを取り除き、小文字にする
+       * @param v
+       * @returns
+       */
     static normalize(v) {
-        return v.replace(/[ -]/g, "").toLowerCase();
+        return v.replace(/[ -]/g, '').toLowerCase();
     }
     static _from(value, values, defaultMode, throwsIfFailed, tag) {
         const nv = Mode.normalize(value);
@@ -54,83 +54,84 @@ class Mode {
 class ScoreMode extends Mode {
     constructor(value, name, aliases = []) {
         super(value.toString(), name, aliases);
-        this.type = "ScoreMode";
+        this.type = 'ScoreMode';
         ScoreMode.Values.push(this);
     }
     static from(value, throwsIfFailed = false) {
-        return Mode._from(value, ScoreMode.Values, ScoreMode.Score, throwsIfFailed, "ScoreMode");
+        return Mode._from(value, ScoreMode.Values, ScoreMode.Score, throwsIfFailed, 'ScoreMode');
     }
 }
 exports.ScoreMode = ScoreMode;
 ScoreMode.Values = [];
-ScoreMode.Score = new ScoreMode(0, "Score");
-ScoreMode.Accuracy = new ScoreMode(1, "Accuracy");
-ScoreMode.Combo = new ScoreMode(2, "Combo");
-ScoreMode.ScoreV2 = new ScoreMode(3, "ScoreV2");
+ScoreMode.Score = new ScoreMode(0, 'Score');
+ScoreMode.Accuracy = new ScoreMode(1, 'Accuracy');
+ScoreMode.Combo = new ScoreMode(2, 'Combo');
+ScoreMode.ScoreV2 = new ScoreMode(3, 'ScoreV2');
 class TeamMode extends Mode {
     constructor(value, name, aliases = []) {
         super(value.toString(), name, aliases);
-        this.type = "TeamMode";
+        this.type = 'TeamMode';
         TeamMode.Values.push(this);
     }
     static from(value, throwsIfFailed = false) {
-        return Mode._from(value, TeamMode.Values, TeamMode.HeadToHead, throwsIfFailed, "TeamMode");
+        return Mode._from(value, TeamMode.Values, TeamMode.HeadToHead, throwsIfFailed, 'TeamMode');
     }
     isTeamMatch() {
-        return this == TeamMode.TeamVs || this == TeamMode.TagTeamVs;
+        return this === TeamMode.TeamVs || this === TeamMode.TagTeamVs;
     }
 }
 exports.TeamMode = TeamMode;
 TeamMode.Values = [];
-TeamMode.HeadToHead = new TeamMode(0, "HeadToHead"); // historyのhead-to-headはnormalizeで対応済み
-TeamMode.TagCoop = new TeamMode(1, "TagCoop");
-TeamMode.TeamVs = new TeamMode(2, "TeamVs");
-TeamMode.TagTeamVs = new TeamMode(3, "TagTeamVs");
+TeamMode.HeadToHead = new TeamMode(0, 'HeadToHead'); // historyのhead-to-headはnormalizeで対応済み
+TeamMode.TagCoop = new TeamMode(1, 'TagCoop');
+TeamMode.TeamVs = new TeamMode(2, 'TeamVs');
+TeamMode.TagTeamVs = new TeamMode(3, 'TagTeamVs');
 class PlayMode extends Mode {
     constructor(value, name, officialName, aliases = []) {
         super(value.toString(), name, aliases);
-        this.type = "PlayMode";
-        this.id = typeof value == "number" ? value : parseInt(value);
+        this.type = 'PlayMode';
+        this.id = typeof value === 'number' ? value : parseInt(value);
         this.officialName = officialName;
         PlayMode.Values.push(this);
     }
     static from(value, throwsIfFailed = false) {
-        return Mode._from(value, PlayMode.Values, PlayMode.Osu, throwsIfFailed, "PlayMode");
+        return Mode._from(value, PlayMode.Values, PlayMode.Osu, throwsIfFailed, 'PlayMode');
     }
 }
 exports.PlayMode = PlayMode;
 PlayMode.Values = [];
-PlayMode.Osu = new PlayMode(0, "Osu", "osu!");
-PlayMode.Taiko = new PlayMode(1, "Taiko", "osu!taiko");
-PlayMode.CatchTheBeat = new PlayMode(2, "CatchTheBeat", "osu!catch", ["fruits", "catch", "fruit"]);
-PlayMode.OsuMania = new PlayMode(3, "OsuMania", "osu!mania", ["mania"]);
+PlayMode.Osu = new PlayMode(0, 'Osu', 'osu!');
+PlayMode.Taiko = new PlayMode(1, 'Taiko', 'osu!taiko');
+PlayMode.CatchTheBeat = new PlayMode(2, 'CatchTheBeat', 'osu!catch', ['fruits', 'catch', 'fruit']);
+PlayMode.OsuMania = new PlayMode(3, 'OsuMania', 'osu!mania', ['mania']);
 class Team extends Mode {
     constructor(value, name, aliases = []) {
         super(value.toString(), name, aliases);
-        this.type = "Team";
+        this.type = 'Team';
         Team.Values.push(this);
     }
     static from(value, throwsIfFailed = false) {
-        return Mode._from(value, Team.Values, Team.Red, throwsIfFailed, "Team");
+        return Mode._from(value, Team.Values, Team.Red, throwsIfFailed, 'Team');
     }
 }
 exports.Team = Team;
 Team.Values = [];
-Team.None = new Team("none", "None");
-Team.Red = new Team("red", "Red");
-Team.Blue = new Team("blue", "Blue");
+Team.None = new Team('none', 'None');
+Team.Red = new Team('red', 'Red');
+Team.Blue = new Team('blue', 'Blue');
 class Mod extends Mode {
     constructor(value, name, isGlobalMod, aliases = []) {
         super(value.toString(), name, aliases);
-        this.type = "Mod";
+        this.type = 'Mod';
         Mod.Values.push(this);
         this.isGlobalMod = isGlobalMod;
     }
     static from(value, throwsIfFailed = false) {
-        return Mode._from(value, Mod.Values, Mod.None, throwsIfFailed, "Mod");
+        return Mode._from(value, Mod.Values, Mod.None, throwsIfFailed, 'Mod');
     }
     static parseMods(str) {
-        const arrMods = str.match(/[a-zA-Z0-9\-]+/g)?.map(v => Mod.from(v));
+        // アルファベット, 数字, ハイフン（co-op用）のまとまりに分解する
+        const arrMods = str.match(/[a-zA-Z0-9-]+/g)?.map(v => Mod.from(v));
         if (arrMods) {
             const setMods = new Set(arrMods);
             return Mod.removeInvalidCombinations(setMods);
@@ -176,33 +177,33 @@ class Mod extends Mode {
 }
 exports.Mod = Mod;
 Mod.Values = [];
-Mod.None = new Mod("none", "None", true);
-Mod.Freemod = new Mod("Freemod", "Freemod", true);
-Mod.NoFail = new Mod("nf", "NoFail", false);
-Mod.Easy = new Mod("ez", "Easy", false);
-Mod.Hidden = new Mod("hd", "Hidden", false);
-Mod.HardRock = new Mod("hr", "HardRock", false);
-Mod.SuddenDeath = new Mod("sd", "SuddenDeath", false);
-Mod.DoubleTime = new Mod("dt", "DoubleTime", true, ["double"]);
-Mod.Nightcore = new Mod("nc", "Nightcore", true);
-Mod.Relax = new Mod("relax", "Relax", false, ["RX"]);
-Mod.HalfTime = new Mod("ht", "HalfTime", true);
-Mod.Flashlight = new Mod("fl", "Flashlight", false);
-Mod.SpunOut = new Mod("so", "SpunOut", false);
-Mod.Relax2 = new Mod("ap", "Relax2", false, ["auto pilot"]);
-Mod.FadeIn = new Mod("fi", "FadeIn", false);
-Mod.Random = new Mod("rd", "Random", true);
-Mod.KeyCoop = new Mod("co-op", "KeyCoop", false);
-Mod.Mirror = new Mod("mr", "Mirror", false);
-Mod.Key1 = new Mod("1k", "Key1", false);
-Mod.Key2 = new Mod("2k", "Key2", false);
-Mod.Key3 = new Mod("3k", "Key3", false);
-Mod.Key4 = new Mod("4k", "Key4", false);
-Mod.Key5 = new Mod("5k", "Key5", false);
-Mod.Key6 = new Mod("6k", "Key6", false);
-Mod.Key7 = new Mod("7k", "Key7", false);
-Mod.Key8 = new Mod("8k", "Key8", false);
-Mod.Key9 = new Mod("9k", "Key9", false);
+Mod.None = new Mod('none', 'None', true);
+Mod.Freemod = new Mod('Freemod', 'Freemod', true);
+Mod.NoFail = new Mod('nf', 'NoFail', false);
+Mod.Easy = new Mod('ez', 'Easy', false);
+Mod.Hidden = new Mod('hd', 'Hidden', false);
+Mod.HardRock = new Mod('hr', 'HardRock', false);
+Mod.SuddenDeath = new Mod('sd', 'SuddenDeath', false);
+Mod.DoubleTime = new Mod('dt', 'DoubleTime', true, ['double']);
+Mod.Nightcore = new Mod('nc', 'Nightcore', true);
+Mod.Relax = new Mod('relax', 'Relax', false, ['RX']);
+Mod.HalfTime = new Mod('ht', 'HalfTime', true);
+Mod.Flashlight = new Mod('fl', 'Flashlight', false);
+Mod.SpunOut = new Mod('so', 'SpunOut', false);
+Mod.Relax2 = new Mod('ap', 'Relax2', false, ['auto pilot']);
+Mod.FadeIn = new Mod('fi', 'FadeIn', false);
+Mod.Random = new Mod('rd', 'Random', true);
+Mod.KeyCoop = new Mod('co-op', 'KeyCoop', false);
+Mod.Mirror = new Mod('mr', 'Mirror', false);
+Mod.Key1 = new Mod('1k', 'Key1', false);
+Mod.Key2 = new Mod('2k', 'Key2', false);
+Mod.Key3 = new Mod('3k', 'Key3', false);
+Mod.Key4 = new Mod('4k', 'Key4', false);
+Mod.Key5 = new Mod('5k', 'Key5', false);
+Mod.Key6 = new Mod('6k', 'Key6', false);
+Mod.Key7 = new Mod('7k', 'Key7', false);
+Mod.Key8 = new Mod('8k', 'Key8', false);
+Mod.Key9 = new Mod('9k', 'Key9', false);
 /* memo
   !mp settings mod と !mp mods のMOD表記
   none なにもない場合は項目自体なし

@@ -4,7 +4,7 @@ import { LobbyPlugin } from '../plugins/LobbyPlugin';
 export class DummyLobbyPlugin extends LobbyPlugin {
 
   constructor(lobby: Lobby) {
-    super(lobby, "dummy");
+    super(lobby, 'dummy');
   }
 
   GetPluginStatus(): string {

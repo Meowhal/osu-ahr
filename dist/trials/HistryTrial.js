@@ -27,7 +27,7 @@ async function GetHistryTrial() {
         return err.response;
     });
     console.log(JSON.stringify(response.data));
-    fs_1.promises.writeFile("data/arc/history_76714773_joinleftsametime.json", JSON.stringify(response.data));
+    fs_1.promises.writeFile('data/arc/history_76714773_joinleftsametime.json', JSON.stringify(response.data));
 }
 async function GetOrderTrial() {
     const matchId = 76714773;
@@ -36,39 +36,39 @@ async function GetOrderTrial() {
     console.log(res);
 }
 async function GetLobbyNameChanger() {
-    let hr = new HistoryRepository_1.HistoryRepository(67719013, new HistoryFetcher_1.HistoryFecher());
-    let ln = "";
+    const hr = new HistoryRepository_1.HistoryRepository(67719013, new HistoryFetcher_1.HistoryFecher());
+    let ln = '';
     hr.changedLobbyName.on(e => {
-        console.log(e.oldName + "->" + e.newName + " ");
+        console.log(e.oldName + '->' + e.newName + ' ');
         ln = e.newName;
     });
-    while (!ln.startsWith("4-5*")) {
+    while (!ln.startsWith('4-5*')) {
         await hr.fetch(true);
     }
 }
 async function promiseTrial() {
     let task = delayAsync(100).then(() => 1);
     setImmediate(async () => {
-        let n = await task;
-        console.log("i1 " + n);
+        const n = await task;
+        console.log('i1 ' + n);
     });
     setImmediate(async () => {
         task = task.then(() => 2);
-        let n = await task;
-        console.log("i2 " + n);
+        const n = await task;
+        console.log('i2 ' + n);
     });
     setImmediate(async () => {
         task = task.then(() => 3);
-        let n = await task;
-        console.log("i3 " + n);
+        const n = await task;
+        console.log('i3 ' + n);
     });
     setImmediate(async () => {
-        let n = await task;
-        console.log("i4 " + n);
+        const n = await task;
+        console.log('i4 ' + n);
     });
 }
 async function delayAsync(ms) {
-    if (ms == 0)
+    if (ms === 0)
         return Promise.resolve();
     return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -11,12 +11,12 @@ const chai_1 = require("chai");
 const log4js_1 = __importDefault(require("log4js"));
 class TestUtils {
     constructor() {
-        this.ownerNickname = "creator";
-        this.lobbyName = "test";
-        this.loggerMode = "";
+        this.ownerNickname = 'creator';
+        this.lobbyName = 'test';
+        this.loggerMode = '';
     }
     async SetupLobbyAsync(logging = false) {
-        const ircClient = new DummyIrcClient_1.DummyIrcClient("osu_irc_server", this.ownerNickname);
+        const ircClient = new DummyIrcClient_1.DummyIrcClient('osu_irc_server', this.ownerNickname);
         if (logging) {
             (0, IIrcClient_1.logIrcEvent)(ircClient);
         }
@@ -25,11 +25,11 @@ class TestUtils {
         return { lobby, ircClient };
     }
     async AddPlayersAsync(names, client) {
-        if (typeof names == "number") {
+        if (typeof names === 'number') {
             const start = client.players.size;
             const p = [];
             for (let i = 0; i < names; i++) {
-                p[i] = "p" + (i + start);
+                p[i] = 'p' + (i + start);
                 await client.emulateAddPlayerAsync(p[i]);
             }
             return p;
@@ -40,25 +40,25 @@ class TestUtils {
         }
     }
     async sendMessageAsOwner(lobby, message) {
-        let owner = lobby.GetOrMakePlayer(this.ownerNickname);
+        const owner = lobby.GetOrMakePlayer(this.ownerNickname);
         lobby.RaiseReceivedChatCommand(owner, message);
     }
     // async呼び出し用のディレイ関数
     delayAsync(ms) {
-        if (ms == 0)
+        if (ms === 0)
             return Promise.resolve();
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     assertHost(username, lobby) {
         const host = lobby.host;
-        if (host == null) {
-            chai_1.assert.fail("No one is host now.");
+        if (host === null) {
+            chai_1.assert.fail('No one is host now.');
         }
         else {
             chai_1.assert.equal(host.name, username);
         }
-        for (let p of lobby.players) {
-            if (p == host) {
+        for (const p of lobby.players) {
+            if (p === host) {
                 chai_1.assert.isTrue(p.isHost);
             }
             else {
@@ -76,17 +76,17 @@ class TestUtils {
         return p;
     }
     configMochaVerbosely() {
-        if (this.loggerMode != "Verbosely") {
-            this.loggerMode = "Verbosely";
+        if (this.loggerMode !== 'Verbosely') {
+            this.loggerMode = 'Verbosely';
             log4js_1.default.shutdown();
-            log4js_1.default.configure("config/log_mocha.json");
+            log4js_1.default.configure('config/log_mocha.json');
         }
     }
     configMochaAsSilent() {
-        if (this.loggerMode != "Silent") {
-            this.loggerMode = "Silent";
+        if (this.loggerMode !== 'Silent') {
+            this.loggerMode = 'Silent';
             log4js_1.default.shutdown();
-            log4js_1.default.configure("config/log_mocha_silent.json");
+            log4js_1.default.configure('config/log_mocha_silent.json');
         }
     }
     /**
@@ -98,14 +98,14 @@ class TestUtils {
     async assertEventFire(event, cb, timeout = 0) {
         return new Promise((resolve, reject) => {
             let id;
-            if (timeout != 0) {
+            if (timeout !== 0) {
                 id = setTimeout(() => {
                     d.dispose();
-                    reject("The expected event was not fired");
+                    reject('The expected event was not fired');
                 }, timeout);
             }
             const d = event.on(a => {
-                if (cb != null && cb(a) === false)
+                if (cb !== null && cb(a) === false)
                     return;
                 d.dispose();
                 clearTimeout(id);
@@ -126,11 +126,11 @@ class TestUtils {
                 resolve(Date.now());
             }, timeout);
             const d = event.on(a => {
-                if (cb != null && cb(a) === false)
+                if (cb !== null && cb(a) === false)
                     return;
                 clearTimeout(id);
                 d.dispose();
-                reject("The event expected not to fire was fired");
+                reject('The event expected not to fire was fired');
             });
         });
     }
@@ -144,16 +144,16 @@ class TestUtils {
     async assertBanchoRespond(lobby, expected, cb, timeout = 0) {
         return new Promise((resolve, reject) => {
             let id;
-            if (timeout != 0) {
+            if (timeout !== 0) {
                 id = setTimeout(() => {
                     d.dispose();
-                    reject("the expected response was not returned.");
+                    reject('the expected response was not returned.');
                 }, timeout);
             }
             const d = lobby.ReceivedBanchoResponse.on(a => {
-                if (a.response.type != expected)
+                if (a.response.type !== expected)
                     return;
-                if (cb != null && cb(a.response) === false)
+                if (cb !== null && cb(a.response) === false)
                     return;
                 d.dispose();
                 clearTimeout(id);
@@ -175,21 +175,21 @@ class TestUtils {
                 resolve(Date.now());
             }, timeout);
             const d = lobby.ReceivedBanchoResponse.on(a => {
-                if (a.response.type != notExpected)
+                if (a.response.type !== notExpected)
                     return;
-                if (cb != null && cb(a.response) === false)
+                if (cb !== null && cb(a.response) === false)
                     return;
                 clearTimeout(id);
                 d.dispose();
-                reject("the response not expected was returned.");
+                reject('the response not expected was returned.');
             });
         });
     }
     assertMpSettingsResult(lobby, result) {
         chai_1.assert.equal(lobby.players.size, result.players.length);
-        for (let r of result.players) {
+        for (const r of result.players) {
             const p = lobby.GetPlayer(r.name);
-            if (p == null) {
+            if (p === null) {
                 chai_1.assert.fail();
                 return;
             }

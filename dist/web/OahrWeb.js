@@ -7,8 +7,8 @@ exports.OahrWeb = void 0;
 const config_1 = __importDefault(require("config"));
 const log4js_1 = __importDefault(require("log4js"));
 const express_1 = __importDefault(require("express"));
-const logger = log4js_1.default.getLogger("server");
-const OahrWebDefaultOption = config_1.default.get("OahrWeb");
+const logger = log4js_1.default.getLogger('server');
+const OahrWebDefaultOption = config_1.default.get('OahrWeb');
 class OahrWeb {
     constructor() {
         this.config = OahrWebDefaultOption;
@@ -17,9 +17,9 @@ class OahrWeb {
         this.server = this.app.listen(this.config.port, this.config.hostname, () => {
             console.log(`Server running at http://${this.config.hostname}:${this.config.port}/`);
         });
-        this.app.get("/api/test/:id", (req, res, next) => {
+        this.app.get('/api/test/:id', (req, res, next) => {
             const re = {
-                test: "hello",
+                test: 'hello',
                 id: req.params.id
             };
             res.json(re);

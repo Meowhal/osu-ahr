@@ -10,7 +10,7 @@ const HistoryFetcher_1 = require("./HistoryFetcher");
 class HistoryRepository {
     constructor(lobbyId, fetcher = null) {
         this.matchInfo = null;
-        this.lobbyName = "";
+        this.lobbyName = '';
         this.latestEventId = 0;
         this.oldestEventId = Number.MAX_VALUE;
         this.currentGameEventId = 0;
@@ -24,15 +24,15 @@ class HistoryRepository {
         this.errorCount = 0;
         this.fetchTask = Promise.resolve({ count: 0, filled: true, isRewind: false });
         this.lobbyId = lobbyId;
-        this.logger = log4js_1.default.getLogger("his_repo");
-        this.logger.addContext("channel", lobbyId);
+        this.logger = log4js_1.default.getLogger('his_repo');
+        this.logger.addContext('channel', lobbyId);
         this.users = {};
         this.events = [];
         this.fetcher = fetcher ?? new HistoryFetcher_1.HistoryFecher();
     }
     setLobbyId(lobbyId) {
         this.lobbyId = parseInt(lobbyId);
-        this.logger.addContext("channel", lobbyId);
+        this.logger.addContext('channel', lobbyId);
     }
     /**
      * 現在の最新イベントからサーバー上の最新イベントまで更新する。
@@ -42,15 +42,15 @@ class HistoryRepository {
         if (this.hasError)
             return;
         try {
-            while (!(await this.fetch(false)).filled && !this.lobbyClosed) {
-            }
+            while (!(await this.fetch(false)).filled && !this.lobbyClosed)
+                ;
         }
         catch (e) {
             if (e instanceof Error) {
-                this.logger.error("@updateToLatest : " + e.message);
+                this.logger.error('@updateToLatest : ' + e.message);
             }
             else {
-                this.logger.error("@updateToLatest : " + e);
+                this.logger.error('@updateToLatest : ' + e);
             }
             this.hasError = true;
             if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
@@ -82,12 +82,12 @@ class HistoryRepository {
         return p;
     }
     async fetch_(isRewind = false) {
-        if (this.lobbyId == 0)
+        if (this.lobbyId === 0)
             return { count: 0, filled: true, isRewind };
-        let limit = 100;
+        const limit = 100;
         let after = null;
         let before = null;
-        if (this.events.length != 0) {
+        if (this.events.length !== 0) {
             if (isRewind) {
                 before = this.oldestEventId;
             }
@@ -122,7 +122,7 @@ class HistoryRepository {
             this.lobbyName = data.match.name;
         }
         let newEvents = data.events;
-        if (this.events.length == 0) {
+        if (this.events.length === 0) {
             this.events = data.events;
             this.oldestEventId = data.events[0].id;
             this.latestEventId = data.events[data.events.length - 1].id;
@@ -145,9 +145,9 @@ class HistoryRepository {
                 this.gotUserProfile.emit({ sender: this, user: u });
             }
         });
-        for (let ev of newEvents) {
+        for (const ev of newEvents) {
             switch (ev.detail.type) {
-                case "other":
+                case 'other':
                     this.checkLobbyName(ev);
                     if (ev.game) {
                         if (ev.game.end_time) {
@@ -158,13 +158,13 @@ class HistoryRepository {
                         }
                     }
                     break;
-                case "player-kicked":
+                case 'player-kicked':
                     this.raiseKickedEvent(ev);
                     break;
             }
         }
         if (this.currentGameEventId) {
-            const matchEvt = data.events.find(v => v.id == this.currentGameEventId);
+            const matchEvt = data.events.find(v => v.id === this.currentGameEventId);
             if (matchEvt?.game?.end_time) {
                 this.raiseFinishedGame(matchEvt);
                 this.currentGameEventId = 0;
@@ -177,12 +177,12 @@ class HistoryRepository {
             isRewind,
             count: data.events.length,
             filled: isRewind
-                ? this.events[0].detail.type == "match-created"
-                : this.latestEventId == data.latest_event_id
+                ? this.events[0].detail.type === 'match-created'
+                : this.latestEventId === data.latest_event_id
         };
     }
     checkLobbyName(ev) {
-        if (ev.detail.text != null && ev.detail.text != this.lobbyName) {
+        if (ev.detail.text && ev.detail.text !== this.lobbyName) {
             const newName = ev.detail.text;
             const oldName = this.lobbyName;
             this.lobbyName = newName;
@@ -225,35 +225,35 @@ class HistoryRepository {
         await this.updateToLatest();
         const map = {}; // 確認されたプレイヤー一覧、ロビー離席済みはtrue
         const result = [];
-        if (this.events.length == 0)
+        if (this.events.length === 0)
             return [];
         let i = this.events.length;
         let loopCount = 0;
         let hostAge = -1; // 現在のホスト
         let gameCount = 0; // 現在までの試合数
-        let unresolvedPlayers = new Set(); // 試合に参加したがまだ順番が確定していないプレイヤー
+        const unresolvedPlayers = new Set(); // 試合に参加したがまだ順番が確定していないプレイヤー
         while (true) {
             i--;
             loopCount++;
             if (i < 0) {
                 // 巻き戻し
                 try {
-                    let r = await this.fetch(true);
-                    if (r.count == 0)
+                    const r = await this.fetch(true);
+                    if (r.count === 0)
                         break; // 結果が空なら終わり
                     i = r.count - 1;
                 }
                 catch (e) {
-                    this.logger.error("@calcCurrentOrderAsID - fetch : " + e);
+                    this.logger.error('@calcCurrentOrderAsID - fetch : ' + e);
                     throw e;
                 }
             }
-            let ev = this.events[i];
-            if (ev.user_id != null) {
+            const ev = this.events[i];
+            if (ev.user_id) {
                 switch (ev.detail.type) {
-                    case "host-changed":
-                        // clearhost実行時に id = 0 
-                        if (ev.user_id != 0 && !(ev.user_id in map)) {
+                    case 'host-changed':
+                        // clearhost実行時に id = 0
+                        if (ev.user_id !== 0 && !(ev.user_id in map)) {
                             map[ev.user_id] = false;
                             // -1、直前の試合開始ID、直前のhostchangeIDのいずれか
                             //this.logger.trace(`changed ${this.users[ev.user_id].username} ${hostAge}`);
@@ -262,9 +262,9 @@ class HistoryRepository {
                         hostAge = Date.parse(ev.timestamp);
                         unresolvedPlayers.delete(ev.user_id);
                         break;
-                    case "match-created":
+                    case 'match-created':
                         break;
-                    case "player-joined":
+                    case 'player-joined':
                         if (!(ev.user_id in map)) {
                             const la = Date.parse(ev.timestamp);
                             map[ev.user_id] = false;
@@ -273,24 +273,24 @@ class HistoryRepository {
                             unresolvedPlayers.delete(ev.user_id);
                         }
                         break;
-                    case "player-left":
-                    case "player-kicked":
+                    case 'player-left':
+                    case 'player-kicked':
                         if (!(ev.user_id in map)) {
                             map[ev.user_id] = true;
                             unresolvedPlayers.delete(ev.user_id);
                         }
                         break;
                     default:
-                        this.logger.warn("unknown event type! " + JSON.stringify(ev));
+                        this.logger.warn('unknown event type! ' + JSON.stringify(ev));
                         break;
                 }
             }
-            else if (ev.detail.type == "other" && ev.game) {
+            else if (ev.detail.type === 'other' && ev.game) {
                 hostAge = Date.parse(ev.game.start_time);
                 //this.logger.trace(`set host age ${hostAge} bc game start`);
                 if (ev.game.scores && gameCount < HistoryRepository.ESC_CRITERIA) {
                     gameCount++;
-                    for (let s of ev.game.scores) {
+                    for (const s of ev.game.scores) {
                         if (!(s.user_id in map)) {
                             unresolvedPlayers.add(s.user_id);
                         }
@@ -302,10 +302,10 @@ class HistoryRepository {
             //  直近{ESC_CRITERIA}回の試合参加メンバーすべての存在が確認された
             //  ロビー作成イベントまで到達
             // ループリミットを超過
-            if (16 <= result.length && unresolvedPlayers.size === 0) {
+            if (result.length >= 16 && unresolvedPlayers.size === 0) {
                 this.logger.info(`found ${result.length} players in ${loopCount} events. full lobby`);
-                if (16 < result.length) {
-                    this.logger.warn(`lots of players!!`);
+                if (result.length > 16) {
+                    this.logger.warn('lots of players!!');
                 }
                 break;
             }
@@ -313,16 +313,16 @@ class HistoryRepository {
                 this.logger.info(`found ${result.length} players in ${loopCount} events. estimated`);
                 break;
             }
-            if (ev.detail.type == "match-created") {
+            if (ev.detail.type === 'match-created') {
                 this.logger.info(`found ${result.length} players in ${loopCount} events. reached begin of events`);
                 break;
             }
             if (HistoryRepository.LOOP_LIMIT < loopCount) {
-                this.logger.warn("loop limit exceeded! " + HistoryRepository.LOOP_LIMIT);
+                this.logger.warn('loop limit exceeded! ' + HistoryRepository.LOOP_LIMIT);
                 break;
             }
             if (this.lobbyClosed) {
-                this.logger.warn("lobby was closed in action");
+                this.logger.warn('lobby was closed in action');
                 result.length = 0;
                 break;
             }

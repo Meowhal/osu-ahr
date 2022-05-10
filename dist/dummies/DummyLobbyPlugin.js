@@ -4,7 +4,7 @@ exports.DummyLobbyPlugin = void 0;
 const LobbyPlugin_1 = require("../plugins/LobbyPlugin");
 class DummyLobbyPlugin extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby) {
-        super(lobby, "dummy");
+        super(lobby, 'dummy');
     }
     GetPluginStatus() {
         return `-- Dummy Lobby Plugin --

@@ -23,8 +23,8 @@ const AfkKicker_1 = require("../plugins/AfkKicker");
 const MiscLoader_1 = require("../plugins/MiscLoader");
 const CommandParser_1 = require("../parsers/CommandParser");
 const CacheCleaner_1 = require("../plugins/CacheCleaner");
-const logger = log4js_1.default.getLogger("cli");
-const OahrCliDefaultOption = config_1.default.get("OahrCli");
+const logger = log4js_1.default.getLogger('cli');
+const OahrCliDefaultOption = config_1.default.get('OahrCli');
 class OahrBase {
     constructor(client) {
         this.option = OahrCliDefaultOption;
@@ -48,7 +48,7 @@ class OahrBase {
         this.lobby.RaisePluginsLoaded();
     }
     get isRegistered() {
-        return this.client.hostMask != "";
+        return this.client.hostMask !== '';
     }
     displayInfo() {
         logger.info(this.lobby.GetLobbyStatus());
@@ -56,9 +56,9 @@ class OahrBase {
     ensureRegisteredAsync() {
         return new Promise((resolve, reject) => {
             if (!this.isRegistered) {
-                logger.trace("waiting for registration from bancho");
-                this.client.once("registered", () => {
-                    logger.trace("registerd");
+                logger.trace('waiting for registration from bancho');
+                this.client.once('registered', () => {
+                    logger.trace('registerd');
                     resolve();
                 });
             }
@@ -68,14 +68,15 @@ class OahrBase {
         });
     }
     async makeLobbyAsync(name) {
-        name = name.replace(/[^ -/:-@\[-~0-9a-zA-Z]/g, "");
+        // Remove all but ascii graphic characters
+        name = name.replace(/[^ -~]/g, '');
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
-        logger.info("Making lobby, name : " + name);
+        logger.info('Making lobby, name : ' + name);
         await this.lobby.MakeLobbyAsync(name);
-        this.lobby.SendMessage("!mp password " + this.option.password);
-        for (let p of this.option.invite_users) {
-            this.lobby.SendMessage("!mp invite " + p);
+        this.lobby.SendMessage('!mp password ' + this.option.password);
+        for (const p of this.option.invite_users) {
+            this.lobby.SendMessage('!mp invite ' + p);
         }
         logger.info(`Made lobby : ${this.lobby.channel}`);
     }
@@ -83,7 +84,7 @@ class OahrBase {
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
         const channel = CommandParser_1.parser.EnsureMpChannelId(id);
-        logger.info("Entering lobby, channel : %s", channel);
+        logger.info('Entering lobby, channel : %s', channel);
         await this.lobby.EnterLobbyAsync(channel);
         await this.lobby.LoadMpSettingsAsync();
         logger.info(`Entered lobby : ${this.lobby.channel}`);

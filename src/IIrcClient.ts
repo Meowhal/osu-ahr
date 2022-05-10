@@ -2,8 +2,8 @@ import * as irc from './libs/irc';
 import { IsStatResponse } from './parsers/StatParser';
 import { EventEmitter } from 'events';
 import log4js from 'log4js';
-const ircLogger = log4js.getLogger("irc");
-const pmLogger = log4js.getLogger("PMLogger");
+const ircLogger = log4js.getLogger('irc');
+const pmLogger = log4js.getLogger('PMLogger');
 
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、
@@ -25,7 +25,7 @@ export function logIrcEvent(client: IIrcClient) {
   });
   client.on('registered', function (message) {
     const args = message.args as string[] | undefined;
-    ircLogger.debug('@reg %s', args?.join(", "));
+    ircLogger.debug('@reg %s', args?.join(', '));
   });
   client.on('message', function (from, to, message) {
     ircLogger.debug('@msg  %s => %s: %s', from, to, message);
@@ -51,14 +51,14 @@ export function logIrcEvent(client: IIrcClient) {
   client.on('action', function (from, to, text, message) {
     ircLogger.debug('@action  %s => %s: %s', from, to, text);
   });
-  client.on("selfMessage", (target: string, toSend) => {
-    ircLogger.debug('@sent bot => %s: %s', target, toSend);    
+  client.on('selfMessage', (target: string, toSend) => {
+    ircLogger.debug('@sent bot => %s: %s', target, toSend);
   });
 }
 
 export function logPrivateMessage(client: IIrcClient) {
-  client.on("message", (from, to, message) => {
-    if (to == client.nick) {
+  client.on('message', (from, to, message) => {
+    if (to === client.nick) {
       if (IsStatResponse(message)) {
         pmLogger.trace(`pm ${from} -> ${message}`);
       } else {

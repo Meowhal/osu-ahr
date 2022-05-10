@@ -16,12 +16,12 @@ class DeferredAction {
      * @param resetTimer 現在の遅延時間をリセットするか
      */
     start(delay, param = undefined, resetTimer = false) {
-        if (this.timeId != null && resetTimer) {
+        if (this.timeId !== null && resetTimer) {
             clearTimeout(this.timeId);
             this.timeId = null;
         }
         this.param = param;
-        if (this.timeId == null) {
+        if (this.timeId === null) {
             this.timeId = setTimeout(() => {
                 this.timeId = null;
                 this.action(this.param);
@@ -32,7 +32,7 @@ class DeferredAction {
     }
     /** 遅延実行をキャンセルする。*/
     cancel() {
-        if (this.timeId != null) {
+        if (this.timeId !== null) {
             clearTimeout(this.timeId);
             this.timeId = null;
             this.param = undefined;
@@ -40,7 +40,7 @@ class DeferredAction {
     }
     /** 遅延実行が完了しているか */
     get done() {
-        return this.timeId == null;
+        return this.timeId === null;
     }
 }
 exports.DeferredAction = DeferredAction;

@@ -2,87 +2,80 @@ import { Lobby } from '../Lobby';
 import { Player } from '../Player';
 import { LobbyPlugin } from './LobbyPlugin';
 import { BanchoResponseType } from '../parsers/CommandParser';
-import config from 'config';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason } from '../webapi/BeatmapRepository';
-import { FetchProfileError, FetchProfileErrorReason, ProfileRepository } from '../webapi/ProfileRepository';
+import { FetchProfileError, FetchProfileErrorReason } from '../webapi/ProfileRepository';
 import { WebApiClient } from '../webapi/WebApiClient';
-
-export interface MiscLoaderOption {
-}
 
 /**
  * Get beatmap mirror link from Beatconnect
  * Use !mirror to fetch the mirror link
  */
 export class MiscLoader extends LobbyPlugin {
-  option: MiscLoaderOption;
   canResend: boolean = true;
-  beatconnectURL: string = "https://beatconnect.io/b/${beatmapset_id}";
-  kitsuURL: string = "https://kitsu.moe/d/${beatmapset_id}";
+  beatconnectURL: string = 'https://beatconnect.io/b/${beatmapset_id}';
+  kitsuURL: string = 'https://kitsu.moe/d/${beatmapset_id}';
   canSeeRank: boolean = false;
 
-  constructor(lobby: Lobby, option: Partial<MiscLoaderOption> = {}) {
-    super(lobby, "MiscLoader", "miscLoader");
-    const d = config.get<MiscLoaderOption>(this.pluginName);
-    if(WebApiClient.available){
+  constructor(lobby: Lobby) {
+    super(lobby, 'MiscLoader', 'miscLoader');
+    if (WebApiClient.available) {
       this.canSeeRank = true;
     }
-    this.option = { ...d, ...option } as MiscLoaderOption;
     this.registerEvents();
   }
 
   private registerEvents(): void {
-    this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player))
+    this.lobby.ReceivedChatCommand.on(a => this.onReceivedChatCommand(a.command, a.param, a.player));
     this.lobby.ReceivedBanchoResponse.on(a => {
-      if (a.response.type == BanchoResponseType.BeatmapChanged) {
+      if (a.response.type === BanchoResponseType.BeatmapChanged) {
         this.canResend = true;
       }
     });
   }
 
   private async onReceivedChatCommand(command: string, param: string, player: Player): Promise<void> {
-    if (command == "!mirror") {
+    if (command === '!mirror') {
       if (this.canResend) {
         this.checkMirror(this.lobby.mapId);
       }
     }
-    if (command == "!rank") {
-      this.getProfile(player)
+    if (command === '!rank') {
+      this.getProfile(player);
     }
   }
 
-  async getProfile(player: Player){
+  async getProfile(player: Player) {
     try {
-      if(!this.canSeeRank){
+      if (!this.canSeeRank) {
         return;
       }
-      let currentPlayer = this.lobby.GetPlayer(player.name);
-      if(!currentPlayer)
+      const currentPlayer = this.lobby.GetPlayer(player.name);
+      if (!currentPlayer)
         return;
-      if(currentPlayer.id == 0 || this.lobby.gameMode == undefined){
-        this.lobby.SendMessageWithCoolTime("!stats " + currentPlayer.name, "!rank", 10000);
+      if (currentPlayer.id === 0 || this.lobby.gameMode === undefined) {
+        this.lobby.SendMessageWithCoolTime('!stats ' + currentPlayer.name, '!rank', 10000);
         return;
       }
-      let selectedMode = "";
-      switch(this.lobby.gameMode.value){
-        case "0":
-          selectedMode = "osu";
+      let selectedMode = '';
+      switch (this.lobby.gameMode.value) {
+        case '0':
+          selectedMode = 'osu';
           break;
-        case "1":
-          selectedMode = "taiko";
+        case '1':
+          selectedMode = 'taiko';
           break;
-        case "2":
-          selectedMode = "fruits";
+        case '2':
+          selectedMode = 'fruits';
           break;
-        case "3":
-          selectedMode = "mania";
+        case '3':
+          selectedMode = 'mania';
           break;
       }
       const profile = await WebApiClient.getPlayer(currentPlayer.id, selectedMode);
-    
-      const msg = profile.username + " your rank is #" + profile.statistics.global_rank;
-      this.lobby.SendMessageWithCoolTime(msg, "!rank",5000);
-      
+
+      const msg = profile.username + ' your rank is #' + profile.statistics.global_rank;
+      this.lobby.SendMessageWithCoolTime(msg, '!rank', 5000);
+
     } catch (e: any) {
       if (e instanceof FetchProfileError) {
         switch (e.reason) {
@@ -101,18 +94,18 @@ export class MiscLoader extends LobbyPlugin {
 
   async checkMirror(mapId: number): Promise<void> {
     try {
-      let map = await BeatmapRepository.getBeatmap(mapId, this.lobby.gameMode);
+      const map = await BeatmapRepository.getBeatmap(mapId, this.lobby.gameMode);
       this.canResend = false;
       if (!map) {
-        this.lobby.SendMessage("Current beatmap doesn't have mirror...");
+        this.lobby.SendMessage('Current beatmap doesn\'t have mirror...');
         this.canResend = false;
         return;
       }
       this.canResend = true;
-      var beatconnectLink = this.beatconnectURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
-      var kitsuLink = this.kitsuURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
-      var beatmapView = map.beatmapset?.title.toString();
-      this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView} : [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, "!mirror", 5000);
+      const beatconnectLink = this.beatconnectURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
+      const kitsuLink = this.kitsuURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
+      const beatmapView = map.beatmapset?.title.toString();
+      this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView} : [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, '!mirror', 5000);
     } catch (e: any) {
       this.canResend = false;
       if (e instanceof FetchBeatmapError) {

@@ -22,9 +22,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.trial = void 0;
 const irc = __importStar(require("../libs/irc"));
 const IrcTestSettings = {
-    server: "irc.dollyfish.net.nz",
-    nick: "ohr",
-    channel: "#test"
+    server: 'irc.dollyfish.net.nz',
+    nick: 'ohr',
+    channel: '#test'
 };
 function trial() {
     const bot = new irc.Client(IrcTestSettings.server, IrcTestSettings.nick, {
@@ -71,7 +71,7 @@ function trial() {
     });
     bot.addListener('registered', function (message) {
         console.log('registered %s', message);
-        bot.join("#test");
+        bot.join('#test');
     });
 }
 exports.trial = trial;

@@ -28,7 +28,7 @@ const readline = __importStar(require("readline"));
 const log4js_1 = __importDefault(require("log4js"));
 const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
-const logger = log4js_1.default.getLogger("cli");
+const logger = log4js_1.default.getLogger('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands 
   [make <Lobby_name>] Make a lobby.  ex: 'make 5* auto host rotation'
@@ -53,15 +53,15 @@ class OahrCli extends OahrBase_1.OahrBase {
         super(client);
         this.scenes = {
             mainMenu: {
-                name: "",
-                prompt: "> ",
+                name: '',
+                prompt: '> ',
                 action: async (line) => {
-                    let l = CommandParser_1.parser.SplitCliCommand(line);
+                    const l = CommandParser_1.parser.SplitCliCommand(line);
                     switch (l.command) {
-                        case "m":
-                        case "make":
-                            if (l.arg == "") {
-                                logger.info("make command needs lobby name. ex:make testlobby");
+                        case 'm':
+                        case 'make':
+                            if (l.arg === '') {
+                                logger.info('make command needs lobby name. ex:make testlobby');
                                 return;
                             }
                             try {
@@ -69,89 +69,89 @@ class OahrCli extends OahrBase_1.OahrBase {
                                 this.transitionToLobbyMenu();
                             }
                             catch (e) {
-                                logger.info("faiiled to make lobby : %s", e);
+                                logger.info('faiiled to make lobby : %s', e);
                                 this.scene = this.scenes.exited;
                             }
                             break;
-                        case "e":
-                        case "enter":
+                        case 'e':
+                        case 'enter':
                             try {
-                                if (l.arg == "") {
-                                    logger.info("enter command needs lobby id. ex:enter 123456");
+                                if (l.arg === '') {
+                                    logger.info('enter command needs lobby id. ex:enter 123456');
                                     return;
                                 }
                                 await this.enterLobbyAsync(l.arg);
                                 this.transitionToLobbyMenu();
                             }
                             catch (e) {
-                                logger.info("invalid channel : %s", e);
+                                logger.info('invalid channel : %s', e);
                                 this.scene = this.scenes.exited;
                             }
                             break;
-                        case "q":
-                        case "quit":
-                        case "exit":
+                        case 'q':
+                        case 'quit':
+                        case 'exit':
                             this.scene = this.scenes.exited;
                             break;
-                        case "h":
-                        case "help":
-                        case "command":
-                        case "commands":
-                        case "/?":
-                        case "-?":
-                        case "?":
+                        case 'h':
+                        case 'help':
+                        case 'command':
+                        case 'commands':
+                        case '/?':
+                        case '-?':
+                        case '?':
                             console.log(mainMenuCommandsMessage);
                             break;
-                        case "":
+                        case '':
                             break;
                         default:
-                            logger.info("invalid command : %s", line);
+                            logger.info('invalid command : %s', line);
                             break;
                     }
                 },
                 completer: (line) => {
-                    const completions = ["make", "enter", "quit", "exit", "help"];
+                    const completions = ['make', 'enter', 'quit', 'exit', 'help'];
                     const hits = completions.filter(v => v.startsWith(line));
-                    return [hits.length ? hits : ["make", "enter", "quit", "help"], line];
+                    return [hits.length ? hits : ['make', 'enter', 'quit', 'help'], line];
                 }
             },
             lobbyMenu: {
-                name: "lobbyMenu",
-                prompt: "> ",
+                name: 'lobbyMenu',
+                prompt: '> ',
                 action: async (line) => {
-                    let l = CommandParser_1.parser.SplitCliCommand(line);
-                    if (this.lobby.status == Lobby_1.LobbyStatus.Left || this.client.conn == null) {
+                    const l = CommandParser_1.parser.SplitCliCommand(line);
+                    if (this.lobby.status === Lobby_1.LobbyStatus.Left || !this.client.conn) {
                         this.scene = this.scenes.exited;
                         return;
                     }
                     switch (l.command) {
-                        case "s":
-                        case "say":
-                            if ((l.arg.startsWith("!") && !l.arg.startsWith("!mp ")) || l.arg.startsWith("*")) {
+                        case 's':
+                        case 'say':
+                            if ((l.arg.startsWith('!') && !l.arg.startsWith('!mp ')) || l.arg.startsWith('*')) {
                                 this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.arg);
                             }
                             else {
                                 this.lobby.SendMessage(l.arg);
                             }
                             break;
-                        case "i":
-                        case "info":
+                        case 'i':
+                        case 'info':
                             this.displayInfo();
                             break;
-                        case "reorder":
+                        case 'reorder':
                             this.selector.Reorder(l.arg);
                             break;
-                        case "regulation":
+                        case 'regulation':
                             if (!l.arg) {
                                 console.log(this.checker.getRegulationDescription());
                             }
                             else {
-                                this.checker.processOwnerCommand("*regulation", l.arg); // TODO check
+                                this.checker.processOwnerCommand('*regulation', l.arg); // TODO check
                             }
                             break;
-                        case "c":
-                        case "close":
-                            if (l.arg == "now") {
+                        case 'c':
+                        case 'close':
+                            if (l.arg === 'now') {
                                 // close now
                                 await this.lobby.CloseLobbyAsync();
                                 this.scene = this.scenes.exited;
@@ -165,53 +165,53 @@ class OahrCli extends OahrBase_1.OahrBase {
                                 this.terminator.CloseLobby();
                             }
                             break;
-                        case "q":
-                        case "quit":
-                            logger.info("quit");
+                        case 'q':
+                        case 'quit':
+                            logger.info('quit');
                             this.scene = this.scenes.exited;
                             break;
-                        case "h":
-                        case "help":
-                        case "command":
-                        case "commands":
-                        case "/?":
-                        case "-?":
-                        case "?":
+                        case 'h':
+                        case 'help':
+                        case 'command':
+                        case 'commands':
+                        case '/?':
+                        case '-?':
+                        case '?':
                             console.log(lobbyMenuCommandsMessage);
                             break;
-                        case "check_order":
+                        case 'check_order':
                             this.lobby.historyRepository.calcCurrentOrderAsName().then(r => {
-                                logger.info("history order = " + r.join(", "));
-                                logger.info("current order = " + this.selector.hostQueue.map(p => p.name).join(", "));
+                                logger.info('history order = ' + r.join(', '));
+                                logger.info('current order = ' + this.selector.hostQueue.map(p => p.name).join(', '));
                             });
                             break;
-                        case "":
+                        case '':
                             break;
                         default:
-                            if (l.command.startsWith("!mp")) {
-                                this.lobby.SendMessage("!mp " + l.arg);
+                            if (l.command.startsWith('!mp')) {
+                                this.lobby.SendMessage('!mp ' + l.arg);
                             }
-                            else if (l.command.startsWith("!") || l.command.startsWith("*")) {
-                                this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + " " + l.arg);
+                            else if (l.command.startsWith('!') || l.command.startsWith('*')) {
+                                this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + ' ' + l.arg);
                             }
                             else {
-                                console.log("invalid command : %s", line);
+                                console.log('invalid command : %s', line);
                             }
                             break;
                     }
                 },
                 completer: (line) => {
-                    const completions = ["say", "info", "reorder", "regulation", "close", "quit", "help"];
+                    const completions = ['say', 'info', 'reorder', 'regulation', 'close', 'quit', 'help'];
                     const hits = completions.filter(v => v.startsWith(line));
                     return [hits.length ? hits : completions, line];
                 }
             },
             exited: {
-                name: "exited",
-                prompt: "ended",
+                name: 'exited',
+                prompt: 'ended',
                 action: async (line) => { },
                 completer: (line) => {
-                    return [["exit"], line];
+                    return [['exit'], line];
                 }
             }
         };
@@ -224,7 +224,7 @@ class OahrCli extends OahrBase_1.OahrBase {
         return this.scene === this.scenes.exited;
     }
     start(rl) {
-        if (rl == null) {
+        if (!rl) {
             rl = readline.createInterface({
                 input: process.stdin,
                 output: process.stdout,
@@ -233,40 +233,40 @@ class OahrCli extends OahrBase_1.OahrBase {
                 }
             });
         }
-        let r = rl;
-        logger.trace("waiting for registration from bancho");
-        console.log("Connecting to Osu Bancho ...");
-        this.client.once("registered", () => {
-            console.log("Connected :D");
-            console.log("\n=== Welcome to osu-ahr ===");
+        const r = rl;
+        logger.trace('waiting for registration from bancho');
+        console.log('Connecting to Osu Bancho ...');
+        this.client.once('registered', () => {
+            console.log('Connected :D');
+            console.log('\n=== Welcome to osu-ahr ===');
             console.log(mainMenuCommandsMessage);
             r.setPrompt(this.prompt);
             r.prompt();
         });
-        r.on("line", line => {
-            logger.trace("scene:%s, line:%s", this.scene.name, line);
+        r.on('line', line => {
+            logger.trace('scene:%s, line:%s', this.scene.name, line);
             this.scene.action(line).then(() => {
                 if (!this.exited) {
                     r.setPrompt(this.prompt);
                     r.prompt();
                 }
                 else {
-                    logger.trace("closing interface");
+                    logger.trace('closing interface');
                     r.close();
                 }
             });
         });
-        r.on("close", () => {
-            if (this.client != null) {
-                logger.info("readline closed");
-                if (this.client.conn != null && !this.client.conn.requestedDisconnect) {
-                    this.client.disconnect("goodby", () => {
-                        logger.info("ircClient disconnected");
+        r.on('close', () => {
+            if (this.client) {
+                logger.info('readline closed');
+                if (this.client.conn && !this.client.conn.requestedDisconnect) {
+                    this.client.disconnect('goodby', () => {
+                        logger.info('ircClient disconnected');
                         process.exit(0);
                     });
                 }
                 else {
-                    logger.info("exit");
+                    logger.info('exit');
                     process.exit(0);
                 }
             }
@@ -274,7 +274,7 @@ class OahrCli extends OahrBase_1.OahrBase {
     }
     transitionToLobbyMenu() {
         this.scene = this.scenes.lobbyMenu;
-        this.scene.prompt = (this.lobby.channel || "") + " > ";
+        this.scene.prompt = (this.lobby.channel || '') + ' > ';
         console.log(lobbyMenuCommandsMessage);
     }
 }

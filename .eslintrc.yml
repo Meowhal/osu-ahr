@@ -1,15 +1,103 @@
 env:
   es2021: true
   node: true
+  browser: true
 extends:
-  - standard
-parser: '@typescript-eslint/parser'
+  - "eslint:recommended"
+  - "plugin:@typescript-eslint/eslint-recommended"
+  - "plugin:@typescript-eslint/recommended"
+parser: "@typescript-eslint/parser"
 parserOptions:
   ecmaVersion: latest
   sourceType: module
+  project: ./tsconfig.json
 plugins:
-  - '@typescript-eslint'
-rules: {
-  "no-unused-vars": "off",
-  "@typescript-eslint/no-unused-vars": ["error"]
-}
+  - "@typescript-eslint"
+rules:
+  "@typescript-eslint/no-var-requires":
+    - "off"
+  "@typescript-eslint/no-explicit-any":
+    - "off"
+  "@typescript-eslint/no-unused-vars":
+    - "off"
+  "@typescript-eslint/no-namespace":
+    - "off"
+  "@typescript-eslint/ban-types":
+    - "error"
+  "@typescript-eslint/no-empty-function":
+    - "error"
+  "@typescript-eslint/no-empty-interface":
+    - "error"
+  "@typescript-eslint/no-inferrable-types":
+    - "off"
+  no-undef:
+    - "off"
+  brace-style:
+    - "off"
+    - "1tbs"
+    - "allowSingleLine": true
+  curly:
+    - "off"
+    - "multi-line"
+    - "consistent"
+  no-console:
+    - "off"
+  no-inline-comments:
+    - "off"
+  comma-style:
+    - "error"
+  no-extra-parens:
+    - "off"
+    - "all"
+  no-useless-catch:
+    - "off"
+  no-empty:
+    - "error"
+  no-fallthrough:
+    - "error"
+  no-constant-condition:
+    - "error"
+    - "checkLoops": false
+  no-irregular-whitespace:
+    - "error"
+  no-useless-escape:
+    - "error"
+  no-case-declarations:
+    - "off"
+  prefer-const:
+    - "error"
+  no-var: 
+    - "error"
+  no-control-regex:
+    - "off"
+  no-unused-vars:
+    - "off"
+  indent:
+    - "error"
+    - 2
+    - "SwitchCase": 1
+  quotes:
+    - "error"
+    - "single"
+  semi:
+    - "error"
+    - "always"
+  yoda:
+    - "error"
+  no-duplicate-imports:
+    - "error"
+    - "includeExports": true
+  camelcase:
+    - "off"
+  eqeqeq:
+    - "error"
+  no-trailing-spaces:
+    - "error"
+  space-before-function-paren:
+    - "off"
+  no-use-before-define:
+    - "off"
+  no-multiple-empty-lines:
+    - "error"
+  padded-blocks:
+    - "off"

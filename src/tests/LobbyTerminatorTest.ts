@@ -1,11 +1,9 @@
-import { assert } from 'chai';
 import { Lobby } from '../Lobby';
-import { parser, BanchoResponse } from '../parsers/CommandParser';
 import { DummyIrcClient } from '../dummies/DummyIrcClient';
 import { LobbyTerminator } from '../plugins/LobbyTerminator';
 import tu from './TestUtils';
 
-describe.skip("Lobby Terminator Tests", function () {
+describe.skip('Lobby Terminator Tests', function () {
   before(function () {
     tu.configMochaVerbosely();
   });
@@ -15,8 +13,8 @@ describe.skip("Lobby Terminator Tests", function () {
     terminator.multilimeMessageInterval = interval;
     return { terminator, lobby, ircClient };
   }
-  it("CloseLobby time", async () => {
+  it('CloseLobby time', async () => {
     const { terminator, lobby, ircClient } = await setupAsync();
     terminator.CloseLobby(100);
-  })
+  });
 });

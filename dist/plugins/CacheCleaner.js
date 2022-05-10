@@ -1,18 +1,14 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CacheCleaner = void 0;
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const config_1 = __importDefault(require("config"));
 const BeatmapRepository_1 = require("../webapi/BeatmapRepository");
 const ProfileRepository_1 = require("../webapi/ProfileRepository");
+const TypedConfig_1 = require("../TypedConfig");
 class CacheCleaner extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "CacheCleaner", "cleaner");
-        const d = config_1.default.get(this.pluginName);
-        this.option = { ...d, ...option };
+        super(lobby, 'CacheCleaner', 'cleaner');
+        this.option = (0, TypedConfig_1.getConfig)(this.pluginName, option);
         this.cleanedAt = Date.now();
         this.lastHeapSize = process.memoryUsage().heapUsed;
         this.cleaning = false;
@@ -32,16 +28,16 @@ class CacheCleaner extends LobbyPlugin_1.LobbyPlugin {
         if (!player.isAuthorized)
             return;
         switch (command.toLocaleLowerCase()) {
-            case "*clearcache_enable":
+            case '*clearcache_enable':
                 this.option.enabled = true;
-                this.logger.info("CacheCleaner enabled");
+                this.logger.info('CacheCleaner enabled');
                 break;
-            case "*clearcache_disable":
+            case '*clearcache_disable':
                 this.option.enabled = false;
-                this.logger.info("CacheCleaner disabled");
+                this.logger.info('CacheCleaner disabled');
                 break;
-            case "*clearcache":
-            case "*clear":
+            case '*clearcache':
+            case '*clear':
                 this.clearCache();
                 break;
         }
@@ -65,14 +61,14 @@ class CacheCleaner extends LobbyPlugin_1.LobbyPlugin {
     }
     formatByte(numByte) {
         if (isNaN(numByte))
-            return "NaN";
+            return 'NaN';
         if (!isFinite(numByte))
-            return numByte > 0 ? "∞" : "-∞";
-        const notations = ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi", "Ri", "Qi"];
-        const sign = 0 <= numByte ? "" : "-";
+            return numByte > 0 ? '∞' : '-∞';
+        const notations = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi', 'Ri', 'Qi'];
+        const sign = numByte >= 0 ? '' : '-';
         numByte = Math.abs(numByte);
         let idx = 0;
-        while (1024 <= numByte) {
+        while (numByte >= 1024) {
             numByte /= 1024;
             idx++;
         }

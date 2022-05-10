@@ -11,11 +11,12 @@ const config_1 = __importDefault(require("config"));
  */
 class WordCounter extends LobbyPlugin_1.LobbyPlugin {
     constructor(lobby, option = {}) {
-        super(lobby, "WordCounter", "wcounter");
+        super(lobby, 'WordCounter', 'wcounter');
         this.samples = [];
         this.lastLogTime = 0;
         const d = config_1.default.get(this.pluginName);
         this.option = { ...d, ...option };
+        this.loadEnvSettings(this.option);
         this.periods = this.option.periods.map(a => {
             return {
                 symbol: a.symbol,
@@ -41,11 +42,11 @@ class WordCounter extends LobbyPlugin_1.LobbyPlugin {
         }
     }
     update(message, now) {
-        if (this.periods.length == 0)
+        if (this.periods.length === 0)
             return false;
         const ns = { time: now, length: message.length };
         let changedMax = false;
-        for (let p of this.periods) {
+        for (const p of this.periods) {
             p.chatsPerPeriod++;
             p.wordsPerPeriod += ns.length;
             while (p.index < this.samples.length && this.samples[p.index].time + p.durationMs < now) {
@@ -65,25 +66,25 @@ class WordCounter extends LobbyPlugin_1.LobbyPlugin {
         this.samples.push(ns);
         const topIndex = this.periods.reduce((p, a) => a.index < p ? a.index : p, 1000000);
         // 時間切れのサンプルが溜まってきたら捨てる
-        if (this.samples.length / 2 < topIndex && 100 < this.samples.length) {
+        if (this.samples.length / 2 < topIndex && this.samples.length > 100) {
             this.logger.trace(`gc start len:${this.samples.length}, idx:${topIndex}`);
             this.samples = this.samples.slice(topIndex);
-            for (let p of this.periods) {
+            for (const p of this.periods) {
                 p.index -= topIndex;
             }
         }
         return changedMax;
     }
     log(msg, important) {
-        let f = (important ? this.logger.info : this.logger.debug).bind(this.logger);
-        f("msg:%s", msg);
-        for (let p of this.periods) {
+        const f = (important ? this.logger.info : this.logger.debug).bind(this.logger);
+        f('msg:%s', msg);
+        for (const p of this.periods) {
             f(`  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `);
         }
     }
     GetPluginStatus() {
-        let m = "-- Word Counter --";
-        for (let p of this.periods) {
+        let m = '-- Word Counter --';
+        for (const p of this.periods) {
             m +=
                 `\n  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `;
         }
