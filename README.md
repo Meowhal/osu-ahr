@@ -79,6 +79,7 @@ Discord
 + Enviroment Variable Supports
   + Almost all configs that can be set in local.json can also be set from environment variables.
   + The environment variable name should be in the form `ahr_[category]_[config_name]`.
++ Fixed discord Permission Issue.
 
 e.g. bash
 
