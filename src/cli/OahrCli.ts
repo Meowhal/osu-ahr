@@ -224,7 +224,7 @@ export class OahrCli extends OahrBase {
     logger.trace('Waiting for registration from osu!Bancho...');
     console.log('Connecting to osu!Bancho...');
     this.client.once('registered', () => {
-      console.log('Connected :D');
+      console.log('Connected. :D');
       console.log('\n=== Welcome to osu-ahr ===');
       console.log(mainMenuCommandsMessage);
       r.setPrompt(this.prompt);
@@ -245,10 +245,10 @@ export class OahrCli extends OahrBase {
     });
     r.on('close', () => {
       if (this.client) {
-        logger.info('Readline closed');
+        logger.info('Readline closed.');
         if (this.client.conn && !this.client.conn.requestedDisconnect) {
           this.client.disconnect('Goodbye', () => {
-            logger.info('IRC client disconnected');
+            logger.info('IRC client disconnected.');
             process.exit(0);
           });
         } else {
