@@ -25,7 +25,7 @@ LobbyMenu Commands
   [regulation disable] Disable regulation checking.
   [close] Close the lobby when everyone leaves.
   [close now] Close the lobby and quit this application.
-            DO NOT Quit the application before closing the lobby!
+            Do NOT quit the application before closing the lobby!
   [quit] Quit this application. (Lobby will not close.)
 `;
 
