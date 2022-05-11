@@ -168,17 +168,17 @@ export class OahrCli extends OahrBase {
             break;
           case 'check_order':
             this.lobby.historyRepository.calcCurrentOrderAsName().then(r => {
-              logger.info('History order = ' + r.join(', '));
-              logger.info('Current order = ' + this.selector.hostQueue.map(p => p.name).join(', '));
+              logger.info(`History order = ${r.join(', ')}`);
+              logger.info(`Current order = ${this.selector.hostQueue.map(p => p.name).join(', ')}`);
             });
             break;
           case '':
             break;
           default:
             if (l.command.startsWith('!mp')) {
-              this.lobby.SendMessage('!mp ' + l.arg);
+              this.lobby.SendMessage(`!mp ${l.arg}`);
             } else if (l.command.startsWith('!') || l.command.startsWith('*')) {
-              this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + ' ' + l.arg);
+              this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), `${l.command} ${l.arg}`);
             } else {
               console.log('Invalid command : %s', line);
             }
@@ -262,7 +262,7 @@ export class OahrCli extends OahrBase {
 
   transitionToLobbyMenu() {
     this.scene = this.scenes.lobbyMenu;
-    this.scene.prompt = (this.lobby.channel || '') + ' > ';
+    this.scene.prompt = `${this.lobby.channel || ''} > `;
     console.log(lobbyMenuCommandsMessage);
   }
 }
