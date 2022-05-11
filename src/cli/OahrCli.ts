@@ -248,7 +248,7 @@ export class OahrCli extends OahrBase {
         logger.info('Readline closed');
         if (this.client.conn && !this.client.conn.requestedDisconnect) {
           this.client.disconnect('Goodbye', () => {
-            logger.info('ircClient disconnected');
+            logger.info('IRC client disconnected');
             process.exit(0);
           });
         } else {
