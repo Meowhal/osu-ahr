@@ -8,24 +8,24 @@ import { OahrBase } from './OahrBase';
 const logger = log4js.getLogger('cli');
 
 const mainMenuCommandsMessage = `
-MainMenu Commands 
-  [make <Lobby_name>] Make a lobby.  ex: 'make 5* auto host rotation'
-  [enter <LobbyID>]   Enter the lobby. ex: 'enter 123456' (It only works in a Tournament lobby ID.)
+MainMenu Commands
+  [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
+  [enter <LobbyID>] Enter the lobby. ex: 'enter 123456' (It only works in a Tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
 
 const lobbyMenuCommandsMessage = `
-LobbyMenu Commands 
+LobbyMenu Commands
   [say <Message>] Send Message to #multiplayer.
   [info] Show current application's informations.
   [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
   [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
-  [regulation enable] Enable regulation checking 
+  [regulation enable] Enable regulation checking
   [regulation disable] Disable regulation checking
   [close] Close the lobby and Quit this application. ex: 'close now'
             DO NOT Quit application before close the lobby!
-  [quit]  Quit this application. (lobby won't close.)
+  [quit] Quit this application. (lobby won't close.)
 `;
 
 interface Scene {
@@ -222,7 +222,7 @@ export class OahrCli extends OahrBase {
     const r = rl as readline.Interface;
 
     logger.trace('waiting for registration from bancho');
-    console.log('Connecting to Osu Bancho ...');
+    console.log('Connecting to Osu Bancho...');
     this.client.once('registered', () => {
       console.log('Connected :D');
       console.log('\n=== Welcome to osu-ahr ===');
