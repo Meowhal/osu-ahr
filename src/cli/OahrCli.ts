@@ -221,8 +221,8 @@ export class OahrCli extends OahrBase {
     }
     const r = rl as readline.Interface;
 
-    logger.trace('Waiting for registration from bancho');
-    console.log('Connecting to Osu Bancho...');
+    logger.trace('Waiting for registration from osu!Bancho');
+    console.log('Connecting to osu!Bancho...');
     this.client.once('registered', () => {
       console.log('Connected :D');
       console.log('\n=== Welcome to osu-ahr ===');
