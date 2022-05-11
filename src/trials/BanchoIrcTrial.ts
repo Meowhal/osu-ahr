@@ -59,12 +59,12 @@ export function ConnectionServerTrial() {
 
   logIrcEvent(bot);
 
-  console.log('hostmask => ' + bot.hostMask);
+  console.log(`hostmask => ${bot.hostMask}`);
 
   bot.connect();
 
   bot.addListener('registered', function (message) {
-    console.log('hostmask => ' + bot.hostMask);
+    console.log(`hostmask => ${bot.hostMask}`);
     bot.disconnect('goodby', () => { console.log('disconnected'); });
   });
 }

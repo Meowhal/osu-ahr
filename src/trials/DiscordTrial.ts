@@ -28,7 +28,7 @@ export async function trial() {
   const cfg = config.get<DiscordOption>('Discord');
 
   client.once('ready', async cl => {
-    console.log('Ready! ' + generateInviteLink());
+    console.log(`Ready! ${generateInviteLink()}`);
     for (const g of cl.guilds.cache.values()) {
       await g.commands.set(commands);
     }
@@ -78,7 +78,7 @@ export async function trial() {
   });
 
   client.on('messageCreate', async message => {
-    console.log('msg:' + message.content);
+    console.log(`msg:${message.content}`);
 
     if (message.author.bot) {
       return;
