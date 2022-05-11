@@ -19,7 +19,7 @@ const lobbyMenuCommandsMessage = `
 LobbyMenu Commands
   [say <Message>] Send Message to #multiplayer.
   [info] Show current application's informations.
-  [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
+  [reorder] arrange host queue. ex: 'reorder player1, player2, player3'
   [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
   [regulation enable] Enable regulation checking
   [regulation disable] Disable regulation checking
@@ -60,7 +60,7 @@ export class OahrCli extends OahrBase {
               await this.makeLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
             } catch (e) {
-              logger.info('faiiled to make lobby : %s', e);
+              logger.info('failed to make lobby : %s', e);
               this.scene = this.scenes.exited;
             }
             break;
@@ -247,7 +247,7 @@ export class OahrCli extends OahrBase {
       if (this.client) {
         logger.info('readline closed');
         if (this.client.conn && !this.client.conn.requestedDisconnect) {
-          this.client.disconnect('goodby', () => {
+          this.client.disconnect('goodbye', () => {
             logger.info('ircClient disconnected');
             process.exit(0);
           });
