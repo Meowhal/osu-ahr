@@ -61,7 +61,7 @@ export class OahrCli extends OahrBase {
               await this.makeLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
             } catch (e) {
-              logger.info('Failed to make a lobby : %s', e);
+              logger.info(`Failed to make a lobby : ${e}`);
               this.scene = this.scenes.exited;
             }
             break;
@@ -75,7 +75,7 @@ export class OahrCli extends OahrBase {
               await this.enterLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
             } catch (e) {
-              logger.info('Invalid channel : %s', e);
+              logger.info(`Invalid channel : ${e}`);
               this.scene = this.scenes.exited;
             }
             break;
@@ -96,7 +96,7 @@ export class OahrCli extends OahrBase {
           case '':
             break;
           default:
-            logger.info('Invalid command : %s', line);
+            logger.info(`Invalid command : ${line}`);
             break;
         }
       },
@@ -180,7 +180,7 @@ export class OahrCli extends OahrBase {
             } else if (l.command.startsWith('!') || l.command.startsWith('*')) {
               this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), `${l.command} ${l.arg}`);
             } else {
-              console.log('Invalid command : %s', line);
+              console.log(`Invalid command : ${line}`);
             }
             break;
         }
@@ -233,7 +233,7 @@ export class OahrCli extends OahrBase {
     });
 
     r.on('line', line => {
-      logger.trace('Scene:%s, Line:%s', this.scene.name, line);
+      logger.trace(`Scene:${this.scene.name}, Line:${line}`);
       this.scene.action(line).then(() => {
         if (!this.exited) {
           r.setPrompt(this.prompt);

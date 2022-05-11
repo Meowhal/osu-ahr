@@ -107,7 +107,7 @@ export class OahrBase {
   async enterLobbyAsync(id: string): Promise<void> {
     if (!this.isRegistered) await this.ensureRegisteredAsync();
     const channel = parser.EnsureMpChannelId(id);
-    logger.info('Entering lobby, channel : %s', channel);
+    logger.info(`Entering lobby, channel : ${channel}`);
     await this.lobby.EnterLobbyAsync(channel);
     await this.lobby.LoadMpSettingsAsync();
 
