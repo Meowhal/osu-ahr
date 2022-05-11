@@ -221,7 +221,7 @@ export class OahrCli extends OahrBase {
     }
     const r = rl as readline.Interface;
 
-    logger.trace('Waiting for registration from osu!Bancho');
+    logger.trace('Waiting for registration from osu!Bancho...');
     console.log('Connecting to osu!Bancho...');
     this.client.once('registered', () => {
       console.log('Connected :D');
@@ -238,7 +238,7 @@ export class OahrCli extends OahrBase {
           r.setPrompt(this.prompt);
           r.prompt();
         } else {
-          logger.trace('Closing interface');
+          logger.trace('Closing interface...');
           r.close();
         }
       });
@@ -252,7 +252,7 @@ export class OahrCli extends OahrBase {
             process.exit(0);
           });
         } else {
-          logger.info('Exiting');
+          logger.info('Exiting...');
           process.exit(0);
         }
       }
