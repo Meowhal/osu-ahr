@@ -152,9 +152,9 @@ export class AfkKicker extends LobbyPlugin {
     if (stat.afkPoint < 0) {
       stat.afkPoint = 0;
     } else if (this.option.threshold <= stat.afkPoint) {
-      this.lobby.SendMessage('!mp kick ' + player.escaped_name);
+      this.lobby.SendMessage(`!mp kick ${player.escaped_name}`);
       this.lobby.SendMessage('bot: kicked afk player.');
-      this.logger.info('kicked ' + player.escaped_name);
+      this.logger.info(`kicked ${player.escaped_name}`);
     }
   }
 
@@ -197,7 +197,7 @@ export class AfkKicker extends LobbyPlugin {
       .filter(([player, stat]) => stat.afkPoint > 0)
       .map(([player, stat]) => `${player.escaped_name}: ${stat.afkPoint}`).join(',');
     if (points) {
-      points = '\n  points: ' + points;
+      points = `\n  points: ${points}`;
     }
     return `-- AFK Kicker --
   status: ${this.option.enabled ? 'enabled' : 'disabled'}, threshold: ${this.option.threshold}, cooltime: ${this.option.cooltime_ms} (ms)${points}`;

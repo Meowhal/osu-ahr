@@ -154,7 +154,7 @@ export class MatchStarter extends LobbyPlugin {
     let strSec = '';
 
     if (min > 1) {
-      strMin = min.toString() + ' minutes';
+      strMin = `${min.toString()} minutes`;
     } else if (min === 1) {
       strMin = '1 minute';
     }
@@ -164,7 +164,7 @@ export class MatchStarter extends LobbyPlugin {
     }
 
     if (sec > 1) {
-      strSec = sec.toString() + ' seconds';
+      strSec = `${sec.toString()} seconds`;
     } else if (sec === 1) {
       strSec = '1 second';
     }

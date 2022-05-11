@@ -357,9 +357,9 @@ export class AutoHostSelector extends LobbyPlugin {
       let m = this.hostQueue.map(c => disguiseUserName(c.name)).join(', ');
       this.logger.trace(m);
       if (this.option.host_order_chars_limit < m.length) {
-        m = m.substring(0, this.option.host_order_chars_limit) + '...';
+        m = `${m.substring(0, this.option.host_order_chars_limit)}...`;
       }
-      return 'host order : ' + m;
+      return `host order : ${m}`;
     }, '!queue', this.option.host_order_cooltime_ms);
   }
 

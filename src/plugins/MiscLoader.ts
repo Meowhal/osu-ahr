@@ -53,7 +53,7 @@ export class MiscLoader extends LobbyPlugin {
       if (!currentPlayer)
         return;
       if (currentPlayer.id === 0 || this.lobby.gameMode === undefined) {
-        this.lobby.SendMessageWithCoolTime('!stats ' + currentPlayer.name, '!rank', 10000);
+        this.lobby.SendMessageWithCoolTime(`!stats ${currentPlayer.name}`, '!rank', 10000);
         return;
       }
       let selectedMode = '';
@@ -73,7 +73,7 @@ export class MiscLoader extends LobbyPlugin {
       }
       const profile = await WebApiClient.getPlayer(currentPlayer.id, selectedMode);
 
-      const msg = profile.username + ' your rank is #' + profile.statistics.global_rank;
+      const msg = `${profile.username} your rank is #${profile.statistics.global_rank}`;
       this.lobby.SendMessageWithCoolTime(msg, '!rank', 5000);
 
     } catch (e: any) {
