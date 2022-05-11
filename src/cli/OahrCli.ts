@@ -252,7 +252,7 @@ export class OahrCli extends OahrBase {
             process.exit(0);
           });
         } else {
-          logger.info('exit');
+          logger.info('Exiting');
           process.exit(0);
         }
       }
