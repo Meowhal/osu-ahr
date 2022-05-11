@@ -23,7 +23,8 @@ LobbyMenu Commands
   [regulation <regulation command>] Change one or more regulations. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
   [regulation enable] Enable regulation checking.
   [regulation disable] Disable regulation checking.
-  [close] Close the lobby and quit this application. ex: 'close now'
+  [close] Close the lobby when everyone leaves.
+  [close now] Close the lobby and quit this application.
             DO NOT Quit the application before closing the lobby!
   [quit] Quit this application. (Lobby will not close.)
 `;
