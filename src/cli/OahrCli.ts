@@ -10,22 +10,22 @@ const logger = log4js.getLogger('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
   [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
-  [enter <LobbyID>] Enter the lobby. ex: 'enter 123456' (It only works in a Tournament lobby ID.)
+  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a Tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
 
 const lobbyMenuCommandsMessage = `
 LobbyMenu Commands
-  [say <Message>] Send message to #multiplayer.
-  [info] Show current application's informations.
-  [reorder] Arrange host queue. ex: 'reorder player1, player2, player3'
-  [regulation <regulation command>] Change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
+  [say <Message>] Send a message to #multiplayer.
+  [info] Show the application's current information.
+  [reorder] Arrange the host queue. ex: 'reorder player1, player2, player3'
+  [regulation <regulation command>] Change one or more regulations. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
   [regulation enable] Enable regulation checking.
   [regulation disable] Disable regulation checking.
   [close] Close the lobby and quit this application. ex: 'close now'
-            DO NOT Quit application before close the lobby!
-  [quit] Quit this application. (Lobby won't close.)
+            DO NOT Quit the application before closing the lobby!
+  [quit] Quit this application. (Lobby will not close.)
 `;
 
 interface Scene {
@@ -53,14 +53,14 @@ export class OahrCli extends OahrBase {
           case 'm':
           case 'make':
             if (l.arg === '') {
-              logger.info('Make command needs lobby name. ex: make testlobby');
+              logger.info('Make command needs a lobby name. ex: make testlobby');
               return;
             }
             try {
               await this.makeLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
             } catch (e) {
-              logger.info('Failed to make lobby : %s', e);
+              logger.info('Failed to make a lobby : %s', e);
               this.scene = this.scenes.exited;
             }
             break;
@@ -68,7 +68,7 @@ export class OahrCli extends OahrBase {
           case 'enter':
             try {
               if (l.arg === '') {
-                logger.info('Enter command needs lobby ID. ex: enter 123456');
+                logger.info('Enter command needs a lobby ID. ex: enter 123456');
                 return;
               }
               await this.enterLobbyAsync(l.arg);
