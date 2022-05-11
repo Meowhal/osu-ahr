@@ -60,7 +60,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       this.channel = channel;
     }
     this.emit('join', channel, who, this.msg);
-    this.emit('join' + channel, who, this.msg);
+    this.emit(`join${channel}`, who, this.msg);
   }
 
   // チャンネル退出イベントを発行する
@@ -69,7 +69,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       this.channel = '';
     }
     this.emit('part', channel, who, this.msg);
-    this.emit('part' + channel, who, this.msg);
+    this.emit(`part${channel}`, who, this.msg);
   }
 
   // メッセージイベントを発行する
@@ -85,7 +85,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
     this.emit('message', from, to, message, this.msg);
     if (to === this.channel) {
       this.emit('message#', from, to, message, this.msg);
-      this.emit('message' + to, from, message, this.msg);
+      this.emit(`message${to}`, from, message, this.msg);
     }
     if (to === this.nick) {
       this.emit('pm', from, message, this.msg);
@@ -276,7 +276,7 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
       }
       setImmediate(() => {
         const id = '12345';
-        this.raiseJoin('#mp_' + id, this.nick);
+        this.raiseJoin(`#mp_${id}`, this.nick);
         this.emulateMessage('BanchoBot', this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
       });
     } else if (target === this.channel) {
@@ -331,8 +331,8 @@ export class DummyIrcClient extends EventEmitter implements IIrcClient {
             m('Started the match');
           } else {
             // カウントダウンや分表示は面倒なので省略
-            m('Match starts in ' + mp.arg + ' seconds');
-            m('Queued the match to start in ' + mp.arg + ' seconds');
+            m(`Match starts in ${mp.arg} seconds`);
+            m(`Queued the match to start in ${mp.arg} seconds`);
           }
           break;
         case 'aborttimer':
