@@ -115,7 +115,7 @@ export class MatchStarter extends LobbyPlugin {
   private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
-      this.logger.trace('accepted start request from %s', player.name);
+      this.logger.trace(`accepted start request from ${player.name}`);
       this.checkVoteCount(true);
     } else {
       this.logger.trace('vote was ignored');

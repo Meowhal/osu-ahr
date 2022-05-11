@@ -42,7 +42,7 @@ export class AutoStartTimer extends LobbyPlugin {
       case '*autostart_time':
         let ct = parseInt(param);
         if (Number.isNaN(ct)) {
-          this.logger.warn('invalid *autostart_time param : %s', param);
+          this.logger.warn(`invalid *autostart_time param : ${param}`);
           return;
         }
         if (ct < WAITINGTIME_MIN) {
