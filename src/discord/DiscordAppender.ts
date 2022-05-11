@@ -69,7 +69,7 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
       if (ev.data.length === 3) {
         return `> **${ev.data[1]}**: ${ev.data[2]}`;
       } else {
-        return '> ' + msg;
+        return `> ${msg}`;
       }
     case 'inout':
       const min = msg.match(/\+\x1b\[32m (.+?) \x1B\[0m/);
@@ -77,10 +77,10 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
       if (min || mout) {
         let msg = '';
         if (min) {
-          msg += '**in** ' + min[1] + ' ';
+          msg += `**in** ${min[1]} `;
         }
         if (mout) {
-          msg += '**out** ' + mout[1];
+          msg += `**out** ${mout[1]}`;
         }
         return { embeds: [new MessageEmbed().setColor(color).setDescription(msg)] };
       }
@@ -89,5 +89,5 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
   if (log4js.levels.WARN.level <= ev.level.level) {
     return { embeds: [new MessageEmbed().setColor(color).setDescription(msg)] };
   }
-  return '`' + ev.categoryName + '` ' + msg;
+  return `\`${ev.categoryName}\` ${msg}`;
 }
