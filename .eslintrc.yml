@@ -84,6 +84,8 @@ rules:
     - "off"
   no-useless-catch:
     - "off"
+  no-useless-concat:
+    - error
   no-useless-escape:
     - error
   no-var:
@@ -91,6 +93,8 @@ rules:
   padded-blocks:
     - "off"
   prefer-const:
+    - error
+  prefer-template:
     - error
   quotes:
     - error
@@ -100,5 +104,7 @@ rules:
     - always
   space-before-function-paren:
     - "off"
+  template-curly-spacing:
+    - error
   yoda:
     - error
