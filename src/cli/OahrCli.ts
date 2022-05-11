@@ -21,8 +21,8 @@ LobbyMenu Commands
   [info] Show current application's informations.
   [reorder] arrange host queue. ex: 'reorder player1, player2, player3'
   [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
-  [regulation enable] Enable regulation checking
-  [regulation disable] Disable regulation checking
+  [regulation enable] Enable regulation checking.
+  [regulation disable] Disable regulation checking.
   [close] Close the lobby and Quit this application. ex: 'close now'
             DO NOT Quit application before close the lobby!
   [quit] Quit this application. (lobby won't close.)
