@@ -301,9 +301,9 @@ export class Lobby {
     this.hostPending = user;
     this.transferHostTimeout.start(this.option.transferhost_timeout_ms);
     if (user.id !== 0) {
-      this.SendMessage('!mp host #' + user.id);
+      this.SendMessage(`!mp host #${user.id}`);
     } else {
-      this.SendMessage('!mp host ' + user.name);
+      this.SendMessage(`!mp host ${user.name}`);
     }
   }
 
@@ -336,7 +336,7 @@ export class Lobby {
     this.ircClient.say(target, message);
     this.ircClient.emit('sentPrivateMessage', target, message);
     this.SentMessage.emit({ message });
-    this.chatlogger.info('%s:%s', 'botbot->' + target, message);
+    this.chatlogger.info('%s:%s', `botbot->${target}`, message);
   }
 
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
@@ -415,7 +415,7 @@ export class Lobby {
           resolve(result);
         }
       });
-      this.ircClient.say(byPm || !this.channel ? 'BanchoBot' : this.channel, '!stat ' + player.escaped_name);
+      this.ircClient.say(byPm || !this.channel ? 'BanchoBot' : this.channel, `!stat ${player.escaped_name}`);
     });
   }
 
@@ -530,7 +530,7 @@ export class Lobby {
           this.mapId = c.params[0];
           this.mapTitle = c.params[1];
           const changer = this.host ? `(by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'bot'})` : '';
-          this.logger.info('beatmap changed%s : %s %s', changer, 'https://osu.ppy.sh/b/' + this.mapId, this.mapTitle);
+          this.logger.info('beatmap changed%s : %s %s', changer, `https://osu.ppy.sh/b/${this.mapId}`, this.mapTitle);
         }
         break;
       case BanchoResponseType.Settings:
@@ -664,7 +664,7 @@ export class Lobby {
   }
 
   RaiseNetError(err: Error): void {
-    this.logger.error('error occured : ' + err.message);
+    this.logger.error(`error occured : ${err.message}`);
     this.logger.error(err.stack);
     this.NetError.emit(err);
   }
@@ -721,7 +721,7 @@ export class Lobby {
   OnUserNotFound(): void {
     if (this.hostPending) {
       const p = this.hostPending;
-      this.logger.warn('occured OnUserNotFound : ' + p.name);
+      this.logger.warn(`occured OnUserNotFound : ${p.name}`);
       this.hostPending = null;
     }
   }
@@ -764,7 +764,7 @@ export class Lobby {
 
       });
       const trg = 'BanchoBot';
-      const msg = '!mp make ' + title;
+      const msg = `!mp make ${title}`;
       this.ircClient.say(trg, msg);
       this.ircClient.emit('sentMessage', trg, msg);
     });
@@ -984,7 +984,7 @@ export class Lobby {
     for (const p of this.plugins) {
       const ps = p.GetPluginStatus();
       if (ps !== '') {
-        s += '\n' + ps;
+        s += `\n${ps}`;
       }
     }
     return s;
@@ -1036,7 +1036,7 @@ export class Lobby {
     // ensure time is stop
     this.stopInfoMessageAnnouncement();
     if (this.option.info_message_announcement_interval_ms > 3 * 60 * 1000) {
-      this.logger.trace('started InfoMessageAnnouncement. interval = ' + this.option.info_message_announcement_interval_ms);
+      this.logger.trace(`started InfoMessageAnnouncement. interval = ${this.option.info_message_announcement_interval_ms}`);
       this.infoMessageAnnouncementTimeId = setInterval(() => {
         this.showInfoMessage();
         if (this.status !== LobbyStatus.Entered) {
