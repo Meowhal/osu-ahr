@@ -77,7 +77,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       await fs.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
       this.logger.info(`stored token to : ${p}`);
       return true;
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(`storeToken error :\n${e.message}\n${e.stack}`);
       return false;
     }
