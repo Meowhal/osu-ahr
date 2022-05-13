@@ -78,7 +78,7 @@ class WebApiClientClass implements IBeatmapFetcher {
       this.logger.info(`stored token to : ${p}`);
       return true;
     } catch (e) {
-      this.logger.error(`storeToken error : ${e}`);
+      this.logger.error(`storeToken error :\n${e.message}\n${e.stack}`);
       return false;
     }
   }
@@ -101,8 +101,8 @@ class WebApiClientClass implements IBeatmapFetcher {
       }
       this.deleteStoredToken(asGuest);
       this.logger.info('deleted expired stored token');
-    } catch (e) {
-      this.logger.error(`loadStoredToken error : ${e}`);
+    } catch (e: any) {
+      this.logger.error(`loadStoredToken error :\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -115,8 +115,8 @@ class WebApiClientClass implements IBeatmapFetcher {
     }
     try {
       fs.unlink(p);
-    } catch (e) {
-      this.logger.error(`load token error : ${e}`);
+    } catch (e: any) {
+      this.logger.error(`load token error :\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -134,8 +134,8 @@ class WebApiClientClass implements IBeatmapFetcher {
       response.data.expires_in += Date.now() / 1000;
       this.logger.info('get Authorized token');
       return response.data;
-    } catch (e) {
-      this.logger.error(`getAuthorizedToken error : ${e}`);
+    } catch (e: any) {
+      this.logger.error(`getAuthorizedToken error :\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -199,8 +199,8 @@ class WebApiClientClass implements IBeatmapFetcher {
       response.data.isGuest = true;
       response.data.expires_in += Date.now() / 1000;
       return response.data;
-    } catch (e) {
-      this.logger.error(`getGuestToken error : ${e}`);
+    } catch (e: any) {
+      this.logger.error(`getGuestToken error :\n${e.message}\n${e.stack}`);
     }
   }
 
