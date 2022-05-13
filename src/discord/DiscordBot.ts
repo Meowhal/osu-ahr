@@ -155,7 +155,7 @@ export class DiscordBot {
       await ahr.makeLobbyAsync(name);
     } catch (e: any) {
       logger.error(`couldn't make a tournament lobby.\n${e}`);
-      await interaction.editReply(`😫 couldn't make a tournament lobby. ${e.message}`);
+      await interaction.editReply(`😫 couldn't make a tournament lobby. ${e}`);
       ahr?.lobby.destroy();
       return;
     }
