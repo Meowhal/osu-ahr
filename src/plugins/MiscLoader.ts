@@ -87,7 +87,7 @@ export class MiscLoader extends LobbyPlugin {
             break;
         }
       } else {
-        this.logger.error(`unexpected error. checking:${player.id}, err:${e.message}`);
+        this.logger.error(`unexpected error. checking:${player.id}, err:\n${e.message}\n${e.stack}`);
       }
     }
   }
@@ -124,7 +124,7 @@ export class MiscLoader extends LobbyPlugin {
             break;
         }
       } else {
-        this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
+        this.logger.error(`unexpected error. checking:${mapId}, err:\n${e.message}\n${e.stack}`);
       }
     }
   }

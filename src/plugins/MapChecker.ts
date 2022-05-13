@@ -153,7 +153,7 @@ export class MapChecker extends LobbyPlugin {
         this.logger.info(m);
       }
     } catch (e: any) {
-      this.logger.warn(e.message);
+      this.logger.warn(`\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -221,7 +221,7 @@ export class MapChecker extends LobbyPlugin {
             break;
         }
       } else {
-        this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
+        this.logger.error(`unexpected error. checking:${mapId}, err:\n${e.message}\n${e.stack}`);
       }
     }
   }

@@ -269,7 +269,7 @@ export class LobbyKeeper extends LobbyPlugin {
       }
 
     } catch (e: any) {
-      this.logger.error(`@LobbyKeeper#onParsedSettings ${e?.message}`);
+      this.logger.error(`@LobbyKeeper#onParsedSettings\n${e?.message}\n${e?.stack}`);
     }
   }
 
