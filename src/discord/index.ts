@@ -41,6 +41,6 @@ try {
   const bot = new DiscordBot(ircClient, discordClient);
   bot.start();
 } catch (e: any) {
-  logger.error(`\n${e.message}\n${e.stack}`);
+  logger.error(`\n${e}`);
   process.exit(1);
 }

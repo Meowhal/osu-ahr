@@ -154,7 +154,7 @@ export class DiscordBot {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.makeLobbyAsync(name);
     } catch (e: any) {
-      logger.error(`couldn't make a tournament lobby.\n${e.message}\n${e.stack}`);
+      logger.error(`couldn't make a tournament lobby.\n${e}`);
       await interaction.editReply(`😫 couldn't make a tournament lobby. ${e.message}`);
       ahr?.lobby.destroy();
       return;
@@ -198,7 +198,7 @@ export class DiscordBot {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.enterLobbyAsync(lobbyId);
     } catch (e: any) {
-      logger.error(`couldn't enter the tournament lobby.\n${e.message}\n${e.stack}`);
+      logger.error(`couldn't enter the tournament lobby.\n${e}`);
       await interaction.editReply(`😫 couldn't enter the tournament lobby. ${e}`);
       ahr?.lobby.destroy();
       return;
@@ -287,7 +287,7 @@ export class DiscordBot {
       await ahr.lobby.CloseLobbyAsync();
       await interaction.editReply('Closed the lobby');
     } catch (e: any) {
-      logger.error(`@discordbot.close\n${e.message}\n${e.stack}`);
+      logger.error(`@discordbot.close\n${e}`);
       await interaction.editReply(`😫 error! ${e}`);
     }
   }
@@ -309,7 +309,7 @@ export class DiscordBot {
       await ahr.lobby.QuitLobbyAsync();
       await interaction.editReply('Stopped managing the lobby');
     } catch (e: any) {
-      logger.error(`@discordbot.quit\n${e.message}\n${e.stack}`);
+      logger.error(`@discordbot.quit\n${e}`);
       await interaction.editReply(`😫 error! ${e}`);
     }
   }
