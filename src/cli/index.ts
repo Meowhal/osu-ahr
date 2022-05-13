@@ -49,6 +49,6 @@ try {
     oahr.start(null);
   }
 } catch (e: any) {
-  logger.error(e);
+  logger.error(`\n${e.message}\n${e.stack}`);
   process.exit(1);
 }

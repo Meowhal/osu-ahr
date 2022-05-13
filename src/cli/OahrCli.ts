@@ -60,8 +60,8 @@ export class OahrCli extends OahrBase {
             try {
               await this.makeLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
-            } catch (e) {
-              logger.info(`Failed to make a lobby : ${e}`);
+            } catch (e: any) {
+              logger.info(`Failed to make a lobby :\n${e.message}\n${e.stack}`);
               this.scene = this.scenes.exited;
             }
             break;
@@ -74,8 +74,8 @@ export class OahrCli extends OahrBase {
               }
               await this.enterLobbyAsync(l.arg);
               this.transitionToLobbyMenu();
-            } catch (e) {
-              logger.info(`Invalid channel : ${e}`);
+            } catch (e: any) {
+              logger.info(`Invalid channel :\n${e.message}\n${e.stack}`);
               this.scene = this.scenes.exited;
             }
             break;
