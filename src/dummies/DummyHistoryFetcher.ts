@@ -147,7 +147,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
         last_visit: this.match.start_time,
         pm_friends_only: false,
         profile_colour: null,
-        username: 'user' + userId,
+        username: `user${userId}`,
         country: {
           code: 'AA',
           name: 'AA'

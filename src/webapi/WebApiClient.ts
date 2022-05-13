@@ -75,10 +75,10 @@ class WebApiClientClass implements IBeatmapFetcher {
       const p = this.getTokenPath(token.isGuest);
       await fs.mkdir(path.dirname(p), { recursive: true });
       await fs.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
-      this.logger.info('stored token to : ' + p);
+      this.logger.info(`stored token to : ${p}`);
       return true;
     } catch (e) {
-      this.logger.error('storeToken error : ' + e);
+      this.logger.error(`storeToken error : ${e}`);
       return false;
     }
   }
@@ -96,13 +96,13 @@ class WebApiClientClass implements IBeatmapFetcher {
       const j = await fs.readFile(p, 'utf8');
       const token = JSON.parse(j) as ApiToken;
       if (!isExpired(token)) {
-        this.logger.info('loaded stored token from : ' + p);
+        this.logger.info(`loaded stored token from : ${p}`);
         return token;
       }
       this.deleteStoredToken(asGuest);
       this.logger.info('deleted expired stored token');
     } catch (e) {
-      this.logger.error('loadStoredToken error : ' + e);
+      this.logger.error(`loadStoredToken error : ${e}`);
     }
   }
 
@@ -116,7 +116,7 @@ class WebApiClientClass implements IBeatmapFetcher {
     try {
       fs.unlink(p);
     } catch (e) {
-      this.logger.error('load token error : ' + e);
+      this.logger.error(`load token error : ${e}`);
     }
   }
 
@@ -124,7 +124,7 @@ class WebApiClientClass implements IBeatmapFetcher {
     try {
       const code = await this.getAuthorizeCode();
       const response = await axios.post('https://osu.ppy.sh/oauth/token', {
-        'client_id': '' + this.option.client_id,
+        'client_id': `${this.option.client_id}`,
         'client_secret': this.option.client_secret,
         'code': code,
         'grant_type': 'authorization_code',
@@ -156,8 +156,8 @@ class WebApiClientClass implements IBeatmapFetcher {
           res.end('missing code');
           return;
         }
-        res.end('ok : ' + code);
-        this.logger.trace('got code! ' + code);
+        res.end(`ok : ${code}`);
+        this.logger.trace(`got code! ${code}`);
         server.close(() => {
           this.logger.trace('closed callback');
         });
@@ -192,7 +192,7 @@ class WebApiClientClass implements IBeatmapFetcher {
     try {
       const response = await axios.post('https://osu.ppy.sh/oauth/token', {
         'grant_type': 'client_credentials',
-        'client_id': '' + this.option.client_id,
+        'client_id': `${this.option.client_id}`,
         'client_secret': this.option.client_secret,
         'scope': 'public'
       });

@@ -85,7 +85,7 @@ export class MpSettingsParser {
         slot: parseInt(m[1]),
         ready: m[2].trim(),
         id: parseInt(m[3]),
-        profile: 'https://osu.ppy.sh/u/' + m[3],
+        profile: `https://osu.ppy.sh/u/${m[3]}`,
         name: m[4].trim(),
         isHost: m[6] === undefined ? false : m[6].includes('Host'),
         team: team,

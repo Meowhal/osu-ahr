@@ -23,7 +23,7 @@ export async function getGuestTokenTrial(): Promise<void> {
   try {
     const response = await axios.post('https://osu.ppy.sh/oauth/token', {
       'grant_type': 'client_credentials',
-      'client_id': '' + oAuthConfig.client_id,
+      'client_id': `${oAuthConfig.client_id}`,
       'client_secret': oAuthConfig.client_secret,
       'scope': 'public'
     });
@@ -38,7 +38,7 @@ export async function getTokenTrial(): Promise<void> {
   try {
     const response = await axios.post('https://osu.ppy.sh/oauth/token', {
       'grant_type': 'authorization_code',
-      'client_id': '' + oAuthConfig.client_id,
+      'client_id': `${oAuthConfig.client_id}`,
       'client_secret': oAuthConfig.client_secret,
       'code': oAuthConfig.code,
       'redirect_uri': oAuthConfig.callback

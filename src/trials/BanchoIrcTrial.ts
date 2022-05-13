@@ -8,15 +8,15 @@ export function trial() {
   const bot = new irc.Client(c.server, c.nick, c.opt);
 
   bot.on('error', function (message) {
-    console.error('ERROR: %s: %s', message.command, message.args.join(' '));
+    console.error(`ERROR: ${message.command}: ${message.args.join(' ')}`);
   });
 
   bot.on('message', function (from, to, message) {
-    console.log('%s => %s: %s', from, to, message);
+    console.log(`${from} => ${to}: ${message}`);
   });
 
   bot.on('pm', function (nick, message) {
-    console.log('Got private message from %s: %s', nick, message);
+    console.log(`Got private message from ${nick}: ${message}`);
     const v = parser.ParseMpMakeResponse(nick, message);
     if (v !== null) {
       console.log(`--- parsed pm id=${v.id} title=${v.title}`);
@@ -25,7 +25,7 @@ export function trial() {
 
   let is_joined = false;
   bot.on('join', function (channel, who) {
-    console.log('%s has joined %s', who, channel);
+    console.log(`${who} has joined ${channel}`);
     if (!is_joined) {
       is_joined = true;
       //bot.say(channel, "!mp password");
@@ -37,17 +37,17 @@ export function trial() {
 
   });
   bot.on('part', function (channel, who, reason) {
-    console.log('%s has left %s: %s', who, channel, reason);
+    console.log(`${who} has left ${channel}: ${reason}`);
   });
   bot.on('kick', function (channel, who, by, reason) {
-    console.log('%s was kicked from %s by %s: %s', who, channel, by, reason);
+    console.log(`${who} was kicked from ${channel} by ${by}: ${reason}`);
   });
   bot.on('invite', (channel, from) => {
     console.log(`${from} invite you to ${channel}`);
   });
 
   bot.addListener('registered', function (message) {
-    console.log('registered %s', message);
+    console.log(`registered ${message}`);
     //bot.say("BanchoBot", "!mp make irc test lobby4");
     bot.join('#lobby');
   });
@@ -59,12 +59,12 @@ export function ConnectionServerTrial() {
 
   logIrcEvent(bot);
 
-  console.log('hostmask => ' + bot.hostMask);
+  console.log(`hostmask => ${bot.hostMask}`);
 
   bot.connect();
 
   bot.addListener('registered', function (message) {
-    console.log('hostmask => ' + bot.hostMask);
+    console.log(`hostmask => ${bot.hostMask}`);
     bot.disconnect('goodby', () => { console.log('disconnected'); });
   });
 }

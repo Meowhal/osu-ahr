@@ -95,11 +95,11 @@ export class OahrBase {
     // Remove all but ascii graphic characters
     name = name.replace(/[^ -~]/g, '');
     if (!this.isRegistered) await this.ensureRegisteredAsync();
-    logger.info('Making lobby, name : ' + name);
+    logger.info(`Making lobby, name : ${name}`);
     await this.lobby.MakeLobbyAsync(name);
-    this.lobby.SendMessage('!mp password ' + this.option.password);
+    this.lobby.SendMessage(`!mp password ${this.option.password}`);
     for (const p of this.option.invite_users) {
-      this.lobby.SendMessage('!mp invite ' + p);
+      this.lobby.SendMessage(`!mp invite ${p}`);
     }
     logger.info(`Made lobby : ${this.lobby.channel}`);
   }
@@ -107,7 +107,7 @@ export class OahrBase {
   async enterLobbyAsync(id: string): Promise<void> {
     if (!this.isRegistered) await this.ensureRegisteredAsync();
     const channel = parser.EnsureMpChannelId(id);
-    logger.info('Entering lobby, channel : %s', channel);
+    logger.info(`Entering lobby, channel : ${channel}`);
     await this.lobby.EnterLobbyAsync(channel);
     await this.lobby.LoadMpSettingsAsync();
 

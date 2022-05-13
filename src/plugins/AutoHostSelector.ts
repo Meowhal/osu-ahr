@@ -115,7 +115,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (isMpSettingResult) return;
 
     this.hostQueue.push(player);
-    this.logger.trace('added %s', player.name);
+    this.logger.trace(`added ${player.name}`);
     if (this.hostQueue.length === 1) {
       this.logger.trace('appoint first player to host');
       this.changeHost();
@@ -152,7 +152,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
     if (this.hostQueue[0] === newhost) {
-      this.logger.trace('a new host has been appointed:%s', newhost.name);
+      this.logger.trace(`a new host has been appointed:${newhost.name}`);
     } else {
       // ホストがキューの先頭以外に変更された場合
       if (!this.lobby.hostPending) {
@@ -357,9 +357,9 @@ export class AutoHostSelector extends LobbyPlugin {
       let m = this.hostQueue.map(c => disguiseUserName(c.name)).join(', ');
       this.logger.trace(m);
       if (this.option.host_order_chars_limit < m.length) {
-        m = m.substring(0, this.option.host_order_chars_limit) + '...';
+        m = `${m.substring(0, this.option.host_order_chars_limit)}...`;
       }
-      return 'host order : ' + m;
+      return `host order : ${m}`;
     }, '!queue', this.option.host_order_cooltime_ms);
   }
 
@@ -400,7 +400,7 @@ export class AutoHostSelector extends LobbyPlugin {
       }
     }
     if (this.logger.isTraceEnabled()) {
-      this.logger.trace('skipto: %s', this.hostQueue.map(p => p.name).join(', '));
+      this.logger.trace(`skipto: ${this.hostQueue.map(p => p.name).join(', ')}`);
     }
     this.raiseOrderChanged('rotated');
     this.changeHost();
@@ -414,7 +414,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (typeof (order) === 'string') {
       const players = order.split(',').map(t => this.lobby.GetPlayer(revealUserName(t.trim()))).filter(p => p !== null) as Player[];
       if (players.length === 0) {
-        this.logger.info('Faild reorder, invalid order string : %s', order);
+        this.logger.info(`Faild reorder, invalid order string : ${order}`);
       } else {
         this.Reorder(players);
       }
@@ -443,8 +443,8 @@ export class AutoHostSelector extends LobbyPlugin {
     }
 
     this.logger.trace('validate queue.');
-    this.logger.trace('  old: %s', Array.from(this.lobby.players).map(p => p.name).join(', '));
-    this.logger.trace('  new: %s', que.map(p => p.name).join(', '));
+    this.logger.trace(`  old: ${Array.from(this.lobby.players).map(p => p.name).join(', ')}`);
+    this.logger.trace(`  new: ${que.map(p => p.name).join(', ')}`);
 
     return isValid;
   }
@@ -465,9 +465,9 @@ export class AutoHostSelector extends LobbyPlugin {
     }
     if (this.hostQueue[0] !== this.lobby.host) {
       this.lobby.TransferHost(this.hostQueue[0]);
-      this.logger.trace('sent !mp host %s', this.hostQueue[0].name);
+      this.logger.trace(`sent !mp host ${this.hostQueue[0].name}`);
     } else {
-      this.logger.trace('%s is already host', this.hostQueue[0].name);
+      this.logger.trace(`${this.hostQueue[0].name} is already host`);
     }
   }
 
@@ -478,7 +478,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
     if (this.logger.isTraceEnabled() && showLog) {
-      this.logger.trace('rotated host queue: %s', this.hostQueue.map(p => p.name).join(', '));
+      this.logger.trace(`rotated host queue: ${this.hostQueue.map(p => p.name).join(', ')}`);
     }
     this.raiseOrderChanged('rotated');
   }
@@ -491,7 +491,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const i = this.hostQueue.indexOf(player);
     if (i !== -1) {
       this.hostQueue.splice(i, 1);
-      this.logger.trace('removed %s', player.name);
+      this.logger.trace(`removed ${player.name}`);
       this.raiseOrderChanged('removed');
       return true;
     } else {

@@ -27,7 +27,7 @@ export class MapRecaster extends LobbyPlugin {
     if (command === '!update') {
       if (this.canRecast) {
         this.canRecast = false;
-        this.lobby.SendMessage('!mp map ' + this.lobby.mapId);
+        this.lobby.SendMessage(`!mp map ${this.lobby.mapId}`);
       }
     }
   }

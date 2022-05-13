@@ -54,7 +54,7 @@ export class DiscordBot {
     });
 
     this.discordClient.on('guildCreate', async guild => {
-      console.log('guildCreate ' + guild.name);
+      console.log(`guildCreate ${guild.name}`);
       await this.registerCommandsAndRoles(guild);
     });
 
@@ -154,8 +154,8 @@ export class DiscordBot {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.makeLobbyAsync(name);
     } catch (e: any) {
-      logger.error('couldn\'t make a tournament lobby. ' + e);
-      await interaction.editReply('😫 couldn\'t make a tournament lobby. ' + e.message);
+      logger.error(`couldn't make a tournament lobby. ${e}`);
+      await interaction.editReply(`😫 couldn't make a tournament lobby. ${e.message}`);
       ahr?.lobby.destroy();
       return;
     }
@@ -166,15 +166,15 @@ export class DiscordBot {
       await this.updateMatchSummary(ahr);
       await interaction.editReply(`😀 Created the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e: any) {
-      logger.error('couldn\'t make a discord channel. ' + e);
-      await interaction.editReply('couldn\'t make a discord channel. ' + e.message);
+      logger.error(`couldn't make a discord channel. ${e}`);
+      await interaction.editReply(`couldn't make a discord channel. ${e.message}`);
     }
   }
 
   async enter(interaction: GuildCommandInteraction) {
     await interaction.deferReply();
     const lobbyNumber = this.resolveLobbyId(interaction, true);
-    const lobbyId = '#mp_' + lobbyNumber;
+    const lobbyId = `#mp_${lobbyNumber}`;
     if (!lobbyNumber) {
       await interaction.editReply('error lobby_id required.');
       return;
@@ -198,8 +198,8 @@ export class DiscordBot {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.enterLobbyAsync(lobbyId);
     } catch (e) {
-      logger.error('couldn\'t enter the tournament lobby. ' + e);
-      await interaction.editReply('😫 couldn\'t enter the tournament lobby. ' + e);
+      logger.error(`couldn't enter the tournament lobby. ${e}`);
+      await interaction.editReply(`😫 couldn't enter the tournament lobby. ${e}`);
       ahr?.lobby.destroy();
       return;
     }
@@ -208,14 +208,14 @@ export class DiscordBot {
       this.registeAhr(ahr, interaction);
       // ロビー用チャンネルからenterコマンドを引数無しで呼び出している場合はそのチャンネルでログ転送を開始する
       const ch = interaction.guild?.channels.cache.get(interaction.channelId);
-      if (ch && lobbyId === ('#' + ch.name)) {
+      if (ch && lobbyId === (`#${ch.name}`)) {
         ahr.startTransferLog(ch.id);
       }
       await this.updateMatchSummary(ahr);
       await interaction.editReply(`😀 Entered the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e) {
-      logger.error('couldn\'t make a discord channel.  ' + e);
-      await interaction.editReply('😫 couldn\'t make a discord channel.  ' + e);
+      logger.error(`couldn't make a discord channel.  ${e}`);
+      await interaction.editReply(`😫 couldn't make a discord channel.  ${e}`);
     }
   }
 
@@ -243,8 +243,8 @@ export class DiscordBot {
     try {
       await interaction.editReply({ embeds: [ahr.createDetailInfoEmbed()] });
     } catch (e: any) {
-      logger.error('@discordbot.info ' + e);
-      await interaction.editReply('😫 error! ' + e.message);
+      logger.error(`@discordbot.info ${e}`);
+      await interaction.editReply(`😫 error! ${e.message}`);
     }
   }
 
@@ -263,10 +263,10 @@ export class DiscordBot {
     const msg = interaction.options.getString('message', true);
     if ((msg.startsWith('!') && !msg.startsWith('!mp ')) || msg.startsWith('*')) {
       ahr.lobby.RaiseReceivedChatCommand(ahr.lobby.GetOrMakePlayer(ahr.client.nick), msg);
-      await interaction.editReply('executed: ' + msg);
+      await interaction.editReply(`executed: ${msg}`);
     } else {
       ahr.lobby.SendMessage(msg);
-      await interaction.editReply('sent: ' + msg);
+      await interaction.editReply(`sent: ${msg}`);
     }
   }
 
@@ -287,8 +287,8 @@ export class DiscordBot {
       await ahr.lobby.CloseLobbyAsync();
       await interaction.editReply('Closed the lobby');
     } catch (e) {
-      logger.error('@discordbot.close ' + e);
-      await interaction.editReply('😫 error! ' + e);
+      logger.error(`@discordbot.close ${e}`);
+      await interaction.editReply(`😫 error! ${e}`);
     }
   }
 
@@ -309,14 +309,14 @@ export class DiscordBot {
       await ahr.lobby.QuitLobbyAsync();
       await interaction.editReply('Stopped managing the lobby');
     } catch (e) {
-      logger.error('@discordbot.quit ' + e);
-      await interaction.editReply('😫 error! ' + e);
+      logger.error(`@discordbot.quit ${e}`);
+      await interaction.editReply(`😫 error! ${e}`);
     }
   }
 
   async handleButtonInteraction(interaction: ButtonInteraction<'present'>, command: string, lobbyNumber: string) {
     if (!interaction.guild) return;
-    const lobbyId = '#mp_' + lobbyNumber;
+    const lobbyId = `#mp_${lobbyNumber}`;
     const ahr = this.ahrs[lobbyId];
     if (!ahr) {
       await interaction.reply({ content: `${lobbyId} - the lobby has already been unmanaged.`, ephemeral: true });
@@ -344,12 +344,12 @@ export class DiscordBot {
       }
       await this.updateMatchSummary(ahr);
     } catch (e) {
-      logger.error('@handleButtonInteraction ' + e);
+      logger.error(`@handleButtonInteraction ${e}`);
     }
   }
 
   async getOrCreateMatchChannel(guild: Guild, lobbyNumber: string): Promise<TextChannel> {
-    const lobbyId = 'mp_' + lobbyNumber;
+    const lobbyId = `mp_${lobbyNumber}`;
     const dc = guild.channels.cache.find(c => c.name === lobbyId);
     if (dc) return dc as TextChannel;
     const role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
@@ -468,7 +468,7 @@ export class DiscordBot {
       if (asNumber) {
         return m[1];
       } else {
-        return '#' + m[0];
+        return `#${m[0]}`;
       }
 
     }

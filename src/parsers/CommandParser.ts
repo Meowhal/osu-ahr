@@ -243,10 +243,10 @@ export namespace parser {
   export function EnsureMpChannelId(id: string): string {
     if (!id || id === '') return '';
     if (id.match(/^#mp_\d+$/)) return id;
-    if (id.match(/^\d+$/)) return '#mp_' + id;
+    if (id.match(/^\d+$/)) return `#mp_${id}`;
     const m = id.match(/^https:\/\/osu\.ppy\.sh\/mp\/(\d+)$/);
 
-    if (m) return '#mp_' + m[1];
+    if (m) return `#mp_${m[1]}`;
     else return '';
   }
 
@@ -267,7 +267,7 @@ export namespace parser {
     message = message.trimRight();
     let m = message.match(/^!mp\s+(\w+)\s*(.*?)$/);
     if (m) {
-      return { command: '!' + m[1].toLowerCase(), param: m[2] };
+      return { command: `!${m[1].toLowerCase()}`, param: m[2] };
     }
     m = message.match(/^([!*]\w+)\s*(.*?)$/);
     if (m) {

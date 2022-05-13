@@ -68,7 +68,7 @@ export class OahrDiscord extends OahrBase {
     const host = lobby.host?.name ?? 'none';
 
 
-    const embed = new MessageEmbed().setColor('BLURPLE').setTitle('Lobby Information - ' + name).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
+    const embed = new MessageEmbed().setColor('BLURPLE').setTitle(`Lobby Information - ${name}`).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
     embed.addField('lobby', `id:${lid}, status:${LobbyStatus[lobby.status]}, host:${host}, players:${lobby.players.size}, name:${name}`,);
     const refs = Array.from(lobby.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(',');
     if (refs) {
@@ -127,19 +127,19 @@ export class OahrDiscord extends OahrBase {
   createMenuButton() {
     const cid = this.lobby.channel; // #mp_xxxx
     if (!cid) throw new Error('invalid ahr lobby state. channel is undefined');
-    return new MessageActionRow().addComponents(new MessageButton().setLabel('Menu').setStyle(MessageButtonStyles.PRIMARY).setCustomId('menu,' + cid));
+    return new MessageActionRow().addComponents(new MessageButton().setLabel('Menu').setStyle(MessageButtonStyles.PRIMARY).setCustomId(`menu,${cid}`));
   }
 
   createControllButtons() {
     const cid = this.lobby.channel; // #mp_xxxx
     if (!cid) throw new Error('invalid ahr lobby state. channel is undefined');
     const btn1 = new MessageButton();
-    const btn2 = new MessageButton().setLabel('close').setStyle(MessageButtonStyles.DANGER).setCustomId('close,' + cid); // close,#mp_xxxx
+    const btn2 = new MessageButton().setLabel('close').setStyle(MessageButtonStyles.DANGER).setCustomId(`close,${cid}`); // close,#mp_xxxx
 
     if (this.transferLog) {
-      btn1.setLabel('Stop transfer').setStyle(MessageButtonStyles.SECONDARY).setCustomId('stopLog,' + cid); // stopLog,#mp_xxxx
+      btn1.setLabel('Stop transfer').setStyle(MessageButtonStyles.SECONDARY).setCustomId(`stopLog,${cid}`); // stopLog,#mp_xxxx
     } else {
-      btn1.setLabel('Start transfer').setStyle(MessageButtonStyles.PRIMARY).setCustomId('startLog,' + cid); // stopLog,#mp_xxxx
+      btn1.setLabel('Start transfer').setStyle(MessageButtonStyles.PRIMARY).setCustomId(`startLog,${cid}`); // stopLog,#mp_xxxx
     }
 
     const row = new MessageActionRow().addComponents(btn1, btn2);

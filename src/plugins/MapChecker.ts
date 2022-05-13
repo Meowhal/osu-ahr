@@ -106,7 +106,7 @@ export class MapChecker extends LobbyPlugin {
       }
       if (p.num_violations_allowed !== undefined) {
         this.option.num_violations_allowed = p.num_violations_allowed;
-        this.logger.info('num_violations_allowed was set to ' + p.num_violations_allowed);
+        this.logger.info(`num_violations_allowed was set to ${p.num_violations_allowed}`);
       }
       let changed = false;
       if (p.star_min !== undefined) {
@@ -148,7 +148,7 @@ export class MapChecker extends LobbyPlugin {
       }
 
       if (changed) {
-        const m = 'New regulation: ' + this.validator.GetDescription();
+        const m = `New regulation: ${this.validator.GetDescription()}`;
         this.lobby.SendMessage(m);
         this.logger.info(m);
       }
@@ -161,7 +161,7 @@ export class MapChecker extends LobbyPlugin {
     if (this.option.enabled) {
       return this.validator.GetDescription();
     } else {
-      return 'Disabled (' + this.validator.GetDescription() + ')';
+      return `Disabled (${this.validator.GetDescription()})`;
     }
   }
 
@@ -330,7 +330,7 @@ export class MapValidator {
       if (violationMsgs.length === 1) {
         message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
       } else {
-        message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => '- ' + m).join('\n')}`;
+        message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => `- ${m}`).join('\n')}`;
       }
       return { rate, message };
     } else {

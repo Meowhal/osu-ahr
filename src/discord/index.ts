@@ -27,7 +27,7 @@ try {
   const ircClient = new irc.Client(c.server, c.nick, c.opt);
   ircClient.on('error', err => {
     if (err.command === 'err_passwdmismatch') {
-      logger.error('%s: %s', err.command, err.args.join(' '));
+      logger.error(`${err.command}: ${err.args.join(' ')}`);
       logger.error('check your account id and password.');
       process.exit(1);
     }
