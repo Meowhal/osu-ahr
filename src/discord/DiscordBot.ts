@@ -90,7 +90,7 @@ export class DiscordBot {
         logger.error('Check the setup guide -> https://github.com/Meowhal/osu-ahr#discord-integration');
 
       } else {
-        logger.error(e);
+        logger.error(`\n${e.message}\n${e.stack}`);
       }
       process.exit();
     }
@@ -154,7 +154,7 @@ export class DiscordBot {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.makeLobbyAsync(name);
     } catch (e: any) {
-      logger.error(`couldn't make a tournament lobby. ${e}`);
+      logger.error(`couldn't make a tournament lobby.\n${e.message}\n${e.stack}`);
       await interaction.editReply(`😫 couldn't make a tournament lobby. ${e.message}`);
       ahr?.lobby.destroy();
       return;
@@ -166,7 +166,7 @@ export class DiscordBot {
       await this.updateMatchSummary(ahr);
       await interaction.editReply(`😀 Created the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
     } catch (e: any) {
-      logger.error(`couldn't make a discord channel. ${e}`);
+      logger.error(`couldn't make a discord channel.\n${e.message}\n${e.stack}`);
       await interaction.editReply(`couldn't make a discord channel. ${e.message}`);
     }
   }
@@ -197,8 +197,8 @@ export class DiscordBot {
     try {
       ahr = new OahrDiscord(this.ircClient, this.sharedObjects);
       await ahr.enterLobbyAsync(lobbyId);
-    } catch (e) {
-      logger.error(`couldn't enter the tournament lobby. ${e}`);
+    } catch (e: any) {
+      logger.error(`couldn't enter the tournament lobby.\n${e.message}\n${e.stack}`);
       await interaction.editReply(`😫 couldn't enter the tournament lobby. ${e}`);
       ahr?.lobby.destroy();
       return;
@@ -213,8 +213,8 @@ export class DiscordBot {
       }
       await this.updateMatchSummary(ahr);
       await interaction.editReply(`😀 Entered the lobby [Lobby History](https://osu.ppy.sh/mp/${lobbyNumber})`);
-    } catch (e) {
-      logger.error(`couldn't make a discord channel.  ${e}`);
+    } catch (e: any) {
+      logger.error(`couldn't make a discord channel.\n${e.message}\n${e.stack}`);
       await interaction.editReply(`😫 couldn't make a discord channel.  ${e}`);
     }
   }
@@ -243,7 +243,7 @@ export class DiscordBot {
     try {
       await interaction.editReply({ embeds: [ahr.createDetailInfoEmbed()] });
     } catch (e: any) {
-      logger.error(`@discordbot.info ${e}`);
+      logger.error(`@discordbot.info\n${e.message}\n${e.stack}`);
       await interaction.editReply(`😫 error! ${e.message}`);
     }
   }
@@ -286,8 +286,8 @@ export class DiscordBot {
     try {
       await ahr.lobby.CloseLobbyAsync();
       await interaction.editReply('Closed the lobby');
-    } catch (e) {
-      logger.error(`@discordbot.close ${e}`);
+    } catch (e: any) {
+      logger.error(`@discordbot.close\n${e.message}\n${e.stack}`);
       await interaction.editReply(`😫 error! ${e}`);
     }
   }
@@ -308,8 +308,8 @@ export class DiscordBot {
     try {
       await ahr.lobby.QuitLobbyAsync();
       await interaction.editReply('Stopped managing the lobby');
-    } catch (e) {
-      logger.error(`@discordbot.quit ${e}`);
+    } catch (e: any) {
+      logger.error(`@discordbot.quit\n${e.message}\n${e.stack}`);
       await interaction.editReply(`😫 error! ${e}`);
     }
   }
@@ -343,8 +343,8 @@ export class DiscordBot {
           break;
       }
       await this.updateMatchSummary(ahr);
-    } catch (e) {
-      logger.error(`@handleButtonInteraction ${e}`);
+    } catch (e: any) {
+      logger.error(`@handleButtonInteraction\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -518,7 +518,7 @@ export class DiscordBot {
           return;
         }
       }
-      logger.error(e);
+      logger.error(`\n${e.message}\n${e.stack}`);
       ahr.updateSummaryMessage = false;
     }
   }
@@ -545,7 +545,7 @@ export class DiscordBot {
         await message.delete();
       }
     } catch (e: any) {
-      logger.error(e);
+      logger.error(`\n${e.message}\n${e.stack}`);
     }
   }
 }
