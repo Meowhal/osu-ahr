@@ -29,8 +29,8 @@ export async function getGuestTokenTrial(): Promise<void> {
     });
     const c = response.data;
     console.log(c);
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error(`\n${e.message}\n${e.stack}`);
   }
 }
 
@@ -45,8 +45,8 @@ export async function getTokenTrial(): Promise<void> {
     });
     const c = response.data;
     console.log(c);
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error(`\n${e.message}\n${e.stack}`);
   }
 }
 
@@ -63,7 +63,7 @@ export async function fetchUpdateTrial(): Promise<void> {
     const r = await axios.get('https://osu.ppy.sh/community/chat/updates?since=2065115911');
     const c = r.data;
     console.log(c);
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error(`\n${e.message}\n${e.stack}`);
   }
 }
