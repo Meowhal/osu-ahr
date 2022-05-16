@@ -66,8 +66,8 @@ export class ProfileFecher extends LobbyPlugin {
           this.logger.warn(`user not found! ${player.name}`);
         }
         this.pendingNames.delete(player.name);
-      } catch (e) {
-        this.logger.error(`@addTaskQueueIfNeeded${e}`);
+      } catch (e: any) {
+        this.logger.error(`@addTaskQueueIfNeeded\n${e.message}\n${e.stack}`);
       }
 
     });

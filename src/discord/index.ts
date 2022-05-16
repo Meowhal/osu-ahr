@@ -41,6 +41,6 @@ try {
   const bot = new DiscordBot(ircClient, discordClient);
   bot.start();
 } catch (e: any) {
-  logger.error(e);
+  logger.error(`\n${e}`);
   process.exit(1);
 }

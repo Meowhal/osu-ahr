@@ -49,8 +49,8 @@ export class LobbyPlugin {
   loadEnvSettings(option: any) {
     try {
       loadEnvConfig(this.pluginName, option);
-    } catch (e) {
-      this.logger.error(e);
+    } catch (e: any) {
+      this.logger.error(`\n${e.message}\n${e.stack}`);
       process.exit(1);
     }
   }

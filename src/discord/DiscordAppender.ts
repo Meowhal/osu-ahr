@@ -41,7 +41,7 @@ export function configure(config: any, layouts: any) {
           await ch.send(content);
         }
       } catch (e: any) {
-        logger.error(e.message);
+        logger.error(`\n${e.message}\n${e.stack}`);
         const ahr = ahrs[loggingEvent.context.channelId];
         if (ahr) {
           ahr.stopTransferLog();

@@ -26,8 +26,8 @@ export class OahrHeadless extends OahrBase {
         default:
           process.exit(1);
       }
-    } catch (e) {
-      logger.error(e);
+    } catch (e: any) {
+      logger.error(`\n${e}`);
       process.exit(1);
     }
 
