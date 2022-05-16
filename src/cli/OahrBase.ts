@@ -101,7 +101,7 @@ export class OahrBase {
     for (const p of this.option.invite_users) {
       this.lobby.SendMessage(`!mp invite ${p}`);
     }
-    logger.info(`Successfully made a lobby. Name : ${this.lobby.channel}`);
+    logger.info(`Successfully made the lobby. Name : ${this.lobby.channel}`);
   }
 
   async enterLobbyAsync(id: string): Promise<void> {
@@ -111,6 +111,6 @@ export class OahrBase {
     await this.lobby.EnterLobbyAsync(channel);
     await this.lobby.LoadMpSettingsAsync();
 
-    logger.info(`Successfully entered a lobby. Channel : ${this.lobby.channel}`);
+    logger.info(`Successfully entered the lobby. Channel : ${this.lobby.channel}`);
   }
 }
