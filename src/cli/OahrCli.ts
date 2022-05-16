@@ -10,7 +10,7 @@ const logger = log4js.getLogger('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
   [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
-  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a Tournament lobby ID.)
+  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
