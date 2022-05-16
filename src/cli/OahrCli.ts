@@ -54,7 +54,7 @@ export class OahrCli extends OahrBase {
           case 'm':
           case 'make':
             if (l.arg === '') {
-              logger.info('Make command needs a lobby name. ex: make testlobby');
+              logger.info('Make command needs a lobby name. ex: \'make testlobby\'');
               return;
             }
             try {
@@ -69,7 +69,7 @@ export class OahrCli extends OahrBase {
           case 'enter':
             try {
               if (l.arg === '') {
-                logger.info('Enter command needs a lobby ID. ex: enter 123456');
+                logger.info('Enter command needs a lobby ID. ex: \'enter 123456\'');
                 return;
               }
               await this.enterLobbyAsync(l.arg);
