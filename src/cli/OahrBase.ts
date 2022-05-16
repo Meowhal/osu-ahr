@@ -95,22 +95,22 @@ export class OahrBase {
     // Remove all but ascii graphic characters
     name = name.replace(/[^ -~]/g, '');
     if (!this.isRegistered) await this.ensureRegisteredAsync();
-    logger.info(`Making a lobby...\nName : ${name}`);
+    logger.info(`Making a lobby... Name : ${name}`);
     await this.lobby.MakeLobbyAsync(name);
     this.lobby.SendMessage(`!mp password ${this.option.password}`);
     for (const p of this.option.invite_users) {
       this.lobby.SendMessage(`!mp invite ${p}`);
     }
-    logger.info(`Successfully made a lobby.\nName : ${this.lobby.channel}`);
+    logger.info(`Successfully made a lobby. Name : ${this.lobby.channel}`);
   }
 
   async enterLobbyAsync(id: string): Promise<void> {
     if (!this.isRegistered) await this.ensureRegisteredAsync();
     const channel = parser.EnsureMpChannelId(id);
-    logger.info(`Entering a lobby...\nChannel : ${channel}`);
+    logger.info(`Entering a lobby... Channel : ${channel}`);
     await this.lobby.EnterLobbyAsync(channel);
     await this.lobby.LoadMpSettingsAsync();
 
-    logger.info(`Successfully entered a lobby.\nChannel : ${this.lobby.channel}`);
+    logger.info(`Successfully entered a lobby. Channel : ${this.lobby.channel}`);
   }
 }
