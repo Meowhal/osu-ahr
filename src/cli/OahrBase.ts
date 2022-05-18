@@ -80,9 +80,9 @@ export class OahrBase {
   ensureRegisteredAsync(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.isRegistered) {
-        logger.trace('waiting for registration from bancho');
+        logger.trace('Waiting for registration from osu!Bancho...');
         this.client.once('registered', () => {
-          logger.trace('registerd');
+          logger.trace('Registered.');
           resolve();
         });
       } else {
@@ -95,22 +95,22 @@ export class OahrBase {
     // Remove all but ascii graphic characters
     name = name.replace(/[^ -~]/g, '');
     if (!this.isRegistered) await this.ensureRegisteredAsync();
-    logger.info(`Making lobby, name : ${name}`);
+    logger.info(`Making a lobby... Name : ${name}`);
     await this.lobby.MakeLobbyAsync(name);
     this.lobby.SendMessage(`!mp password ${this.option.password}`);
     for (const p of this.option.invite_users) {
       this.lobby.SendMessage(`!mp invite ${p}`);
     }
-    logger.info(`Made lobby : ${this.lobby.channel}`);
+    logger.info(`Successfully made the lobby. Name : ${this.lobby.channel}`);
   }
 
   async enterLobbyAsync(id: string): Promise<void> {
     if (!this.isRegistered) await this.ensureRegisteredAsync();
     const channel = parser.EnsureMpChannelId(id);
-    logger.info(`Entering lobby, channel : ${channel}`);
+    logger.info(`Entering a lobby... Channel : ${channel}`);
     await this.lobby.EnterLobbyAsync(channel);
     await this.lobby.LoadMpSettingsAsync();
 
-    logger.info(`Entered lobby : ${this.lobby.channel}`);
+    logger.info(`Successfully entered the lobby. Channel : ${this.lobby.channel}`);
   }
 }

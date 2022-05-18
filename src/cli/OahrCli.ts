@@ -10,7 +10,7 @@ const logger = log4js.getLogger('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
   [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
-  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a Tournament lobby ID.)
+  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
@@ -54,7 +54,7 @@ export class OahrCli extends OahrBase {
           case 'm':
           case 'make':
             if (l.arg === '') {
-              logger.info('Make command needs a lobby name. ex: make testlobby');
+              logger.info('Make command needs a lobby name. ex: \'make testlobby\'');
               return;
             }
             try {
@@ -69,7 +69,7 @@ export class OahrCli extends OahrBase {
           case 'enter':
             try {
               if (l.arg === '') {
-                logger.info('Enter command needs a lobby ID. ex: enter 123456');
+                logger.info('Enter command needs a lobby ID. ex: \'enter 123456\'');
                 return;
               }
               await this.enterLobbyAsync(l.arg);
