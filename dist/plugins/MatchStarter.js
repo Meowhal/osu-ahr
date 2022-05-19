@@ -103,7 +103,7 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         if (this.voting.passed)
             return;
         if (this.voting.Vote(player)) {
-            this.logger.trace('accepted start request from %s', player.name);
+            this.logger.trace(`accepted start request from ${player.name}`);
             this.checkVoteCount(true);
         }
         else {
@@ -139,7 +139,7 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         let strAnd = '';
         let strSec = '';
         if (min > 1) {
-            strMin = min.toString() + ' minutes';
+            strMin = `${min.toString()} minutes`;
         }
         else if (min === 1) {
             strMin = '1 minute';
@@ -148,7 +148,7 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
             strAnd = ' and ';
         }
         if (sec > 1) {
-            strSec = sec.toString() + ' seconds';
+            strSec = `${sec.toString()} seconds`;
         }
         else if (sec === 1) {
             strSec = '1 second';

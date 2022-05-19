@@ -30,23 +30,23 @@ const irc = __importStar(require("../libs/irc"));
 const TypedConfig_1 = require("../TypedConfig");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
 const logger = log4js_1.default.getLogger('cli');
-console.log('starting up...');
+console.log('Starting up...');
 const config_path = './config/log_discord.json';
 log4js_1.default.configure(config_path);
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();
     if (c.nick === 'your account id' || c.opt.password === 'you can get password from \'https://osu.ppy.sh/p/irc\'') {
-        logger.error('you must enter your account name and irc password in the config file. ');
-        logger.error('you can get the password from \'https://osu.ppy.sh/p/irc\' ');
-        logger.error('Copy config/default.json to config/local.json, and enter your id and irc password.');
+        logger.error('You must enter your account ID and IRC password in the config file.');
+        logger.error('You can get your IRC password in \'https://osu.ppy.sh/p/irc\' ');
+        logger.error('Copy config/default.json to config/local.json, and then enter your account ID and IRC password.');
         process.exit(1);
     }
     const ircClient = new irc.Client(c.server, c.nick, c.opt);
     ircClient.on('error', err => {
         if (err.command === 'err_passwdmismatch') {
-            logger.error('%s: %s', err.command, err.args.join(' '));
-            logger.error('check your account id and password.');
+            logger.error(`${err.command}: ${err.args.join(' ')}`);
+            logger.error('Check your account ID and IRC password.');
             process.exit(1);
         }
     });
@@ -58,7 +58,7 @@ try {
     bot.start();
 }
 catch (e) {
-    logger.error(e);
+    logger.error(`@discord-index\n${e}`);
     process.exit(1);
 }
 //# sourceMappingURL=index.js.map

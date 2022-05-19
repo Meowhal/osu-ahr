@@ -32,7 +32,7 @@ const logger = log4js_1.default.getLogger('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
   [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
-  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a Tournament lobby ID.)
+  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
@@ -62,7 +62,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case 'm':
                         case 'make':
                             if (l.arg === '') {
-                                logger.info('Make command needs a lobby name. ex: make testlobby');
+                                logger.info('Make command needs a lobby name. ex: \'make testlobby\'');
                                 return;
                             }
                             try {
@@ -70,7 +70,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                                 this.transitionToLobbyMenu();
                             }
                             catch (e) {
-                                logger.info('Failed to make a lobby : %s', e);
+                                logger.info(`Failed to make a lobby :\n${e}`);
                                 this.scene = this.scenes.exited;
                             }
                             break;
@@ -78,14 +78,14 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case 'enter':
                             try {
                                 if (l.arg === '') {
-                                    logger.info('Enter command needs a lobby ID. ex: enter 123456');
+                                    logger.info('Enter command needs a lobby ID. ex: \'enter 123456\'');
                                     return;
                                 }
                                 await this.enterLobbyAsync(l.arg);
                                 this.transitionToLobbyMenu();
                             }
                             catch (e) {
-                                logger.info('Invalid channel : %s', e);
+                                logger.info(`Invalid channel :\n${e}`);
                                 this.scene = this.scenes.exited;
                             }
                             break;
@@ -106,7 +106,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case '':
                             break;
                         default:
-                            logger.info('Invalid command : %s', line);
+                            logger.info(`Invalid command : ${line}`);
                             break;
                     }
                 },
@@ -182,21 +182,21 @@ class OahrCli extends OahrBase_1.OahrBase {
                             break;
                         case 'check_order':
                             this.lobby.historyRepository.calcCurrentOrderAsName().then(r => {
-                                logger.info('History order = ' + r.join(', '));
-                                logger.info('Current order = ' + this.selector.hostQueue.map(p => p.name).join(', '));
+                                logger.info(`History order = ${r.join(', ')}`);
+                                logger.info(`Current order = ${this.selector.hostQueue.map(p => p.name).join(', ')}`);
                             });
                             break;
                         case '':
                             break;
                         default:
                             if (l.command.startsWith('!mp')) {
-                                this.lobby.SendMessage('!mp ' + l.arg);
+                                this.lobby.SendMessage(`!mp ${l.arg}`);
                             }
                             else if (l.command.startsWith('!') || l.command.startsWith('*')) {
-                                this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + ' ' + l.arg);
+                                this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), `${l.command} ${l.arg}`);
                             }
                             else {
-                                console.log('Invalid command : %s', line);
+                                console.log(`Invalid command : ${line}`);
                             }
                             break;
                     }
@@ -245,7 +245,7 @@ class OahrCli extends OahrBase_1.OahrBase {
             r.prompt();
         });
         r.on('line', line => {
-            logger.trace('Scene:%s, Line:%s', this.scene.name, line);
+            logger.trace(`Scene:${this.scene.name}, Line:${line}`);
             this.scene.action(line).then(() => {
                 if (!this.exited) {
                     r.setPrompt(this.prompt);
@@ -275,7 +275,7 @@ class OahrCli extends OahrBase_1.OahrBase {
     }
     transitionToLobbyMenu() {
         this.scene = this.scenes.lobbyMenu;
-        this.scene.prompt = (this.lobby.channel || '') + ' > ';
+        this.scene.prompt = `${this.lobby.channel || ''} > `;
         console.log(lobbyMenuCommandsMessage);
     }
 }

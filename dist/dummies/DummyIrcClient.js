@@ -43,7 +43,7 @@ class DummyIrcClient extends events_1.EventEmitter {
             this.channel = channel;
         }
         this.emit('join', channel, who, this.msg);
-        this.emit('join' + channel, who, this.msg);
+        this.emit(`join${channel}`, who, this.msg);
     }
     // チャンネル退出イベントを発行する
     raisePart(channel, who) {
@@ -51,7 +51,7 @@ class DummyIrcClient extends events_1.EventEmitter {
             this.channel = '';
         }
         this.emit('part', channel, who, this.msg);
-        this.emit('part' + channel, who, this.msg);
+        this.emit(`part${channel}`, who, this.msg);
     }
     // メッセージイベントを発行する
     emulateMessage(from, to, message) {
@@ -66,7 +66,7 @@ class DummyIrcClient extends events_1.EventEmitter {
         this.emit('message', from, to, message, this.msg);
         if (to === this.channel) {
             this.emit('message#', from, to, message, this.msg);
-            this.emit('message' + to, from, message, this.msg);
+            this.emit(`message${to}`, from, message, this.msg);
         }
         if (to === this.nick) {
             this.emit('pm', from, message, this.msg);
@@ -243,7 +243,7 @@ class DummyIrcClient extends events_1.EventEmitter {
             }
             setImmediate(() => {
                 const id = '12345';
-                this.raiseJoin('#mp_' + id, this.nick);
+                this.raiseJoin(`#mp_${id}`, this.nick);
                 this.emulateMessage('BanchoBot', this.nick, `Created the tournament match https://osu.ppy.sh/mp/${id} ${title}`);
             });
         }
@@ -302,8 +302,8 @@ class DummyIrcClient extends events_1.EventEmitter {
                     }
                     else {
                         // カウントダウンや分表示は面倒なので省略
-                        m('Match starts in ' + mp.arg + ' seconds');
-                        m('Queued the match to start in ' + mp.arg + ' seconds');
+                        m(`Match starts in ${mp.arg} seconds`);
+                        m(`Queued the match to start in ${mp.arg} seconds`);
                     }
                     break;
                 case 'aborttimer':

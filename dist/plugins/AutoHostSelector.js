@@ -104,7 +104,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         if (isMpSettingResult)
             return;
         this.hostQueue.push(player);
-        this.logger.trace('added %s', player.name);
+        this.logger.trace(`added ${player.name}`);
         if (this.hostQueue.length === 1) {
             this.logger.trace('appoint first player to host');
             this.changeHost();
@@ -142,7 +142,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         if (this.lobby.isMatching)
             return; // 試合中は何もしない
         if (this.hostQueue[0] === newhost) {
-            this.logger.trace('a new host has been appointed:%s', newhost.name);
+            this.logger.trace(`a new host has been appointed:${newhost.name}`);
         }
         else {
             // ホストがキューの先頭以外に変更された場合
@@ -342,9 +342,9 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
             let m = this.hostQueue.map(c => (0, Player_1.disguiseUserName)(c.name)).join(', ');
             this.logger.trace(m);
             if (this.option.host_order_chars_limit < m.length) {
-                m = m.substring(0, this.option.host_order_chars_limit) + '...';
+                m = `${m.substring(0, this.option.host_order_chars_limit)}...`;
             }
-            return 'host order : ' + m;
+            return `host order : ${m}`;
         }, '!queue', this.option.host_order_cooltime_ms);
     }
     /**
@@ -382,7 +382,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
             }
         }
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace('skipto: %s', this.hostQueue.map(p => p.name).join(', '));
+            this.logger.trace(`skipto: ${this.hostQueue.map(p => p.name).join(', ')}`);
         }
         this.raiseOrderChanged('rotated');
         this.changeHost();
@@ -395,7 +395,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         if (typeof (order) === 'string') {
             const players = order.split(',').map(t => this.lobby.GetPlayer((0, Player_1.revealUserName)(t.trim()))).filter(p => p !== null);
             if (players.length === 0) {
-                this.logger.info('Faild reorder, invalid order string : %s', order);
+                this.logger.info(`Faild reorder, invalid order string : ${order}`);
             }
             else {
                 this.Reorder(players);
@@ -425,8 +425,8 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
             isValid = isValid && this.lobby.players.has(p) && !exports.DENY_LIST.includes(p);
         }
         this.logger.trace('validate queue.');
-        this.logger.trace('  old: %s', Array.from(this.lobby.players).map(p => p.name).join(', '));
-        this.logger.trace('  new: %s', que.map(p => p.name).join(', '));
+        this.logger.trace(`  old: ${Array.from(this.lobby.players).map(p => p.name).join(', ')}`);
+        this.logger.trace(`  new: ${que.map(p => p.name).join(', ')}`);
         return isValid;
     }
     /**
@@ -445,10 +445,10 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         }
         if (this.hostQueue[0] !== this.lobby.host) {
             this.lobby.TransferHost(this.hostQueue[0]);
-            this.logger.trace('sent !mp host %s', this.hostQueue[0].name);
+            this.logger.trace(`sent !mp host ${this.hostQueue[0].name}`);
         }
         else {
-            this.logger.trace('%s is already host', this.hostQueue[0].name);
+            this.logger.trace(`${this.hostQueue[0].name} is already host`);
         }
     }
     /**
@@ -458,7 +458,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         const current = this.hostQueue.shift();
         this.hostQueue.push(current);
         if (this.logger.isTraceEnabled() && showLog) {
-            this.logger.trace('rotated host queue: %s', this.hostQueue.map(p => p.name).join(', '));
+            this.logger.trace(`rotated host queue: ${this.hostQueue.map(p => p.name).join(', ')}`);
         }
         this.raiseOrderChanged('rotated');
     }
@@ -470,7 +470,7 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
         const i = this.hostQueue.indexOf(player);
         if (i !== -1) {
             this.hostQueue.splice(i, 1);
-            this.logger.trace('removed %s', player.name);
+            this.logger.trace(`removed ${player.name}`);
             this.raiseOrderChanged('removed');
             return true;
         }

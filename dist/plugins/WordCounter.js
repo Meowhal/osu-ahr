@@ -77,7 +77,7 @@ class WordCounter extends LobbyPlugin_1.LobbyPlugin {
     }
     log(msg, important) {
         const f = (important ? this.logger.info : this.logger.debug).bind(this.logger);
-        f('msg:%s', msg);
+        f(`msg:${msg}`);
         for (const p of this.periods) {
             f(`  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `);
         }

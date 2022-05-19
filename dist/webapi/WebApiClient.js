@@ -57,11 +57,11 @@ class WebApiClientClass {
             const p = this.getTokenPath(token.isGuest);
             await fs_1.promises.mkdir(path_1.default.dirname(p), { recursive: true });
             await fs_1.promises.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
-            this.logger.info('stored token to : ' + p);
+            this.logger.info(`stored token to : ${p}`);
             return true;
         }
         catch (e) {
-            this.logger.error('storeToken error : ' + e);
+            this.logger.error(`storeToken error :\n${e.message}\n${e.stack}`);
             return false;
         }
     }
@@ -79,14 +79,14 @@ class WebApiClientClass {
             const j = await fs_1.promises.readFile(p, 'utf8');
             const token = JSON.parse(j);
             if (!isExpired(token)) {
-                this.logger.info('loaded stored token from : ' + p);
+                this.logger.info(`loaded stored token from : ${p}`);
                 return token;
             }
             this.deleteStoredToken(asGuest);
             this.logger.info('deleted expired stored token');
         }
         catch (e) {
-            this.logger.error('loadStoredToken error : ' + e);
+            this.logger.error(`loadStoredToken error :\n${e.message}\n${e.stack}`);
         }
     }
     async deleteStoredToken(asGuest) {
@@ -101,14 +101,14 @@ class WebApiClientClass {
             fs_1.promises.unlink(p);
         }
         catch (e) {
-            this.logger.error('load token error : ' + e);
+            this.logger.error(`load token error :\n${e.message}\n${e.stack}`);
         }
     }
     async getAuthorizedToken() {
         try {
             const code = await this.getAuthorizeCode();
             const response = await axios_1.default.post('https://osu.ppy.sh/oauth/token', {
-                'client_id': '' + this.option.client_id,
+                'client_id': `${this.option.client_id}`,
                 'client_secret': this.option.client_secret,
                 'code': code,
                 'grant_type': 'authorization_code',
@@ -120,7 +120,7 @@ class WebApiClientClass {
             return response.data;
         }
         catch (e) {
-            this.logger.error(`getAuthorizedToken error : ${e}`);
+            this.logger.error(`getAuthorizedToken error :\n${e.message}\n${e.stack}`);
         }
     }
     getAuthorizeCode() {
@@ -140,8 +140,8 @@ class WebApiClientClass {
                     res.end('missing code');
                     return;
                 }
-                res.end('ok : ' + code);
-                this.logger.trace('got code! ' + code);
+                res.end(`ok : ${code}`);
+                this.logger.trace(`got code! ${code}`);
                 server.close(() => {
                     this.logger.trace('closed callback');
                 });
@@ -176,7 +176,7 @@ class WebApiClientClass {
         try {
             const response = await axios_1.default.post('https://osu.ppy.sh/oauth/token', {
                 'grant_type': 'client_credentials',
-                'client_id': '' + this.option.client_id,
+                'client_id': `${this.option.client_id}`,
                 'client_secret': this.option.client_secret,
                 'scope': 'public'
             });
@@ -185,7 +185,7 @@ class WebApiClientClass {
             return response.data;
         }
         catch (e) {
-            this.logger.error(`getGuestToken error : ${e}`);
+            this.logger.error(`getGuestToken error :\n${e.message}\n${e.stack}`);
         }
     }
     async accessApi(url, config = {}, tryCount = 2) {

@@ -46,7 +46,7 @@ class LobbyPlugin {
             (0, TypedConfig_1.loadEnvConfig)(this.pluginName, option);
         }
         catch (e) {
-            this.logger.error(e);
+            this.logger.error(`\n${e.message}\n${e.stack}`);
             process.exit(1);
         }
     }

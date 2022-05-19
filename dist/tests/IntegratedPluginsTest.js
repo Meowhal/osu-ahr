@@ -36,7 +36,7 @@ describe('Integrated Plugins Tests', function () {
             lobby.RaiseReceivedChatCommand(owner, m);
             await TestUtils_1.default.delayAsync(10);
             TestUtils_1.default.assertHost('p4', lobby);
-            m = '*skipto ' + owner.name;
+            m = `*skipto ${owner.name}`;
             chai_1.assert.isTrue(CommandParser_1.parser.IsChatCommand(m));
             lobby.RaiseReceivedChatCommand(owner, m);
             await TestUtils_1.default.delayAsync(10);
