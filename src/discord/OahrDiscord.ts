@@ -68,32 +68,32 @@ export class OahrDiscord extends OahrBase {
     const host = lobby.host?.name ?? 'none';
 
 
-    const embed = new MessageEmbed().setColor('BLURPLE').setTitle(`Lobby Information - ${name}`).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
-    embed.addField('lobby', `id:${lid}, status:${LobbyStatus[lobby.status]}, host:${host}, players:${lobby.players.size}, name:${name}`,);
+    const embed = new MessageEmbed().setColor('BLURPLE').setTitle('Lobby Information').setURL(`https://osu.ppy.sh/community/matches/${lid}`);
+    embed.addField('Lobby', `Name: \`${name}\`, ID: \`${lid}\`, Status: \`${LobbyStatus[lobby.status]}\`, Host: \`${host}\`, Player(s): \`${lobby.players.size}\``,);
     const refs = Array.from(lobby.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(',');
     if (refs) {
-      embed.addField('referee', refs, false);
+      embed.addField('Referee', `\`${refs}\``, false);
     }
 
     const ho = this.getPlayerOrders();
     if (ho !== '') {
-      embed.addField('host order', ho, false);
+      embed.addField('Host order', `\`${ho}\``, false);
     }
 
-    embed.addField(`map - ${lobby.mapTitle}`, `https://osu.ppy.sh/b/${lobby.mapId}`, false);
-    embed.addField('selector', `changer:${this.selector.mapChanger?.name ?? 'none'}, rflag:${this.selector.needsRotate ? 'true' : 'false'}`, false);
+    embed.addField('Beatmap', `${lobby.mapTitle !== '' ? `\`${lobby.mapTitle}\`\nhttps://osu.ppy.sh/b/${lobby.mapId}` : `https://osu.ppy.sh/b/${lobby.mapId}`}`, false);
+    embed.addField('Selector', `Beatmap changer: \`${this.selector.mapChanger?.name ?? 'None'}\`, R Flag: \`${this.selector.needsRotate ? 'True' : 'False'}\``, false);
 
     const denylist = this.selector.getDeniedPlayerNames();
     if (denylist.length !== 0) {
-      embed.addField('denylist', `${denylist.join(', ')}`);
+      embed.addField('Deny list', `\`${denylist.join(', ')}\``);
     }
 
-    embed.addField('history', `${this.history.repository.hasError ? 'stopped' : 'active'}, latest:${this.history.repository?.latestEventId.toString() ?? '0'}, loaded:${this.history.repository?.events.length.toString() ?? '0'}`, false);
-    embed.addField('regulation', this.checker.getRegulationDescription(), false);
+    embed.addField('History', `Activity: \`${this.history.repository.hasError ? 'Stopped' : 'Active'}\`, Latest: \`${this.history.repository?.latestEventId.toString() ?? '0'}\`, Loaded: \`${this.history.repository?.events.length.toString() ?? '0'}\``, false);
+    embed.addField('Regulation(s)', `\`${this.checker.getRegulationDescription()}\``, false);
 
     const keeps = this.keeper.getDescription();
     if (keeps !== '') {
-      embed.addField('keeps', keeps, false);
+      embed.addField('Keep(s)', `\`${keeps}\``, false);
     }
 
     return embed;
@@ -107,18 +107,18 @@ export class OahrDiscord extends OahrBase {
     const host = lobby.host?.name ?? 'none';
 
     const embed = new MessageEmbed().setColor(stat.color).setTitle(`#mp_${lid}`).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
-    embed.addField('title', name, true);
-    embed.addField('status', stat.text, true);
-    embed.addField('host', host, true);
-    embed.addField('regulation', this.checker.getRegulationDescription(), true);
-    embed.addField(`map - ${lobby.mapTitle}`, `https://osu.ppy.sh/b/${lobby.mapId}`, false);
+    embed.addField('Title', `\`${name}\``, true);
+    embed.addField('Status', `\`${stat.text}\``, true);
+    embed.addField('Host', `\`${host}\``, true);
+    embed.addField('Regulation(s)', `\`${this.checker.getRegulationDescription()}\``, true);
+    embed.addField('Beatmap', `${lobby.mapTitle !== '' ? `\`${lobby.mapTitle}\`\nhttps://osu.ppy.sh/b/${lobby.mapId}` : `https://osu.ppy.sh/b/${lobby.mapId}`}`, false);
     const ho = this.getPlayerOrders();
     if (ho !== '') {
-      embed.addField('host order', ho, false);
+      embed.addField('Host order', `\`${ho}\``, false);
     }
     const keeps = this.keeper.getDescription();
     if (keeps !== '') {
-      embed.addField('keeps', keeps, false);
+      embed.addField('Keep(s)', `\`${keeps}\``, false);
     }
     embed.setTimestamp();
     return embed;
@@ -126,20 +126,20 @@ export class OahrDiscord extends OahrBase {
 
   createMenuButton() {
     const cid = this.lobby.channel; // #mp_xxxx
-    if (!cid) throw new Error('invalid ahr lobby state. channel is undefined');
+    if (!cid) throw new Error('Invalid ahr lobby state. Channel is undefined');
     return new MessageActionRow().addComponents(new MessageButton().setLabel('Menu').setStyle(MessageButtonStyles.PRIMARY).setCustomId(`menu,${cid}`));
   }
 
   createControllButtons() {
     const cid = this.lobby.channel; // #mp_xxxx
-    if (!cid) throw new Error('invalid ahr lobby state. channel is undefined');
+    if (!cid) throw new Error('Invalid ahr lobby state. Channel is undefined');
     const btn1 = new MessageButton();
-    const btn2 = new MessageButton().setLabel('close').setStyle(MessageButtonStyles.DANGER).setCustomId(`close,${cid}`); // close,#mp_xxxx
+    const btn2 = new MessageButton().setLabel('Close lobby').setStyle(MessageButtonStyles.DANGER).setCustomId(`close,${cid}`); // close,#mp_xxxx
 
     if (this.transferLog) {
-      btn1.setLabel('Stop transfer').setStyle(MessageButtonStyles.SECONDARY).setCustomId(`stopLog,${cid}`); // stopLog,#mp_xxxx
+      btn1.setLabel('Stop transferring').setStyle(MessageButtonStyles.SECONDARY).setCustomId(`stopLog,${cid}`); // stopLog,#mp_xxxx
     } else {
-      btn1.setLabel('Start transfer').setStyle(MessageButtonStyles.PRIMARY).setCustomId(`startLog,${cid}`); // stopLog,#mp_xxxx
+      btn1.setLabel('Transfer in-game chat').setStyle(MessageButtonStyles.PRIMARY).setCustomId(`startLog,${cid}`); // stopLog,#mp_xxxx
     }
 
     const row = new MessageActionRow().addComponents(btn1, btn2);

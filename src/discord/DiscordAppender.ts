@@ -41,7 +41,7 @@ export function configure(config: any, layouts: any) {
           await ch.send(content);
         }
       } catch (e: any) {
-        logger.error(`\n${e.message}\n${e.stack}`);
+        logger.error(`@DiscordAppender#configure\n${e.message}\n${e.stack}`);
         const ahr = ahrs[loggingEvent.context.channelId];
         if (ahr) {
           ahr.stopTransferLog();
@@ -77,10 +77,10 @@ function createContent(ev: log4js.LoggingEvent, msg: string): string | MessageOp
       if (min || mout) {
         let msg = '';
         if (min) {
-          msg += `**in** ${min[1]} `;
+          msg += `**In** ${min[1]} `;
         }
         if (mout) {
-          msg += `**out** ${mout[1]}`;
+          msg += `**Out** ${mout[1]}`;
         }
         return { embeds: [new MessageEmbed().setColor(color).setDescription(msg)] };
       }
