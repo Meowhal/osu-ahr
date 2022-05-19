@@ -355,7 +355,7 @@ export class DiscordBot {
     const role = guild.roles.cache.find(r => r.name === ADMIN_ROLE.name);
     return await guild.channels.create(lobbyId, {
       type: 'GUILD_TEXT',
-      topic: `Created by ${this.discordClient.user?.username}. [Lobby History](https://osu.ppy.sh/community/matches/${lobbyNumber})`,
+      topic: `Created by ${this.discordClient.user?.username}. Lobby history: https://osu.ppy.sh/community/matches/${lobbyNumber}`,
       permissionOverwrites: [
         {
           id: guild.roles.everyone,
