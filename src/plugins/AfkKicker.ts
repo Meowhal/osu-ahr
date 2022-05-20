@@ -146,15 +146,15 @@ export class AfkKicker extends LobbyPlugin {
     stat.timeLastChange = now;
     stat.afkPoint += delta;
     if (delta > 0) {
-      this.logger.info(`Detected ${player.escaped_name} is afk. Reason: ${reason}(${(delta > 0 ? '+' : '') + delta}), ${stat.afkPoint} / ${this.option.threshold}`);
+      this.logger.info(`Detected ${player.escaped_name} is AFK. Reason: ${reason}(${(delta > 0 ? '+' : '') + delta}), ${stat.afkPoint} / ${this.option.threshold}`);
     }
 
     if (stat.afkPoint < 0) {
       stat.afkPoint = 0;
     } else if (this.option.threshold <= stat.afkPoint) {
       this.lobby.SendMessage(`!mp kick ${player.escaped_name}`);
-      this.lobby.SendMessage('bot: kicked afk player.');
-      this.logger.info(`kicked ${player.escaped_name}`);
+      this.lobby.SendMessage('bot: Kicked an AFK player.');
+      this.logger.info(`Kicked ${player.escaped_name}`);
     }
   }
 
@@ -163,31 +163,31 @@ export class AfkKicker extends LobbyPlugin {
     switch (command) {
       case '*afkkick_enable':
         this.option.enabled = true;
-        this.logger.info('afkkick enabled');
+        this.logger.info('AFK Kicker plugin enabled.');
         break;
       case '*afkkick_disable':
         this.option.enabled = false;
-        this.logger.info('afkkick disabled');
+        this.logger.info('AFK Kicker plugin disabled.');
         break;
       case '*afkkick_threshold':
         let th = parseInt(param);
         if (Number.isNaN(th)) {
-          this.logger.warn(`invalid *afkkick_threshold param : ${param}`);
+          this.logger.warn(`Invalid AFK Kicker threshold parameter : ${param}`);
           return;
         }
         th = Math.max(th, 1);
         this.option.threshold = th;
-        this.logger.info(`afkkicker.threshold was set to ${th}`);
+        this.logger.info(`Threshold for AFK Kicker set to ${th}`);
         break;
       case '*afkkick_cooltime':
         let ct = parseInt(param);
         if (Number.isNaN(ct)) {
-          this.logger.warn(`invalid *afkkick_cooltime param : ${param}`);
+          this.logger.warn(`Invalid AFK Kicker cooltime parameter : ${param}`);
           return;
         }
         ct = Math.max(ct, 10000);
         this.option.cooltime_ms = ct;
-        this.logger.info(`afkkicker.cool_time_ms was set to ${ct}`);
+        this.logger.info(`Cooltime(ms) for AFK Kicker set to ${ct}`);
         break;
     }
   }
@@ -197,9 +197,9 @@ export class AfkKicker extends LobbyPlugin {
       .filter(([player, stat]) => stat.afkPoint > 0)
       .map(([player, stat]) => `${player.escaped_name}: ${stat.afkPoint}`).join(',');
     if (points) {
-      points = `\n  points: ${points}`;
+      points = `\n  Points: ${points}`;
     }
     return `-- AFK Kicker --
-  status: ${this.option.enabled ? 'enabled' : 'disabled'}, threshold: ${this.option.threshold}, cooltime: ${this.option.cooltime_ms} (ms)${points}`;
+  Status: ${this.option.enabled ? 'Enabled' : 'Disabled'}, Threshold: ${this.option.threshold}, Cooltime: ${this.option.cooltime_ms} (ms)${points}`;
   }
 }
