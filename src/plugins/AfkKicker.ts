@@ -146,7 +146,7 @@ export class AfkKicker extends LobbyPlugin {
     stat.timeLastChange = now;
     stat.afkPoint += delta;
     if (delta > 0) {
-      this.logger.info(`Detected ${player.escaped_name} is AFK. Reason: ${reason}(${(delta > 0 ? '+' : '') + delta}), ${stat.afkPoint} / ${this.option.threshold}`);
+      this.logger.info(`Detected player ${player.escaped_name} is AFK. Reason: ${reason}(${(delta > 0 ? '+' : '') + delta}), ${stat.afkPoint} / ${this.option.threshold}`);
     }
 
     if (stat.afkPoint < 0) {
