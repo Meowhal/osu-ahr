@@ -20,7 +20,7 @@ LobbyMenu Commands
   [say <Message>] Send a message to #multiplayer.
   [info] Show the application's current information.
   [reorder] Arrange the host queue, e.g: 'reorder player1, player2, player3'
-  [regulation <regulation command>] Change one or more regulations, e.g: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
+  [regulation <regulation command>] Change one or more regulations, e.g: 'regulation star_min=2 star_max=5 length_min=60 length_max=300' 
   [regulation enable] Enable regulation checking.
   [regulation disable] Disable regulation checking.
   [close] Close the lobby when everyone leaves.
