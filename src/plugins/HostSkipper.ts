@@ -104,14 +104,14 @@ export class HostSkipper extends LobbyPlugin {
 
   private onParsedStat(player: Player, result: StatResult, isPm: boolean): void {
     if (!isPm && this.lobby.host === player && this.statIsAfk(result.status) && !this.lobby.isMatching) {
-      this.logger.trace(`passed afk check ${result.name} -> ${StatStatuses[result.status]}`);
+      this.logger.trace(`Passed an AFK check ${result.name} -> ${StatStatuses[result.status]}`);
       if (this.option.afk_check_do_skip) {
         this.Skip();
       } else {
         if (this.isMapChanged) {
-          this.lobby.SendMessage('bot : players can start the match by !start vote.');
+          this.lobby.SendMessage('bot : Players can start the match by !start vote.');
         } else {
-          this.lobby.SendMessage('bot : players can skip afk host by !skip vote.');
+          this.lobby.SendMessage('bot : Players can skip the AFK host by !skip vote.');
         }
       }
     }
@@ -135,22 +135,22 @@ export class HostSkipper extends LobbyPlugin {
 
   private vote(player: Player): void {
     if (this.voting.passed) {
-      this.logger.debug(`vote from ${player.name} was ignored, already skipped`);
+      this.logger.debug(`A vote from player ${player.name} was ignored, already skipped.`);
     } else if (this.elapsedSinceHostChanged < this.option.vote_cooltime_ms) {
-      this.logger.debug(`vote from ${player.name} was ignored, at cool time.`);
+      this.logger.debug(`A vote from player ${player.name} was ignored, done during cooltime.`);
       if (player.isHost) {
         const secs = (this.option.vote_cooltime_ms - this.elapsedSinceHostChanged) / 1000;
-        this.lobby.SendMessage(`skip command is in cooltime. you have to wait ${secs.toFixed(2)} sec(s).`);
+        this.lobby.SendMessage(`The skip command is currently in cooltime. You have to wait ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
-      this.logger.debug(`host(${player.name}) sent !skip command`);
+      this.logger.debug(`Host(${player.name}) sent !skip command.`);
       this.Skip();
     } else {
       if (this.voting.Vote(player)) {
-        this.logger.trace(`accept skip request from ${player.name}`);
+        this.logger.trace(`Accepted a skip request from player ${player.name}`);
         this.checkSkipCount(true);
       } else {
-        this.logger.debug(`vote from ${player.name} was ignored, double vote`);
+        this.logger.debug(`A vote from player ${player.name} was ignored, voted twice.`);
       }
     }
   }
@@ -161,13 +161,13 @@ export class HostSkipper extends LobbyPlugin {
       this.lobby.DeferMessage(`bot : Host skip progress: ${this.voting.toString()}`, 'checkSkipCount', this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
-      this.lobby.DeferMessage(`bot : Passed skip vote: ${this.voting.toString()}`, 'checkSkipCount', 100, true);
+      this.lobby.DeferMessage(`bot : Passed a skip vote: ${this.voting.toString()}`, 'checkSkipCount', 100, true);
       this.Skip();
     }
   }
 
   Skip(): void {
-    this.logger.info('do skip');
+    this.logger.info('Skipping...');
     this.StopTimer();
     this.SendPluginMessage('skip');
     this.timeHostChanged = Date.now();
@@ -175,10 +175,10 @@ export class HostSkipper extends LobbyPlugin {
 
   SkipTo(username: string): void {
     if (!this.lobby.Includes(username)) {
-      this.logger.info(`invalid username @skipto : ${username}`);
+      this.logger.info(`Cannot skip to an invalid username : ${username}`);
       return;
     }
-    this.logger.info(`do skipTo : ${username}`);
+    this.logger.info(`Skipped to : ${username}`);
     this.StopTimer();
     this.SendPluginMessage('skipto', [username]);
   }
@@ -192,19 +192,19 @@ export class HostSkipper extends LobbyPlugin {
   StartTimer(isFirst: boolean): void {
     if (this.option.afk_check_interval_ms === 0 || !this.lobby.host || this.lobby.status !== LobbyStatus.Entered || this.lobby.isMatching) return;
     this.StopTimer();
-    this.logger.trace('start afk check timer');
+    this.logger.trace('Started the AFK check timer.');
     const target = this.lobby.host;
     this.afkTimer = setTimeout(async () => {
       if (!this.lobby.isMatching && this.lobby.host === target) {
         try {
           const stat1 = await this.lobby.RequestStatAsync(target, true, this.option.afk_check_timeout_ms);
-          this.logger.trace(`stat check phase 1 ${stat1.name} -> ${StatStatuses[stat1.status]}`);
+          this.logger.trace(`Stat check phase 1 ${stat1.name} -> ${StatStatuses[stat1.status]}`);
           if (this.afkTimer !== undefined && this.lobby.host === target && this.statIsAfk(stat1.status)) {
             // double check and show stat for players
             await this.lobby.RequestStatAsync(target, false, this.option.afk_check_timeout_ms);
           }
         } catch {
-          this.logger.warn('stat check timeout!');
+          this.logger.warn('Stat check timed out!');
         }
         // StopTimerが呼び出されていない、かつホストがターゲットと同じならタイマー再開
         if (this.afkTimer !== undefined && this.lobby.host === target) {
@@ -216,7 +216,7 @@ export class HostSkipper extends LobbyPlugin {
 
   StopTimer(): void {
     if (this.afkTimer !== undefined) {
-      this.logger.trace('stop timer');
+      this.logger.trace('Stopping timer...');
       clearTimeout(this.afkTimer);
       this.afkTimer = undefined;
     }
@@ -227,6 +227,7 @@ export class HostSkipper extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- Host Skipper -- timer : ${this.afkTimer !== undefined ? 'active' : '###'}, skip_vote : ${this.voting.toString()}`;
+    return `-- Host Skipper -- 
+  Timer : ${this.afkTimer !== undefined ? 'Active' : '###'}, Skip Vote : ${this.voting.toString()}`;
   }
 }
