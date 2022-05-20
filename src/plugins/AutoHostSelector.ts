@@ -27,11 +27,11 @@ class DenyList {
   logger = log4js.getLogger('DenyList');
   addPlayer(player: Player) {
     if (this.players.has(player.escaped_name)) {
-      this.logger.info(`${player.name} is already in denylist.`);
+      this.logger.info(`Player ${player.name} is already in the deny list.`);
       return false;
     } else {
       this.players.add(player.escaped_name);
-      this.logger.info(`Added ${player.name} to denylist.`);
+      this.logger.info(`Added player ${player.name} to the deny list.`);
       this.playerAdded.emit({ name: player.escaped_name });
       return true;
     }
@@ -39,11 +39,11 @@ class DenyList {
 
   removePlayer(player: Player) {
     if (this.players.delete(player.escaped_name)) {
-      this.logger.info(`Removed ${player.name} from denylist.`);
+      this.logger.info(`Removed player ${player.name} from the deny list.`);
       this.playerRemoved.emit({ name: player.escaped_name });
       return true;
     } else {
-      this.logger.info(`${player.name} is not in denylist.`);
+      this.logger.info(`Player ${player.name} is not in the deny list.`);
       return false;
     }
   }
@@ -115,9 +115,9 @@ export class AutoHostSelector extends LobbyPlugin {
     if (isMpSettingResult) return;
 
     this.hostQueue.push(player);
-    this.logger.trace(`added ${player.name}`);
+    this.logger.trace(`Added player ${player.name} to host queue.`);
     if (this.hostQueue.length === 1) {
-      this.logger.trace('appoint first player to host');
+      this.logger.trace('Appointed first player as host.');
       this.changeHost();
     }
     this.raiseOrderChanged('added');
@@ -136,7 +136,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (isMpSettingResult) return;
     if (this.hostQueue.length === 0) return;
     if (!this.lobby.host && !this.lobby.hostPending && !this.lobby.isClearedHost) { // ホストがいない、かつ承認待ちのホストがいない、!mp clearhostが実行されていない
-      this.logger.info('host has left');
+      this.logger.info('A host has left the lobby.');
       this.changeHost();
     }
   }
@@ -152,11 +152,11 @@ export class AutoHostSelector extends LobbyPlugin {
     if (this.lobby.isMatching) return; // 試合中は何もしない
 
     if (this.hostQueue[0] === newhost) {
-      this.logger.trace(`a new host has been appointed:${newhost.name}`);
+      this.logger.trace(`A new host has been appointed: ${newhost.name}`);
     } else {
       // ホストがキューの先頭以外に変更された場合
       if (!this.lobby.hostPending) {
-        this.logger.trace('the host may have manually changed by the previous host');
+        this.logger.trace('The host may have been manually changed by the previous host.');
         this.rotateQueue();
       }
       this.changeHost();
@@ -164,7 +164,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
     if (this.mapChanger && this.mapChanger !== newhost) { // 前任のホストがマップを変更している
       this.needsRotate = false;
-      this.logger.info('host is appointed after map change');
+      this.logger.info('A host is appointed after a beatmap change.');
     }
   }
 
@@ -174,7 +174,7 @@ export class AutoHostSelector extends LobbyPlugin {
   private onBeatmapChanging(): void {
     if (this.hostQueue[0] !== this.lobby.host) {
       // アボートで中断後にマップ変更しようとした場合は次のホストに変更
-      this.logger.info('host changed map after abort the match');
+      this.logger.info('A host changed the beatmap after aborting the match.');
       this.changeHost();
       this.needsRotate = false;
     } else {
@@ -191,7 +191,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (!this.lobby.hostPending && this.needsRotate) {
       this.rotateQueue();
     } else {
-      this.logger.info('rotation skipped.');
+      this.logger.info('Rotation skipped.');
     }
   }
 
@@ -209,16 +209,16 @@ export class AutoHostSelector extends LobbyPlugin {
 
   private onMatchAborted(playersFinished: number, playersInGame: number): void {
     if (playersFinished !== 0) { // 誰か一人でも試合終了している場合は通常の終了処理
-      this.logger.trace('The match was aborted after several players were Finished. call normal match finish process');
+      this.logger.trace('The match was aborted after several players finished the match. Calling normal match finish process...');
       this.onMatchFinished();
     } else {
       if (this.lobby.host) {
         // 誰も終了していない場合は試合再開許可モードへ
         this.needsRotate = false;
-        this.logger.trace('The match was aborted before any Player Finished.');
+        this.logger.trace('The match was aborted before any player finished.');
       } else {
         // ホストがいない状態で試合が中断されたら
-        this.logger.trace('The match was aborted after the host left.');
+        this.logger.trace('The match was aborted after the host left the lobby.');
         this.changeHost();
       }
     }
@@ -289,7 +289,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const player = this.lobby.GetOrMakePlayer(name);
     if (this.hostQueue.includes(player)) {
       this.hostQueue = this.hostQueue.filter(p => p !== player);
-      this.logger.info(`removed ${player.name} from hostqueue`);
+      this.logger.info(`Removed player ${player.name} from the host queue.`);
       if (player.isHost) {
         this.changeHost();
       }
@@ -300,7 +300,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const player = this.lobby.GetOrMakePlayer(name);
     if (this.lobby.players.has(player) && !this.hostQueue.includes(player)) {
       this.onPlayerJoined(player, player.slot, false);
-      this.logger.info(`added ${player.name} to hostqueue`);
+      this.logger.info(`Added player ${player.name} to the host queue.`);
     }
   }
 
@@ -309,19 +309,19 @@ export class AutoHostSelector extends LobbyPlugin {
     if (type === 'skip') {
       this.Skip();
     } else if (type === 'skipto') {
-      this.logger.trace('received plugin message skipto');
+      this.logger.trace('Received a plugin message: skipto');
       if (args.length !== 1) {
-        this.logger.error('skipto invalid arguments length');
+        this.logger.error('skipto has invalid length arguments.');
         return;
       }
       const to = this.lobby.GetOrMakePlayer(args[0]);
       if (!this.hostQueue.includes(to)) {
-        this.logger.error('skipto target dosent exist');
+        this.logger.error('The skipto target does not exist.');
         return;
       }
       this.SkipTo(to);
     } else if (type === 'reorder') {
-      this.logger.trace('received plugin message reorder');
+      this.logger.trace('Received a plugin message: reorder');
       this.Reorder(args[0]);
     }
   }
@@ -331,7 +331,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param result
    */
   OrderBySlotBase(result: MpSettingsResult): void {
-    this.logger.info('reordered slot base order.');
+    this.logger.info('Reordered slot base order.');
     this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.name)).filter(p => !DENY_LIST.includes(p));
   }
 
@@ -340,10 +340,10 @@ export class AutoHostSelector extends LobbyPlugin {
     const newQueue = this.hostQueue.concat(playersIn).filter(p => !playersOut.includes(p) && !DENY_LIST.includes(p));
 
     if (this.validateNewQueue(newQueue)) {
-      this.logger.info('modified host queue.');
+      this.logger.info('Modified the host queue.');
       this.hostQueue = newQueue;
     } else {
-      this.logger.warn('failed to modified the host queue.');
+      this.logger.warn('Failed to modify the host queue.');
       this.OrderBySlotBase(result);
     }
   }
@@ -359,7 +359,7 @@ export class AutoHostSelector extends LobbyPlugin {
       if (this.option.host_order_chars_limit < m.length) {
         m = `${m.substring(0, this.option.host_order_chars_limit)}...`;
       }
-      return `host order : ${m}`;
+      return `Host order : ${m}`;
     }, '!queue', this.option.host_order_cooltime_ms);
   }
 
@@ -367,7 +367,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * 強制ローテーション
    */
   Skip(): void {
-    this.logger.trace('received plugin message skip');
+    this.logger.trace('Received a plugin message: skip');
     this.rotateQueue();
     this.changeHost();
   }
@@ -387,7 +387,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
     // キューにいないプレイヤーの場合は何もしない
     if (!this.hostQueue.find(p => p === trg)) {
-      this.logger.error(`couldn't skip to who isn't in queue. ${trg.name}`);
+      this.logger.error(`Cannot skip to a player who isn't in the queue. ${trg.name}`);
       return;
     }
 
@@ -395,7 +395,7 @@ export class AutoHostSelector extends LobbyPlugin {
     while (this.hostQueue[0] !== trg) {
       this.rotateQueue(false);
       if (c++ > 16) {
-        this.logger.error('infinity loop detected');
+        this.logger.error('Detected an infinite loop.');
         return;
       }
     }
@@ -414,7 +414,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (typeof (order) === 'string') {
       const players = order.split(',').map(t => this.lobby.GetPlayer(revealUserName(t.trim()))).filter(p => p !== null) as Player[];
       if (players.length === 0) {
-        this.logger.info(`Faild reorder, invalid order string : ${order}`);
+        this.logger.info(`Failed to reorder, an invalid order string : ${order}`);
       } else {
         this.Reorder(players);
       }
@@ -426,12 +426,12 @@ export class AutoHostSelector extends LobbyPlugin {
         }
       }
       if (this.validateNewQueue(nq)) {
-        this.logger.info('reordered host queue.');
+        this.logger.info('Reordered the host queue.');
         this.hostQueue = nq;
         this.raiseOrderChanged('orderd');
         this.changeHost();
       } else {
-        this.logger.info('failed to reorder.');
+        this.logger.info('Failed to reorder.');
       }
     }
   }
@@ -442,9 +442,9 @@ export class AutoHostSelector extends LobbyPlugin {
       isValid = isValid && this.lobby.players.has(p) && !DENY_LIST.includes(p);
     }
 
-    this.logger.trace('validate queue.');
-    this.logger.trace(`  old: ${Array.from(this.lobby.players).map(p => p.name).join(', ')}`);
-    this.logger.trace(`  new: ${que.map(p => p.name).join(', ')}`);
+    this.logger.trace('Validated queue.');
+    this.logger.trace(`  Old: ${Array.from(this.lobby.players).map(p => p.name).join(', ')}`);
+    this.logger.trace(`  New: ${que.map(p => p.name).join(', ')}`);
 
     return isValid;
   }
@@ -465,9 +465,9 @@ export class AutoHostSelector extends LobbyPlugin {
     }
     if (this.hostQueue[0] !== this.lobby.host) {
       this.lobby.TransferHost(this.hostQueue[0]);
-      this.logger.trace(`sent !mp host ${this.hostQueue[0].name}`);
+      this.logger.trace(`Sent !mp host ${this.hostQueue[0].name}`);
     } else {
-      this.logger.trace(`${this.hostQueue[0].name} is already host`);
+      this.logger.trace(`Player ${this.hostQueue[0].name} is already a host.`);
     }
   }
 
@@ -478,7 +478,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
     if (this.logger.isTraceEnabled() && showLog) {
-      this.logger.trace(`rotated host queue: ${this.hostQueue.map(p => p.name).join(', ')}`);
+      this.logger.trace(`Rotated the host queue: ${this.hostQueue.map(p => p.name).join(', ')}`);
     }
     this.raiseOrderChanged('rotated');
   }
@@ -491,7 +491,7 @@ export class AutoHostSelector extends LobbyPlugin {
     const i = this.hostQueue.indexOf(player);
     if (i !== -1) {
       this.hostQueue.splice(i, 1);
-      this.logger.trace(`removed ${player.name}`);
+      this.logger.trace(`Removed player ${player.name} from the host queue.`);
       this.raiseOrderChanged('removed');
       return true;
     } else {
@@ -507,9 +507,9 @@ export class AutoHostSelector extends LobbyPlugin {
     const m = this.hostQueue.map(p => p.name).join(', ');
     const b = this.getDeniedPlayerNames().join(',');
     return `-- AutoHostSelector --
-  queue : ${m}
-  mapChanger : ${!this.mapChanger ? 'null' : this.mapChanger.name}, needsRotate : ${this.needsRotate}
-  denyList : ${b}`;
+  Queue : ${m}
+  Beatmap changer : ${!this.mapChanger ? 'null' : this.mapChanger.name}, needsRotate : ${this.needsRotate}
+  Deny list : ${b}`;
   }
 
   private raiseOrderChanged(type: OrderChangeType) {
