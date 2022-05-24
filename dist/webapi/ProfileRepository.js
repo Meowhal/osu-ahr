@@ -104,7 +104,7 @@ class WebsiteProfileFetcher {
     }
     async fetchProfileFromWebsite(userID, mode) {
         try {
-            const target = 'https://osu.ppy.sh/users/' + userID + '/' + mode;
+            const target = `https://osu.ppy.sh/users/${userID}/${mode}`;
             const res = await axios_1.default.get(target);
             const match = this.webpreg.exec(res.data);
             if (match) {

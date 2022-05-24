@@ -5,109 +5,109 @@ exports.BotCommands = void 0;
 exports.BotCommands = [
     {
         name: 'make',
-        description: 'Make a tournament lobby',
+        description: 'Make a tournament lobby.',
         defaultPermission: false,
         options: [
             {
                 type: 3,
                 name: 'lobby_name',
-                description: 'Initial lobby Name e.g. "4.00-5.99 auto host rotation"',
+                description: 'The initial lobby name that\'ll be set. E.g. "4.00-5.99 auto host rotation"',
                 required: true
             }
         ]
     },
     {
         name: 'enter',
-        description: 'Enter the lobby.',
+        description: 'Enter a lobby.',
         defaultPermission: false,
         options: [
             {
                 type: 4,
                 name: 'lobby_id',
-                description: ' Tournament lobby ID',
+                description: 'The tournament lobby ID of the lobby to enter.',
                 required: false
             }
         ]
     },
     {
         name: 'info',
-        description: 'Shows the status of the lobby.',
+        description: 'Show the status of a lobby.',
         defaultPermission: false,
         options: [
             {
                 type: 4,
                 name: 'lobby_id',
-                description: ' Tournament lobby ID',
+                description: 'The tournament lobby ID of the lobby to show it\'s status.',
                 required: false
             }
         ]
     },
     {
         name: 'say',
-        description: 'send a message',
+        description: 'Send a message to a lobby.',
         defaultPermission: false,
         options: [
             {
                 type: 3,
                 name: 'message',
-                description: 'message',
+                description: 'The message to send.',
                 required: true
             },
             {
                 type: 4,
                 name: 'lobby_id',
-                description: ' Tournament lobby ID',
+                description: 'The tournament lobby ID of a lobby to send a message to.',
                 required: false
             }
         ]
     },
     {
         name: 'config',
-        description: 'configure ahrbot',
+        description: 'Configure the auto host rotation bot.',
         defaultPermission: false,
         options: [
             {
                 type: 3,
                 name: 'section',
-                description: 'specify config section',
+                description: 'The configuration section to edit.',
                 required: true
             },
             {
                 type: 3,
                 name: 'name',
-                description: 'option name',
+                description: 'The configuration name to edit.',
                 required: true
             },
             {
                 type: 3,
                 name: 'value',
-                description: 'new value',
+                description: 'The new configuration value to set.',
                 required: true
             }
         ]
     },
     {
         name: 'close',
-        description: 'Close the lobby',
+        description: 'Close a lobby.',
         defaultPermission: false,
         options: [
             {
                 type: 4,
                 name: 'lobby_id',
-                description: ' Tournament lobby ID',
+                description: 'The tournament lobby ID of a lobby to close.',
                 required: false
             }
         ]
     },
     {
         name: 'quit',
-        description: 'Quit managing the lobby',
+        description: 'Quit managing a lobby.',
         defaultPermission: false,
         options: [
             {
                 type: 4,
                 name: 'lobby_id',
-                description: 'Tournament lobby ID',
+                description: 'The tournament lobby ID of a lobby to quit managing.',
                 required: false
             }
         ]

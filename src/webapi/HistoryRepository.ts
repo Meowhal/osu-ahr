@@ -89,9 +89,9 @@ export class HistoryRepository {
       while (!(await this.fetch(false)).filled && !this.lobbyClosed);
     } catch (e: any) {
       if (e instanceof Error) {
-        this.logger.error('@updateToLatest : ' + e.message);
+        this.logger.error(`@updateToLatest : ${e.message}`);
       } else {
-        this.logger.error('@updateToLatest : ' + e);
+        this.logger.error(`@updateToLatest :\n${e.message}\n${e.stack}`);
       }
 
       this.hasError = true;
@@ -292,8 +292,8 @@ export class HistoryRepository {
           const r = await this.fetch(true);
           if (r.count === 0) break; // 結果が空なら終わり
           i = r.count - 1;
-        } catch (e) {
-          this.logger.error('@calcCurrentOrderAsID - fetch : ' + e);
+        } catch (e: any) {
+          this.logger.error(`@calcCurrentOrderAsID - fetch :\n${e.message}\n${e.stack}`);
           throw e;
         }
       }
@@ -331,7 +331,7 @@ export class HistoryRepository {
             }
             break;
           default:
-            this.logger.warn('unknown event type! ' + JSON.stringify(ev));
+            this.logger.warn(`unknown event type! ${JSON.stringify(ev)}`);
             break;
         }
       } else if (ev.detail.type === 'other' && ev.game) {
@@ -368,7 +368,7 @@ export class HistoryRepository {
         break;
       }
       if (HistoryRepository.LOOP_LIMIT < loopCount) {
-        this.logger.warn('loop limit exceeded! ' + HistoryRepository.LOOP_LIMIT);
+        this.logger.warn(`loop limit exceeded! ${HistoryRepository.LOOP_LIMIT}`);
         break;
       }
       if (this.lobbyClosed) {

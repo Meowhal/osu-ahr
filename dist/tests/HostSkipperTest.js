@@ -328,7 +328,7 @@ describe('HostSkipperTest', function () {
             let skipped = false;
             const task = resolveSkipAsync(lobby, () => skipped = true);
             for (let i = 1; i < numplayers; i++) {
-                ircClient.emulateMessage('p' + i, ircClient.channel, '!skip');
+                ircClient.emulateMessage(`p${i}`, ircClient.channel, '!skip');
                 await TestUtils_1.default.delayAsync(1);
                 chai_1.assert.equal(skipper.voting.count, Math.min(i, skipper.voting.required));
                 chai_1.assert.equal(skipped, skipper.voting.required <= i);
@@ -346,7 +346,7 @@ describe('HostSkipperTest', function () {
             const players = ['abc xxx[aaui]', 'a', 'b', 'c'];
             await TestUtils_1.default.AddPlayersAsync(players, ircClient);
             await TestUtils_1.default.changeHostAsync(players[0], lobby);
-            ircClient.emulateMessage(players[1], ircClient.channel, '!skip ' + players[0]);
+            ircClient.emulateMessage(players[1], ircClient.channel, `!skip ${players[0]}`);
             chai_1.assert.equal(skipper.voting.count, 1);
         });
         it('accept !skip with space', async () => {

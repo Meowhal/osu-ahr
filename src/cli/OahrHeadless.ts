@@ -9,7 +9,7 @@ export class OahrHeadless extends OahrBase {
   constructor(client: IIrcClient) {
     super(client);
     client.once('part', () => {
-      logger.info('detected part event. closing...');
+      logger.info('Part event detected. Closing...');
       process.exit(0);
     });
   }
@@ -26,8 +26,8 @@ export class OahrHeadless extends OahrBase {
         default:
           process.exit(1);
       }
-    } catch (e) {
-      logger.error(e);
+    } catch (e: any) {
+      logger.error(`@OahrHeadless#start\n${e}`);
       process.exit(1);
     }
 

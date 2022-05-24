@@ -1094,7 +1094,7 @@ describe('AutoHostSelectorTest', function () {
         assert.equal(DENY_LIST.players.size, 2);
 
         const un = 'asdf    hello';
-        tu.sendMessageAsOwner(lobby, '*denylist     add    ' + un);
+        tu.sendMessageAsOwner(lobby, `*denylist     add    ${un}`);
 
         assert.equal(DENY_LIST.players.size, 3);
         assert.include(DENY_LIST.players, escapeUserName(un));

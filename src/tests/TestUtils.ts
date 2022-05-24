@@ -28,7 +28,7 @@ class TestUtils {
       const start = client.players.size;
       const p = [];
       for (let i = 0; i < names; i++) {
-        p[i] = 'p' + (i + start);
+        p[i] = `p${i + start}`;
         await client.emulateAddPlayerAsync(p[i]);
       }
       return p;

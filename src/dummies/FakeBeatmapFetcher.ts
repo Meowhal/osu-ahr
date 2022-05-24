@@ -119,7 +119,7 @@ export class FakeBeatmapFetcher implements IBeatmapFetcher {
     const map = {
       ...this.beatmapTemplate,
       id: id,
-      url: 'https://osu.ppy.sh/beatmaps/' + id,
+      url: `https://osu.ppy.sh/beatmaps/${id}`,
       mode: MODES[mode.id],
       mode_int: mode.id,
       convert: false,

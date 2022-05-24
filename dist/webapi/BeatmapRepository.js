@@ -143,7 +143,7 @@ class WebsiteBeatmapFecher {
     }
     async fetchBeatmapFromWebsite(id) {
         try {
-            const target = 'https://osu.ppy.sh/b/' + id;
+            const target = `https://osu.ppy.sh/b/${id}`;
             const res = await axios_1.default.get(target);
             const match = this.webpreg.exec(res.data);
             if (match) {

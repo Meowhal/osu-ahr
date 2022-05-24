@@ -77,7 +77,7 @@ exports.escapeUserName = escapeUserName;
  * @param username
  */
 function disguiseUserName(username) {
-    return username[0] + '\u{200B}' + username.substring(1);
+    return `${username[0]}\u{200B}${username.substring(1)}`;
 }
 exports.disguiseUserName = disguiseUserName;
 /**

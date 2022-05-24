@@ -115,7 +115,7 @@ export class MatchStarter extends LobbyPlugin {
   private vote(player: Player): void {
     if (this.voting.passed) return;
     if (this.voting.Vote(player)) {
-      this.logger.trace('accepted start request from %s', player.name);
+      this.logger.trace(`accepted start request from ${player.name}`);
       this.checkVoteCount(true);
     } else {
       this.logger.trace('vote was ignored');
@@ -154,7 +154,7 @@ export class MatchStarter extends LobbyPlugin {
     let strSec = '';
 
     if (min > 1) {
-      strMin = min.toString() + ' minutes';
+      strMin = `${min.toString()} minutes`;
     } else if (min === 1) {
       strMin = '1 minute';
     }
@@ -164,7 +164,7 @@ export class MatchStarter extends LobbyPlugin {
     }
 
     if (sec > 1) {
-      strSec = sec.toString() + ' seconds';
+      strSec = `${sec.toString()} seconds`;
     } else if (sec === 1) {
       strSec = '1 second';
     }

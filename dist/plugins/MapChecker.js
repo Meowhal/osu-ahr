@@ -78,7 +78,7 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
             }
             if (p.num_violations_allowed !== undefined) {
                 this.option.num_violations_allowed = p.num_violations_allowed;
-                this.logger.info('num_violations_allowed was set to ' + p.num_violations_allowed);
+                this.logger.info(`num_violations_allowed was set to ${p.num_violations_allowed}`);
             }
             let changed = false;
             if (p.star_min !== undefined) {
@@ -119,13 +119,13 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
                 changed = true;
             }
             if (changed) {
-                const m = 'New regulation: ' + this.validator.GetDescription();
+                const m = `New regulation: ${this.validator.GetDescription()}`;
                 this.lobby.SendMessage(m);
                 this.logger.info(m);
             }
         }
         catch (e) {
-            this.logger.warn(e.message);
+            this.logger.warn(`\n${e.message}\n${e.stack}`);
         }
     }
     getRegulationDescription() {
@@ -133,7 +133,7 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
             return this.validator.GetDescription();
         }
         else {
-            return 'Disabled (' + this.validator.GetDescription() + ')';
+            return `Disabled (${this.validator.GetDescription()})`;
         }
     }
     SetEnabled(v) {
@@ -193,7 +193,7 @@ class MapChecker extends LobbyPlugin_1.LobbyPlugin {
                 }
             }
             else {
-                this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
+                this.logger.error(`unexpected error. checking:${mapId}, err:\n${e.message}\n${e.stack}`);
             }
         }
     }
@@ -286,7 +286,7 @@ class MapValidator {
                 message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
             }
             else {
-                message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => '- ' + m).join('\n')}`;
+                message = `${mapDesc} was rejected because of following reason:\n${violationMsgs.map(m => `- ${m}`).join('\n')}`;
             }
             return { rate, message };
         }

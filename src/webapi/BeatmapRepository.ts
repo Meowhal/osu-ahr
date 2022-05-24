@@ -164,7 +164,7 @@ export class WebsiteBeatmapFecher implements IBeatmapFetcher {
   webpreg = /<script id="json-beatmapset" type="application\/json">\s*(.+?)\s*<\/script>/ms;
   async fetchBeatmapFromWebsite(id: number): Promise<Beatmapset> {
     try {
-      const target = 'https://osu.ppy.sh/b/' + id;
+      const target = `https://osu.ppy.sh/b/${id}`;
       const res = await axios.get(target);
       const match = this.webpreg.exec(res.data);
       if (match) {

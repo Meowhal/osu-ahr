@@ -12,7 +12,7 @@
                 c = b;
             }
             else if (c) {
-                c.message += '<br />' + l;
+                c.message += `<br />${l}`;
             }
         }
         if (c)
@@ -76,10 +76,10 @@
     }
     function formatDate(date) {
         const M = date.getMonth() + 1;
-        const d = ('' + date.getDate()).padStart(2, '0');
-        const h = ('' + date.getHours()).padStart(2, '0');
-        const m = ('' + date.getMinutes()).padStart(2, '0');
-        const s = ('' + date.getSeconds()).padStart(2, '0');
+        const d = (`${date.getDate()}`).padStart(2, '0');
+        const h = (`${date.getHours()}`).padStart(2, '0');
+        const m = (`${date.getMinutes()}`).padStart(2, '0');
+        const s = (`${date.getSeconds()}`).padStart(2, '0');
         return `${M}/${d} ${h}:${m}:${s}`;
     }
     function AppendLog(log) {
@@ -98,8 +98,8 @@
         const spMsg = document.createElement('span');
         spMsg.className = 'message';
         spMsg.innerHTML = log.message;
-        li.classList.add('lvl_' + log.level);
-        li.classList.add('tag_' + log.tag);
+        li.classList.add(`lvl_${log.level}`);
+        li.classList.add(`tag_${log.tag}`);
         li.appendChild(spMsg);
         li.appendChild(spDate);
         li.appendChild(spLevel);
@@ -133,11 +133,11 @@
     }
     function setMapId(mapId) {
         document.getElementsByName('mapid')[0].value = mapId;
-        document.location.search = 'mapid=' + mapId;
+        document.location.search = `mapid=${mapId}`;
     }
     function updateClicked() {
         const value = document.getElementsByName('mapid')[0].value;
-        document.location.search = 'mapid=' + value;
+        document.location.search = `mapid=${value}`;
     }
     function closeClicked() {
         fetch('/api/close').then(async (res) => {
@@ -203,7 +203,7 @@
                 fetchLogsAsync(mapId);
             });
             const his = document.getElementById('history');
-            his.href = 'https://osu.ppy.sh/community/matches/' + mapId;
+            his.href = `https://osu.ppy.sh/community/matches/${mapId}`;
             his.innerText = 'history';
         }
         document.getElementById('update').addEventListener('click', () => updateClicked());

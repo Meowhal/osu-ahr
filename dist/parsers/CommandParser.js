@@ -241,10 +241,10 @@ var parser;
         if (id.match(/^#mp_\d+$/))
             return id;
         if (id.match(/^\d+$/))
-            return '#mp_' + id;
+            return `#mp_${id}`;
         const m = id.match(/^https:\/\/osu\.ppy\.sh\/mp\/(\d+)$/);
         if (m)
-            return '#mp_' + m[1];
+            return `#mp_${m[1]}`;
         else
             return '';
     }
@@ -268,7 +268,7 @@ var parser;
         message = message.trimRight();
         let m = message.match(/^!mp\s+(\w+)\s*(.*?)$/);
         if (m) {
-            return { command: '!' + m[1].toLowerCase(), param: m[2] };
+            return { command: `!${m[1].toLowerCase()}`, param: m[2] };
         }
         m = message.match(/^([!*]\w+)\s*(.*?)$/);
         if (m) {

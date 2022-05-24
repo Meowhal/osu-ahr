@@ -44,7 +44,7 @@ function configure(config, layouts) {
                 }
             }
             catch (e) {
-                logger.error(e.message);
+                logger.error(`@DiscordAppender#configure\n${e.message}\n${e.stack}`);
                 const ahr = ahrs[loggingEvent.context.channelId];
                 if (ahr) {
                     ahr.stopTransferLog();
@@ -72,7 +72,7 @@ function createContent(ev, msg) {
                 return `> **${ev.data[1]}**: ${ev.data[2]}`;
             }
             else {
-                return '> ' + msg;
+                return `> ${msg}`;
             }
         case 'inout':
             const min = msg.match(/\+\x1b\[32m (.+?) \x1B\[0m/);
@@ -80,10 +80,10 @@ function createContent(ev, msg) {
             if (min || mout) {
                 let msg = '';
                 if (min) {
-                    msg += '**in** ' + min[1] + ' ';
+                    msg += `**In** ${min[1]} `;
                 }
                 if (mout) {
-                    msg += '**out** ' + mout[1];
+                    msg += `**Out** ${mout[1]}`;
                 }
                 return { embeds: [new discord_js_1.MessageEmbed().setColor(color).setDescription(msg)] };
             }
@@ -92,6 +92,6 @@ function createContent(ev, msg) {
     if (log4js_1.default.levels.WARN.level <= ev.level.level) {
         return { embeds: [new discord_js_1.MessageEmbed().setColor(color).setDescription(msg)] };
     }
-    return '`' + ev.categoryName + '` ' + msg;
+    return `\`${ev.categoryName}\` ${msg}`;
 }
 //# sourceMappingURL=DiscordAppender.js.map

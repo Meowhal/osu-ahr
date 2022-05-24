@@ -1006,7 +1006,7 @@ describe('AutoHostSelectorTest', function () {
                 TestUtils_1.default.sendMessageAsOwner(lobby, '*denylist add');
                 chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 2);
                 const un = 'asdf    hello';
-                TestUtils_1.default.sendMessageAsOwner(lobby, '*denylist     add    ' + un);
+                TestUtils_1.default.sendMessageAsOwner(lobby, `*denylist     add    ${un}`);
                 chai_1.assert.equal(AutoHostSelector_1.DENY_LIST.players.size, 3);
                 chai_1.assert.include(AutoHostSelector_1.DENY_LIST.players, (0, Player_1.escapeUserName)(un));
                 lobby.destroy();

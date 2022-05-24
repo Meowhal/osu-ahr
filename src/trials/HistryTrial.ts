@@ -40,7 +40,7 @@ async function GetLobbyNameChanger() {
   const hr = new HistoryRepository(67719013, new HistoryFecher());
   let ln = '';
   hr.changedLobbyName.on(e => {
-    console.log(e.oldName + '->' + e.newName + ' ');
+    console.log(`${e.oldName}->${e.newName} `);
     ln = e.newName;
   });
   while (!ln.startsWith('4-5*')) {
@@ -52,21 +52,21 @@ async function promiseTrial() {
   let task = delayAsync(100).then(() => 1);
   setImmediate(async () => {
     const n = await task;
-    console.log('i1 ' + n);
+    console.log(`i1 ${n}`);
   });
   setImmediate(async () => {
     task = task.then(() => 2);
     const n = await task;
-    console.log('i2 ' + n);
+    console.log(`i2 ${n}`);
   });
   setImmediate(async () => {
     task = task.then(() => 3);
     const n = await task;
-    console.log('i3 ' + n);
+    console.log(`i3 ${n}`);
   });
   setImmediate(async () => {
     const n = await task;
-    console.log('i4 ' + n);
+    console.log(`i4 ${n}`);
   });
 }
 
