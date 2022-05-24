@@ -475,6 +475,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * ホストキューの先頭を末尾に付け替える
    */
   private rotateQueue(showLog: boolean = true): void {
+    if (this.hostQueue.length === 0) return;
     const current = this.hostQueue.shift() as Player;
     this.hostQueue.push(current);
     if (this.logger.isTraceEnabled() && showLog) {
