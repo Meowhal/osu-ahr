@@ -61,13 +61,13 @@ export class ProfileFecher extends LobbyPlugin {
         if (profile !== null) {
           player.id = profile.id;
           player.profile = profile;
-          this.logger.info('fetch profile :' + player.name);
+          this.logger.info(`fetch profile :${player.name}`);
         } else {
-          this.logger.warn('user not found! ' + player.name);
+          this.logger.warn(`user not found! ${player.name}`);
         }
         this.pendingNames.delete(player.name);
-      } catch (e) {
-        this.logger.error('@addTaskQueueIfNeeded' + e);
+      } catch (e: any) {
+        this.logger.error(`@addTaskQueueIfNeeded\n${e.message}\n${e.stack}`);
       }
 
     });

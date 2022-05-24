@@ -417,7 +417,7 @@ describe('LobbyTest', function () {
             const { ircClient, lobby, players } = await PrepareLobbyWith3Players();
             let mf = false;
             const msg = () => {
-                return 'a' + 'b' + 'c';
+                return 'abc';
             };
             lobby.SentMessage.on(({ message }) => {
                 chai_1.assert.equal(message, msg());

@@ -22,7 +22,7 @@ async function trial() {
     const client = new discord_js_1.Client({ intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_INTEGRATIONS] });
     const cfg = config_1.default.get('Discord');
     client.once('ready', async (cl) => {
-        console.log('Ready! ' + generateInviteLink());
+        console.log(`Ready! ${generateInviteLink()}`);
         for (const g of cl.guilds.cache.values()) {
             await g.commands.set(commands);
         }
@@ -66,7 +66,7 @@ async function trial() {
         }
     });
     client.on('messageCreate', async (message) => {
-        console.log('msg:' + message.content);
+        console.log(`msg:${message.content}`);
         if (message.author.bot) {
             return;
         }

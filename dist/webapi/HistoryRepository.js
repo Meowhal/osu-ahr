@@ -47,10 +47,10 @@ class HistoryRepository {
         }
         catch (e) {
             if (e instanceof Error) {
-                this.logger.error('@updateToLatest : ' + e.message);
+                this.logger.error(`@updateToLatest : ${e.message}`);
             }
             else {
-                this.logger.error('@updateToLatest : ' + e);
+                this.logger.error(`@updateToLatest :\n${e.message}\n${e.stack}`);
             }
             this.hasError = true;
             if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
@@ -244,7 +244,7 @@ class HistoryRepository {
                     i = r.count - 1;
                 }
                 catch (e) {
-                    this.logger.error('@calcCurrentOrderAsID - fetch : ' + e);
+                    this.logger.error(`@calcCurrentOrderAsID - fetch :\n${e.message}\n${e.stack}`);
                     throw e;
                 }
             }
@@ -281,7 +281,7 @@ class HistoryRepository {
                         }
                         break;
                     default:
-                        this.logger.warn('unknown event type! ' + JSON.stringify(ev));
+                        this.logger.warn(`unknown event type! ${JSON.stringify(ev)}`);
                         break;
                 }
             }
@@ -318,7 +318,7 @@ class HistoryRepository {
                 break;
             }
             if (HistoryRepository.LOOP_LIMIT < loopCount) {
-                this.logger.warn('loop limit exceeded! ' + HistoryRepository.LOOP_LIMIT);
+                this.logger.warn(`loop limit exceeded! ${HistoryRepository.LOOP_LIMIT}`);
                 break;
             }
             if (this.lobbyClosed) {

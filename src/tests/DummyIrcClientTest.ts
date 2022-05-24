@@ -17,7 +17,7 @@ describe('DummyIrcClientTest', function () {
     //logIrcEvent(client);
     client.on('registered', function (message) {
       f_registered++;
-      client.say('BanchoBot', '!mp make ' + lobbyTitle);
+      client.say('BanchoBot', `!mp make ${lobbyTitle}`);
     });
     client.on('pm', function (nick, message) {
       const v = parser.ParseMpMakeResponse(nick, message);
@@ -50,7 +50,7 @@ describe('DummyIrcClientTest', function () {
 
     //logIrcEvent(client);
     client.on('registered', function (message) {
-      client.say('BanchoBot', '!mp make ' + lobbyTitle);
+      client.say('BanchoBot', `!mp make ${lobbyTitle}`);
     });
     client.on('join', function (channel, who) {
       players.forEach((v, i, a) => client.emulateAddPlayerAsync(v));
@@ -68,7 +68,7 @@ describe('DummyIrcClientTest', function () {
     //logIrcEvent(client);
     const lobbyTitle = '';
     client.on('registered', function (message) {
-      client.say('BanchoBot', '!mp make ' + lobbyTitle);
+      client.say('BanchoBot', `!mp make ${lobbyTitle}`);
     });
     client.on('pm', function (nick, message) {
       assert.equal(message, 'No name provided');
@@ -83,7 +83,7 @@ describe('DummyIrcClientTest', function () {
 
     //logIrcEvent(client);
     client.on('registered', function (message) {
-      client.say('BanchoBot', '!mp make ' + lobbyTitle);
+      client.say('BanchoBot', `!mp make ${lobbyTitle}`);
     });
     client.on('join', function (channel, who) {
       players.forEach((v, i, a) => client.emulateAddPlayerAsync(v));

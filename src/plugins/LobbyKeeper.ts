@@ -94,7 +94,7 @@ export class LobbyKeeper extends LobbyPlugin {
         this.option.mode = r;
         return;
       } else {
-        throw new Error('Invalid Option. LobbyKeeper.mode : ' + mode);
+        throw new Error(`Invalid Option. LobbyKeeper.mode : ${mode}`);
       }
     }
 
@@ -110,7 +110,7 @@ export class LobbyKeeper extends LobbyPlugin {
       return;
     }
 
-    throw new Error('Invalid Option. LobbyKeeper.mode : ' + mode);
+    throw new Error(`Invalid Option. LobbyKeeper.mode : ${mode}`);
   }
 
   private setSizeOption(size: any) {
@@ -122,11 +122,11 @@ export class LobbyKeeper extends LobbyPlugin {
     }
 
     if (typeof size !== 'number') {
-      throw new Error('invalid size ' + size);
+      throw new Error(`invalid size ${size}`);
     }
 
     if (size < 0 || size > 16 || isNaN(size)) {
-      throw new Error('invalid size ' + size);
+      throw new Error(`invalid size ${size}`);
     }
     this.option.size = size;
     this.slotKeeper.size = size;
@@ -146,7 +146,7 @@ export class LobbyKeeper extends LobbyPlugin {
       this.option.mods = Mod.removeInvalidCombinations(mods);
       return;
     }
-    throw new Error('Invalid Option. LobbyKeeper.mods : ' + mods);
+    throw new Error(`Invalid Option. LobbyKeeper.mods : ${mods}`);
   }
 
   private tryParseModeParams(param: string) {
@@ -177,7 +177,7 @@ export class LobbyKeeper extends LobbyPlugin {
       const score = ScoreMode.from(param, true);
       return { team: this.option.mode?.team ?? TeamMode.HeadToHead, score };
     } catch {
-      throw new Error('Invalid Option. LobbyKeeper.mode : ' + param);
+      throw new Error(`Invalid Option. LobbyKeeper.mode : ${param}`);
     }
   }
 
@@ -269,7 +269,7 @@ export class LobbyKeeper extends LobbyPlugin {
       }
 
     } catch (e: any) {
-      this.logger.error('@LobbyKeeper#onParsedSettings ' + e?.message);
+      this.logger.error(`@LobbyKeeper#onParsedSettings\n${e?.message}\n${e?.stack}`);
     }
   }
 

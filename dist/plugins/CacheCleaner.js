@@ -56,7 +56,7 @@ class CacheCleaner extends LobbyPlugin_1.LobbyPlugin {
             this.cleanedAt = Date.now();
         }
         catch (e) {
-            this.logger.error(e);
+            this.logger.error(`\n${e.message}\n${e.stack}`);
         }
     }
     formatByte(numByte) {

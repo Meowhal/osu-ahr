@@ -73,8 +73,8 @@ export class CacheCleaner extends LobbyPlugin {
       this.logger.info(`heap size: ${this.formatByte(this.lastHeapSize)} -> ${this.formatByte(currentMem)}`);
       this.lastHeapSize = currentMem;
       this.cleanedAt = Date.now();
-    } catch (e) {
-      this.logger.error(e);
+    } catch (e: any) {
+      this.logger.error(`\n${e.message}\n${e.stack}`);
     }
   }
 

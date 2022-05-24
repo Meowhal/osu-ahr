@@ -11,7 +11,7 @@ class OahrHeadless extends OahrBase_1.OahrBase {
     constructor(client) {
         super(client);
         client.once('part', () => {
-            logger.info('detected part event. closing...');
+            logger.info('Part event detected. Closing...');
             process.exit(0);
         });
     }
@@ -29,7 +29,7 @@ class OahrHeadless extends OahrBase_1.OahrBase {
             }
         }
         catch (e) {
-            logger.error(e);
+            logger.error(`@OahrHeadless#start\n${e}`);
             process.exit(1);
         }
     }

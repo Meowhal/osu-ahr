@@ -30,23 +30,24 @@ const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
 const logger = log4js_1.default.getLogger('cli');
 const mainMenuCommandsMessage = `
-MainMenu Commands 
-  [make <Lobby_name>] Make a lobby.  ex: 'make 5* auto host rotation'
-  [enter <LobbyID>]   Enter the lobby. ex: 'enter 123456' (It only works in a Tournament lobby ID.)
+MainMenu Commands
+  [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
+  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
 const lobbyMenuCommandsMessage = `
-LobbyMenu Commands 
-  [say <Message>] Send Message to #multiplayer.
-  [info] Show current application's informations.
-  [reorder] arragne host queue. ex: 'reorder player1, player2, player3'
-  [regulation <regulation command>] change regulation. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
-  [regulation enable] Enable regulation checking 
-  [regulation disable] Disable regulation checking
-  [close] Close the lobby and Quit this application. ex: 'close now'
-            DO NOT Quit application before close the lobby!
-  [quit]  Quit this application. (lobby won't close.)
+LobbyMenu Commands
+  [say <Message>] Send a message to #multiplayer.
+  [info] Show the application's current information.
+  [reorder] Arrange the host queue. ex: 'reorder player1, player2, player3'
+  [regulation <regulation command>] Change one or more regulations. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
+  [regulation enable] Enable regulation checking.
+  [regulation disable] Disable regulation checking.
+  [close] Close the lobby when everyone leaves.
+  [close now] Close the lobby and quit this application.
+            Do NOT quit the application before closing the lobby!
+  [quit] Quit this application. (Lobby will not close.)
 `;
 class OahrCli extends OahrBase_1.OahrBase {
     constructor(client) {
@@ -61,7 +62,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case 'm':
                         case 'make':
                             if (l.arg === '') {
-                                logger.info('make command needs lobby name. ex:make testlobby');
+                                logger.info('Make command needs a lobby name. ex: \'make testlobby\'');
                                 return;
                             }
                             try {
@@ -69,7 +70,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                                 this.transitionToLobbyMenu();
                             }
                             catch (e) {
-                                logger.info('faiiled to make lobby : %s', e);
+                                logger.info(`Failed to make a lobby :\n${e}`);
                                 this.scene = this.scenes.exited;
                             }
                             break;
@@ -77,14 +78,14 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case 'enter':
                             try {
                                 if (l.arg === '') {
-                                    logger.info('enter command needs lobby id. ex:enter 123456');
+                                    logger.info('Enter command needs a lobby ID. ex: \'enter 123456\'');
                                     return;
                                 }
                                 await this.enterLobbyAsync(l.arg);
                                 this.transitionToLobbyMenu();
                             }
                             catch (e) {
-                                logger.info('invalid channel : %s', e);
+                                logger.info(`Invalid channel :\n${e}`);
                                 this.scene = this.scenes.exited;
                             }
                             break;
@@ -105,7 +106,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case '':
                             break;
                         default:
-                            logger.info('invalid command : %s', line);
+                            logger.info(`Invalid command : ${line}`);
                             break;
                     }
                 },
@@ -181,21 +182,21 @@ class OahrCli extends OahrBase_1.OahrBase {
                             break;
                         case 'check_order':
                             this.lobby.historyRepository.calcCurrentOrderAsName().then(r => {
-                                logger.info('history order = ' + r.join(', '));
-                                logger.info('current order = ' + this.selector.hostQueue.map(p => p.name).join(', '));
+                                logger.info(`History order = ${r.join(', ')}`);
+                                logger.info(`Current order = ${this.selector.hostQueue.map(p => p.name).join(', ')}`);
                             });
                             break;
                         case '':
                             break;
                         default:
                             if (l.command.startsWith('!mp')) {
-                                this.lobby.SendMessage('!mp ' + l.arg);
+                                this.lobby.SendMessage(`!mp ${l.arg}`);
                             }
                             else if (l.command.startsWith('!') || l.command.startsWith('*')) {
-                                this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), l.command + ' ' + l.arg);
+                                this.lobby.RaiseReceivedChatCommand(this.lobby.GetOrMakePlayer(this.client.nick), `${l.command} ${l.arg}`);
                             }
                             else {
-                                console.log('invalid command : %s', line);
+                                console.log(`Invalid command : ${line}`);
                             }
                             break;
                     }
@@ -234,39 +235,39 @@ class OahrCli extends OahrBase_1.OahrBase {
             });
         }
         const r = rl;
-        logger.trace('waiting for registration from bancho');
-        console.log('Connecting to Osu Bancho ...');
+        logger.trace('Waiting for registration from osu!Bancho...');
+        console.log('Connecting to osu!Bancho...');
         this.client.once('registered', () => {
-            console.log('Connected :D');
+            console.log('Connected. :D');
             console.log('\n=== Welcome to osu-ahr ===');
             console.log(mainMenuCommandsMessage);
             r.setPrompt(this.prompt);
             r.prompt();
         });
         r.on('line', line => {
-            logger.trace('scene:%s, line:%s', this.scene.name, line);
+            logger.trace(`Scene:${this.scene.name}, Line:${line}`);
             this.scene.action(line).then(() => {
                 if (!this.exited) {
                     r.setPrompt(this.prompt);
                     r.prompt();
                 }
                 else {
-                    logger.trace('closing interface');
+                    logger.trace('Closing interface...');
                     r.close();
                 }
             });
         });
         r.on('close', () => {
             if (this.client) {
-                logger.info('readline closed');
+                logger.info('Readline closed.');
                 if (this.client.conn && !this.client.conn.requestedDisconnect) {
-                    this.client.disconnect('goodby', () => {
-                        logger.info('ircClient disconnected');
+                    this.client.disconnect('Goodbye.', () => {
+                        logger.info('IRC client disconnected.');
                         process.exit(0);
                     });
                 }
                 else {
-                    logger.info('exit');
+                    logger.info('Exiting...');
                     process.exit(0);
                 }
             }
@@ -274,7 +275,7 @@ class OahrCli extends OahrBase_1.OahrBase {
     }
     transitionToLobbyMenu() {
         this.scene = this.scenes.lobbyMenu;
-        this.scene.prompt = (this.lobby.channel || '') + ' > ';
+        this.scene.prompt = `${this.lobby.channel || ''} > `;
         console.log(lobbyMenuCommandsMessage);
     }
 }

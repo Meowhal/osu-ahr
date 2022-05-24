@@ -51,7 +51,7 @@ class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
                 return;
             }
             else {
-                throw new Error('Invalid Option. LobbyKeeper.mode : ' + mode);
+                throw new Error(`Invalid Option. LobbyKeeper.mode : ${mode}`);
             }
         }
         if ('team' in mode && 'score' in mode) {
@@ -66,7 +66,7 @@ class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
             }
             return;
         }
-        throw new Error('Invalid Option. LobbyKeeper.mode : ' + mode);
+        throw new Error(`Invalid Option. LobbyKeeper.mode : ${mode}`);
     }
     setSizeOption(size) {
         if (size === null || size === undefined || size === 'null' || size === '') {
@@ -76,10 +76,10 @@ class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
             size = parseInt(size);
         }
         if (typeof size !== 'number') {
-            throw new Error('invalid size ' + size);
+            throw new Error(`invalid size ${size}`);
         }
         if (size < 0 || size > 16 || isNaN(size)) {
-            throw new Error('invalid size ' + size);
+            throw new Error(`invalid size ${size}`);
         }
         this.option.size = size;
         this.slotKeeper.size = size;
@@ -98,7 +98,7 @@ class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
             this.option.mods = Modes_1.Mod.removeInvalidCombinations(mods);
             return;
         }
-        throw new Error('Invalid Option. LobbyKeeper.mods : ' + mods);
+        throw new Error(`Invalid Option. LobbyKeeper.mods : ${mods}`);
     }
     tryParseModeParams(param) {
         const m1 = /^(.+),(.+)$/.exec(param);
@@ -129,7 +129,7 @@ class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
             return { team: this.option.mode?.team ?? Modes_1.TeamMode.HeadToHead, score };
         }
         catch {
-            throw new Error('Invalid Option. LobbyKeeper.mode : ' + param);
+            throw new Error(`Invalid Option. LobbyKeeper.mode : ${param}`);
         }
     }
     checkMode(teamMode, scoreMode) {
@@ -217,7 +217,7 @@ class LobbyKeeper extends LobbyPlugin_1.LobbyPlugin {
             }
         }
         catch (e) {
-            this.logger.error('@LobbyKeeper#onParsedSettings ' + e?.message);
+            this.logger.error(`@LobbyKeeper#onParsedSettings\n${e?.message}\n${e?.stack}`);
         }
     }
     onPlayerJoined(toSlot) {

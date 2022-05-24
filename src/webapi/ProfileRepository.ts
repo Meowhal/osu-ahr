@@ -122,7 +122,7 @@ export class WebsiteProfileFetcher implements IProfileFetcher {
 
   async fetchProfileFromWebsite(userID: number, mode: string): Promise<UserProfile> {
     try {
-      const target = 'https://osu.ppy.sh/users/' + userID + '/' + mode;
+      const target = `https://osu.ppy.sh/users/${userID}/${mode}`;
       const res = await axios.get(target);
       const match = this.webpreg.exec(res.data);
       if (match) {

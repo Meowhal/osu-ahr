@@ -57,7 +57,7 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
             return;
         if (command === '!abort') {
             if (player === this.lobby.host) {
-                this.logger.trace('host(%s) sent !abort command', player.name);
+                this.logger.trace(`host(${player.name}) sent !abort command`);
                 this.doAbort();
             }
             else {
@@ -74,11 +74,11 @@ class MatchAborter extends LobbyPlugin_1.LobbyPlugin {
         if (this.voting.passed)
             return;
         if (this.voting.Vote(player)) {
-            this.logger.trace('accept abort request from %s (%s)', player.name, this.voting.toString());
+            this.logger.trace(`accept abort request from ${player.name} (${this.voting.toString()})`);
             this.checkVoteCount(true);
         }
         else {
-            this.logger.trace('vote from %s was ignored', player.name);
+            this.logger.trace(`vote from ${player.name} was ignored`);
         }
     }
     // 投票数を確認して必要数に達していたら試合中断

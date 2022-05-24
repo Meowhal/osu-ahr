@@ -63,7 +63,7 @@ describe('MatchStarterTest', function () {
       for (let i = 1; i <= 16; i++) {
         const ex = Math.max(Math.ceil(i * starter.option.vote_rate), starter.option.vote_min);
         await tu.AddPlayersAsync(1, ircClient);
-        assert.equal(starter.voting.required, ex, 'players:' + i);
+        assert.equal(starter.voting.required, ex, `players:${i}`);
       }
     });
     it('vote test', async () => {

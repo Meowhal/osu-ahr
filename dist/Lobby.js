@@ -102,7 +102,7 @@ class Lobby {
                 this.handlePrivateMessage(nick, message);
             },
             kick: (channel, who, by, reason) => {
-                this.logger.info('%s was kicked from %s by %s: %s', who, channel, by, reason);
+                this.logger.info(`${who} was kicked from ${channel} by ${by}: ${reason}`);
             },
             part: (channel, nick) => {
                 if (channel === this.channel) {
@@ -117,7 +117,7 @@ class Lobby {
             selfMessage: (target, toSend) => {
                 if (target === this.channel) {
                     const r = toSend.replace(/\[http\S+\s([^\]]+)\]/g, '[http... $1]');
-                    this.chatlogger.info('bot:%s', r);
+                    this.chatlogger.info(`bot:${r}`);
                 }
             }
         };
@@ -261,10 +261,10 @@ class Lobby {
         this.hostPending = user;
         this.transferHostTimeout.start(this.option.transferhost_timeout_ms);
         if (user.id !== 0) {
-            this.SendMessage('!mp host #' + user.id);
+            this.SendMessage(`!mp host #${user.id}`);
         }
         else {
-            this.SendMessage('!mp host ' + user.name);
+            this.SendMessage(`!mp host ${user.name}`);
         }
     }
     onTimeoutedTransferHost() {
@@ -286,14 +286,14 @@ class Lobby {
             this.ircClient.say(this.channel, message);
             this.ircClient.emit('sentMessage', this.channel, message);
             this.SentMessage.emit({ message });
-            //this.chatlogger.trace("%s:%s", "bot", message);
+            //this.chatlogger.trace(`bot:${message}`);
         }
     }
     SendPrivateMessage(message, target) {
         this.ircClient.say(target, message);
         this.ircClient.emit('sentPrivateMessage', target, message);
         this.SentMessage.emit({ message });
-        this.chatlogger.info('%s:%s', 'botbot->' + target, message);
+        this.chatlogger.info(`botbot->${target}:${message}`);
     }
     SendMessageWithCoolTime(message, tag, cooltimeMs) {
         const now = Date.now();
@@ -365,7 +365,7 @@ class Lobby {
                     resolve(result);
                 }
             });
-            this.ircClient.say(byPm || !this.channel ? 'BanchoBot' : this.channel, '!stat ' + player.escaped_name);
+            this.ircClient.say(byPm || !this.channel ? 'BanchoBot' : this.channel, `!stat ${player.escaped_name}`);
         });
     }
     async SendMultilineMessageWithInterval(lines, intervalMs, tag, cooltimeMs) {
@@ -391,16 +391,16 @@ class Lobby {
                 }
                 this.PlayerChated.emit({ player: p, message });
                 if ((0, StatParser_1.IsStatResponse)(message)) {
-                    this.chatlogger.trace('%s:%s', p.name, message);
+                    this.chatlogger.trace(`${p.name}:${message}`);
                 }
                 else {
-                    this.chatlogger.info('%s:%s', p.name, message);
+                    this.chatlogger.info(`${p.name}:${message}`);
                 }
             }
         }
     }
     handleAction(from, to, message) {
-        this.chatlogger.info('*%s:%s', from, message);
+        this.chatlogger.info(`*${from}:${message}`);
     }
     handlePrivateMessage(from, message) {
         if (from === 'BanchoBot') {
@@ -457,11 +457,11 @@ class Lobby {
                 break;
             case CommandParser_1.BanchoResponseType.AddedReferee:
                 this.GetOrMakePlayer(c.params[0]).setRole(Player_1.Roles.Referee);
-                this.logger.trace('AddedReferee : %s', c.params[0]);
+                this.logger.trace(`AddedReferee : ${c.params[0]}`);
                 break;
             case CommandParser_1.BanchoResponseType.RemovedReferee:
                 this.GetOrMakePlayer(c.params[0]).removeRole(Player_1.Roles.Referee);
-                this.logger.trace('RemovedReferee : %s', c.params[0]);
+                this.logger.trace(`RemovedReferee : ${c.params[0]}`);
                 break;
             case CommandParser_1.BanchoResponseType.ListRefs:
                 this.listRefStart = Date.now();
@@ -471,7 +471,7 @@ class Lobby {
                 break;
             case CommandParser_1.BanchoResponseType.TeamChanged:
                 this.GetOrMakePlayer(c.params[0]).team = c.params[1];
-                this.logger.trace('team changed : %s, %s', c.params[0], Player_1.Teams[c.params[1]]);
+                this.logger.trace(`team changed : ${c.params[0]}, ${Player_1.Teams[c.params[1]]}`);
                 break;
             case CommandParser_1.BanchoResponseType.BeatmapChanged:
             case CommandParser_1.BanchoResponseType.MpBeatmapChanged:
@@ -479,7 +479,7 @@ class Lobby {
                     this.mapId = c.params[0];
                     this.mapTitle = c.params[1];
                     const changer = this.host ? `(by ${c.type === CommandParser_1.BanchoResponseType.BeatmapChanged ? this.host.name : 'bot'})` : '';
-                    this.logger.info('beatmap changed%s : %s %s', changer, 'https://osu.ppy.sh/b/' + this.mapId, this.mapTitle);
+                    this.logger.info(`beatmap changed${changer} : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
                 }
                 break;
             case CommandParser_1.BanchoResponseType.Settings:
@@ -504,7 +504,7 @@ class Lobby {
             case CommandParser_1.BanchoResponseType.Unhandled:
                 if (this.checkListRef(message))
                     break;
-                this.logger.debug('unhandled bancho response : %s', message);
+                this.logger.debug(`unhandled bancho response : ${message}`);
                 break;
         }
         this.ReceivedBanchoResponse.emit({ message, response: c });
@@ -514,7 +514,7 @@ class Lobby {
             if (Date.now() < this.listRefStart + this.option.listref_duration_ms) {
                 const p = this.GetOrMakePlayer(message);
                 p.setRole(Player_1.Roles.Referee);
-                this.logger.trace('AddedReferee : %s', p.escaped_name);
+                this.logger.trace(`AddedReferee : ${p.escaped_name}`);
                 return true;
             }
             else {
@@ -525,7 +525,7 @@ class Lobby {
         return false;
     }
     RaiseReceivedChatCommand(player, message) {
-        this.logger.trace('custom command %s:%s', player.name, message);
+        this.logger.trace(`custom command ${player.name}:${message}`);
         if (player.isReferee && message.startsWith('!mp'))
             return;
         const { command, param } = CommandParser_1.parser.ParseChatCommand(message);
@@ -562,7 +562,7 @@ class Lobby {
         const player = this.GetOrMakePlayer(username);
         const from = player.slot;
         player.slot = slot;
-        this.logger.trace('slot moved : %s, %d', username, slot);
+        this.logger.trace(`slot moved : ${username}, ${slot}`);
         this.PlayerMoved.emit({ player, from, to: slot });
     }
     RaiseHostChanged(username) {
@@ -586,7 +586,7 @@ class Lobby {
         const sc = this.CountPlayersStatus();
         this.PlayerFinished.emit({ player, score, isPassed, playersFinished: sc.finished, playersInGame: sc.inGame });
         if (!this.players.has(player)) {
-            this.logger.warn('未参加のプレイヤーがゲームを終えた: %s', username);
+            this.logger.warn(`未参加のプレイヤーがゲームを終えた: ${username}`);
             this.LoadMpSettingsAsync();
         }
     }
@@ -599,13 +599,13 @@ class Lobby {
     }
     RaiseAbortedMatch() {
         const sc = this.CountPlayersStatus();
-        this.logger.info('match aborted %d / %d', sc.finished, sc.inGame);
+        this.logger.info(`match aborted ${sc.finished} / ${sc.inGame}`);
         this.isMatching = false;
         this.players.forEach(p => p.mpstatus = Player_1.MpStatuses.InLobby);
         this.AbortedMatch.emit({ playersFinished: sc.finished, playersInGame: sc.inGame });
     }
     RaiseNetError(err) {
-        this.logger.error('error occured : ' + err.message);
+        this.logger.error(`error occured : ${err.message}`);
         this.logger.error(err.stack);
         this.NetError.emit(err);
     }
@@ -641,7 +641,7 @@ class Lobby {
             const p = this.GetPlayer(this.statParser.result.name);
             if (p) {
                 p.laststat = this.statParser.result;
-                this.logger.info('parsed stat %s -> %s', p.name, StatParser_1.StatStatuses[p.laststat.status]);
+                this.logger.info(`parsed stat ${p.name} -> ${StatParser_1.StatStatuses[p.laststat.status]}`);
                 this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
             }
         }
@@ -657,7 +657,7 @@ class Lobby {
     OnUserNotFound() {
         if (this.hostPending) {
             const p = this.hostPending;
-            this.logger.warn('occured OnUserNotFound : ' + p.name);
+            this.logger.warn(`occured OnUserNotFound : ${p.name}`);
             this.hostPending = null;
         }
     }
@@ -697,7 +697,7 @@ class Lobby {
                 }
             });
             const trg = 'BanchoBot';
-            const msg = '!mp make ' + title;
+            const msg = `!mp make ${title}`;
             this.ircClient.say(trg, msg);
             this.ircClient.emit('sentMessage', trg, msg);
         });
@@ -707,7 +707,7 @@ class Lobby {
         return new Promise((resolve, reject) => {
             const ch = CommandParser_1.parser.EnsureMpChannelId(channel);
             if (ch === '') {
-                this.logger.error('invalid channel: %s', channel);
+                this.logger.error(`invalid channel: ${channel}`);
                 reject('invalid channel');
                 return;
             }
@@ -802,14 +802,14 @@ class Lobby {
                 this.setAsHost(player);
             }
             if (this.players.size > 16) {
-                this.logger.warn('joined 17th players: %s', player.name);
+                this.logger.warn(`joined 17th players: ${player.name}`);
                 this.UnexpectedAction.emit(new Error('unexpected join'));
                 return false;
             }
             return true;
         }
         else {
-            this.logger.warn('参加済みのプレイヤーが再度参加した: %s', player.name);
+            this.logger.warn(`参加済みのプレイヤーが再度参加した: ${player.name}`);
             this.UnexpectedAction.emit(new Error('unexpected join'));
             return false;
         }
@@ -824,13 +824,13 @@ class Lobby {
                 this.host = null;
             }
             if (this.hostPending === player) {
-                this.logger.warn('pending中にユーザーが離脱した pending host: %s', player.name);
+                this.logger.warn(`pending中にユーザーが離脱した pending host: ${player.name}`);
                 this.hostPending = null;
             }
             return true;
         }
         else {
-            this.logger.warn('未参加のプレイヤーが退出した: %s', player.name);
+            this.logger.warn(`未参加のプレイヤーが退出した: ${player.name}`);
             this.UnexpectedAction.emit(new Error('unexpected left'));
             return false;
         }
@@ -838,7 +838,7 @@ class Lobby {
     setAsHost(player) {
         if (!this.players.has(player)) {
             this.transferHostTimeout.cancel();
-            this.logger.warn('未参加のプレイヤーがホストになった: %s', player.name);
+            this.logger.warn(`未参加のプレイヤーがホストになった: ${player.name}`);
             return false;
         }
         if (this.hostPending === player) {
@@ -846,7 +846,7 @@ class Lobby {
             this.hostPending = null;
         }
         else if (this.hostPending !== null) {
-            this.logger.warn('pending中に別のユーザーがホストになった pending: %s, host: %s', this.hostPending.name, player.name);
+            this.logger.warn(`pending中に別のユーザーがホストになった pending: ${this.hostPending.name}, host: ${player.name}`);
         } // pending === null は有効
         if (this.host) {
             this.host.removeRole(Player_1.Roles.Host);
@@ -905,7 +905,7 @@ class Lobby {
         for (const p of this.plugins) {
             const ps = p.GetPluginStatus();
             if (ps !== '') {
-                s += '\n' + ps;
+                s += `\n${ps}`;
             }
         }
         return s;
@@ -946,14 +946,14 @@ class Lobby {
             c.setRole(Player_1.Roles.Authorized);
             c.setRole(Player_1.Roles.Referee);
             c.setRole(Player_1.Roles.Creator);
-            this.logger.info('assigned %s creators role', this.ircClient.nick);
+            this.logger.info(`assigned ${this.ircClient.nick} creators role`);
         }
     }
     startInfoMessageAnnouncement() {
         // ensure time is stop
         this.stopInfoMessageAnnouncement();
         if (this.option.info_message_announcement_interval_ms > 3 * 60 * 1000) {
-            this.logger.trace('started InfoMessageAnnouncement. interval = ' + this.option.info_message_announcement_interval_ms);
+            this.logger.trace(`started InfoMessageAnnouncement. interval = ${this.option.info_message_announcement_interval_ms}`);
             this.infoMessageAnnouncementTimeId = setInterval(() => {
                 this.showInfoMessage();
                 if (this.status !== LobbyStatus.Entered) {

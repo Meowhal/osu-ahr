@@ -58,8 +58,8 @@ export async function trial() {
 async function test(interaction: GuildCommandInteraction) {
   const chatlogger = log4js.getLogger('chat');
   setDiscordId(interaction, chatlogger);
-  chatlogger.trace('%s:%s', 'user1', 'hello');
-  chatlogger.info('%s:%s', 'user2', 'hello');
+  chatlogger.trace('user1:hello');
+  chatlogger.info('user2:hello');
 
   const inout = log4js.getLogger('inout');
   setDiscordId(interaction, inout);

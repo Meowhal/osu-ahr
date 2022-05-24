@@ -152,9 +152,9 @@ export class AfkKicker extends LobbyPlugin {
     if (stat.afkPoint < 0) {
       stat.afkPoint = 0;
     } else if (this.option.threshold <= stat.afkPoint) {
-      this.lobby.SendMessage('!mp kick ' + player.escaped_name);
+      this.lobby.SendMessage(`!mp kick ${player.escaped_name}`);
       this.lobby.SendMessage('bot: kicked afk player.');
-      this.logger.info('kicked ' + player.escaped_name);
+      this.logger.info(`kicked ${player.escaped_name}`);
     }
   }
 
@@ -172,22 +172,22 @@ export class AfkKicker extends LobbyPlugin {
       case '*afkkick_threshold':
         let th = parseInt(param);
         if (Number.isNaN(th)) {
-          this.logger.warn('invalid *afkkick_threshold param : %s', param);
+          this.logger.warn(`invalid *afkkick_threshold param : ${param}`);
           return;
         }
         th = Math.max(th, 1);
         this.option.threshold = th;
-        this.logger.info('afkkicker.threshold was set to %s', th);
+        this.logger.info(`afkkicker.threshold was set to ${th}`);
         break;
       case '*afkkick_cooltime':
         let ct = parseInt(param);
         if (Number.isNaN(ct)) {
-          this.logger.warn('invalid *afkkick_cooltime param : %s', param);
+          this.logger.warn(`invalid *afkkick_cooltime param : ${param}`);
           return;
         }
         ct = Math.max(ct, 10000);
         this.option.cooltime_ms = ct;
-        this.logger.info('afkkicker.cool_time_ms was set to %s', ct);
+        this.logger.info(`afkkicker.cool_time_ms was set to ${ct}`);
         break;
     }
   }
@@ -197,7 +197,7 @@ export class AfkKicker extends LobbyPlugin {
       .filter(([player, stat]) => stat.afkPoint > 0)
       .map(([player, stat]) => `${player.escaped_name}: ${stat.afkPoint}`).join(',');
     if (points) {
-      points = '\n  points: ' + points;
+      points = `\n  points: ${points}`;
     }
     return `-- AFK Kicker --
   status: ${this.option.enabled ? 'enabled' : 'disabled'}, threshold: ${this.option.threshold}, cooltime: ${this.option.cooltime_ms} (ms)${points}`;

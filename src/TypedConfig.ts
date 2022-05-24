@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import config from 'config';
 import { IClientOpts } from './libs/irc';
 import log4js from 'log4js';

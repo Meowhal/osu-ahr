@@ -49,7 +49,7 @@ class MiscLoader extends LobbyPlugin_1.LobbyPlugin {
             if (!currentPlayer)
                 return;
             if (currentPlayer.id === 0 || this.lobby.gameMode === undefined) {
-                this.lobby.SendMessageWithCoolTime('!stats ' + currentPlayer.name, '!rank', 10000);
+                this.lobby.SendMessageWithCoolTime(`!stats ${currentPlayer.name}`, '!rank', 10000);
                 return;
             }
             let selectedMode = '';
@@ -68,7 +68,7 @@ class MiscLoader extends LobbyPlugin_1.LobbyPlugin {
                     break;
             }
             const profile = await WebApiClient_1.WebApiClient.getPlayer(currentPlayer.id, selectedMode);
-            const msg = profile.username + ' your rank is #' + profile.statistics.global_rank;
+            const msg = `${profile.username} your rank is #${profile.statistics.global_rank}`;
             this.lobby.SendMessageWithCoolTime(msg, '!rank', 5000);
         }
         catch (e) {
@@ -83,7 +83,7 @@ class MiscLoader extends LobbyPlugin_1.LobbyPlugin {
                 }
             }
             else {
-                this.logger.error(`unexpected error. checking:${player.id}, err:${e.message}`);
+                this.logger.error(`unexpected error. checking:${player.id}, err:\n${e.message}\n${e.stack}`);
             }
         }
     }
@@ -121,7 +121,7 @@ class MiscLoader extends LobbyPlugin_1.LobbyPlugin {
                 }
             }
             else {
-                this.logger.error(`unexpected error. checking:${mapId}, err:${e.message}`);
+                this.logger.error(`unexpected error. checking:${mapId}, err:\n${e.message}\n${e.stack}`);
             }
         }
     }

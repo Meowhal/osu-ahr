@@ -34,7 +34,7 @@ function startTestServer() {
     const p = `logs/cli/${req.params.id}.log`;
     let frm = 0;
     if (req.query.from) {
-      frm = parseInt(req.query.from + '');
+      frm = parseInt(`${req.query.from}`);
     }
     const stream = fs.createReadStream(p, { start: frm });
     const reader = readline.createInterface({ input: stream });

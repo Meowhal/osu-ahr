@@ -23,14 +23,14 @@ export async function getGuestTokenTrial(): Promise<void> {
   try {
     const response = await axios.post('https://osu.ppy.sh/oauth/token', {
       'grant_type': 'client_credentials',
-      'client_id': '' + oAuthConfig.client_id,
+      'client_id': `${oAuthConfig.client_id}`,
       'client_secret': oAuthConfig.client_secret,
       'scope': 'public'
     });
     const c = response.data;
     console.log(c);
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error(`\n${e.message}\n${e.stack}`);
   }
 }
 
@@ -38,15 +38,15 @@ export async function getTokenTrial(): Promise<void> {
   try {
     const response = await axios.post('https://osu.ppy.sh/oauth/token', {
       'grant_type': 'authorization_code',
-      'client_id': '' + oAuthConfig.client_id,
+      'client_id': `${oAuthConfig.client_id}`,
       'client_secret': oAuthConfig.client_secret,
       'code': oAuthConfig.code,
       'redirect_uri': oAuthConfig.callback
     });
     const c = response.data;
     console.log(c);
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error(`\n${e.message}\n${e.stack}`);
   }
 }
 
@@ -63,7 +63,7 @@ export async function fetchUpdateTrial(): Promise<void> {
     const r = await axios.get('https://osu.ppy.sh/community/chat/updates?since=2065115911');
     const c = r.data;
     console.log(c);
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error(`\n${e.message}\n${e.stack}`);
   }
 }

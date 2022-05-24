@@ -53,8 +53,8 @@ exports.trial = trial;
 async function test(interaction) {
     const chatlogger = log4js_1.default.getLogger('chat');
     setDiscordId(interaction, chatlogger);
-    chatlogger.trace('%s:%s', 'user1', 'hello');
-    chatlogger.info('%s:%s', 'user2', 'hello');
+    chatlogger.trace('user1:hello');
+    chatlogger.info('user2:hello');
     const inout = log4js_1.default.getLogger('inout');
     setDiscordId(interaction, inout);
     inout.trace('+\x1B[32m Gaevsk1y, Althic_ \x1B[0m, -\x1B[31m Tryeforce(2), Shinkilol(1) \x1B[0m');

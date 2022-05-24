@@ -14,7 +14,7 @@ class StatResult {
         this.date = date;
     }
     toString() {
-        return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status === StatStatuses.None ? '' : ' is ' + StatStatuses[this.status]}:
+        return `Stats for (${this.name})[https://osu.ppy.sh/u/${this.id}]${this.status === StatStatuses.None ? '' : ` is ${StatStatuses[this.status]}`}:
 Score:    ${this.score} (#${this.rank})
 Plays:    ${this.plays} (lv${this.level})
 Accuracy: ${this.accuracy}%`;
