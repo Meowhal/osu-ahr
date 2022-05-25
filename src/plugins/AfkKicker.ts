@@ -200,6 +200,6 @@ export class AfkKicker extends LobbyPlugin {
       points = `\n  Points: ${points}`;
     }
     return `-- AFK Kicker --
-  Status: ${this.option.enabled ? 'Enabled' : 'Disabled'}, Threshold: ${this.option.threshold}, Cooltime: ${this.option.cooltime_ms} (ms)${points}`;
+  Status: ${this.option.enabled ? 'Enabled' : 'Disabled'}, Threshold: ${this.option.threshold}, Cooltime(ms): ${this.option.cooltime_ms} ${points}`;
   }
 }
