@@ -172,7 +172,7 @@ export class AfkKicker extends LobbyPlugin {
       case '*afkkick_threshold':
         let th = parseInt(param);
         if (Number.isNaN(th)) {
-          this.logger.warn(`Invalid AFK Kicker threshold parameter : ${param}`);
+          this.logger.warn(`Invalid AFK Kicker threshold parameter: ${param}`);
           return;
         }
         th = Math.max(th, 1);
@@ -182,7 +182,7 @@ export class AfkKicker extends LobbyPlugin {
       case '*afkkick_cooltime':
         let ct = parseInt(param);
         if (Number.isNaN(ct)) {
-          this.logger.warn(`Invalid AFK Kicker cooltime parameter : ${param}`);
+          this.logger.warn(`Invalid AFK Kicker cooltime parameter: ${param}`);
           return;
         }
         ct = Math.max(ct, 10000);
