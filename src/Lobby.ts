@@ -86,7 +86,7 @@ export class Lobby {
 
   constructor(ircClient: IIrcClient, option: Partial<LobbyOption> = {}) {
     if (!ircClient.conn) {
-      throw new Error('clientが未接続です');
+      throw new Error('clientが未接続です (Client is not connected)');
     }
     this.option = getConfig('Lobby', option) as LobbyOption;
     this.status = LobbyStatus.Standby;
@@ -118,7 +118,7 @@ export class Lobby {
       },
       registered: async () => {
         if (this.status === LobbyStatus.Entered && this.channel) {
-          this.logger.warn('Detected network reconnection! Loading multiplayer settings...');
+          this.logger.warn('Detected a network reconnection! Loading multiplayer settings...');
           await this.LoadMpSettingsAsync();
         }
       },
@@ -574,7 +574,7 @@ export class Lobby {
   }
 
   RaiseReceivedChatCommand(player: Player, message: string): void {
-    this.logger.trace(`Executing a custom command by ${player.name}: ${message}`);
+    this.logger.trace(`Executing a command by ${player.name}: ${message}`);
     if (player.isReferee && message.startsWith('!mp')) return;
     const { command, param } = parser.ParseChatCommand(message);
     if (command === '!info' || command === '!help') {
