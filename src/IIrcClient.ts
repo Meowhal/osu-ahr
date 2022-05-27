@@ -1,10 +1,9 @@
 import * as irc from './libs/irc';
 import { IsStatResponse } from './parsers/StatParser';
 import { EventEmitter } from 'events';
-import { getLogger } from './Loggers';
-
-const ircLogger = getLogger('irc');
-const pmLogger = getLogger('pm');
+import log4js from 'log4js';
+const ircLogger = log4js.getLogger('irc');
+const pmLogger = log4js.getLogger('PMLogger');
 
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、

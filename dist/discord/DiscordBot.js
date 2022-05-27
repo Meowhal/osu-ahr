@@ -4,16 +4,19 @@
  * admin roleが正しく登録される
  * admin role以外のユーザーはスラッシュコマンド、ボタンコマンドを利用できない
  */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DiscordBot = void 0;
+const log4js_1 = __importDefault(require("log4js"));
 const discord_js_1 = require("discord.js");
 const OahrDiscord_1 = require("./OahrDiscord");
 const DiscordAppender_1 = require("./DiscordAppender");
 const BotCommand_1 = require("./BotCommand");
 const CommandParser_1 = require("../parsers/CommandParser");
 const TypedConfig_1 = require("../TypedConfig");
-const Loggers_1 = require("../Loggers");
-const logger = (0, Loggers_1.getLogger)('discord_bot');
+const logger = log4js_1.default.getLogger('discord');
 const ADMIN_ROLE = {
     name: 'ahr-admin',
     color: 'ORANGE',

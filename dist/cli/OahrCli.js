@@ -18,14 +18,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrCli = void 0;
-const readline = __importStar(require("readline"));
 const Lobby_1 = require("../Lobby");
-const Loggers_1 = require("../Loggers");
+const readline = __importStar(require("readline"));
+const log4js_1 = __importDefault(require("log4js"));
 const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
-const logger = (0, Loggers_1.getLogger)('cli');
+const logger = log4js_1.default.getLogger('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
   [make <Lobby_name>] Make a lobby, e.g., 'make 5* auto host rotation'
@@ -233,9 +236,9 @@ class OahrCli extends OahrBase_1.OahrBase {
         }
         const r = rl;
         logger.trace('Waiting for registration from osu!Bancho...');
-        logger.info('Connecting to osu!Bancho...');
+        console.log('Connecting to osu!Bancho...');
         this.client.once('registered', () => {
-            logger.info('Connected. :D');
+            console.log('Connected. :D');
             console.log('\n=== Welcome to osu-ahr ===');
             console.log(mainMenuCommandsMessage);
             r.setPrompt(this.prompt);

@@ -1,5 +1,5 @@
 import { Lobby } from '../Lobby';
-import { getLogger, Logger } from '../Loggers';
+import log4js from 'log4js';
 import { loadEnvConfig } from '../TypedConfig';
 
 /**
@@ -7,14 +7,15 @@ import { loadEnvConfig } from '../TypedConfig';
  */
 export class LobbyPlugin {
   lobby: Lobby;
-  logger: Logger;
+  logger: log4js.Logger;
   pluginName: string;
 
   constructor(lobby: Lobby, pluginName: string, loggerTag: string = 'default') {
     this.lobby = lobby;
     this.lobby.plugins.push(this);
     this.pluginName = pluginName;
-    this.logger = getLogger(loggerTag);
+    this.logger = log4js.getLogger(loggerTag);
+    this.logger.addContext('channel', 'lobby');
   }
 
   /**

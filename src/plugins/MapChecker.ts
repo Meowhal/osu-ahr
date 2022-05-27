@@ -1,3 +1,4 @@
+import log4js from 'log4js';
 import { LobbyPlugin } from './LobbyPlugin';
 import { Lobby } from '../Lobby';
 import { Player } from '../Player';
@@ -7,7 +8,6 @@ import { BanchoResponseType } from '../parsers/CommandParser';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from '../webapi/BeatmapRepository';
 import { Beatmap, Beatmapset } from '../webapi/Beatmapsets';
 import { getConfig } from '../TypedConfig';
-import { Logger } from '../Loggers';
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -285,10 +285,10 @@ export function secToTimeNotation(sec: number): string {
 }
 
 export class MapValidator {
-  logger: Logger;
+  logger: log4js.Logger;
   option: MapCheckerOption;
 
-  constructor(option: MapCheckerOption, logger: Logger) {
+  constructor(option: MapCheckerOption, logger: log4js.Logger) {
     this.option = option;
 
     this.logger = logger;

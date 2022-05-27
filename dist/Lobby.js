@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Lobby = exports.LobbyStatus = void 0;
 const Player_1 = require("./Player");
@@ -8,8 +11,8 @@ const TypedEvent_1 = require("./libs/TypedEvent");
 const DeferredAction_1 = require("./libs/DeferredAction");
 const MpSettingsParser_1 = require("./parsers/MpSettingsParser");
 const HistoryRepository_1 = require("./webapi/HistoryRepository");
+const log4js_1 = __importDefault(require("log4js"));
 const TypedConfig_1 = require("./TypedConfig");
-const Loggers_1 = require("./Loggers");
 var LobbyStatus;
 (function (LobbyStatus) {
     LobbyStatus[LobbyStatus["Standby"] = 0] = "Standby";
@@ -66,8 +69,10 @@ class Lobby {
         this.settingParser = new MpSettingsParser_1.MpSettingsParser();
         this.statParser = new StatParser_1.StatParser();
         this.ircClient = ircClient;
-        this.logger = (0, Loggers_1.getLogger)('lobby');
-        this.chatlogger = (0, Loggers_1.getLogger)('chat');
+        this.logger = log4js_1.default.getLogger('lobby');
+        this.logger.addContext('channel', 'lobby');
+        this.chatlogger = log4js_1.default.getLogger('chat');
+        this.chatlogger.addContext('channel', 'lobby');
         this.historyRepository = new HistoryRepository_1.HistoryRepository(0);
         this.transferHostTimeout = new DeferredAction_1.DeferredAction(() => this.onTimeoutedTransferHost());
         this.registerEvents();
@@ -702,7 +707,7 @@ class Lobby {
         return new Promise((resolve, reject) => {
             const ch = CommandParser_1.parser.EnsureMpChannelId(channel);
             if (ch === '') {
-                this.logger.error(`@EnterLobbyAsync Invalid channel specified: ${channel}`);
+                this.logger.error(`invalid channel: ${channel}`);
                 reject('invalid channel');
                 return;
             }

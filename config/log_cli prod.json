@@ -12,37 +12,31 @@
       "level": "info",
       "appender": "console"
     },
-    "file_irc": {
-      "type": "file",
-      "maxLogSize": "2M",
-      "filename": "logs/irc.log"
-    },
-    "file_ahr_f": {
-      "type": "logLevelFilter",
-      "level": "info",
-      "appender": "file_ahr"
-    },    
-    "file_ch": {
+    "file_app": {
       "type": "multiFile",
-      "base": "logs/channels",
+      "base": "logs/app",
       "property": "channel",
       "extension": ".log"
     },
-    "file_ch_f": {
+    "file_app_f": {
       "type": "logLevelFilter",
       "level": "info",
-      "appender": "file_ch"
-    },    
-    "file_chat": {
-      "type": "multiFile",
-      "base": "logs/channels",
-      "property": "channel",
-      "extension": "_chat.log"
+      "appender": "file_app"
     },
-    "file_chat_f": {
+    "file_irc": {
+      "type": "file",
+      "filename": "logs/irc.log"
+    },
+    "file_cli": {
+      "type": "multiFile",
+      "base": "logs/cli",
+      "property": "channel",
+      "extension": ".log"
+    },
+    "file_cli_f": {
       "type": "logLevelFilter",
       "level": "info",
-      "appender": "file_chat"
+      "appender": "file_cli"
     },
     "file_pm": {
       "type": "file",
@@ -61,13 +55,15 @@
     "default": {
       "appenders": [
         "console_f",
-        "file_ch"
+        "file_app",
+        "file_cli_f"
       ],
-      "level": "all"
+      "level": "info"
     },
     "irc": {
       "appenders": [
         "console_f",
+        "file_app_f",
         "file_irc"
       ],
       "level": "all"
@@ -75,21 +71,23 @@
     "chat": {
       "appenders": [
         "console_f",
-        "file_chat"
+        "file_app",
+        "file_cli"
       ],
       "level": "all"
     },
     "inout": {
       "appenders": [
         "console",
-        "file_chat"
+        "file_cli"
       ],
       "level": "all"
     },
-    "pm": {
+    "PMLogger": {
       "appenders": [
         "console_f",
-        "file_pm"
+        "file_pm",
+        "file_cli"
       ],
       "level": "all"
     },
@@ -97,13 +95,13 @@
       "appenders": [
         "file_counter"
       ],
-      "level": "off"
+      "level": "info"
     },
     "webapi": {
       "appenders": [
         "file_webapi"
       ],
-      "level": "off"
+      "level": "info"
     }
   }
 }

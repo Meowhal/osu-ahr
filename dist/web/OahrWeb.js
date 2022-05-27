@@ -5,7 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrWeb = void 0;
 const config_1 = __importDefault(require("config"));
+const log4js_1 = __importDefault(require("log4js"));
 const express_1 = __importDefault(require("express"));
+const logger = log4js_1.default.getLogger('server');
 const OahrWebDefaultOption = config_1.default.get('OahrWeb');
 class OahrWeb {
     constructor() {

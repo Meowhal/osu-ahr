@@ -1,6 +1,9 @@
 import config from 'config';
+import log4js from 'log4js';
 import express, { Express } from 'express';
 import { Server } from 'http';
+
+const logger = log4js.getLogger('server');
 
 export interface OahrWebOption {
   port: number;

@@ -4,6 +4,7 @@
  * admin role以外のユーザーはスラッシュコマンド、ボタンコマンドを利用できない
  */
 
+import log4js from 'log4js';
 import { Client, Permissions, Guild, CommandInteraction, ApplicationCommandPermissionData, CreateRoleOptions, MessageActionRow, MessageButton, DiscordAPIError, Message, TextChannel, GuildMember, ButtonInteraction } from 'discord.js';
 import { IIrcClient } from '../IIrcClient';
 import { OahrDiscord } from './OahrDiscord';
@@ -11,9 +12,8 @@ import { setContext } from './DiscordAppender';
 import { BotCommands } from './BotCommand';
 import { BanchoResponse, BanchoResponseType } from '../parsers/CommandParser';
 import { getConfig } from '../TypedConfig';
-import { getLogger } from '../Loggers';
 
-const logger = getLogger('discord_bot');
+const logger = log4js.getLogger('discord');
 
 const ADMIN_ROLE: CreateRoleOptions = {
   name: 'ahr-admin',

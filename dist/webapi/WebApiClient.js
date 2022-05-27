@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebApiClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 const config_1 = __importDefault(require("config"));
+const log4js_1 = __importDefault(require("log4js"));
 const http_1 = __importDefault(require("http"));
 const open_1 = __importDefault(require("open"));
 const path_1 = __importDefault(require("path"));
@@ -14,7 +15,6 @@ const fs_1 = require("fs");
 const UserProfile_1 = require("./UserProfile");
 const BeatmapRepository_1 = require("./BeatmapRepository");
 const ProfileRepository_1 = require("./ProfileRepository");
-const Loggers_1 = require("../Loggers");
 function isExpired(token) {
     if (token === undefined)
         return true;
@@ -24,7 +24,7 @@ class WebApiClientClass {
     constructor(option = {}) {
         const WebApiDefaultOption = config_1.default.get('WebApi');
         this.option = { ...WebApiDefaultOption, ...option };
-        this.logger = (0, Loggers_1.getLogger)('webapi');
+        this.logger = log4js_1.default.getLogger('webapi');
         this.available = this.option.client_id !== 0 && this.option.client_secret !== '***';
     }
     async updateToken() {
