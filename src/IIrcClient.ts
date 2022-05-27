@@ -22,7 +22,7 @@ export interface IIrcClient extends EventEmitter {
 
 export function logIrcEvent(client: IIrcClient) {
   client.on('error', function (message) {
-    ircLogger.error(`@NodeIRC#error\n${message instanceof Error ? `${message.name}\n${message.stack}\n` : ''}${JSON.stringify(message) !== '{}' ? `${JSON.stringify(message, null, 2)}\n` : ''}message =`, message);
+    ircLogger.error(`@NodeIRC#error\n${message instanceof Error ? `${message.name}\n${message.stack}\n` : ''}${message instanceof Object && JSON.stringify(message) !== '{}' ? `${JSON.stringify(message, null, 2)}\n` : ''}message =`, message);
   });
   client.on('registered', function (message) {
     const args = message.args as string[] | undefined;
