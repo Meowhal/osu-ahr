@@ -1,11 +1,11 @@
+import * as readline from 'readline';
 import { IIrcClient } from '../IIrcClient';
 import { LobbyStatus } from '../Lobby';
-import * as readline from 'readline';
-import log4js from 'log4js';
+import { getLogger } from '../Loggers';
 import { parser } from '../parsers/CommandParser';
 import { OahrBase } from './OahrBase';
 
-const logger = log4js.getLogger('cli');
+const logger = getLogger('cli');
 
 const mainMenuCommandsMessage = `
 MainMenu Commands
@@ -223,9 +223,9 @@ export class OahrCli extends OahrBase {
     const r = rl as readline.Interface;
 
     logger.trace('Waiting for registration from osu!Bancho...');
-    console.log('Connecting to osu!Bancho...');
+    logger.info('Connecting to osu!Bancho...');
     this.client.once('registered', () => {
-      console.log('Connected. :D');
+      logger.info('Connected. :D');
       console.log('\n=== Welcome to osu-ahr ===');
       console.log(mainMenuCommandsMessage);
       r.setPrompt(this.prompt);
