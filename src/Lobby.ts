@@ -95,9 +95,7 @@ export class Lobby {
 
     this.ircClient = ircClient;
     this.logger = getLogger('lobby');
-    this.logger.addContext('channel', 'lobby');
     this.chatlogger = getLogger('chat');
-    this.chatlogger.addContext('channel', 'lobby');
     this.historyRepository = new HistoryRepository(0);
     this.transferHostTimeout = new DeferredAction(() => this.onTimeoutedTransferHost());
     this.registerEvents();
@@ -775,7 +773,7 @@ export class Lobby {
     return new Promise<string>((resolve, reject) => {
       const ch = parser.EnsureMpChannelId(channel);
       if (ch === '') {
-        this.logger.error(`invalid channel: ${channel}`);
+        this.logger.error(`@EnterLobbyAsync Invalid channel specified: ${channel}`);
         reject('invalid channel');
         return;
       }

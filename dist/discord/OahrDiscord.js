@@ -5,7 +5,7 @@ const Lobby_1 = require("../Lobby");
 const OahrBase_1 = require("../cli/OahrBase");
 const discord_js_1 = require("discord.js");
 const Loggers_1 = require("../Loggers");
-const logger = (0, Loggers_1.getLogger)('discord_ahr');
+const logger = (0, Loggers_1.getLogger)('discord');
 const LOBBY_STAT = {
     match: {
         text: 'match',

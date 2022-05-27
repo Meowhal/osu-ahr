@@ -7,8 +7,8 @@ import { logIrcEvent, logPrivateMessage } from '../IIrcClient';
 import { CONFIG_OPTION, getIrcConfig } from '../TypedConfig';
 import { applySpeedLimit } from '../libs/ChatLimiter';
 
-console.log('Starting up...');
-const logger = getLogger('discord_pre');
+const logger = getLogger('pre');
+logger.info('Starting up...');
 
 try {
   CONFIG_OPTION.USE_ENV = true;

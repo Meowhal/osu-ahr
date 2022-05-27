@@ -15,7 +15,6 @@ export class LobbyPlugin {
     this.lobby.plugins.push(this);
     this.pluginName = pluginName;
     this.logger = getLogger(loggerTag);
-    this.logger.addContext('channel', 'lobby');
   }
 
   /**

@@ -16,7 +16,7 @@ class DenyList {
         this.players = new Set();
         this.playerAdded = new TypedEvent_1.TypedEvent();
         this.playerRemoved = new TypedEvent_1.TypedEvent();
-        this.logger = (0, Loggers_1.getLogger)('DenyList');
+        this.logger = (0, Loggers_1.getLogger)('deny_list');
     }
     addPlayer(player) {
         if (this.players.has(player.escaped_name)) {

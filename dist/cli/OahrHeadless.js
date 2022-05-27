@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrHeadless = void 0;
 const Loggers_1 = require("../Loggers");
 const OahrBase_1 = require("./OahrBase");
-const logger = (0, Loggers_1.getLogger)('headless_ahr');
+const logger = (0, Loggers_1.getLogger)('hl');
 class OahrHeadless extends OahrBase_1.OahrBase {
     constructor(client) {
         super(client);

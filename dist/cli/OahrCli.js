@@ -25,7 +25,7 @@ const Lobby_1 = require("../Lobby");
 const Loggers_1 = require("../Loggers");
 const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
-const logger = (0, Loggers_1.getLogger)('cli_ahr');
+const logger = (0, Loggers_1.getLogger)('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
   [make <Lobby_name>] Make a lobby, e.g., 'make 5* auto host rotation'
@@ -233,9 +233,9 @@ class OahrCli extends OahrBase_1.OahrBase {
         }
         const r = rl;
         logger.trace('Waiting for registration from osu!Bancho...');
-        console.log('Connecting to osu!Bancho...');
+        logger.info('Connecting to osu!Bancho...');
         this.client.once('registered', () => {
-            console.log('Connected. :D');
+            logger.info('Connected. :D');
             console.log('\n=== Welcome to osu-ahr ===');
             console.log(mainMenuCommandsMessage);
             r.setPrompt(this.prompt);

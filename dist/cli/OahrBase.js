@@ -23,7 +23,7 @@ const AfkKicker_1 = require("../plugins/AfkKicker");
 const MiscLoader_1 = require("../plugins/MiscLoader");
 const CommandParser_1 = require("../parsers/CommandParser");
 const CacheCleaner_1 = require("../plugins/CacheCleaner");
-const logger = (0, Loggers_1.getLogger)('base_ahr');
+const logger = (0, Loggers_1.getLogger)('ahr');
 const OahrCliDefaultOption = config_1.default.get('OahrCli');
 class OahrBase {
     constructor(client) {
@@ -78,7 +78,7 @@ class OahrBase {
         for (const p of this.option.invite_users) {
             this.lobby.SendMessage(`!mp invite ${p}`);
         }
-        logger.info(`Successfully made the lobby. Name : ${this.lobby.channel}`);
+        logger.info(`Successfully made the lobby. Channel : ${this.lobby.channel}`);
     }
     async enterLobbyAsync(id) {
         if (!this.isRegistered)

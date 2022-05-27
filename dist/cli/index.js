@@ -26,8 +26,8 @@ const OahrHeadless_1 = require("./OahrHeadless");
 const IIrcClient_1 = require("../IIrcClient");
 const TypedConfig_1 = require("../TypedConfig");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-console.log('Starting up...');
-const logger = (0, Loggers_1.getLogger)('index_pre');
+const logger = (0, Loggers_1.getLogger)('pre');
+logger.info('Starting up...');
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();

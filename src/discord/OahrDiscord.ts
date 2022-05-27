@@ -7,7 +7,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { MessageButtonStyles } from 'discord.js/typings/enums';
 import { getLogger } from '../Loggers';
 
-const logger = getLogger('discord_ahr');
+const logger = getLogger('discord');
 
 const LOBBY_STAT = {
   match: {

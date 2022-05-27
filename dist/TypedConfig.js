@@ -7,7 +7,7 @@ exports.loadEnvConfig = exports.loadEnvConfigWithTypeHint = exports.generateDefa
 require("dotenv/config");
 const config_1 = __importDefault(require("config"));
 const Loggers_1 = require("./Loggers");
-const configLogger = (0, Loggers_1.getLogger)('config');
+const configLogger = (0, Loggers_1.getLogger)('cfg');
 exports.CONFIG_OPTION = {
     USE_ENV: false,
     PRINT_LOADED_ENV_CONFIG: true,

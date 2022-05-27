@@ -2,7 +2,7 @@ import { IIrcClient } from '../IIrcClient';
 import { getLogger } from '../Loggers';
 import { OahrBase } from './OahrBase';
 
-const logger = getLogger('headless_ahr');
+const logger = getLogger('hl');
 
 export class OahrHeadless extends OahrBase {
 

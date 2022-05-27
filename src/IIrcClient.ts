@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import { getLogger } from './Loggers';
 
 const ircLogger = getLogger('irc');
-const pmLogger = getLogger('PMLogger');
+const pmLogger = getLogger('pm');
 
 // テスト用に使用する部分をインターフェースとして定義する
 // typescriptのインターフェースはダックタイピング可能なので、

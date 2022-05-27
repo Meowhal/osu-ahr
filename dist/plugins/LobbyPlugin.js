@@ -12,7 +12,6 @@ class LobbyPlugin {
         this.lobby.plugins.push(this);
         this.pluginName = pluginName;
         this.logger = (0, Loggers_1.getLogger)(loggerTag);
-        this.logger.addContext('channel', 'lobby');
     }
     /**
      * 他のプラグインにメッセージを送信する。

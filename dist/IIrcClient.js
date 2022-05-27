@@ -4,7 +4,7 @@ exports.logPrivateMessage = exports.logIrcEvent = void 0;
 const StatParser_1 = require("./parsers/StatParser");
 const Loggers_1 = require("./Loggers");
 const ircLogger = (0, Loggers_1.getLogger)('irc');
-const pmLogger = (0, Loggers_1.getLogger)('PMLogger');
+const pmLogger = (0, Loggers_1.getLogger)('pm');
 function logIrcEvent(client) {
     client.on('error', function (message) {
         ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);

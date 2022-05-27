@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLogger = void 0;
 const log4js_1 = __importDefault(require("log4js"));
 function selectConfigPath() {
+    const proc = process.argv[0];
     const exeFile = process.argv[1];
     const hasVerboseFlag = process.argv.some(v => v === '--verbose' || v === '-v');
     if (exeFile.includes('discord')) {
@@ -19,7 +20,7 @@ function selectConfigPath() {
             return './config/log_mocha.json';
         }
     }
-    else if (process.env.NODE_ENV !== 'production' || hasVerboseFlag) {
+    else if (proc.includes('ts-node') || hasVerboseFlag) {
         return './config/log_cli_verbose.json';
     }
     else {
@@ -27,10 +28,12 @@ function selectConfigPath() {
     }
 }
 const path = selectConfigPath();
-console.log(`load log4js configuration from ${path}`);
+console.log(`Loading log4js configuration from ${path}`);
 log4js_1.default.configure(path);
 function getLogger(category) {
-    return log4js_1.default.getLogger(category);
+    const l = log4js_1.default.getLogger(category);
+    l.addContext('channel', 'ahr'); // set default channel
+    return l;
 }
 exports.getLogger = getLogger;
 //# sourceMappingURL=Loggers.js.map

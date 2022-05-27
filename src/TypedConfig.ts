@@ -3,7 +3,7 @@ import config from 'config';
 import { IClientOpts } from './libs/irc';
 import { getLogger } from './Loggers';
 
-const configLogger = getLogger('config');
+const configLogger = getLogger('cfg');
 
 export const CONFIG_OPTION = {
   USE_ENV: false,
