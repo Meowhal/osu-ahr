@@ -3,7 +3,7 @@ import { Teams } from '../Player';
 import { parser, BanchoResponseType } from '../parsers/CommandParser';
 import tu from './TestUtils';
 
-describe.only('CommandParserTest', function () {
+describe('CommandParserTest', function () {
   before(function () {
     tu.configMochaAsSilent();
   });
