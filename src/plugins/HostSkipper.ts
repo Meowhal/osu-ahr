@@ -216,7 +216,7 @@ export class HostSkipper extends LobbyPlugin {
 
   StopTimer(): void {
     if (this.afkTimer !== undefined) {
-      this.logger.trace('Stopping the AFK Kicker timer...');
+      this.logger.trace('Stopping the AFK Check timer...');
       clearTimeout(this.afkTimer);
       this.afkTimer = undefined;
     }
