@@ -32,7 +32,7 @@ export class LobbyTerminator extends LobbyPlugin {
     if (this.terminateTimer) {
       clearTimeout(this.terminateTimer);
       this.terminateTimer = undefined;
-      this.logger.trace('Cleared the terminator timer.');
+      this.logger.trace('Cleared the lobby terminator timer.');
     }
   }
 
@@ -41,7 +41,7 @@ export class LobbyTerminator extends LobbyPlugin {
       if (this.terminateTimer) {
         clearTimeout(this.terminateTimer);
       }
-      this.logger.trace('Started the terminator timer.');
+      this.logger.trace('Started the lobby terminator timer.');
       this.terminateTimer = setTimeout(() => {
         this.logger.info('Terminated the lobby.');
         this.lobby.CloseLobbyAsync();
