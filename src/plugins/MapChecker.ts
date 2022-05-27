@@ -106,7 +106,7 @@ export class MapChecker extends LobbyPlugin {
       }
       if (p.num_violations_allowed !== undefined) {
         this.option.num_violations_allowed = p.num_violations_allowed;
-        this.logger.info(`Number of violations allowed set to ${p.num_violations_allowed}`);
+        this.logger.info(`Number of allowed violations set to ${p.num_violations_allowed}`);
       }
       let changed = false;
       if (p.star_min !== undefined) {
