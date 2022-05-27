@@ -4,8 +4,8 @@ import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { Player, revealUserName, disguiseUserName } from '../Player';
 import { Disposable, TypedEvent } from '../libs/TypedEvent';
 import { LobbyPlugin } from './LobbyPlugin';
-import log4js from 'log4js';
 import { getConfig } from '../TypedConfig';
+import { getLogger } from '../Loggers';
 
 export interface AutoHostSelectorOption {
   show_host_order_after_every_match: boolean;
@@ -24,7 +24,7 @@ class DenyList {
   players = new Set<string>();
   playerAdded = new TypedEvent<{ name: string }>();
   playerRemoved = new TypedEvent<{ name: string }>();
-  logger = log4js.getLogger('DenyList');
+  logger = getLogger('deny_list');
   addPlayer(player: Player) {
     if (this.players.has(player.escaped_name)) {
       this.logger.info(`${player.name} is already in denylist.`);

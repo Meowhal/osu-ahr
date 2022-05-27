@@ -6,9 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.configure = exports.setContext = void 0;
 const discord_js_1 = require("discord.js");
 const log4js_1 = __importDefault(require("log4js"));
+const Loggers_1 = require("../Loggers");
 let discordClient;
 let ahrs;
-const logger = log4js_1.default.getLogger('discord');
+const logger = (0, Loggers_1.getLogger)('discord_apd');
 function setContext(client, ahrs_) {
     discordClient = client;
     ahrs = ahrs_;

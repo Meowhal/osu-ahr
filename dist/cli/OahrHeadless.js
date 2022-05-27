@@ -1,12 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrHeadless = void 0;
-const log4js_1 = __importDefault(require("log4js"));
+const Loggers_1 = require("../Loggers");
 const OahrBase_1 = require("./OahrBase");
-const logger = log4js_1.default.getLogger('cli');
+const logger = (0, Loggers_1.getLogger)('hl');
 class OahrHeadless extends OahrBase_1.OahrBase {
     constructor(client) {
         super(client);
