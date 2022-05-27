@@ -60,7 +60,7 @@ export class HistoryLoader extends LobbyPlugin {
 
   onChangedLobbyName(newName: string, oldName: string): any {
     this.lobby.lobbyName = newName;
-    this.logger.info(`Lobby name has been changed : ${oldName} -> ${newName}, Host : ${this.lobby.host?.name}`);
+    this.logger.info(`Lobby name has been changed: ${oldName} -> ${newName}, Host: ${this.lobby.host?.name}`);
   }
 
   startFetch(): void {
@@ -85,8 +85,8 @@ export class HistoryLoader extends LobbyPlugin {
 
   GetPluginStatus(): string {
     return `-- HistoryLoader --
-  hasError : ${this.repository?.hasError},
-  Latest : ${this.repository?.latestEventId}
-  Loaded events : ${this.repository?.events.length}`;
+  hasError: ${this.repository?.hasError},
+  Latest: ${this.repository?.latestEventId}
+  Loaded events: ${this.repository?.events.length}`;
   }
 }
