@@ -109,9 +109,9 @@ export class HostSkipper extends LobbyPlugin {
         this.Skip();
       } else {
         if (this.isMapChanged) {
-          this.lobby.SendMessage('bot : Players can start the match by !start vote.');
+          this.lobby.SendMessage('bot: Players can start the match by !start vote.');
         } else {
-          this.lobby.SendMessage('bot : Players can skip the AFK host by !skip vote.');
+          this.lobby.SendMessage('bot: Players can skip the AFK host by !skip vote.');
         }
       }
     }
@@ -158,10 +158,10 @@ export class HostSkipper extends LobbyPlugin {
   // スキップ状況を確認して、必要数に達している場合は
   private checkSkipCount(showMessage: boolean = false): void {
     if (this.voting.count !== 0 && showMessage) {
-      this.lobby.DeferMessage(`bot : Host skip progress: ${this.voting.toString()}`, 'checkSkipCount', this.option.vote_msg_defer_ms, false);
+      this.lobby.DeferMessage(`bot: Host skip progress: ${this.voting.toString()}`, 'checkSkipCount', this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
-      this.lobby.DeferMessage(`bot : Passed a skip vote: ${this.voting.toString()}`, 'checkSkipCount', 100, true);
+      this.lobby.DeferMessage(`bot: Passed a skip vote: ${this.voting.toString()}`, 'checkSkipCount', 100, true);
       this.Skip();
     }
   }
@@ -175,10 +175,10 @@ export class HostSkipper extends LobbyPlugin {
 
   SkipTo(username: string): void {
     if (!this.lobby.Includes(username)) {
-      this.logger.info(`Cannot skip to an invalid username : ${username}`);
+      this.logger.info(`Cannot skip to an invalid username: ${username}`);
       return;
     }
-    this.logger.info(`Skipped to : ${username}`);
+    this.logger.info(`Skipped to: ${username}`);
     this.StopTimer();
     this.SendPluginMessage('skipto', [username]);
   }
