@@ -6,8 +6,6 @@ import { OahrDiscord } from './OahrDiscord';
 let discordClient: Client | undefined;
 let ahrs: { [index: string]: OahrDiscord };
 
-const logger = getLogger('discord_apd');
-
 export function setContext(client: Client, ahrs_: { [index: string]: OahrDiscord }) {
   discordClient = client;
   ahrs = ahrs_;
@@ -43,6 +41,7 @@ export function configure(config: any, layouts: any) {
           await ch.send(content);
         }
       } catch (e: any) {
+        const logger = getLogger('discord_apd');
         logger.error(`@DiscordAppender#configure\n${e.message}\n${e.stack}`);
         const ahr = ahrs[loggingEvent.context.channelId];
         if (ahr) {
