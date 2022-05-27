@@ -221,7 +221,7 @@ export class MapChecker extends LobbyPlugin {
             break;
         }
       } else {
-        this.logger.error(`@MapChecker#check\nCaught error while checking beatmap ${mapId}\n${e.message}\n${e.stack}`);
+        this.logger.error(`@MapChecker#check\nThere was an error while checking beatmap ${mapId}\n${e.message}\n${e.stack}`);
       }
     }
   }
