@@ -196,7 +196,7 @@ export class MatchStarter extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- MatchStarter --
+    return `-- Match Starter --
   Vote: ${this.voting.toString()}`;
   }
 }
