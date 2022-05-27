@@ -79,6 +79,7 @@ Discord
 + Enviroment Variable Supports
   + Almost all configs that can be set in local.json can also be set from environment variables.
   + The environment variable name should be in the form `ahr_[category]_[config_name]`.
+  + Improve texts & grammaticalization
 + Fixed discord Permission Issue.
 
 e.g. bash
@@ -150,7 +151,7 @@ Note: You can also run your bot on discord. See the [Discord Integration](#disco
 # Configuration
 
 You can edit local.json to configure the bot's behavior.
-It is also possible to set values via environment variables.
+It is also possible to set values via environment variables. (.env files are also supported.)
 The format of environment variable name is `ahr_[section_name]_[config_name]`.
 
 ## IRC Section
@@ -549,3 +550,5 @@ The `/say [message]` command is used to forward a message to the in-game chat. T
 + [qqzzy](https://osu.ppy.sh/users/10911588)
   + He gives me various insights.
   + <https://github.com/jramseygreen/osu_bot_framework-v3>
++ [Xayanide](https://github.com/Xayanide)
+  + He made various contributions to the project.

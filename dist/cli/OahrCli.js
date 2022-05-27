@@ -18,21 +18,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrCli = void 0;
-const Lobby_1 = require("../Lobby");
 const readline = __importStar(require("readline"));
-const log4js_1 = __importDefault(require("log4js"));
+const Lobby_1 = require("../Lobby");
+const Loggers_1 = require("../Loggers");
 const CommandParser_1 = require("../parsers/CommandParser");
 const OahrBase_1 = require("./OahrBase");
-const logger = log4js_1.default.getLogger('cli');
+const logger = (0, Loggers_1.getLogger)('cli');
 const mainMenuCommandsMessage = `
 MainMenu Commands
-  [make <Lobby_name>] Make a lobby. ex: 'make 5* auto host rotation'
-  [enter <LobbyID>] Enter a lobby. ex: 'enter 123456' (It will only work with a tournament lobby ID.)
+  [make <Lobby_name>] Make a lobby, e.g., 'make 5* auto host rotation'
+  [enter <LobbyID>] Enter a lobby, e.g., 'enter 123456' (It will only work with a tournament lobby ID.)
   [help] Show this message.
   [quit] Quit this application.
 `;
@@ -40,8 +37,8 @@ const lobbyMenuCommandsMessage = `
 LobbyMenu Commands
   [say <Message>] Send a message to #multiplayer.
   [info] Show the application's current information.
-  [reorder] Arrange the host queue. ex: 'reorder player1, player2, player3'
-  [regulation <regulation command>] Change one or more regulations. ex: 'regulation star_min=2 star_max=5 len_min=60 len_max=300' 
+  [reorder] Arrange the host queue, e.g., 'reorder player1, player2, player3'
+  [regulation <regulation command>] Change one or more regulations, e.g., 'regulation star_min=2 star_max=5 length_min=60 length_max=300' 
   [regulation enable] Enable regulation checking.
   [regulation disable] Disable regulation checking.
   [close] Close the lobby when everyone leaves.
@@ -62,7 +59,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case 'm':
                         case 'make':
                             if (l.arg === '') {
-                                logger.info('Make command needs a lobby name. ex: \'make testlobby\'');
+                                logger.info('Make command needs a lobby name, e.g., \'make testlobby\'');
                                 return;
                             }
                             try {
@@ -78,7 +75,7 @@ class OahrCli extends OahrBase_1.OahrBase {
                         case 'enter':
                             try {
                                 if (l.arg === '') {
-                                    logger.info('Enter command needs a lobby ID. ex: \'enter 123456\'');
+                                    logger.info('Enter command needs a lobby ID, e.g., \'enter 123456\'');
                                     return;
                                 }
                                 await this.enterLobbyAsync(l.arg);
@@ -236,13 +233,16 @@ class OahrCli extends OahrBase_1.OahrBase {
         }
         const r = rl;
         logger.trace('Waiting for registration from osu!Bancho...');
-        console.log('Connecting to osu!Bancho...');
+        logger.info('Connecting to osu!Bancho...');
         this.client.once('registered', () => {
-            console.log('Connected. :D');
+            logger.info('Connected. :D');
             console.log('\n=== Welcome to osu-ahr ===');
             console.log(mainMenuCommandsMessage);
             r.setPrompt(this.prompt);
             r.prompt();
+        });
+        this.client.once('part', () => {
+            r.close();
         });
         r.on('line', line => {
             logger.trace(`Scene:${this.scene.name}, Line:${line}`);

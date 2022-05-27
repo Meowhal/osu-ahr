@@ -1,8 +1,8 @@
 
-import log4js from 'log4js';
 import { Event, History, Match, User, Game } from './HistoryTypes';
 import { TypedEvent } from '../libs/TypedEvent';
 import { HistoryFecher as HistoryFetcher, IHistoryFetcher as IHistoryFetcher } from './HistoryFetcher';
+import { getLogger, Logger } from '../Loggers';
 
 /* メモ
 試合中のイベントはend_timeがnullになっている
@@ -43,7 +43,7 @@ export class HistoryRepository {
   latestEventId: number = 0;
   oldestEventId: number = Number.MAX_VALUE;
   currentGameEventId: number = 0;
-  logger: log4js.Logger;
+  logger: Logger;
   users: { [id: number]: User };
   events: Event[];
   lobbyClosed: boolean = false;
@@ -66,7 +66,7 @@ export class HistoryRepository {
 
   constructor(lobbyId: number, fetcher: IHistoryFetcher | null = null) {
     this.lobbyId = lobbyId;
-    this.logger = log4js.getLogger('his_repo');
+    this.logger = getLogger('his_repo');
     this.logger.addContext('channel', lobbyId);
     this.users = {};
     this.events = [];
