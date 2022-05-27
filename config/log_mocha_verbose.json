@@ -9,7 +9,7 @@
       "appenders": [
         "console"
       ],
-      "level": "off"
+      "level": "trace"
     }
   }
 }
