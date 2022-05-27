@@ -84,7 +84,7 @@ export class HistoryLoader extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- HistoryLoader --
+    return `-- History Loader --
   hasError: ${this.repository?.hasError}
   Latest: ${this.repository?.latestEventId}
   Loaded events: ${this.repository?.events.length}`;
