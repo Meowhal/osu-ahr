@@ -22,38 +22,38 @@ export interface IIrcClient extends EventEmitter {
 
 export function logIrcEvent(client: IIrcClient) {
   client.on('error', function (message) {
-    ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);
+    ircLogger.error(`@IIrcClient#logIrcEvent:@NodeIRC#error\n${message instanceof Error ? `${message.name}\n${message.stack}\n` : ''}${JSON.stringify(message) !== '{}' ? `${JSON.stringify(message, null, 2)}\n` : ''}message =`, message);
   });
   client.on('registered', function (message) {
     const args = message.args as string[] | undefined;
-    ircLogger.debug(`@reg ${args?.join(', ')}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#registered\n${args?.join(', ')}`);
   });
   client.on('message', function (from, to, message) {
-    ircLogger.debug(`@msg  ${from} => ${to}: ${message}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#message\n${from} => ${to}: ${message}`);
   });
   client.on('pm', function (nick, message) {
-    ircLogger.debug(`@pm   ${nick}: ${message}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#pm\n${nick}: ${message}`);
   });
   client.on('join', function (channel, who) {
-    ircLogger.debug(`@join ${who} has joined ${channel}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#join\n${who} has joined ${channel}`);
   });
   client.on('part', function (channel, who, reason) {
-    ircLogger.debug(`@part ${who} has left ${channel}: ${reason}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#part\n${who} has left ${channel}: ${reason}`);
   });
   client.on('kick', function (channel, who, by, reason) {
-    ircLogger.debug(`@kick ${who} was kicked from ${channel} by ${by}: ${reason}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#kick\n${who} was kicked from ${channel} by ${by}: ${reason}`);
   });
   client.on('invite', (channel, from) => {
-    ircLogger.debug(`@invt ${from} invite you to ${channel}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#invite\n${from} invited you to ${channel}`);
   });
   client.on('notice', function (from, to, message) {
-    ircLogger.debug(`@notice  ${from} => ${to}: ${message}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#notice\n${from} => ${to}: ${message}`);
   });
   client.on('action', function (from, to, text, message) {
-    ircLogger.debug(`@action  ${from} => ${to}: ${text}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#action\n${from} => ${to}: ${text}`);
   });
   client.on('selfMessage', (target: string, toSend) => {
-    ircLogger.debug(`@sent bot => ${target}: ${toSend}`);
+    ircLogger.debug(`@IIrcClient#logIrcEvent:@NodeIRC#selfMessage\nBot => ${target}: ${toSend}`);
   });
 }
 
@@ -61,9 +61,9 @@ export function logPrivateMessage(client: IIrcClient) {
   client.on('message', (from, to, message) => {
     if (to === client.nick) {
       if (IsStatResponse(message)) {
-        pmLogger.trace(`pm ${from} -> ${message}`);
+        pmLogger.trace(`@IIrcClient#logPrivateMessage:@NodeIRC#message\nPM: ${from} -> ${message}`);
       } else {
-        pmLogger.info(`pm ${from} -> ${message}`);
+        pmLogger.info(`@IIrcClient#logPrivateMessage:@NodeIRC#message\nPM: ${from} -> ${message}`);
       }
     }
   });
