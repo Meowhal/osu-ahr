@@ -234,7 +234,7 @@ class WebApiClientClass implements IBeatmapFetcher {
         }
       }
     }
-    throw new Error('Failed to access API');
+    throw new Error('Failed to access the API');
   }
 
   async getChatUpdates() {
