@@ -507,7 +507,7 @@ export class AutoHostSelector extends LobbyPlugin {
   GetPluginStatus(): string {
     const m = this.hostQueue.map(p => p.name).join(', ');
     const b = this.getDeniedPlayerNames().join(',');
-    return `-- AutoHostSelector --
+    return `-- Auto Host Selector --
   Queue: ${m}
   Beatmap changer: ${!this.mapChanger ? 'null' : this.mapChanger.name}, needsRotate: ${this.needsRotate}
   Deny list: ${b}`;
