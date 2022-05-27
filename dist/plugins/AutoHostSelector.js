@@ -455,9 +455,9 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
      * ホストキューの先頭を末尾に付け替える
      */
     rotateQueue(showLog = true) {
-        if (this.hostQueue.length === 0)
-            return;
         const current = this.hostQueue.shift();
+        if (current === undefined)
+            return;
         this.hostQueue.push(current);
         if (this.logger.isTraceEnabled() && showLog) {
             this.logger.trace(`rotated host queue: ${this.hostQueue.map(p => p.name).join(', ')}`);
