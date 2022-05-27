@@ -109,9 +109,9 @@ export class HostSkipper extends LobbyPlugin {
         this.Skip();
       } else {
         if (this.isMapChanged) {
-          this.lobby.SendMessage('Bot: Players can start the match by !start vote.');
+          this.lobby.SendMessage('Bot: Players can start the match with !start to vote.');
         } else {
-          this.lobby.SendMessage('Bot: Players can skip the AFK host by !skip vote.');
+          this.lobby.SendMessage('Bot: Players can skip the AFK host with !skip to vote.');
         }
       }
     }
@@ -135,22 +135,22 @@ export class HostSkipper extends LobbyPlugin {
 
   private vote(player: Player): void {
     if (this.voting.passed) {
-      this.logger.debug(`A vote from player ${player.name} was ignored, already skipped.`);
+      this.logger.debug(`A host skip vote from player ${player.name} was ignored, already skipped.`);
     } else if (this.elapsedSinceHostChanged < this.option.vote_cooltime_ms) {
-      this.logger.debug(`A vote from player ${player.name} was ignored, done during cooltime.`);
+      this.logger.debug(`A host skip vote from player ${player.name} was ignored, done during cooltime.`);
       if (player.isHost) {
         const secs = (this.option.vote_cooltime_ms - this.elapsedSinceHostChanged) / 1000;
-        this.lobby.SendMessage(`The skip command is currently in cooltime. You have to wait ${secs.toFixed(2)} sec(s).`);
+        this.lobby.SendMessage(`The host skip command is currently in cooltime. You have to wait ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
-      this.logger.debug(`Host(${player.name}) sent !skip command.`);
+      this.logger.debug(`The host (Player ${player.name}) sent a !skip command.`);
       this.Skip();
     } else {
       if (this.voting.Vote(player)) {
-        this.logger.trace(`Accepted a skip request from player ${player.name}`);
+        this.logger.trace(`Accepted a host skip request from player ${player.name}`);
         this.checkSkipCount(true);
       } else {
-        this.logger.debug(`A vote from player ${player.name} was ignored, voted twice.`);
+        this.logger.debug(`A host skip vote from player ${player.name} was ignored, voted twice.`);
       }
     }
   }
@@ -161,13 +161,13 @@ export class HostSkipper extends LobbyPlugin {
       this.lobby.DeferMessage(`Bot: Host skip progress: ${this.voting.toString()}`, 'checkSkipCount', this.option.vote_msg_defer_ms, false);
     }
     if (this.voting.passed) {
-      this.lobby.DeferMessage(`Bot: Passed a skip vote: ${this.voting.toString()}`, 'checkSkipCount', 100, true);
+      this.lobby.DeferMessage(`Bot: Passed a host skip vote: ${this.voting.toString()}`, 'checkSkipCount', 100, true);
       this.Skip();
     }
   }
 
   Skip(): void {
-    this.logger.info('Skipping...');
+    this.logger.info('Skipping host...');
     this.StopTimer();
     this.SendPluginMessage('skip');
     this.timeHostChanged = Date.now();
@@ -175,10 +175,10 @@ export class HostSkipper extends LobbyPlugin {
 
   SkipTo(username: string): void {
     if (!this.lobby.Includes(username)) {
-      this.logger.info(`Cannot skip to an invalid username: ${username}`);
+      this.logger.info(`Cannot skip the host to an invalid username: ${username}`);
       return;
     }
-    this.logger.info(`Skipped to: ${username}`);
+    this.logger.info(`Host has been skipped to: ${username}`);
     this.StopTimer();
     this.SendPluginMessage('skipto', [username]);
   }
@@ -216,7 +216,7 @@ export class HostSkipper extends LobbyPlugin {
 
   StopTimer(): void {
     if (this.afkTimer !== undefined) {
-      this.logger.trace('Stopping timer...');
+      this.logger.trace('Stopping the AFK Kicker timer...');
       clearTimeout(this.afkTimer);
       this.afkTimer = undefined;
     }
