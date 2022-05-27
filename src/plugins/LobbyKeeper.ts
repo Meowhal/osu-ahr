@@ -94,7 +94,7 @@ export class LobbyKeeper extends LobbyPlugin {
         this.option.mode = r;
         return;
       } else {
-        throw new Error(`Invalid mode option. Lobby keeper mode : ${mode}`);
+        throw new Error(`Invalid mode option. Lobby keeper mode: ${mode}`);
       }
     }
 
@@ -110,7 +110,7 @@ export class LobbyKeeper extends LobbyPlugin {
       return;
     }
 
-    throw new Error(`Invalid mode option. Lobby keeper mode : ${mode}`);
+    throw new Error(`Invalid mode option. Lobby keeper mode: ${mode}`);
   }
 
   private setSizeOption(size: any) {
@@ -146,7 +146,7 @@ export class LobbyKeeper extends LobbyPlugin {
       this.option.mods = Mod.removeInvalidCombinations(mods);
       return;
     }
-    throw new Error(`Invalid mod option. Lobby keeper mod(s) : ${mods}`);
+    throw new Error(`Invalid mod option. Lobby keeper mod(s): ${mods}`);
   }
 
   private tryParseModeParams(param: string) {
@@ -177,7 +177,7 @@ export class LobbyKeeper extends LobbyPlugin {
       const score = ScoreMode.from(param, true);
       return { team: this.option.mode?.team ?? TeamMode.HeadToHead, score };
     } catch {
-      throw new Error(`Invalid mode option. Lobby keeper mode : ${param}`);
+      throw new Error(`Invalid mode option. Lobby keeper mode: ${param}`);
     }
   }
 
@@ -302,7 +302,7 @@ export class LobbyKeeper extends LobbyPlugin {
     if (this.option.hostkick_tolerance <= this.kickedUsers.size || p.isReferee || p.isAuthorized) {
       this.kickedUsers.clear();
       this.mpKickedUsers.clear();
-      this.logger.debug(`Kick counter activated : ${this.lobby.host.name}`);
+      this.logger.debug(`Kick counter activated: ${this.lobby.host.name}`);
       this.lobby.SendMessage(`!mp kick ${this.lobby.host.name}`);
     }
   }
