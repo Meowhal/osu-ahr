@@ -352,7 +352,7 @@ export class LobbyKeeper extends LobbyPlugin {
           this.setModeOption(matchMode[2]);
           if (this.option.mode) {
             this.fixLobbyModeAndSize();
-            return `Keeping lobby mode ${this.option.mode.team.name}, ${this.option.mode.score.name}`;
+            return `Keeping the lobby mode ${this.option.mode.team.name}, ${this.option.mode.score.name}`;
           } else {
             return 'Disabled keeping the lobby mode.';
           }
@@ -372,7 +372,7 @@ export class LobbyKeeper extends LobbyPlugin {
           this.setSizeOption(matchSize[2]);
           if (this.option.size) {
             this.fixLobbyModeAndSize();
-            return `Keeping lobby size ${this.option.size}`;
+            return `Keeping the lobby size ${this.option.size}`;
           } else {
             return 'Disabled keeping the lobby size.';
           }
@@ -393,7 +393,7 @@ export class LobbyKeeper extends LobbyPlugin {
           this.setModsOption(matchMods[2]);
           if (this.option.mods) {
             this.fixMods();
-            return `Keeping mod(s) ${this.option.mods === null || this.option.mods.length === 0 ? 'None' : this.option.mods.map(m => m.name).join(', ')}`;
+            return `Keeping the lobby mod(s) ${this.option.mods === null || this.option.mods.length === 0 ? 'None' : this.option.mods.map(m => m.name).join(', ')}`;
           } else {
             return 'Disabled keeping the lobby mods.';
           }
@@ -423,15 +423,15 @@ export class LobbyKeeper extends LobbyPlugin {
     if (command === '*no') {
       if (param === 'keep mode' && this.option.mode !== null) {
         this.setModeOption(null);
-        return 'Disabled keeping team mode and score mode.';
+        return 'Disabled keeping the lobby team and score modes.';
       }
       if (param === 'keep size' && this.option.size !== 0) {
         this.setSizeOption(0);
-        return 'Disabled keeping lobby size.';
+        return 'Disabled keeping the lobby size.';
       }
       if ((param === 'keep mod' || param === 'keep mods') && this.option.mods !== null) {
         this.setModsOption(null);
-        return 'Disabled keeping mods.';
+        return 'Disabled keeping the lobby mods.';
       }
       if (param === 'keep password' && this.option.password !== null) {
         if (this.option.password !== '') {
