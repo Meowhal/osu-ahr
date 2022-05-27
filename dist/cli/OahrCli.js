@@ -244,6 +244,9 @@ class OahrCli extends OahrBase_1.OahrBase {
             r.setPrompt(this.prompt);
             r.prompt();
         });
+        this.client.once('part', () => {
+            r.close();
+        });
         r.on('line', line => {
             logger.trace(`Scene:${this.scene.name}, Line:${line}`);
             this.scene.action(line).then(() => {
