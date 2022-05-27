@@ -170,7 +170,7 @@ export class MatchAborter extends LobbyPlugin {
 
   private stopTimer(): void {
     if (this.abortTimer !== null) {
-      this.logger.trace('Stopping the abort timer...');
+      this.logger.trace('Stopping the match abort timer...');
       clearTimeout(this.abortTimer);
       this.abortTimer = null;
     }
