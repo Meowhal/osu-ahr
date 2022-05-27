@@ -337,7 +337,7 @@ export class LobbyKeeper extends LobbyPlugin {
   }
 
   private onFinishedGame(game: Game): any {
-    this.logger.trace(`Finished game -> Mode: ${game.mode}, Mode_int: ${game.mode_int}, Score type: ${game.scoring_type}, Team type: ${game.team_type}, Mod(s): ${game.mods}`);
+    this.logger.trace(`Have finished the game -> Mode: ${game.mode}, Mode_int: ${game.mode_int}, Score type: ${game.scoring_type}, Team type: ${game.team_type}, Mod(s): ${game.mods}`);
   }
 
   private processCommand(command: string, param: string): string | null {
