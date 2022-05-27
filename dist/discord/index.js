@@ -18,21 +18,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+const Loggers_1 = require("../Loggers");
+const irc = __importStar(require("../libs/irc"));
 const discord_js_1 = require("discord.js");
-const log4js_1 = __importDefault(require("log4js"));
 const DiscordBot_1 = require("./DiscordBot");
 const IIrcClient_1 = require("../IIrcClient");
-const irc = __importStar(require("../libs/irc"));
 const TypedConfig_1 = require("../TypedConfig");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-const logger = log4js_1.default.getLogger('cli');
-console.log('Starting up...');
-const config_path = './config/log_discord.json';
-log4js_1.default.configure(config_path);
+const logger = (0, Loggers_1.getLogger)('pre');
+logger.info('Starting up...');
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();
