@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.configure = exports.setContext = void 0;
 const discord_js_1 = require("discord.js");
 const log4js_1 = __importDefault(require("log4js"));
+const Loggers_1 = require("../Loggers");
 let discordClient;
 let ahrs;
-const logger = log4js_1.default.getLogger('discord');
 function setContext(client, ahrs_) {
     discordClient = client;
     ahrs = ahrs_;
@@ -43,6 +43,7 @@ function configure(config, layouts) {
                 }
             }
             catch (e) {
+                const logger = (0, Loggers_1.getLogger)('discord_apd');
                 logger.error(`@DiscordAppender#configure\n${e.message}\n${e.stack}`);
                 const ahr = ahrs[loggingEvent.context.channelId];
                 if (ahr) {
