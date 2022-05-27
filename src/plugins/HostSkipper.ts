@@ -143,7 +143,7 @@ export class HostSkipper extends LobbyPlugin {
         this.lobby.SendMessage(`The host skip command is currently in cooltime. You have to wait ${secs.toFixed(2)} sec(s).`);
       }
     } else if (player.isHost) {
-      this.logger.debug(`The host (Player ${player.name}) sent a !skip command.`);
+      this.logger.debug(`The host (Player ${player.name}) sent !skip command.`);
       this.Skip();
     } else {
       if (this.voting.Vote(player)) {
