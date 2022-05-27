@@ -6,10 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const Player_1 = require("../Player");
 const CommandParser_1 = require("../parsers/CommandParser");
-const TestUtils_1 = __importDefault(require("./TestUtils"));
-describe.only('CommandParserTest', function () {
+const log4js_1 = __importDefault(require("log4js"));
+describe('CommandParserTest', function () {
     before(function () {
-        TestUtils_1.default.configMochaAsSilent();
+        log4js_1.default.configure('config/log_mocha_silent.json');
     });
     it('make lobby message parse test', () => {
         let message = 'Created the tournament match https://osu.ppy.sh/mp/52612489 irctestroom';

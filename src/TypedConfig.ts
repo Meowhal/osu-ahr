@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import config from 'config';
 import { IClientOpts } from './libs/irc';
-import { getLogger } from './Loggers';
+import log4js from 'log4js';
 
-const configLogger = getLogger('cfg');
+const configLogger = log4js.getLogger('config');
 
 export const CONFIG_OPTION = {
   USE_ENV: false,

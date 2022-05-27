@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadEnvConfig = exports.loadEnvConfigWithTypeHint = exports.generateDefaultOptionTypeHint = exports.getConfig = exports.getIrcConfig = exports.CONFIG_OPTION = void 0;
 require("dotenv/config");
 const config_1 = __importDefault(require("config"));
-const Loggers_1 = require("./Loggers");
-const configLogger = (0, Loggers_1.getLogger)('cfg');
+const log4js_1 = __importDefault(require("log4js"));
+const configLogger = log4js_1.default.getLogger('config');
 exports.CONFIG_OPTION = {
     USE_ENV: false,
     PRINT_LOADED_ENV_CONFIG: true,

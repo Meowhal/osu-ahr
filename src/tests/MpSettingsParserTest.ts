@@ -2,11 +2,12 @@ import { assert } from 'chai';
 import { Teams } from '../Player';
 import { MpSettingsParser, MpSettingsResult } from '../parsers/MpSettingsParser';
 import { MpSettingsCases } from './cases/MpSettingsCases';
-import tu from './TestUtils';
+
+import log4js from 'log4js';
 
 describe('MpSettingsParserTest', function () {
   before(function () {
-    tu.configMochaAsSilent();
+    log4js.configure('config/log_mocha_silent.json');
   });
   it('mp settings parse test', () => {
     const p = new MpSettingsParser();

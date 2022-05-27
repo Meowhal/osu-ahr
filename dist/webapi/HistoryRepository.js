@@ -1,9 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HistoryRepository = void 0;
+const log4js_1 = __importDefault(require("log4js"));
 const TypedEvent_1 = require("../libs/TypedEvent");
 const HistoryFetcher_1 = require("./HistoryFetcher");
-const Loggers_1 = require("../Loggers");
 class HistoryRepository {
     constructor(lobbyId, fetcher = null) {
         this.matchInfo = null;
@@ -21,7 +24,7 @@ class HistoryRepository {
         this.errorCount = 0;
         this.fetchTask = Promise.resolve({ count: 0, filled: true, isRewind: false });
         this.lobbyId = lobbyId;
-        this.logger = (0, Loggers_1.getLogger)('his_repo');
+        this.logger = log4js_1.default.getLogger('his_repo');
         this.logger.addContext('channel', lobbyId);
         this.users = {};
         this.events = [];

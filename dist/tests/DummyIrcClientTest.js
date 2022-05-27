@@ -6,10 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const DummyIrcClient_1 = require("../dummies/DummyIrcClient");
 const CommandParser_1 = require("../parsers/CommandParser");
-const TestUtils_1 = __importDefault(require("./TestUtils"));
+const log4js_1 = __importDefault(require("log4js"));
 describe('DummyIrcClientTest', function () {
     before(function () {
-        TestUtils_1.default.configMochaAsSilent();
+        log4js_1.default.configure('config/log_mocha_silent.json');
     });
     // ロビー作成テスト
     it('make lobby test', (done) => {

@@ -1,12 +1,10 @@
 import { Client, ColorResolvable, MessageEmbed, MessageOptions, TextBasedChannel } from 'discord.js';
 import log4js from 'log4js';
-import { getLogger } from '../Loggers';
 import { OahrDiscord } from './OahrDiscord';
 
 let discordClient: Client | undefined;
 let ahrs: { [index: string]: OahrDiscord };
-
-const logger = getLogger('discord_apd');
+const logger = log4js.getLogger('discord');
 
 export function setContext(client: Client, ahrs_: { [index: string]: OahrDiscord }) {
   discordClient = client;

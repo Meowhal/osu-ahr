@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.regSwitch = exports.LobbyPlugin = void 0;
-const Loggers_1 = require("../Loggers");
+const log4js_1 = __importDefault(require("log4js"));
 const TypedConfig_1 = require("../TypedConfig");
 /**
  * ロビーのイベントに反応して処理を行うプラグインのベースクラス。
@@ -11,7 +14,8 @@ class LobbyPlugin {
         this.lobby = lobby;
         this.lobby.plugins.push(this);
         this.pluginName = pluginName;
-        this.logger = (0, Loggers_1.getLogger)(loggerTag);
+        this.logger = log4js_1.default.getLogger(loggerTag);
+        this.logger.addContext('channel', 'lobby');
     }
     /**
      * 他のプラグインにメッセージを送信する。

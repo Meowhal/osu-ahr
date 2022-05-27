@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoHostSelector = exports.DENY_LIST = void 0;
 const CommandParser_1 = require("../parsers/CommandParser");
 const Player_1 = require("../Player");
 const TypedEvent_1 = require("../libs/TypedEvent");
 const LobbyPlugin_1 = require("./LobbyPlugin");
+const log4js_1 = __importDefault(require("log4js"));
 const TypedConfig_1 = require("../TypedConfig");
-const Loggers_1 = require("../Loggers");
 /**
  * 拒否リスト
  * 各ロビーで共有することを想定しているので、プレイヤーオブジェクトではなくエスケープ名を保持する
@@ -16,7 +19,7 @@ class DenyList {
         this.players = new Set();
         this.playerAdded = new TypedEvent_1.TypedEvent();
         this.playerRemoved = new TypedEvent_1.TypedEvent();
-        this.logger = (0, Loggers_1.getLogger)('deny_list');
+        this.logger = log4js_1.default.getLogger('DenyList');
     }
     addPlayer(player) {
         if (this.players.has(player.escaped_name)) {

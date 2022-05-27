@@ -4,8 +4,8 @@ import { MpSettingsResult } from '../parsers/MpSettingsParser';
 import { LobbyPlugin } from './LobbyPlugin';
 import { Game, User } from '../webapi/HistoryTypes';
 import { Mod, ScoreMode, TeamMode } from '../Modes';
+import { Logger } from 'log4js';
 import { ConfigTypeHint, getConfig } from '../TypedConfig';
-import { Logger } from '../Loggers';
 
 export interface LobbyKeeperOption {
   /**
