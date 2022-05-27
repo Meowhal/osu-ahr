@@ -1,8 +1,8 @@
 import { IIrcClient } from '../IIrcClient';
-import log4js from 'log4js';
+import { getLogger } from '../Loggers';
 import { OahrBase } from './OahrBase';
 
-const logger = log4js.getLogger('cli');
+const logger = getLogger('hl');
 
 export class OahrHeadless extends OahrBase {
 

@@ -1,15 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoHostSelector = exports.DENY_LIST = void 0;
 const CommandParser_1 = require("../parsers/CommandParser");
 const Player_1 = require("../Player");
 const TypedEvent_1 = require("../libs/TypedEvent");
 const LobbyPlugin_1 = require("./LobbyPlugin");
-const log4js_1 = __importDefault(require("log4js"));
 const TypedConfig_1 = require("../TypedConfig");
+const Loggers_1 = require("../Loggers");
 /**
  * 拒否リスト
  * 各ロビーで共有することを想定しているので、プレイヤーオブジェクトではなくエスケープ名を保持する
@@ -19,7 +16,7 @@ class DenyList {
         this.players = new Set();
         this.playerAdded = new TypedEvent_1.TypedEvent();
         this.playerRemoved = new TypedEvent_1.TypedEvent();
-        this.logger = log4js_1.default.getLogger('DenyList');
+        this.logger = (0, Loggers_1.getLogger)('deny_list');
     }
     addPlayer(player) {
         if (this.players.has(player.escaped_name)) {
@@ -456,6 +453,8 @@ class AutoHostSelector extends LobbyPlugin_1.LobbyPlugin {
      */
     rotateQueue(showLog = true) {
         const current = this.hostQueue.shift();
+        if (current === undefined)
+            return;
         this.hostQueue.push(current);
         if (this.logger.isTraceEnabled() && showLog) {
             this.logger.trace(`rotated host queue: ${this.hostQueue.map(p => p.name).join(', ')}`);

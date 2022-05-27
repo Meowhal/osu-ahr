@@ -10,11 +10,10 @@ const DummyIrcClient_1 = require("../dummies/DummyIrcClient");
 const DummyLobbyPlugin_1 = require("../dummies/DummyLobbyPlugin");
 const StatParser_1 = require("../parsers/StatParser");
 const MpSettingsCases_1 = require("./cases/MpSettingsCases");
-const log4js_1 = __importDefault(require("log4js"));
 const TestUtils_1 = __importDefault(require("./TestUtils"));
 describe('LobbyTest', function () {
     before(function () {
-        log4js_1.default.configure('config/log_mocha_silent.json');
+        TestUtils_1.default.configMochaAsSilent();
     });
     // テスト用にロビー作成済み、プレイヤー追加済みのロビーを作成する。
     async function PrepareLobbyWith3Players() {

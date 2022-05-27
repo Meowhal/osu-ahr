@@ -1,7 +1,7 @@
-import { Lobby } from '../Lobby';
-import { IIrcClient } from '../IIrcClient';
 import config from 'config';
-import log4js from 'log4js';
+import { Lobby } from '../Lobby';
+import { getLogger } from '../Loggers';
+import { IIrcClient } from '../IIrcClient';
 import { AutoHostSelector } from '../plugins/AutoHostSelector';
 import { MatchStarter } from '../plugins/MatchStarter';
 import { HostSkipper } from '../plugins/HostSkipper';
@@ -19,7 +19,7 @@ import { MiscLoader } from '../plugins/MiscLoader';
 import { parser } from '../parsers/CommandParser';
 import { CacheCleaner } from '../plugins/CacheCleaner';
 
-const logger = log4js.getLogger('cli');
+const logger = getLogger('ahr');
 
 export interface OahrCliOption {
   invite_users: string[]; // ロビー作成時に招待するプレイヤー, 自分を招待する場合など
@@ -101,7 +101,7 @@ export class OahrBase {
     for (const p of this.option.invite_users) {
       this.lobby.SendMessage(`!mp invite ${p}`);
     }
-    logger.info(`Successfully made the lobby. Name : ${this.lobby.channel}`);
+    logger.info(`Successfully made the lobby. Channel : ${this.lobby.channel}`);
   }
 
   async enterLobbyAsync(id: string): Promise<void> {
