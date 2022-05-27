@@ -115,7 +115,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (isMpSettingResult) return;
 
     this.hostQueue.push(player);
-    this.logger.trace(`Added player ${player.name} to host queue.`);
+    this.logger.trace(`Added player ${player.name} to the host queue.`);
     if (this.hostQueue.length === 1) {
       this.logger.trace('Appointed first player as host.');
       this.changeHost();
