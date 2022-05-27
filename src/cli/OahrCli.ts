@@ -231,6 +231,9 @@ export class OahrCli extends OahrBase {
       r.setPrompt(this.prompt);
       r.prompt();
     });
+    this.client.once('part', () => {
+      r.close();
+    });
 
     r.on('line', line => {
       logger.trace(`Scene:${this.scene.name}, Line:${line}`);
