@@ -359,7 +359,7 @@ export class AutoHostSelector extends LobbyPlugin {
       if (this.option.host_order_chars_limit < m.length) {
         m = `${m.substring(0, this.option.host_order_chars_limit)}...`;
       }
-      return `Host order : ${m}`;
+      return `Host order: ${m}`;
     }, '!queue', this.option.host_order_cooltime_ms);
   }
 
@@ -414,7 +414,7 @@ export class AutoHostSelector extends LobbyPlugin {
     if (typeof (order) === 'string') {
       const players = order.split(',').map(t => this.lobby.GetPlayer(revealUserName(t.trim()))).filter(p => p !== null) as Player[];
       if (players.length === 0) {
-        this.logger.info(`Failed to reorder, an invalid order string : ${order}`);
+        this.logger.info(`Failed to reorder, an invalid order string: ${order}`);
       } else {
         this.Reorder(players);
       }
@@ -508,9 +508,9 @@ export class AutoHostSelector extends LobbyPlugin {
     const m = this.hostQueue.map(p => p.name).join(', ');
     const b = this.getDeniedPlayerNames().join(',');
     return `-- AutoHostSelector --
-  Queue : ${m}
-  Beatmap changer : ${!this.mapChanger ? 'null' : this.mapChanger.name}, needsRotate : ${this.needsRotate}
-  Deny list : ${b}`;
+  Queue: ${m}
+  Beatmap changer: ${!this.mapChanger ? 'null' : this.mapChanger.name}, needsRotate: ${this.needsRotate}
+  Deny list: ${b}`;
   }
 
   private raiseOrderChanged(type: OrderChangeType) {
