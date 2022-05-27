@@ -334,7 +334,7 @@ export class Lobby {
     this.ircClient.say(target, message);
     this.ircClient.emit('sentPrivateMessage', target, message);
     this.SentMessage.emit({ message });
-    this.chatlogger.info(`BotBot -> ${target}: ${message}`);
+    this.chatlogger.info(`Bot -> ${target}: ${message}`);
   }
 
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
