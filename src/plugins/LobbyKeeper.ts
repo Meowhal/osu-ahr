@@ -357,7 +357,7 @@ export class LobbyKeeper extends LobbyPlugin {
             return 'Disabled keeping the lobby mode.';
           }
         } catch (e: any) {
-          this.logger.warn(e?.message ?? 'Failed to parse mode parameters.');
+          this.logger.warn(e?.message ?? 'Failed to parse the mode parameters.');
           return null;
         }
       }
