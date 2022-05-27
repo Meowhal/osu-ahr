@@ -700,7 +700,7 @@ export class Lobby {
       const p = this.GetPlayer(this.statParser.result.name);
       if (p) {
         p.laststat = this.statParser.result;
-        this.logger.info(`Parsed player stat: ${p.name} -> ${StatStatuses[p.laststat.status]}`);
+        this.logger.info(`Parsed a player's stat: ${p.name} -> ${StatStatuses[p.laststat.status]}`);
         this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
       }
     }
