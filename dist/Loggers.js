@@ -28,9 +28,9 @@ function selectConfigPath() {
 }
 const path = selectConfigPath();
 console.log(`load log4js configuration from ${path}`);
-const l = log4js_1.default.configure(path);
+log4js_1.default.configure(path);
 function getLogger(category) {
-    return l.getLogger(category);
+    return log4js_1.default.getLogger(category);
 }
 exports.getLogger = getLogger;
 //# sourceMappingURL=Loggers.js.map

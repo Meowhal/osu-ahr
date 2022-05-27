@@ -26,10 +26,8 @@ const DiscordBot_1 = require("./DiscordBot");
 const IIrcClient_1 = require("../IIrcClient");
 const TypedConfig_1 = require("../TypedConfig");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-const logger = log4js_1.default.getLogger('cli');
 console.log('Starting up...');
-const config_path = './config/log_discord.json';
-log4js_1.default.configure(config_path);
+const logger = (0, Loggers_1.getLogger)('discord_pre');
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();

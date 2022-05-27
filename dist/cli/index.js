@@ -26,12 +26,8 @@ const OahrHeadless_1 = require("./OahrHeadless");
 const IIrcClient_1 = require("../IIrcClient");
 const TypedConfig_1 = require("../TypedConfig");
 const ChatLimiter_1 = require("../libs/ChatLimiter");
-const logger = log4js_1.default.getLogger('cli');
 console.log('Starting up...');
-const config_path = (process.env.NODE_ENV === 'production')
-    ? './config/log_cli_prod.json'
-    : './config/log_cli_dev.json';
-log4js_1.default.configure(config_path);
+const logger = (0, Loggers_1.getLogger)('index_pre');
 try {
     TypedConfig_1.CONFIG_OPTION.USE_ENV = true;
     const c = (0, TypedConfig_1.getIrcConfig)();
