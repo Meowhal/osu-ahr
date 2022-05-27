@@ -298,7 +298,7 @@ export class LobbyKeeper extends LobbyPlugin {
     if (!p || this.mpKickedUsers.has(p)) return;
 
     this.kickedUsers.add(p);
-    this.logger.debug(`Added player ${p.name} to kicked users, count: ${this.kickedUsers.size}`);
+    this.logger.debug(`Added player ${p.name} to kicked users. Count: ${this.kickedUsers.size}`);
     if (this.option.hostkick_tolerance <= this.kickedUsers.size || p.isReferee || p.isAuthorized) {
       this.kickedUsers.clear();
       this.mpKickedUsers.clear();
@@ -331,13 +331,13 @@ export class LobbyKeeper extends LobbyPlugin {
     }
     if (this.option.title !== null || this.option.mode !== null || this.option.mods !== null) {
       this.lobby.LoadMpSettingsAsync().catch((e: any) => {
-        this.logger.error('lobbyKeeper#onMatchFinished\nFailed to LoadMpSettingsAsync');
+        this.logger.error('LobbyKeeper#onMatchFinished\nFailed to LoadMpSettingsAsync');
       });
     }
   }
 
   private onFinishedGame(game: Game): any {
-    this.logger.trace(`Finished game -> mode:${game.mode}, mode_int:${game.mode_int}, score:${game.scoring_type}, team:${game.team_type}, mods:${game.mods}`);
+    this.logger.trace(`Finished game -> Mode: ${game.mode}, Mode_int: ${game.mode_int}, Score type: ${game.scoring_type}, Team type: ${game.team_type}, Mod(s): ${game.mods}`);
   }
 
   private processCommand(command: string, param: string): string | null {
