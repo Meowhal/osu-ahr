@@ -191,7 +191,7 @@ export class MapChecker extends LobbyPlugin {
       const map = await BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
 
       if (mapId !== this.checkingMapId) {
-        this.logger.info(`The target beatmap has already been changed. Checked: ${mapId}, Current:${this.checkingMapId}`);
+        this.logger.info(`The target beatmap has already been changed. Checked beatmap: ${mapId}, Current:${this.checkingMapId}`);
         return;
       }
 
@@ -205,18 +205,18 @@ export class MapChecker extends LobbyPlugin {
       if (e instanceof FetchBeatmapError) {
         switch (e.reason) {
           case FetchBeatmapErrorReason.FormatError:
-            this.logger.error(`Failed to parse the webpage. Checked: ${mapId}`);
+            this.logger.error(`Failed to parse the webpage. Checked beatmap: ${mapId}`);
             break;
           case FetchBeatmapErrorReason.NotFound:
-            this.logger.info(`Beatmap cannot be found. Checked: ${mapId}`);
+            this.logger.info(`Beatmap cannot be found. Checked beatmap: ${mapId}`);
             this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] had already been removed from the website.`, false);
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
-            this.logger.info(`Gamemode mismatched. Checked: ${mapId}`);
+            this.logger.info(`Gamemode mismatched. Checked beatmap: ${mapId}`);
             this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not ${this.option.gamemode.officialName} beatmap. Pick ${this.option.gamemode.officialName} beatmap.`, false);
             break;
           case FetchBeatmapErrorReason.NotAvailable:
-            this.logger.info(`Beatmap is not available. Checked: ${mapId}`);
+            this.logger.info(`Beatmap is not available. Checked beatmap: ${mapId}`);
             this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not available for download.`, false);
             break;
         }
