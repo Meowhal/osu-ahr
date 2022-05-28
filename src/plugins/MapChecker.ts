@@ -191,7 +191,7 @@ export class MapChecker extends LobbyPlugin {
       const map = await BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
 
       if (mapId !== this.checkingMapId) {
-        this.logger.info(`The target beatmap has already been changed. Checked beatmap: ${mapId}, Current:${this.checkingMapId}`);
+        this.logger.info(`The target beatmap has already been changed. Checked beatmap: ${mapId}, Current: ${this.checkingMapId}`);
         return;
       }
 
