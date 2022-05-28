@@ -178,7 +178,7 @@ export class HostSkipper extends LobbyPlugin {
       this.logger.info(`Cannot skip the host to an invalid username: ${username}`);
       return;
     }
-    this.logger.info(`Host has been skipped to: ${username}`);
+    this.logger.info(`The host has been skipped to: ${username}`);
     this.StopTimer();
     this.SendPluginMessage('skipto', [username]);
   }
