@@ -387,7 +387,7 @@ export class AutoHostSelector extends LobbyPlugin {
 
     // キューにいないプレイヤーの場合は何もしない
     if (!this.hostQueue.find(p => p === trg)) {
-      this.logger.error(`Cannot skip to a player who isn't in the queue. ${trg.name}`);
+      this.logger.error(`Cannot skip the host to a player who isn't in the host queue. ${trg.name}`);
       return;
     }
 
@@ -442,7 +442,7 @@ export class AutoHostSelector extends LobbyPlugin {
       isValid = isValid && this.lobby.players.has(p) && !DENY_LIST.includes(p);
     }
 
-    this.logger.trace('Validated the queue.');
+    this.logger.trace('Validated the host queue.');
     this.logger.trace(`  Old: ${Array.from(this.lobby.players).map(p => p.name).join(', ')}`);
     this.logger.trace(`  New: ${que.map(p => p.name).join(', ')}`);
 
