@@ -117,7 +117,7 @@ export class AutoHostSelector extends LobbyPlugin {
     this.hostQueue.push(player);
     this.logger.trace(`Added player ${player.name} to the host queue.`);
     if (this.hostQueue.length === 1) {
-      this.logger.trace('Appointed first player as host.');
+      this.logger.trace('Appointed the first player as host.');
       this.changeHost();
     }
     this.raiseOrderChanged('added');
@@ -331,7 +331,7 @@ export class AutoHostSelector extends LobbyPlugin {
    * @param result
    */
   OrderBySlotBase(result: MpSettingsResult): void {
-    this.logger.info('Reordered slot base order.');
+    this.logger.info('Reordered the slot base order.');
     this.hostQueue = result.players.map(r => this.lobby.GetOrMakePlayer(r.name)).filter(p => !DENY_LIST.includes(p));
   }
 
@@ -442,7 +442,7 @@ export class AutoHostSelector extends LobbyPlugin {
       isValid = isValid && this.lobby.players.has(p) && !DENY_LIST.includes(p);
     }
 
-    this.logger.trace('Validated queue.');
+    this.logger.trace('Validated the queue.');
     this.logger.trace(`  Old: ${Array.from(this.lobby.players).map(p => p.name).join(', ')}`);
     this.logger.trace(`  New: ${que.map(p => p.name).join(', ')}`);
 
