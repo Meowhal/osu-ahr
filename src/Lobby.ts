@@ -404,7 +404,7 @@ export class Lobby {
   async RequestStatAsync(player: Player, byPm: boolean, timeout: number = this.option.stat_timeout_ms): Promise<StatResult> {
     return new Promise<StatResult>((resolve, reject) => {
       const tm = setTimeout(() => {
-        reject('Stat request timed out');
+        reject('Stat request has timed out');
       }, timeout);
       const d = this.ParsedStat.on(({ result }) => {
         if (escapeUserName(result.name) === player.escaped_name) {
@@ -520,15 +520,15 @@ export class Lobby {
         break;
       case BanchoResponseType.TeamChanged:
         this.GetOrMakePlayer(c.params[0]).team = c.params[1];
-        this.logger.trace(`Team has changed: ${c.params[0]}, ${Teams[c.params[1]]}`);
+        this.logger.trace(`Team has been changed: ${c.params[0]}, ${Teams[c.params[1]]}`);
         break;
       case BanchoResponseType.BeatmapChanged:
       case BanchoResponseType.MpBeatmapChanged:
         if (this.mapId !== c.params[0]) {
           this.mapId = c.params[0];
           this.mapTitle = c.params[1];
-          const changer = this.host ? ` by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'Bot'})` : '';
-          this.logger.info(`Beatmap has been changed${changer}: https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
+          const changer = this.host ? `by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'Bot'}` : '';
+          this.logger.info(`Beatmap has been changed ${changer}: https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
         }
         break;
       case BanchoResponseType.Settings:
@@ -628,7 +628,7 @@ export class Lobby {
   }
 
   RaiseMatchStarted(): void {
-    this.logger.info('Match has started.');
+    this.logger.info('The match has started!');
     this.isMatching = true;
     this.players.forEach(p => p.mpstatus = MpStatuses.Playing);
     this.MatchStarted.emit({ mapId: this.mapId, mapTitle: this.mapTitle });
@@ -647,7 +647,7 @@ export class Lobby {
 
   RaiseMatchFinished(): void {
     const count = this.players.size;
-    this.logger.info(`Match has finished. (${count} player(s))`);
+    this.logger.info(`The match has finished! (${count} player(s))`);
     this.isMatching = false;
     this.players.forEach(p => p.mpstatus = MpStatuses.InLobby);
     this.MatchFinished.emit();
