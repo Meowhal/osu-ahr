@@ -22,7 +22,7 @@ export enum LobbyStatus {
 }
 
 export interface LobbyOption {
-  authorized_users: string[], // 特権ユーザー
+  authorized_users: string[],
   listref_duration_ms: number,
   info_message: string,
   info_message_cooltime_ms: number,
@@ -173,7 +173,7 @@ export class Lobby {
   }
 
   /**
-   * 試合を終えて待機中の人数を数える
+   * Count the number of people who finished the match.
    */
   get playersFinished(): number {
     let i = 0;
@@ -184,7 +184,7 @@ export class Lobby {
   }
 
   /**
-   * 試合中の人数を数える
+   * Count the number of people in the match.
    */
   get playersInGame(): number {
     let i = 0;
@@ -195,7 +195,7 @@ export class Lobby {
   }
 
   /**
-   * プレイヤーたちの状況を項目ごとに数える
+   * Count the number of players in each situation.
    */
   CountPlayersStatus(): { inGame: number, playing: number, finished: number, inlobby: number, total: number } {
     const r = { inGame: 0, playing: 0, finished: 0, inlobby: 0, total: this.players.size };
@@ -217,10 +217,9 @@ export class Lobby {
   }
 
   /**
-   * usernameからプレイヤーオブジェクトを取得または作成する
-   * nameに対してPlayerは一意のインスタンスで直接比較可能
-   * この関数以外でPlayerを作成してはならない
-   * 再入室してきたユーザーの情報を参照したい場合に備えてプレイヤーをマップで保持しておく
+   * Get or create a player object from username
+   * Player is a unique instance, so it is directly comparable
+   * Player must not be created outside of this function
    * @param username
    */
   GetOrMakePlayer(username: string): Player {
@@ -238,8 +237,8 @@ export class Lobby {
   }
 
   /**
-   * username からプレイヤーオブジェクトを取得する
-   * まだ作成されていないプレイヤーだった場合nullを返す
+   * Get a player object from username
+   * Return null if the player has not been created yet
    * @param username
    */
   GetPlayer(username: string): Player | null {
@@ -251,7 +250,7 @@ export class Lobby {
     }
   }
 
-  // username のプレイヤーがゲームに参加しているか調べる
+  // Check if the player is participating in the Lobby
   Includes(username: string): boolean {
     const ename = escapeUserName(username);
     const p = this.playersMap.get(ename);
@@ -640,7 +639,7 @@ export class Lobby {
     const sc = this.CountPlayersStatus();
     this.PlayerFinished.emit({ player, score, isPassed, playersFinished: sc.finished, playersInGame: sc.inGame });
     if (!this.players.has(player)) {
-      this.logger.warn(`未参加のプレイヤーがゲームを終えた (A player that did not participate finished a match): ${username}`);
+      this.logger.warn(`A player that did not participate finished a match: ${username}`);
       this.LoadMpSettingsAsync();
     }
   }
@@ -707,7 +706,7 @@ export class Lobby {
   }
 
   /**
-   * pluginに読み込み作業が完了したことを通知する
+   * Notify plugins that the loading operation is complete
    */
   RaisePluginsLoaded(): void {
     for (const p of this.plugins) {
@@ -874,7 +873,7 @@ export class Lobby {
       }
       return true;
     } else {
-      this.logger.warn(`参加済みのプレイヤーが再度参加した (A player inside the lobby has joined for the second time): ${player.name}`);
+      this.logger.warn(`A player inside the lobby has joined for the second time: ${player.name}`);
       this.UnexpectedAction.emit(new Error('A player inside the lobby has joined for the second time'));
       return false;
     }
@@ -891,12 +890,12 @@ export class Lobby {
         this.host = null;
       }
       if (this.hostPending === player) {
-        this.logger.warn(`pending中にユーザーが離脱した (A pending user has left) Pending: ${player.name}`);
+        this.logger.warn(`A pending user has left: ${player.name}`);
         this.hostPending = null;
       }
       return true;
     } else {
-      this.logger.warn(`未参加のプレイヤーが退出した (A player outside the lobby has left): ${player.name}`);
+      this.logger.warn(`A player outside the lobby has left: ${player.name}`);
       this.UnexpectedAction.emit(new Error('A player outside the lobby has left'));
       return false;
     }
@@ -905,7 +904,7 @@ export class Lobby {
   private setAsHost(player: Player): boolean {
     if (!this.players.has(player)) {
       this.transferHostTimeout.cancel();
-      this.logger.warn(`未参加のプレイヤーがホストになった (A player outside the lobby became a host): ${player.name}`);
+      this.logger.warn(`A player outside the lobby became a host: ${player.name}`);
       return false;
     }
 
@@ -913,8 +912,8 @@ export class Lobby {
       this.transferHostTimeout.cancel();
       this.hostPending = null;
     } else if (this.hostPending !== null) {
-      this.logger.warn(`pending中に別のユーザーがホストになった (A pending host became a host) Pending: ${this.hostPending.name}, Host: ${player.name}`);
-    } // pending === null は有効
+      this.logger.warn(`Another player became host during host assignment. Pending: ${this.hostPending.name}, Host: ${player.name}`);
+    } // pending === null means Manual changes
 
     if (this.host) {
       this.host.removeRole(Roles.Host);
@@ -925,7 +924,7 @@ export class Lobby {
   }
 
   /**
-   * MpSettingsの結果を取り込む。join/left/hostの発生しない
+   * Import MpSettings result. no join/left/changehost occurences
    * @param result
    */
   private margeMpSettingsResult(result: MpSettingsResult): { playersIn: Player[], playersOut: Player[], hostChanged: boolean } {
@@ -1019,7 +1018,7 @@ export class Lobby {
     }
   }
 
-  // ircでログインしたユーザーに権限を与える
+  // Grant privileges to the owner
   private assignCreatorRole(): void {
     if (!this.ircClient.nick) {
       this.ircClient.once('registered', () => {
