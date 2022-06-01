@@ -93,7 +93,7 @@ export class WordCounter extends LobbyPlugin {
     const topIndex = this.periods.reduce((p, a) => a.index < p ? a.index : p, 1000000);
     // 時間切れのサンプルが溜まってきたら捨てる
     if (this.samples.length / 2 < topIndex && this.samples.length > 100) {
-      this.logger.trace(`GC start length: ${this.samples.length}, IDX: ${topIndex}`);
+      this.logger.trace(`Started garbage collection. Samples length: ${this.samples.length}, Top index: ${topIndex}`);
       this.samples = this.samples.slice(topIndex);
       for (const p of this.periods) {
         p.index -= topIndex;
