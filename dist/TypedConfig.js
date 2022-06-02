@@ -89,7 +89,7 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
                         r[hint.key] = false;
                     }
                     else {
-                        throw new Error(`env:${envKey} type mismatched. ${hint.key} must be true/false but "${envVar}"`);
+                        throw new Error(`Environment key ${envKey}'s type mismatched. ${hint.key} must be a boolean but received "${envVar}"`);
                     }
                     break;
                 case 'number':
@@ -98,7 +98,7 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
                         r[hint.key] = num;
                     }
                     else {
-                        throw new Error(`env:${envKey} type mismatched. ${hint.key} must be number but "${envVar}"`);
+                        throw new Error(`Environment key ${envKey}'s type mismatched. ${hint.key} must be a number but received "${envVar}"`);
                     }
                     break;
                 case 'string':
@@ -110,17 +110,17 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
                         r[hint.key] = arr;
                     }
                     else {
-                        throw new Error(`env:${envKey} type mismatched. ${hint.key} must be str array(e.g. ["aaa", "bbb", "ccc"] ) but "${envVar}"`);
+                        throw new Error(`Environment key ${envKey}'s type mismatched. ${hint.key} must be a string array, e.g., ["aaa", "bbb", "ccc"] but received "${envVar}"`);
                     }
                     break;
                 default:
-                    throw new Error(`env:${envKey} unsupported type. can't set ${hint.type} via env. ${envVar}`);
+                    throw new Error(`Environment key ${envKey} has an unsupported type. Cannot set ${hint.type} via environment. Received ${envVar}`);
             }
         }
     }
     if (exports.CONFIG_OPTION.PRINT_LOADED_ENV_CONFIG) {
         for (const key in r) {
-            configLogger.info(`loaded env:${genEnvKey(category, key)} : ${r[key]}`);
+            configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${r[key]}`);
         }
     }
     return r;

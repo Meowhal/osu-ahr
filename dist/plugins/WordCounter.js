@@ -67,7 +67,7 @@ class WordCounter extends LobbyPlugin_1.LobbyPlugin {
         const topIndex = this.periods.reduce((p, a) => a.index < p ? a.index : p, 1000000);
         // 時間切れのサンプルが溜まってきたら捨てる
         if (this.samples.length / 2 < topIndex && this.samples.length > 100) {
-            this.logger.trace(`gc start len:${this.samples.length}, idx:${topIndex}`);
+            this.logger.trace(`Started garbage collection. Samples length: ${this.samples.length}, Top index: ${topIndex}`);
             this.samples = this.samples.slice(topIndex);
             for (const p of this.periods) {
                 p.index -= topIndex;
@@ -77,16 +77,20 @@ class WordCounter extends LobbyPlugin_1.LobbyPlugin {
     }
     log(msg, important) {
         const f = (important ? this.logger.info : this.logger.debug).bind(this.logger);
-        f(`msg:${msg}`);
+        f(`Message: ${msg}`);
         for (const p of this.periods) {
-            f(`  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `);
+            f(`  ${p.symbol} (${(p.durationMs / 1000).toFixed(2)} sec(s))
+      cp${p.symbol}: ${p.chatsPerPeriod} (Max: ${p.chatsPerPeriodMax})
+      wp${p.symbol}: ${p.wordsPerPeriod} (Max: ${p.wordsPerPeriodMax}) `);
         }
     }
     GetPluginStatus() {
         let m = '-- Word Counter --';
         for (const p of this.periods) {
             m +=
-                `\n  ${p.symbol}(${(p.durationMs / 1000).toFixed(2)}sec) cp${p.symbol}:${p.chatsPerPeriod}(max:${p.chatsPerPeriodMax}), wp${p.symbol}:${p.wordsPerPeriod}(max:${p.wordsPerPeriodMax}) `;
+                `\n  ${p.symbol} (${(p.durationMs / 1000).toFixed(2)} sec(s))
+        cp${p.symbol}: ${p.chatsPerPeriod} (Max: ${p.chatsPerPeriodMax})
+        wp${p.symbol}: ${p.wordsPerPeriod} (Max: ${p.wordsPerPeriodMax}) `;
         }
         return m;
     }

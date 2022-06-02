@@ -45,12 +45,12 @@ class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
     }
     onChangedLobbyName(newName, oldName) {
         this.lobby.lobbyName = newName;
-        this.logger.info(`lobbyname changed : ${oldName} -> ${newName}, host : ${this.lobby.host?.name}`);
+        this.logger.info(`Lobby name has been changed: ${oldName} -> ${newName}, Host: ${this.lobby.host?.name}`);
     }
     startFetch() {
         this.stopFetch();
         if (this.option.fetch_interval_ms >= 5000) {
-            this.logger.trace('start fetching');
+            this.logger.trace('Started fetching.');
             this.fetchInvervalId = setInterval(() => {
                 if (!this.lobby.isMatching) {
                     this.repository.updateToLatest();
@@ -60,13 +60,16 @@ class HistoryLoader extends LobbyPlugin_1.LobbyPlugin {
     }
     stopFetch() {
         if (this.fetchInvervalId) {
-            this.logger.trace('stop fetching');
+            this.logger.trace('Stopped fetching.');
             clearInterval(this.fetchInvervalId);
             this.fetchInvervalId = null;
         }
     }
     GetPluginStatus() {
-        return `-- HistoryLoader -- hasError : ${this.repository?.hasError}, latest : ${this.repository?.latestEventId} loaded events : ${this.repository?.events.length}`;
+        return `-- History Loader --
+  hasError: ${this.repository?.hasError}
+  Latest: ${this.repository?.latestEventId}
+  Loaded events: ${this.repository?.events.length}`;
     }
 }
 exports.HistoryLoader = HistoryLoader;

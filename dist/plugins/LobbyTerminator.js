@@ -23,7 +23,7 @@ class LobbyTerminator extends LobbyPlugin_1.LobbyPlugin {
         if (this.terminateTimer) {
             clearTimeout(this.terminateTimer);
             this.terminateTimer = undefined;
-            this.logger.trace('terminate_timer canceled');
+            this.logger.trace('Cleared the lobby terminator timer.');
         }
     }
     onPlayerLeft(p) {
@@ -31,9 +31,9 @@ class LobbyTerminator extends LobbyPlugin_1.LobbyPlugin {
             if (this.terminateTimer) {
                 clearTimeout(this.terminateTimer);
             }
-            this.logger.trace('terminate_timer start');
+            this.logger.trace('Started the lobby terminator timer.');
             this.terminateTimer = setTimeout(() => {
-                this.logger.info('terminated lobby');
+                this.logger.info('Terminated the lobby.');
                 this.lobby.CloseLobbyAsync();
             }, this.option.terminate_time_ms);
         }
@@ -41,13 +41,13 @@ class LobbyTerminator extends LobbyPlugin_1.LobbyPlugin {
     CloseLobby(time_ms = 0) {
         if (time_ms === 0) {
             if (this.lobby.players.size === 0) {
-                this.logger.info('terminated lobby');
+                this.logger.info('Terminated the lobby.');
                 this.lobby.CloseLobbyAsync();
             }
             else {
                 this.lobby.SendMultilineMessageWithInterval([
                     '!mp password closed',
-                    'This lobby will be closed after everyone leaves.',
+                    'This lobby will be closed when everyone leaves.',
                     'Thank you for playing with the auto host rotation lobby.'
                 ], this.multilimeMessageInterval, 'close lobby announcement', 100000);
                 this.option.terminate_time_ms = 1000;

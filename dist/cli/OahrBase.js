@@ -72,22 +72,22 @@ class OahrBase {
         name = name.replace(/[^ -~]/g, '');
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
-        logger.info(`Making a lobby... Name : ${name}`);
+        logger.info(`Making a lobby... Name: ${name}`);
         await this.lobby.MakeLobbyAsync(name);
         this.lobby.SendMessage(`!mp password ${this.option.password}`);
         for (const p of this.option.invite_users) {
             this.lobby.SendMessage(`!mp invite ${p}`);
         }
-        logger.info(`Successfully made the lobby. Channel : ${this.lobby.channel}`);
+        logger.info(`Successfully made the lobby. Channel: ${this.lobby.channel}`);
     }
     async enterLobbyAsync(id) {
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
         const channel = CommandParser_1.parser.EnsureMpChannelId(id);
-        logger.info(`Entering a lobby... Channel : ${channel}`);
+        logger.info(`Entering a lobby... Channel: ${channel}`);
         await this.lobby.EnterLobbyAsync(channel);
         await this.lobby.LoadMpSettingsAsync();
-        logger.info(`Successfully entered the lobby. Channel : ${this.lobby.channel}`);
+        logger.info(`Successfully entered the lobby. Channel: ${this.lobby.channel}`);
     }
 }
 exports.OahrBase = OahrBase;

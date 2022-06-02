@@ -7,7 +7,7 @@ const chai_1 = require("chai");
 const Player_1 = require("../Player");
 const CommandParser_1 = require("../parsers/CommandParser");
 const TestUtils_1 = __importDefault(require("./TestUtils"));
-describe.only('CommandParserTest', function () {
+describe('CommandParserTest', function () {
     before(function () {
         TestUtils_1.default.configMochaAsSilent();
     });
