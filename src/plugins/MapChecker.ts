@@ -353,19 +353,19 @@ export class MapValidator {
     }
 
     if (this.option.star_min > 0 && this.option.star_max > 0) {
-      d_star = `${this.option.star_min.toFixed(2)} <= star rating <= ${this.option.star_max.toFixed(2)}`;
+      d_star = `${this.option.star_min.toFixed(2)} <= Star rating <= ${this.option.star_max.toFixed(2)}`;
     } else if (this.option.star_min > 0) {
-      d_star = `${this.option.star_min.toFixed(2)} <= star rating`;
+      d_star = `${this.option.star_min.toFixed(2)} <= Star rating`;
     } else if (this.option.star_max > 0) {
-      d_star = `star rating <= ${this.option.star_max.toFixed(2)}`;
+      d_star = `Star rating <= ${this.option.star_max.toFixed(2)}`;
     }
 
     if (this.option.length_min > 0 && this.option.length_max > 0) {
-      d_length = `${secToTimeNotation(this.option.length_min)} <= length <= ${secToTimeNotation(this.option.length_max)}`;
+      d_length = `${secToTimeNotation(this.option.length_min)} <= Length <= ${secToTimeNotation(this.option.length_max)}`;
     } else if (this.option.length_min > 0) {
-      d_length = `${secToTimeNotation(this.option.length_min)} <= length`;
+      d_length = `${secToTimeNotation(this.option.length_min)} <= Length`;
     } else if (this.option.length_max > 0) {
-      d_length = `length <= ${secToTimeNotation(this.option.length_max)}`;
+      d_length = `Length <= ${secToTimeNotation(this.option.length_max)}`;
     }
 
     return [d_star, d_length, d_gamemode].filter(d => d !== '').join(', ');
