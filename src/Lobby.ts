@@ -86,7 +86,7 @@ export class Lobby {
 
   constructor(ircClient: IIrcClient, option: Partial<LobbyOption> = {}) {
     if (!ircClient.conn) {
-      throw new Error('clientが未接続です (Client is not connected)');
+      throw new Error('Client is not connected');
     }
     this.option = getConfig('Lobby', option) as LobbyOption;
     this.status = LobbyStatus.Standby;
