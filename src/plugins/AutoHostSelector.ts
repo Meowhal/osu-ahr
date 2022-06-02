@@ -510,7 +510,7 @@ export class AutoHostSelector extends LobbyPlugin {
     return `-- Auto Host Selector --
   Queue: ${m}
   Beatmap changer: ${!this.mapChanger ? 'Null' : this.mapChanger.name}
-  needsRotate: ${this.needsRotate}
+  Needs rotation: ${this.needsRotate}
   Deny list: ${b}`;
   }
 
