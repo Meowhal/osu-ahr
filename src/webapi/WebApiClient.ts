@@ -75,10 +75,10 @@ class WebApiClientClass implements IBeatmapFetcher {
       const p = this.getTokenPath(token.isGuest);
       await fs.mkdir(path.dirname(p), { recursive: true });
       await fs.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
-      this.logger.info(`stored token to : ${p}`);
+      this.logger.info(`Stored token to: ${p}`);
       return true;
     } catch (e: any) {
-      this.logger.error(`storeToken error :\n${e.message}\n${e.stack}`);
+      this.logger.error(`@WebApiClient#storeToken\n${e.message}\n${e.stack}`);
       return false;
     }
   }
@@ -96,13 +96,13 @@ class WebApiClientClass implements IBeatmapFetcher {
       const j = await fs.readFile(p, 'utf8');
       const token = JSON.parse(j) as ApiToken;
       if (!isExpired(token)) {
-        this.logger.info(`loaded stored token from : ${p}`);
+        this.logger.info(`Loaded stored token from: ${p}`);
         return token;
       }
       this.deleteStoredToken(asGuest);
-      this.logger.info('deleted expired stored token');
+      this.logger.info('Deleted expired stored token.');
     } catch (e: any) {
-      this.logger.error(`loadStoredToken error :\n${e.message}\n${e.stack}`);
+      this.logger.error(`@WebApiClient#loadStoredToken\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -116,7 +116,7 @@ class WebApiClientClass implements IBeatmapFetcher {
     try {
       fs.unlink(p);
     } catch (e: any) {
-      this.logger.error(`load token error :\n${e.message}\n${e.stack}`);
+      this.logger.error(`@WebApiClient#deleteStoredToken\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -132,10 +132,10 @@ class WebApiClientClass implements IBeatmapFetcher {
       });
       response.data.isGuest = false;
       response.data.expires_in += Date.now() / 1000;
-      this.logger.info('get Authorized token');
+      this.logger.info('Got authorized token.');
       return response.data;
     } catch (e: any) {
-      this.logger.error(`getAuthorizedToken error :\n${e.message}\n${e.stack}`);
+      this.logger.error(`@WebApiClient#getAuthorizedToken\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -147,34 +147,34 @@ class WebApiClientClass implements IBeatmapFetcher {
         res.setHeader('Content-Type', 'text/html');
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         if (!req.url) {
-          res.end('missing req.url');
+          res.end('Missing request URL.');
           return;
         }
         const url = new URL(req.url, `http://${req.headers.host}`);
         code = url.searchParams.get('code');
         if (code === null) {
-          res.end('missing code');
+          res.end('Missing code.');
           return;
         }
-        res.end(`ok : ${code}`);
-        this.logger.trace(`got code! ${code}`);
+        res.end(`Ok: ${code}`);
+        this.logger.trace(`Got code! ${code}`);
         server.close(() => {
-          this.logger.trace('closed callback');
+          this.logger.trace('Closed callback.');
         });
         if (res.connection) {
           res.connection.end();
           res.connection.destroy();
         } else {
-          reject('no connection');
+          reject('No connection');
         }
 
       });
       server.once('close', () => {
-        this.logger.trace('closed event');
+        this.logger.trace('Detected close event.');
         if (code === null) {
-          reject('no code');
+          reject('No code');
         } else {
-          this.logger.info('get Authorized code');
+          this.logger.info('Got authorized code.');
           resoleve(code);
         }
       });
@@ -200,14 +200,14 @@ class WebApiClientClass implements IBeatmapFetcher {
       response.data.expires_in += Date.now() / 1000;
       return response.data;
     } catch (e: any) {
-      this.logger.error(`getGuestToken error :\n${e.message}\n${e.stack}`);
+      this.logger.error(`@WebApiClient#getGuestToken\n${e.message}\n${e.stack}`);
     }
   }
 
   async accessApi(url: string, config: any = {}, tryCount: number = 2): Promise<any> {
     while (tryCount-- > 0) {
       if (!await this.updateToken() || !this.token) {
-        throw new Error('accessApi error : couldn\'t get valid token');
+        throw new Error('@WebApiClient#accessApi: Failed getting valid token');
       }
 
       config.headers = {
@@ -219,13 +219,13 @@ class WebApiClientClass implements IBeatmapFetcher {
       try {
         const response = await axios(url, config);
         if (response.status !== 200) {
-          this.logger.error(`accessApi error: ${url}, status: ${response.status}, msg: ${response.statusText}`);
+          this.logger.error(`@WebApiClient#accessApi\nURL: ${url}\nStatus: ${response.status}\nMessage: ${response.statusText}`);
         }
         return response.data;
       } catch (e: any) {
         switch (e.response?.status) {
           case 401:
-            this.logger.info('api access failed, delete current token.');
+            this.logger.info('@WebApiClient#accessApi\nFailed to access API, deleting current token...');
             this.deleteStoredToken(this.option.asGuest);
             this.token = undefined;
             break;
@@ -234,7 +234,7 @@ class WebApiClientClass implements IBeatmapFetcher {
         }
       }
     }
-    throw new Error('couldn\'t access api');
+    throw new Error('Failed to access the API');
   }
 
   async getChatUpdates() {

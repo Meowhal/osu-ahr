@@ -89,16 +89,16 @@ export class HistoryRepository {
       while (!(await this.fetch(false)).filled && !this.lobbyClosed);
     } catch (e: any) {
       if (e instanceof Error) {
-        this.logger.error(`@updateToLatest : ${e.message}`);
+        this.logger.error(`@HistoryRepository#updateToLatest\n${e.message}\n${e.stack}`);
       } else {
-        this.logger.error(`@updateToLatest :\n${e.message}\n${e.stack}`);
+        this.logger.error(`@HistoryRepository#updateToLatest\n${e}`);
       }
 
       this.hasError = true;
       if (this.errorCount++ < HistoryRepository.ERR_COUNT_LIMIT) {
         setTimeout(() => {
           this.hasError = false;
-          this.logger.info(`restart fetching. count:${this.errorCount}`);
+          this.logger.info(`Restarted fetching. Count: ${this.errorCount}`);
         }, HistoryRepository.RETRY_TIME_MS);
       }
     }
@@ -293,7 +293,7 @@ export class HistoryRepository {
           if (r.count === 0) break; // 結果が空なら終わり
           i = r.count - 1;
         } catch (e: any) {
-          this.logger.error(`@calcCurrentOrderAsID - fetch :\n${e.message}\n${e.stack}`);
+          this.logger.error(`@HistoryRepository#calcCurrentOrderAsID\n${e.message}\n${e.stack}`);
           throw e;
         }
       }
