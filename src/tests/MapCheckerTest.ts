@@ -675,7 +675,7 @@ describe('Map Checker Tests', function () {
         allow_convert: true
       });
 
-      assert.equal(checker.getRegulationDescription(), 'Disabled (difficulty <= 7.00, length <= 10:00, mode: osu!)');
+      assert.equal(checker.getRegulationDescription(), 'Disabled (star rating <= 7.00, length <= 10:00, Mode: osu!)');
     });
 
     it('config', async () => {
@@ -688,55 +688,55 @@ describe('Map Checker Tests', function () {
         gamemode: 'osu',
         allow_convert: true
       });
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!');
 
       checker.option.gamemode = PlayMode.Taiko;
       checker.option.allow_convert = true;
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!taiko (converts allowed)');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!taiko (Converts allowed)');
       checker.option.allow_convert = false;
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!taiko (converts disallowed)');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!taiko (Converts disallowed)');
 
       checker.option.gamemode = PlayMode.CatchTheBeat;
       checker.option.allow_convert = true;
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!catch (converts allowed)');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!catch (Converts allowed)');
       checker.option.allow_convert = false;
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!catch (converts disallowed)');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!catch (Converts disallowed)');
 
       checker.option.gamemode = PlayMode.OsuMania;
       checker.option.allow_convert = true;
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!mania (converts allowed)');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!mania (Converts allowed)');
       checker.option.allow_convert = false;
-      assert.equal(checker.getRegulationDescription(), 'mode: osu!mania (converts disallowed)');
+      assert.equal(checker.getRegulationDescription(), 'Mode: osu!mania (Converts disallowed)');
 
       checker.option.gamemode = PlayMode.Osu;
       checker.option.star_max = 1;
-      assert.equal(checker.getRegulationDescription(), 'difficulty <= 1.00, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), 'star rating <= 1.00, Mode: osu!');
       checker.option.star_max = 0;
       checker.option.star_min = 1;
-      assert.equal(checker.getRegulationDescription(), '1.00 <= difficulty, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1.00 <= star rating, Mode: osu!');
       checker.option.star_max = 2;
       checker.option.star_min = 1;
-      assert.equal(checker.getRegulationDescription(), '1.00 <= difficulty <= 2.00, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1.00 <= star rating <= 2.00, Mode: osu!');
 
       checker.option.star_max = 0;
       checker.option.star_min = 0;
       checker.option.length_max = 60;
-      assert.equal(checker.getRegulationDescription(), 'length <= 1:00, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), 'length <= 1:00, Mode: osu!');
       checker.option.length_max = 0;
       checker.option.length_min = 90;
-      assert.equal(checker.getRegulationDescription(), '1:30 <= length, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1:30 <= length, Mode: osu!');
       checker.option.length_max = 120;
       checker.option.length_min = 30;
-      assert.equal(checker.getRegulationDescription(), '0:30 <= length <= 2:00, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '0:30 <= length <= 2:00, Mode: osu!');
 
       checker.option.star_max = 2;
       checker.option.star_min = 1;
       checker.option.length_max = 120;
       checker.option.length_min = 30;
-      assert.equal(checker.getRegulationDescription(), '1.00 <= difficulty <= 2.00, 0:30 <= length <= 2:00, mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1.00 <= star rating <= 2.00, 0:30 <= length <= 2:00, Mode: osu!');
 
       checker.option.enabled = false;
-      assert.equal(checker.getRegulationDescription(), 'Disabled (1.00 <= difficulty <= 2.00, 0:30 <= length <= 2:00, mode: osu!)');
+      assert.equal(checker.getRegulationDescription(), 'Disabled (1.00 <= star rating <= 2.00, 0:30 <= length <= 2:00, Mode: osu!)');
     });
   });
 
