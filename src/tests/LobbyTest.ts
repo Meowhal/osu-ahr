@@ -62,7 +62,7 @@ describe('LobbyTest', function () {
         await lobby.MakeLobbyAsync(name);
         assert.fail();
       } catch (e: any) {
-        assert.equal(e.message, 'title is empty');
+        assert.equal(e.message, 'The lobby title is empty');
       }
     });
 
@@ -75,7 +75,7 @@ describe('LobbyTest', function () {
         lobby.MakeLobbyAsync('2');
         assert.fail();
       } catch (e: any) {
-        assert.equal(e.message, 'A lobby has already been made.');
+        assert.equal(e.message, 'A lobby has already been made');
       }
     });
 
@@ -87,7 +87,7 @@ describe('LobbyTest', function () {
         await lobby.CloseLobbyAsync();
         assert.fail();
       } catch (e: any) {
-        assert.equal(e.message, 'No lobby to close.');
+        assert.equal(e.message, 'No lobby to close');
       }
     });
   });
