@@ -1,6 +1,6 @@
 {
   "name": "osu-ahr",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "irc bot for osu! multi lobby auto host rotation.",
   "main": "dist/cli/index.js",
   "homepage": "https://github.com/Meowhal/osu-ahr",
@@ -26,7 +26,7 @@
     "dev:web": "ts-node src/web/index.ts",
     "dev:log": "ts-node src/cli/LogServer.ts"
   },
-  "author": "gnsksz",
+  "author": "meowhal",
   "license": "MIT",
   "dependencies": {
     "@discordjs/builders": "^0.12.0",

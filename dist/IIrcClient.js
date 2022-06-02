@@ -1,47 +1,44 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logPrivateMessage = exports.logIrcEvent = void 0;
 const StatParser_1 = require("./parsers/StatParser");
-const log4js_1 = __importDefault(require("log4js"));
-const ircLogger = log4js_1.default.getLogger('irc');
-const pmLogger = log4js_1.default.getLogger('PMLogger');
+const Loggers_1 = require("./Loggers");
+const ircLogger = (0, Loggers_1.getLogger)('irc');
+const pmLogger = (0, Loggers_1.getLogger)('pm');
 function logIrcEvent(client) {
     client.on('error', function (message) {
-        ircLogger.error(`ERROR:\n${JSON.stringify(message)}\n${JSON.stringify(message.stack)}\n${message}\n${message.stack}`);
+        ircLogger.error(`@NodeIRC#error\n${message instanceof Error ? `${message.message}\n${message.stack}\n` : ''}${message instanceof Object && JSON.stringify(message) !== '{}' ? `${JSON.stringify(message, null, 2)}\n` : ''}message =`, message);
     });
     client.on('registered', function (message) {
         const args = message.args;
-        ircLogger.debug(`@reg ${args?.join(', ')}`);
+        ircLogger.debug(`@NodeIRC#registered ${args?.join(', ')}`);
     });
     client.on('message', function (from, to, message) {
-        ircLogger.debug(`@msg  ${from} => ${to}: ${message}`);
+        ircLogger.debug(`@NodeIRC#message ${from} => ${to}: ${message}`);
     });
     client.on('pm', function (nick, message) {
-        ircLogger.debug(`@pm   ${nick}: ${message}`);
+        ircLogger.debug(`@NodeIRC#pm ${nick}: ${message}`);
     });
     client.on('join', function (channel, who) {
-        ircLogger.debug(`@join ${who} has joined ${channel}`);
+        ircLogger.debug(`@NodeIRC#join ${who} has joined ${channel}`);
     });
     client.on('part', function (channel, who, reason) {
-        ircLogger.debug(`@part ${who} has left ${channel}: ${reason}`);
+        ircLogger.debug(`@NodeIRC#part ${who} has left ${channel}: ${reason}`);
     });
     client.on('kick', function (channel, who, by, reason) {
-        ircLogger.debug(`@kick ${who} was kicked from ${channel} by ${by}: ${reason}`);
+        ircLogger.debug(`@NodeIRC#kick ${who} was kicked from ${channel} by ${by}: ${reason}`);
     });
     client.on('invite', (channel, from) => {
-        ircLogger.debug(`@invt ${from} invite you to ${channel}`);
+        ircLogger.debug(`@NodeIRC#invite ${from} invited you to ${channel}`);
     });
     client.on('notice', function (from, to, message) {
-        ircLogger.debug(`@notice  ${from} => ${to}: ${message}`);
+        ircLogger.debug(`@NodeIRC#notice ${from} => ${to}: ${message}`);
     });
     client.on('action', function (from, to, text, message) {
-        ircLogger.debug(`@action  ${from} => ${to}: ${text}`);
+        ircLogger.debug(`@NodeIRC#action ${from} => ${to}: ${text}`);
     });
     client.on('selfMessage', (target, toSend) => {
-        ircLogger.debug(`@sent bot => ${target}: ${toSend}`);
+        ircLogger.debug(`@NodeIRC#selfMessage Bot => ${target}: ${toSend}`);
     });
 }
 exports.logIrcEvent = logIrcEvent;
@@ -49,10 +46,10 @@ function logPrivateMessage(client) {
     client.on('message', (from, to, message) => {
         if (to === client.nick) {
             if ((0, StatParser_1.IsStatResponse)(message)) {
-                pmLogger.trace(`pm ${from} -> ${message}`);
+                pmLogger.trace(`@NodeIRC#message PM: ${from} -> ${message}`);
             }
             else {
-                pmLogger.info(`pm ${from} -> ${message}`);
+                pmLogger.info(`@NodeIRC#message PM: ${from} -> ${message}`);
             }
         }
     });

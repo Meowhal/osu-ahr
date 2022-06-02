@@ -80,14 +80,14 @@ export class MiscLoader extends LobbyPlugin {
       if (e instanceof FetchProfileError) {
         switch (e.reason) {
           case FetchProfileErrorReason.FormatError:
-            this.logger.error(`Couldn't parse the webpage. checked:${player.id}`);
+            this.logger.error(`Failed to parse the webpage. Checked player:${player.id}`);
             break;
           case FetchProfileErrorReason.NotFound:
-            this.logger.info(`Profile not found. checked:${player.id}`);
+            this.logger.info(`Profile cannot be found. Checked player:${player.id}`);
             break;
         }
       } else {
-        this.logger.error(`unexpected error. checking:${player.id}, err:\n${e.message}\n${e.stack}`);
+        this.logger.error(`@MiscLoader#getProfile: There was an error while checking player ${player.id}\n${e.message}\n${e.stack}`);
       }
     }
   }
@@ -97,7 +97,7 @@ export class MiscLoader extends LobbyPlugin {
       const map = await BeatmapRepository.getBeatmap(mapId, this.lobby.gameMode);
       this.canResend = false;
       if (!map) {
-        this.lobby.SendMessage('Current beatmap doesn\'t have mirror...');
+        this.lobby.SendMessage('The current beatmap doesn\'t have a mirror.');
         this.canResend = false;
         return;
       }
@@ -105,26 +105,26 @@ export class MiscLoader extends LobbyPlugin {
       const beatconnectLink = this.beatconnectURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
       const kitsuLink = this.kitsuURL.replace(/\$\{beatmapset_id\}/g, map.beatmapset_id.toString());
       const beatmapView = map.beatmapset?.title.toString();
-      this.lobby.SendMessageWithCoolTime(`Alternative download link for ${beatmapView} : [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, '!mirror', 5000);
+      this.lobby.SendMessageWithCoolTime(`Alternative download link for beatmap ${beatmapView}: [${beatconnectLink} BeatConnect.io] | [${kitsuLink} Kitsu.moe]`, '!mirror', 5000);
     } catch (e: any) {
       this.canResend = false;
       if (e instanceof FetchBeatmapError) {
         switch (e.reason) {
           case FetchBeatmapErrorReason.FormatError:
-            this.logger.error(`Couldn't parse the webpage. checked:${mapId}`);
+            this.logger.error(`Failed to parse the webpage. Checked beatmap: ${mapId}`);
             break;
           case FetchBeatmapErrorReason.NotFound:
-            this.logger.info(`Map can not be found. checked:${mapId}`);
+            this.logger.info(`Beatmap cannot be found. Checked beatmap: ${mapId}`);
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
-            this.logger.info(`Gamemode Mismatched. checked:${mapId}`);
+            this.logger.info(`Gamemode mismatched. Checked beatmap: ${mapId}`);
             break;
           case FetchBeatmapErrorReason.NotAvailable:
-            this.logger.info(`Map is not available. checked:${mapId}`);
+            this.logger.info(`Beatmap is not available. Checked beatmap: ${mapId}`);
             break;
         }
       } else {
-        this.logger.error(`unexpected error. checking:${mapId}, err:\n${e.message}\n${e.stack}`);
+        this.logger.error(`@MiscLoader#checkMirror: There was an error while checking beatmap ${mapId}\n${e.message}\n${e.stack}`);
       }
     }
   }

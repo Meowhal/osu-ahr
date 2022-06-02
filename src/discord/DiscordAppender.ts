@@ -1,10 +1,10 @@
 import { Client, ColorResolvable, MessageEmbed, MessageOptions, TextBasedChannel } from 'discord.js';
 import log4js from 'log4js';
+import { getLogger } from '../Loggers';
 import { OahrDiscord } from './OahrDiscord';
 
 let discordClient: Client | undefined;
 let ahrs: { [index: string]: OahrDiscord };
-const logger = log4js.getLogger('discord');
 
 export function setContext(client: Client, ahrs_: { [index: string]: OahrDiscord }) {
   discordClient = client;
@@ -41,6 +41,7 @@ export function configure(config: any, layouts: any) {
           await ch.send(content);
         }
       } catch (e: any) {
+        const logger = getLogger('discord_apd');
         logger.error(`@DiscordAppender#configure\n${e.message}\n${e.stack}`);
         const ahr = ahrs[loggingEvent.context.channelId];
         if (ahr) {

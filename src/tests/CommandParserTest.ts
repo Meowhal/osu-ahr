@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import { Teams } from '../Player';
 import { parser, BanchoResponseType } from '../parsers/CommandParser';
-import log4js from 'log4js';
+import tu from './TestUtils';
 
 describe('CommandParserTest', function () {
   before(function () {
-    log4js.configure('config/log_mocha_silent.json');
+    tu.configMochaAsSilent();
   });
   it('make lobby message parse test', () => {
     let message = 'Created the tournament match https://osu.ppy.sh/mp/52612489 irctestroom';

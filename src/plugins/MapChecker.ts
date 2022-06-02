@@ -1,4 +1,3 @@
-import log4js from 'log4js';
 import { LobbyPlugin } from './LobbyPlugin';
 import { Lobby } from '../Lobby';
 import { Player } from '../Player';
@@ -8,6 +7,7 @@ import { BanchoResponseType } from '../parsers/CommandParser';
 import { BeatmapRepository, FetchBeatmapError, FetchBeatmapErrorReason, BeatmapCache } from '../webapi/BeatmapRepository';
 import { Beatmap, Beatmapset } from '../webapi/Beatmapsets';
 import { getConfig } from '../TypedConfig';
+import { Logger } from '../Loggers';
 
 export type MapCheckerOption = {
   enabled: boolean;
@@ -106,7 +106,7 @@ export class MapChecker extends LobbyPlugin {
       }
       if (p.num_violations_allowed !== undefined) {
         this.option.num_violations_allowed = p.num_violations_allowed;
-        this.logger.info(`num_violations_allowed was set to ${p.num_violations_allowed}`);
+        this.logger.info(`Number of allowed violations set to ${p.num_violations_allowed}`);
       }
       let changed = false;
       if (p.star_min !== undefined) {
@@ -153,7 +153,7 @@ export class MapChecker extends LobbyPlugin {
         this.logger.info(m);
       }
     } catch (e: any) {
-      this.logger.warn(`\n${e.message}\n${e.stack}`);
+      this.logger.warn(`@MapChecker#processOwnerCommand\n${e.message}\n${e.stack}`);
     }
   }
 
@@ -170,12 +170,12 @@ export class MapChecker extends LobbyPlugin {
 
     if (v) {
       this.SendPluginMessage('enabledMapChecker');
-      this.lobby.SendMessage('mapChecker Enabled');
-      this.logger.info('mapChecker Enabled');
+      this.lobby.SendMessage('Map Checker plugin enabled.');
+      this.logger.info('Map Checker plugin enabled.');
     } else {
       this.SendPluginMessage('disabledMapChecker');
-      this.lobby.SendMessage('mapChecker Disabled');
-      this.logger.info('mapChecker Disabled');
+      this.lobby.SendMessage('Map Checker plugin disabled.');
+      this.logger.info('Map Checker plugin disabled.');
     }
     this.option.enabled = v;
   }
@@ -191,7 +191,7 @@ export class MapChecker extends LobbyPlugin {
       const map = await BeatmapRepository.getBeatmap(mapId, this.option.gamemode, this.option.allow_convert);
 
       if (mapId !== this.checkingMapId) {
-        this.logger.info(`target map is already changed. checked:${mapId}, current:${this.checkingMapId}`);
+        this.logger.info(`The target beatmap has already been changed. Checked beatmap: ${mapId}, Current: ${this.checkingMapId}`);
         return;
       }
 
@@ -205,29 +205,29 @@ export class MapChecker extends LobbyPlugin {
       if (e instanceof FetchBeatmapError) {
         switch (e.reason) {
           case FetchBeatmapErrorReason.FormatError:
-            this.logger.error(`Couldn't parse the webpage. checked:${mapId}`);
+            this.logger.error(`Failed to parse the webpage. Checked beatmap: ${mapId}`);
             break;
           case FetchBeatmapErrorReason.NotFound:
-            this.logger.info(`Map can not be found. checked:${mapId}`);
+            this.logger.info(`Beatmap cannot be found. Checked beatmap: ${mapId}`);
             this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] had already been removed from the website.`, false);
             break;
           case FetchBeatmapErrorReason.PlayModeMismatched:
-            this.logger.info(`Gamemode mismatched. checked:${mapId}`);
-            this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not ${this.option.gamemode.officialName} map. Pick ${this.option.gamemode.officialName} map.`, false);
+            this.logger.info(`Gamemode mismatched. Checked beatmap: ${mapId}`);
+            this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not ${this.option.gamemode.officialName} beatmap. Pick ${this.option.gamemode.officialName} beatmap.`, false);
             break;
           case FetchBeatmapErrorReason.NotAvailable:
-            this.logger.info(`Map is not available. checked:${mapId}`);
+            this.logger.info(`Beatmap is not available. Checked beatmap: ${mapId}`);
             this.rejectMap(`[https://osu.ppy.sh/b/${mapId} ${mapTitle}] is not available for download.`, false);
             break;
         }
       } else {
-        this.logger.error(`unexpected error. checking:${mapId}, err:\n${e.message}\n${e.stack}`);
+        this.logger.error(`@MapChecker#check\nThere was an error while checking beatmap ${mapId}\n${e.message}\n${e.stack}`);
       }
     }
   }
 
   private skipHost(): void {
-    const msg = `The number of violations has reached ${this.option.num_violations_allowed}. Skipped ${this.lobby.host?.escaped_name}`;
+    const msg = `The number of violations has reached ${this.option.num_violations_allowed}. Skipped player ${this.lobby.host?.escaped_name}`;
     this.logger.info(msg);
     this.lobby.SendMessage(msg);
     this.SendPluginMessage('skip');
@@ -235,12 +235,12 @@ export class MapChecker extends LobbyPlugin {
 
   private rejectMap(reason: string, showRegulation: boolean): void {
     this.numViolations += 1;
-    this.logger.info(`Rejected the map selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
+    this.logger.info(`Rejected the beatmap selected by ${this.lobby.host?.escaped_name} (${this.numViolations} / ${this.option.num_violations_allowed})`);
 
     if (showRegulation) {
-      this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current Regulation: ${this.validator.GetDescription()}`);
+      this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | Current regulation: ${this.validator.GetDescription()}`);
       this.lobby.SendMessage(reason);
-      this.lobby.SendMessage('*Attention! Difficulty will not be calculated correctly if a global mod is applied.');
+      this.lobby.SendMessage('Attention! Star rating will not be calculated correctly if a global mod is applied.');
     } else {
       this.lobby.SendMessage(`!mp map ${this.lastMapId} ${this.option.gamemode.value} | ${reason}`);
     }
@@ -274,7 +274,8 @@ export class MapChecker extends LobbyPlugin {
   }
 
   GetPluginStatus(): string {
-    return `-- Mapchecker -- regulation : ${this.getRegulationDescription()}`;
+    return `-- Map Checker --
+  Regulation: ${this.getRegulationDescription()}`;
   }
 }
 
@@ -285,10 +286,10 @@ export function secToTimeNotation(sec: number): string {
 }
 
 export class MapValidator {
-  logger: log4js.Logger;
+  logger: Logger;
   option: MapCheckerOption;
 
-  constructor(option: MapCheckerOption, logger: log4js.Logger) {
+  constructor(option: MapCheckerOption, logger: Logger) {
     this.option = option;
 
     this.logger = logger;
@@ -300,33 +301,33 @@ export class MapValidator {
 
     const mapmode = PlayMode.from(map.mode);
     if (mapmode !== this.option.gamemode && this.option.gamemode !== null) {
-      violationMsgs.push(`gamemode is not ${this.option.gamemode.officialName}.`);
+      violationMsgs.push(`the gamemode is not ${this.option.gamemode.officialName}.`);
       rate += 1;
     }
 
     if (this.option.star_min > 0 && map.difficulty_rating < this.option.star_min) {
       rate += parseFloat((this.option.star_min - map.difficulty_rating).toFixed(2));
-      violationMsgs.push('map star rating is lower than allowed star rating.');
+      violationMsgs.push('the beatmap star rating is lower than the allowed star rating.');
     }
 
     if (this.option.star_max > 0 && this.option.star_max < map.difficulty_rating) {
       rate += parseFloat((map.difficulty_rating - this.option.star_max).toFixed(2));
-      violationMsgs.push('map star rating is higher than allowed star rating.');
+      violationMsgs.push('the beatmap star rating is higher than the allowed star rating.');
     }
 
     if (this.option.length_min > 0 && map.total_length < this.option.length_min) {
       rate += (this.option.length_min - map.total_length) / 60.0;
-      violationMsgs.push('map duration is shorter than allowed duration.');
+      violationMsgs.push('the beatmap length is shorter than the allowed length.');
     }
 
     if (this.option.length_max > 0 && this.option.length_max < map.total_length) {
       rate += (map.total_length - this.option.length_max) / 60.0;
-      violationMsgs.push('map duration is longer than allowed duration.');
+      violationMsgs.push('the beatmap length is longer than the allowed length.');
     }
 
     if (rate > 0) {
       let message;
-      const mapDesc = `[${map.url} ${map.beatmapset?.title}] (Star Rating: ${map.difficulty_rating} Duration: ${secToTimeNotation(map.total_length)})`;
+      const mapDesc = `[${map.url} ${map.beatmapset?.title}] (Star rating: ${map.difficulty_rating}, Length: ${secToTimeNotation(map.total_length)})`;
       if (violationMsgs.length === 1) {
         message = `${mapDesc} was rejected because ${violationMsgs[0]}`;
       } else {
@@ -341,22 +342,22 @@ export class MapValidator {
   GetDescription(): string {
     let d_star = '';
     let d_length = '';
-    let d_gamemode = `mode: ${this.option.gamemode.officialName}`;
+    let d_gamemode = `Mode: ${this.option.gamemode.officialName}`;
     if (this.option.gamemode !== PlayMode.Osu) {
       if (this.option.allow_convert) {
-        d_gamemode += ' (converts allowed)';
+        d_gamemode += ' (Converts allowed)';
       }
       else {
-        d_gamemode += ' (converts disallowed)';
+        d_gamemode += ' (Converts disallowed)';
       }
     }
 
     if (this.option.star_min > 0 && this.option.star_max > 0) {
-      d_star = `${this.option.star_min.toFixed(2)} <= difficulty <= ${this.option.star_max.toFixed(2)}`;
+      d_star = `${this.option.star_min.toFixed(2)} <= star rating <= ${this.option.star_max.toFixed(2)}`;
     } else if (this.option.star_min > 0) {
-      d_star = `${this.option.star_min.toFixed(2)} <= difficulty`;
+      d_star = `${this.option.star_min.toFixed(2)} <= star rating`;
     } else if (this.option.star_max > 0) {
-      d_star = `difficulty <= ${this.option.star_max.toFixed(2)}`;
+      d_star = `star rating <= ${this.option.star_max.toFixed(2)}`;
     }
 
     if (this.option.length_min > 0 && this.option.length_max > 0) {
@@ -406,12 +407,12 @@ function validateMapCheckerOption(option: MapCheckerUncheckedOption): option is 
         option.gamemode = PlayMode.from(option.gamemode, true);
 
       } catch {
-        throw new Error('option MapChecker#gamemode must be [osu | fruits | taiko | mania].');
+        throw new Error('MapChecker#validateMapCheckerOption: Option must be [osu | fruits | taiko | mania]');
       }
     }
 
     if (!(option.gamemode instanceof PlayMode)) {
-      throw new Error('option MapChecker#gamemode must be [osu | fruits | taiko | mania].');
+      throw new Error('MapChecker#validateMapCheckerOption: Option must be [osu | fruits | taiko | mania]');
     }
   }
 
@@ -475,22 +476,22 @@ function parseRegulationCommand(params: string[]): MapCheckerUncheckedOption {
     case 'disabled':
       return { enabled: false };
     case 'num_violations_allowed':
-      if (params.length < 2) throw new Error('missing parameter. *regulation num_violations_allowed [number]');
+      if (params.length < 2) throw new Error('Missing parameter. *regulation num_violations_allowed [number]');
       return { num_violations_allowed: params[1] };
     case 'star_min':
-      if (params.length < 2) throw new Error('missing parameter. *regulation star_min [number]');
+      if (params.length < 2) throw new Error('Missing parameter. *regulation star_min [number]');
       return { star_min: params[1] };
     case 'star_max':
-      if (params.length < 2) throw new Error('missing parameter. *regulation star_max [number]');
+      if (params.length < 2) throw new Error('Missing parameter. *regulation star_max [number]');
       return { star_max: params[1] };
     case 'length_min':
-      if (params.length < 2) throw new Error('missing parameter. *regulation length_min [number]');
+      if (params.length < 2) throw new Error('Missing parameter. *regulation length_min [number]');
       return { length_min: params[1] };
     case 'length_max':
-      if (params.length < 2) throw new Error('missing parameter. *regulation length_max [number]');
+      if (params.length < 2) throw new Error('Missing parameter. *regulation length_max [number]');
       return { length_max: params[1] };
     case 'gamemode':
-      if (params.length < 2) throw new Error('missing parameter. *regulation gamemode [osu | fruits | taiko | mania]');
+      if (params.length < 2) throw new Error('Missing parameter. *regulation gamemode [osu | fruits | taiko | mania]');
       return { gamemode: params[1] };
     case 'allow_convert':
       if (params.length < 2) {
@@ -501,7 +502,7 @@ function parseRegulationCommand(params: string[]): MapCheckerUncheckedOption {
     case 'disallow_convert':
       return { allow_convert: false };
   }
-  throw new Error('missing parameter.  *regulation [enable | disable | star_min | star_max | length_min | length_max | gamemode | num_violations_allowed] <...params>');
+  throw new Error('Missing parameter. *regulation [enable | disable | star_min | star_max | length_min | length_max | gamemode | num_violations_allowed] <...params>');
 }
 
 function parseNoRegulationCommand(param: string): MapCheckerUncheckedOption | undefined {

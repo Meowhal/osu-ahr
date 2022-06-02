@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebApiClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 const config_1 = __importDefault(require("config"));
-const log4js_1 = __importDefault(require("log4js"));
 const http_1 = __importDefault(require("http"));
 const open_1 = __importDefault(require("open"));
 const path_1 = __importDefault(require("path"));
@@ -15,6 +14,7 @@ const fs_1 = require("fs");
 const UserProfile_1 = require("./UserProfile");
 const BeatmapRepository_1 = require("./BeatmapRepository");
 const ProfileRepository_1 = require("./ProfileRepository");
+const Loggers_1 = require("../Loggers");
 function isExpired(token) {
     if (token === undefined)
         return true;
@@ -24,7 +24,7 @@ class WebApiClientClass {
     constructor(option = {}) {
         const WebApiDefaultOption = config_1.default.get('WebApi');
         this.option = { ...WebApiDefaultOption, ...option };
-        this.logger = log4js_1.default.getLogger('webapi');
+        this.logger = (0, Loggers_1.getLogger)('webapi');
         this.available = this.option.client_id !== 0 && this.option.client_secret !== '***';
     }
     async updateToken() {
@@ -57,11 +57,11 @@ class WebApiClientClass {
             const p = this.getTokenPath(token.isGuest);
             await fs_1.promises.mkdir(path_1.default.dirname(p), { recursive: true });
             await fs_1.promises.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
-            this.logger.info(`stored token to : ${p}`);
+            this.logger.info(`Stored token to: ${p}`);
             return true;
         }
         catch (e) {
-            this.logger.error(`storeToken error :\n${e.message}\n${e.stack}`);
+            this.logger.error(`@WebApiClient#storeToken\n${e.message}\n${e.stack}`);
             return false;
         }
     }
@@ -79,14 +79,14 @@ class WebApiClientClass {
             const j = await fs_1.promises.readFile(p, 'utf8');
             const token = JSON.parse(j);
             if (!isExpired(token)) {
-                this.logger.info(`loaded stored token from : ${p}`);
+                this.logger.info(`Loaded stored token from: ${p}`);
                 return token;
             }
             this.deleteStoredToken(asGuest);
-            this.logger.info('deleted expired stored token');
+            this.logger.info('Deleted expired stored token.');
         }
         catch (e) {
-            this.logger.error(`loadStoredToken error :\n${e.message}\n${e.stack}`);
+            this.logger.error(`@WebApiClient#loadStoredToken\n${e.message}\n${e.stack}`);
         }
     }
     async deleteStoredToken(asGuest) {
@@ -101,7 +101,7 @@ class WebApiClientClass {
             fs_1.promises.unlink(p);
         }
         catch (e) {
-            this.logger.error(`load token error :\n${e.message}\n${e.stack}`);
+            this.logger.error(`@WebApiClient#deleteStoredToken\n${e.message}\n${e.stack}`);
         }
     }
     async getAuthorizedToken() {
@@ -116,11 +116,11 @@ class WebApiClientClass {
             });
             response.data.isGuest = false;
             response.data.expires_in += Date.now() / 1000;
-            this.logger.info('get Authorized token');
+            this.logger.info('Got authorized token.');
             return response.data;
         }
         catch (e) {
-            this.logger.error(`getAuthorizedToken error :\n${e.message}\n${e.stack}`);
+            this.logger.error(`@WebApiClient#getAuthorizedToken\n${e.message}\n${e.stack}`);
         }
     }
     getAuthorizeCode() {
@@ -131,35 +131,35 @@ class WebApiClientClass {
                 res.setHeader('Content-Type', 'text/html');
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 if (!req.url) {
-                    res.end('missing req.url');
+                    res.end('Missing request URL.');
                     return;
                 }
                 const url = new url_1.URL(req.url, `http://${req.headers.host}`);
                 code = url.searchParams.get('code');
                 if (code === null) {
-                    res.end('missing code');
+                    res.end('Missing code.');
                     return;
                 }
-                res.end(`ok : ${code}`);
-                this.logger.trace(`got code! ${code}`);
+                res.end(`Ok: ${code}`);
+                this.logger.trace(`Got code! ${code}`);
                 server.close(() => {
-                    this.logger.trace('closed callback');
+                    this.logger.trace('Closed callback.');
                 });
                 if (res.connection) {
                     res.connection.end();
                     res.connection.destroy();
                 }
                 else {
-                    reject('no connection');
+                    reject('No connection');
                 }
             });
             server.once('close', () => {
-                this.logger.trace('closed event');
+                this.logger.trace('Detected close event.');
                 if (code === null) {
-                    reject('no code');
+                    reject('No code');
                 }
                 else {
-                    this.logger.info('get Authorized code');
+                    this.logger.info('Got authorized code.');
                     resoleve(code);
                 }
             });
@@ -185,13 +185,13 @@ class WebApiClientClass {
             return response.data;
         }
         catch (e) {
-            this.logger.error(`getGuestToken error :\n${e.message}\n${e.stack}`);
+            this.logger.error(`@WebApiClient#getGuestToken\n${e.message}\n${e.stack}`);
         }
     }
     async accessApi(url, config = {}, tryCount = 2) {
         while (tryCount-- > 0) {
             if (!await this.updateToken() || !this.token) {
-                throw new Error('accessApi error : couldn\'t get valid token');
+                throw new Error('@WebApiClient#accessApi: Failed getting valid token');
             }
             config.headers = {
                 'Authorization': `Bearer ${this.token.access_token}`,
@@ -201,14 +201,14 @@ class WebApiClientClass {
             try {
                 const response = await (0, axios_1.default)(url, config);
                 if (response.status !== 200) {
-                    this.logger.error(`accessApi error: ${url}, status: ${response.status}, msg: ${response.statusText}`);
+                    this.logger.error(`@WebApiClient#accessApi\nURL: ${url}\nStatus: ${response.status}\nMessage: ${response.statusText}`);
                 }
                 return response.data;
             }
             catch (e) {
                 switch (e.response?.status) {
                     case 401:
-                        this.logger.info('api access failed, delete current token.');
+                        this.logger.info('@WebApiClient#accessApi\nFailed to access API, deleting current token...');
                         this.deleteStoredToken(this.option.asGuest);
                         this.token = undefined;
                         break;
@@ -217,7 +217,7 @@ class WebApiClientClass {
                 }
             }
         }
-        throw new Error('couldn\'t access api');
+        throw new Error('Failed to access the API');
     }
     async getChatUpdates() {
         const data = await this.accessApi('https://osu.ppy.sh/api/v2/chat/updates', {

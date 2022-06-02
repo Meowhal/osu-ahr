@@ -74,6 +74,14 @@ Discord
 
 # Recent Changes
 
+## 1.6.1
+
++ Improve texts and error messages
+  + Fixed grammatical errors and inconsistencies in displayed text
+  + This work was led by [Xayanide](https://github.com/Xayanide). Thanks!
++ Fixed problem with cli waiting for input when lobby is closed
++ Log files are now stored separately for chat-related and system-related files.
+
 ## 1.6.0
 
 + Enviroment Variable Supports
@@ -81,18 +89,6 @@ Discord
   + The environment variable name should be in the form `ahr_[category]_[config_name]`.
   + Improve texts & grammaticalization
 + Fixed discord Permission Issue.
-
-e.g. bash
-
-```bash
-> ahr_irc_nick=meowhal
-> ahr_irc_password=1234abcd
-> npm run start
-
-starting up...
-[INFO] config - loaded env:ahr_irc_nick : meowhal
-[INFO] config - loaded env:ahr_irc_password : 1234abcd
-```
 
 # Setup
 

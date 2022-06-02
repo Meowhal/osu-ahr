@@ -48,11 +48,11 @@ export class CacheCleaner extends LobbyPlugin {
     switch (command.toLocaleLowerCase()) {
       case '*clearcache_enable':
         this.option.enabled = true;
-        this.logger.info('CacheCleaner enabled');
+        this.logger.info('CacheCleaner plugin enabled.');
         break;
       case '*clearcache_disable':
         this.option.enabled = false;
-        this.logger.info('CacheCleaner disabled');
+        this.logger.info('CacheCleaner plugin disabled.');
         break;
       case '*clearcache':
       case '*clear':
@@ -70,11 +70,11 @@ export class CacheCleaner extends LobbyPlugin {
         global.gc();
       }
       const currentMem = process.memoryUsage().heapUsed;
-      this.logger.info(`heap size: ${this.formatByte(this.lastHeapSize)} -> ${this.formatByte(currentMem)}`);
+      this.logger.info(`Heap size: ${this.formatByte(this.lastHeapSize)} -> ${this.formatByte(currentMem)}`);
       this.lastHeapSize = currentMem;
       this.cleanedAt = Date.now();
     } catch (e: any) {
-      this.logger.error(`\n${e.message}\n${e.stack}`);
+      this.logger.error(`@CacheCleaner#clearCache\n${e.message}\n${e.stack}`);
     }
   }
 

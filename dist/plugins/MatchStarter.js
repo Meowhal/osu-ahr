@@ -73,7 +73,7 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
             case '!abort':
                 if (player.isHost || player.isAuthorized) {
                     if (this.IsSelfStartTimerActive) {
-                        this.lobby.SendMessage('Aborted the match start timer');
+                        this.lobby.SendMessage('Aborted the match start timer.');
                         this.stopTimer();
                     }
                 }
@@ -103,20 +103,20 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         if (this.voting.passed)
             return;
         if (this.voting.Vote(player)) {
-            this.logger.trace(`accepted start request from ${player.name}`);
+            this.logger.trace(`Accepted a match start request from player ${player.name}`);
             this.checkVoteCount(true);
         }
         else {
-            this.logger.trace('vote was ignored');
+            this.logger.trace('A match start vote was ignored.');
         }
     }
     // 投票状況を確認して、必要数に達している場合は試合を開始する
     checkVoteCount(showMessage = false) {
         if (this.voting.count !== 0 && showMessage) {
-            this.lobby.DeferMessage(`bot : Match start progress: ${this.voting.toString()}`, 'match start vote', this.option.vote_msg_defer_ms, false);
+            this.lobby.DeferMessage(`Bot: Match start progress: ${this.voting.toString()}`, 'match start vote', this.option.vote_msg_defer_ms, false);
         }
         if (this.voting.passed) {
-            this.lobby.DeferMessage(`bot : passed start vote: ${this.voting.toString()}`, 'match start vote', 100, true);
+            this.lobby.DeferMessage(`Bot: Passed a match start vote: ${this.voting.toString()}`, 'match start vote', 100, true);
             this.start();
         }
     }
@@ -175,7 +175,8 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
         return false;
     }
     GetPluginStatus() {
-        return `-- MatchStarter -- vote : ${this.voting.toString()}`;
+        return `-- Match Starter --
+  Vote: ${this.voting.toString()}`;
     }
 }
 exports.MatchStarter = MatchStarter;

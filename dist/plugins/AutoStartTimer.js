@@ -33,7 +33,7 @@ class AutoStartTimer extends LobbyPlugin_1.LobbyPlugin {
             case '*autostart_time':
                 let ct = parseInt(param);
                 if (Number.isNaN(ct)) {
-                    this.logger.warn(`invalid *autostart_time param : ${param}`);
+                    this.logger.warn(`Invalid Auto Start Timer time parameter: ${param}`);
                     return;
                 }
                 if (ct < WAITINGTIME_MIN) {

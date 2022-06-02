@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OahrBase = void 0;
-const Lobby_1 = require("../Lobby");
 const config_1 = __importDefault(require("config"));
-const log4js_1 = __importDefault(require("log4js"));
+const Lobby_1 = require("../Lobby");
+const Loggers_1 = require("../Loggers");
 const AutoHostSelector_1 = require("../plugins/AutoHostSelector");
 const MatchStarter_1 = require("../plugins/MatchStarter");
 const HostSkipper_1 = require("../plugins/HostSkipper");
@@ -23,7 +23,7 @@ const AfkKicker_1 = require("../plugins/AfkKicker");
 const MiscLoader_1 = require("../plugins/MiscLoader");
 const CommandParser_1 = require("../parsers/CommandParser");
 const CacheCleaner_1 = require("../plugins/CacheCleaner");
-const logger = log4js_1.default.getLogger('cli');
+const logger = (0, Loggers_1.getLogger)('ahr');
 const OahrCliDefaultOption = config_1.default.get('OahrCli');
 class OahrBase {
     constructor(client) {
@@ -72,22 +72,22 @@ class OahrBase {
         name = name.replace(/[^ -~]/g, '');
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
-        logger.info(`Making a lobby... Name : ${name}`);
+        logger.info(`Making a lobby... Name: ${name}`);
         await this.lobby.MakeLobbyAsync(name);
         this.lobby.SendMessage(`!mp password ${this.option.password}`);
         for (const p of this.option.invite_users) {
             this.lobby.SendMessage(`!mp invite ${p}`);
         }
-        logger.info(`Successfully made the lobby. Name : ${this.lobby.channel}`);
+        logger.info(`Successfully made the lobby. Channel: ${this.lobby.channel}`);
     }
     async enterLobbyAsync(id) {
         if (!this.isRegistered)
             await this.ensureRegisteredAsync();
         const channel = CommandParser_1.parser.EnsureMpChannelId(id);
-        logger.info(`Entering a lobby... Channel : ${channel}`);
+        logger.info(`Entering a lobby... Channel: ${channel}`);
         await this.lobby.EnterLobbyAsync(channel);
         await this.lobby.LoadMpSettingsAsync();
-        logger.info(`Successfully entered the lobby. Channel : ${this.lobby.channel}`);
+        logger.info(`Successfully entered the lobby. Channel: ${this.lobby.channel}`);
     }
 }
 exports.OahrBase = OahrBase;
