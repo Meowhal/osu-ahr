@@ -22,7 +22,7 @@ export enum LobbyStatus {
 }
 
 export interface LobbyOption {
-  authorized_users: string[], // 特権ユーザー
+  authorized_users: string[],
   listref_duration_ms: number,
   info_message: string,
   info_message_cooltime_ms: number,
@@ -86,7 +86,7 @@ export class Lobby {
 
   constructor(ircClient: IIrcClient, option: Partial<LobbyOption> = {}) {
     if (!ircClient.conn) {
-      throw new Error('clientが未接続です');
+      throw new Error('Client is not connected');
     }
     this.option = getConfig('Lobby', option) as LobbyOption;
     this.status = LobbyStatus.Standby;
@@ -118,7 +118,7 @@ export class Lobby {
       },
       registered: async () => {
         if (this.status === LobbyStatus.Entered && this.channel) {
-          this.logger.warn('network reconnection detected!');
+          this.logger.warn('Detected a network reconnection! Loading multiplayer settings...');
           await this.LoadMpSettingsAsync();
         }
       },
@@ -134,7 +134,7 @@ export class Lobby {
           this.CancelAllDeferredMessages();
           this.historyRepository.lobbyClosed = true;
 
-          this.logger.info('part');
+          this.logger.info('Detected a part event. Destroying the lobby...');
           this.status = LobbyStatus.Left;
           this.destroy();
         }
@@ -142,7 +142,7 @@ export class Lobby {
       selfMessage: (target: string, toSend: any) => {
         if (target === this.channel) {
           const r = toSend.replace(/\[http\S+\s([^\]]+)\]/g, '[http... $1]');
-          this.chatlogger.info(`bot:${r}`);
+          this.chatlogger.info(`Bot: ${r}`);
         }
       }
     };
@@ -152,7 +152,7 @@ export class Lobby {
     }
 
     this.events.join = (channel: string, who: string) => {
-      this.logger.trace('raised join event');
+      this.logger.trace('Raised a join event.');
       if (who === this.ircClient.nick && this.status !== LobbyStatus.Entered) {
         this.RaiseJoinedLobby(channel);
       }
@@ -173,7 +173,7 @@ export class Lobby {
   }
 
   /**
-   * 試合を終えて待機中の人数を数える
+   * Count the number of people who finished the match.
    */
   get playersFinished(): number {
     let i = 0;
@@ -184,7 +184,7 @@ export class Lobby {
   }
 
   /**
-   * 試合中の人数を数える
+   * Count the number of people in the match.
    */
   get playersInGame(): number {
     let i = 0;
@@ -195,7 +195,7 @@ export class Lobby {
   }
 
   /**
-   * プレイヤーたちの状況を項目ごとに数える
+   * Count the number of players in each situation.
    */
   CountPlayersStatus(): { inGame: number, playing: number, finished: number, inlobby: number, total: number } {
     const r = { inGame: 0, playing: 0, finished: 0, inlobby: 0, total: this.players.size };
@@ -217,10 +217,9 @@ export class Lobby {
   }
 
   /**
-   * usernameからプレイヤーオブジェクトを取得または作成する
-   * nameに対してPlayerは一意のインスタンスで直接比較可能
-   * この関数以外でPlayerを作成してはならない
-   * 再入室してきたユーザーの情報を参照したい場合に備えてプレイヤーをマップで保持しておく
+   * Get or create a player object from username
+   * Player is a unique instance, so it is directly comparable
+   * Player must not be created outside of this function
    * @param username
    */
   GetOrMakePlayer(username: string): Player {
@@ -238,8 +237,8 @@ export class Lobby {
   }
 
   /**
-   * username からプレイヤーオブジェクトを取得する
-   * まだ作成されていないプレイヤーだった場合nullを返す
+   * Get a player object from username
+   * Return null if the player has not been created yet
    * @param username
    */
   GetPlayer(username: string): Player | null {
@@ -251,7 +250,7 @@ export class Lobby {
     }
   }
 
-  // username のプレイヤーがゲームに参加しているか調べる
+  // Check if the player is participating in the Lobby
   Includes(username: string): boolean {
     const ename = escapeUserName(username);
     const p = this.playersMap.get(ename);
@@ -268,20 +267,20 @@ export class Lobby {
         if (a.player === user) {
           resolve();
         } else {
-          reject('Another player became host.');
+          reject('Another player became a host');
         }
       });
 
       const d2 = this.PlayerLeft.on((a: { player: Player }) => {
         if (a.player === user) {
           dispose();
-          reject('Pending host left the lobby.');
+          reject('A pending host has left the lobby');
         }
       });
 
       const t1 = setTimeout(() => {
         dispose();
-        reject('!mp host command timed out.');
+        reject('The !mp host command has timed out');
 
       }, this.option.transferhost_timeout_ms);
 
@@ -334,7 +333,7 @@ export class Lobby {
     this.ircClient.say(target, message);
     this.ircClient.emit('sentPrivateMessage', target, message);
     this.SentMessage.emit({ message });
-    this.chatlogger.info(`botbot->${target}:${message}`);
+    this.chatlogger.info(`Bot -> ${target}: ${message}`);
   }
 
   SendMessageWithCoolTime(message: string | (() => string), tag: string, cooltimeMs: number): boolean {
@@ -404,7 +403,7 @@ export class Lobby {
   async RequestStatAsync(player: Player, byPm: boolean, timeout: number = this.option.stat_timeout_ms): Promise<StatResult> {
     return new Promise<StatResult>((resolve, reject) => {
       const tm = setTimeout(() => {
-        reject('stat timeout');
+        reject('Stat request has timed out');
       }, timeout);
       const d = this.ParsedStat.on(({ result }) => {
         if (escapeUserName(result.name) === player.escaped_name) {
@@ -506,11 +505,11 @@ export class Lobby {
         break;
       case BanchoResponseType.AddedReferee:
         this.GetOrMakePlayer(c.params[0]).setRole(Roles.Referee);
-        this.logger.trace(`AddedReferee : ${c.params[0]}`);
+        this.logger.trace(`Added a referee: ${c.params[0]}`);
         break;
       case BanchoResponseType.RemovedReferee:
         this.GetOrMakePlayer(c.params[0]).removeRole(Roles.Referee);
-        this.logger.trace(`RemovedReferee : ${c.params[0]}`);
+        this.logger.trace(`Removed a referee: ${c.params[0]}`);
         break;
       case BanchoResponseType.ListRefs:
         this.listRefStart = Date.now();
@@ -520,15 +519,15 @@ export class Lobby {
         break;
       case BanchoResponseType.TeamChanged:
         this.GetOrMakePlayer(c.params[0]).team = c.params[1];
-        this.logger.trace(`team changed : ${c.params[0]}, ${Teams[c.params[1]]}`);
+        this.logger.trace(`Team has been changed: ${c.params[0]}, ${Teams[c.params[1]]}`);
         break;
       case BanchoResponseType.BeatmapChanged:
       case BanchoResponseType.MpBeatmapChanged:
         if (this.mapId !== c.params[0]) {
           this.mapId = c.params[0];
           this.mapTitle = c.params[1];
-          const changer = this.host ? `(by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'bot'})` : '';
-          this.logger.info(`beatmap changed${changer} : https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
+          const changer = this.host ? `by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'Bot'}` : '';
+          this.logger.info(`Beatmap has been changed ${changer}: https://osu.ppy.sh/b/${this.mapId} ${this.mapTitle}`);
         }
         break;
       case BanchoResponseType.Settings:
@@ -542,7 +541,7 @@ export class Lobby {
         }
         break;
       case BanchoResponseType.ClearedHost:
-        this.logger.info('cleared host');
+        this.logger.info('Cleared the host.');
         this.isClearedHost = true;
         if (this.host) {
           this.host.removeRole(Roles.Host);
@@ -552,7 +551,7 @@ export class Lobby {
         break;
       case BanchoResponseType.Unhandled:
         if (this.checkListRef(message)) break;
-        this.logger.debug(`unhandled bancho response : ${message}`);
+        this.logger.debug(`Detected an unhandled bancho response:\n${message}`);
         break;
     }
     this.ReceivedBanchoResponse.emit({ message, response: c });
@@ -563,18 +562,18 @@ export class Lobby {
       if (Date.now() < this.listRefStart + this.option.listref_duration_ms) {
         const p = this.GetOrMakePlayer(message);
         p.setRole(Roles.Referee);
-        this.logger.trace(`AddedReferee : ${p.escaped_name}`);
+        this.logger.trace(`Added a referee: ${p.escaped_name}`);
         return true;
       } else {
         this.listRefStart = 0;
-        this.logger.trace('check list ref ended');
+        this.logger.trace('Referee list check has ended.');
       }
     }
     return false;
   }
 
   RaiseReceivedChatCommand(player: Player, message: string): void {
-    this.logger.trace(`custom command ${player.name}:${message}`);
+    this.logger.trace(`Executing a command by ${player.name}: ${message}`);
     if (player.isReferee && message.startsWith('!mp')) return;
     const { command, param } = parser.ParseChatCommand(message);
     if (command === '!info' || command === '!help') {
@@ -614,7 +613,7 @@ export class Lobby {
     const from = player.slot;
     player.slot = slot;
 
-    this.logger.trace(`slot moved : ${username}, ${slot}`);
+    this.logger.trace(`A slot has been moved. Player: ${username}, Slot: ${slot}`);
     this.PlayerMoved.emit({ player, from, to: slot });
   }
 
@@ -628,7 +627,7 @@ export class Lobby {
   }
 
   RaiseMatchStarted(): void {
-    this.logger.info('match started');
+    this.logger.info('The match has started!');
     this.isMatching = true;
     this.players.forEach(p => p.mpstatus = MpStatuses.Playing);
     this.MatchStarted.emit({ mapId: this.mapId, mapTitle: this.mapTitle });
@@ -640,14 +639,14 @@ export class Lobby {
     const sc = this.CountPlayersStatus();
     this.PlayerFinished.emit({ player, score, isPassed, playersFinished: sc.finished, playersInGame: sc.inGame });
     if (!this.players.has(player)) {
-      this.logger.warn(`未参加のプレイヤーがゲームを終えた: ${username}`);
+      this.logger.warn(`A player that did not participate finished a match: ${username}`);
       this.LoadMpSettingsAsync();
     }
   }
 
   RaiseMatchFinished(): void {
     const count = this.players.size;
-    this.logger.info(`match finished (${count} players)`);
+    this.logger.info(`The match has finished! (${count} player(s))`);
     this.isMatching = false;
     this.players.forEach(p => p.mpstatus = MpStatuses.InLobby);
     this.MatchFinished.emit();
@@ -655,15 +654,14 @@ export class Lobby {
 
   RaiseAbortedMatch(): void {
     const sc = this.CountPlayersStatus();
-    this.logger.info(`match aborted ${sc.finished} / ${sc.inGame}`);
+    this.logger.info(`Match has been aborted. (${sc.finished} / ${sc.inGame})`);
     this.isMatching = false;
     this.players.forEach(p => p.mpstatus = MpStatuses.InLobby);
     this.AbortedMatch.emit({ playersFinished: sc.finished, playersInGame: sc.inGame });
   }
 
   RaiseNetError(err: Error): void {
-    this.logger.error(`error occured : ${err.message}`);
-    this.logger.error(err.stack);
+    this.logger.error(`@Lobby#raiseNetError\n${err.message}\n${err.stack}`);
     this.NetError.emit(err);
   }
 
@@ -685,11 +683,11 @@ export class Lobby {
 
   RaiseParsedSettings(): void {
     if (!this.settingParser.isParsing && this.settingParser.result) {
-      this.logger.info('parsed mp settings');
+      this.logger.info('Parsed multiplayer settings.');
       const result = this.settingParser.result;
       const r = this.margeMpSettingsResult(result);
       if (r.hostChanged || r.playersIn.length !== 0 || r.playersOut.length !== 0) {
-        this.logger.info('applied mp settings');
+        this.logger.info('Applied multiplayer settings.');
         this.FixedSettings.emit({ result, ...r });
       }
       this.ParsedSettings.emit({ result, ...r });
@@ -701,14 +699,14 @@ export class Lobby {
       const p = this.GetPlayer(this.statParser.result.name);
       if (p) {
         p.laststat = this.statParser.result;
-        this.logger.info(`parsed stat ${p.name} -> ${StatStatuses[p.laststat.status]}`);
+        this.logger.info(`Parsed a player's stat: ${p.name} -> ${StatStatuses[p.laststat.status]}`);
         this.ParsedStat.emit({ result: this.statParser.result, player: p, isPm });
       }
     }
   }
 
   /**
-   * pluginに読み込み作業が完了したことを通知する
+   * Notify plugins that the loading operation is complete
    */
   RaisePluginsLoaded(): void {
     for (const p of this.plugins) {
@@ -719,7 +717,7 @@ export class Lobby {
   OnUserNotFound(): void {
     if (this.hostPending) {
       const p = this.hostPending;
-      this.logger.warn(`occured OnUserNotFound : ${p.name}`);
+      this.logger.warn(`@Lobby#onUserNotFound\nA user cannot be found: ${p.name}`);
       this.hostPending = null;
     }
   }
@@ -730,18 +728,18 @@ export class Lobby {
 
   MakeLobbyAsync(title: string): Promise<string> {
     if (title === '') {
-      throw new Error('title is empty');
+      throw new Error('The lobby title is empty');
     }
     if (this.status !== LobbyStatus.Standby) {
-      throw new Error('A lobby has already been made.');
+      throw new Error('A lobby has already been made');
     }
     this.status = LobbyStatus.Making;
-    this.logger.trace('start makeLobby');
+    this.logger.trace('Making a lobby...');
     return new Promise<string>(resolve => {
       if (this.ircClient.hostMask !== '') {
         this.makeLobbyAsyncCore(title).then(v => resolve(v));
       } else {
-        this.logger.trace('waiting registered');
+        this.logger.trace('Waiting for registration...');
         this.ircClient.once('registered', () => {
           this.makeLobbyAsyncCore(title).then(v => resolve(v));
         });
@@ -753,11 +751,11 @@ export class Lobby {
     return new Promise<string>((resolve, reject) => {
       this.JoinedLobby.once(a => {
         this.lobbyName = title;
-        this.logger.trace('completed makeLobby');
+        this.logger.trace('Finished making a lobby.');
         if (this.lobbyId) {
           resolve(this.lobbyId);
         } else {
-          reject('missing lobby id');
+          reject('Missing lobby ID');
         }
 
       });
@@ -769,23 +767,23 @@ export class Lobby {
   }
 
   EnterLobbyAsync(channel: string): Promise<string> {
-    this.logger.trace('start EnterLobby');
+    this.logger.trace('Entering a lobby...');
     return new Promise<string>((resolve, reject) => {
       const ch = parser.EnsureMpChannelId(channel);
       if (ch === '') {
-        this.logger.error(`@EnterLobbyAsync Invalid channel specified: ${channel}`);
-        reject('invalid channel');
+        this.logger.error(`@Lobby#enterLobbyAsync: Invalid channel specified: ${channel}`);
+        reject('Invalid channel');
         return;
       }
       const joinhandler = () => {
         this.ircClient.off('error', errhandler);
         this.lobbyName = '__';
-        this.logger.trace('completed EnterLobby');
+        this.logger.trace('Successfully entered the lobby.');
         if (this.lobbyId) {
           resolve(this.lobbyId);
         } else {
           this.destroy();
-          reject('missing lobby id');
+          reject('Missing lobby ID');
         }
       };
       const errhandler = (message: any) => {
@@ -800,10 +798,10 @@ export class Lobby {
   }
 
   CloseLobbyAsync(): Promise<void> {
-    this.logger.trace('start CloseLobby');
+    this.logger.trace('Closing the lobby...');
     if (this.status !== LobbyStatus.Entered) {
-      this.logger.error('invalid call :CloseLobbyAsync');
-      throw new Error('No lobby to close.');
+      this.logger.error('@Lobby#closeLobbyAsync: Invalid lobby status.');
+      throw new Error('No lobby to close');
     }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once('part', (channel: string, nick: string) => {
@@ -819,10 +817,10 @@ export class Lobby {
   }
 
   QuitLobbyAsync(): Promise<void> {
-    this.logger.trace('start QuitLobby');
+    this.logger.trace('Quiting the lobby...');
     if (this.status !== LobbyStatus.Entered) {
-      this.logger.error('invalid call :QuitLobbyAsync');
-      throw new Error('No lobby to close.');
+      this.logger.error('@Lobby#quitLobbyAsync: Invalid lobby status.');
+      throw new Error('No lobby to close');
     }
     return new Promise<void>((resolve, reject) => {
       this.ircClient.once('part', (channel: string, nick: string) => {
@@ -839,20 +837,20 @@ export class Lobby {
 
   LoadMpSettingsAsync(): Promise<void> {
     if (this.status !== LobbyStatus.Entered) {
-      return Promise.reject('invalid lobby status @LoadMpSettingsAsync');
+      return Promise.reject('@loadMpSettingsAsync: Invalid lobby status');
     }
     if (this.SendMessageWithCoolTime('!mp settings', 'mpsettings', 15000)) {
-      this.logger.trace('start loadLobbySettings');
+      this.logger.trace('Loading multiplayer settings...');
       const p = new Promise<void>(resolve => {
         this.FixedSettings.once(() => {
           this.SendMessage('!mp listrefs');
-          this.logger.trace('completed loadLobbySettings');
+          this.logger.trace('Successfully loaded multiplayer settings.');
           resolve();
         });
       });
       return p;
     } else {
-      this.logger.trace('load mp settings skiped by cool time');
+      this.logger.trace('Multiplayer settings loading process has been skipped due to cooltime.');
       return Promise.resolve();
     }
   }
@@ -869,14 +867,14 @@ export class Lobby {
         this.setAsHost(player);
       }
       if (this.players.size > 16) {
-        this.logger.warn(`joined 17th players: ${player.name}`);
-        this.UnexpectedAction.emit(new Error('unexpected join'));
+        this.logger.warn(`A player has joined the lobby with more than 16 players: ${player.name}`);
+        this.UnexpectedAction.emit(new Error('A player has joined the lobby with more than 16 players'));
         return false;
       }
       return true;
     } else {
-      this.logger.warn(`参加済みのプレイヤーが再度参加した: ${player.name}`);
-      this.UnexpectedAction.emit(new Error('unexpected join'));
+      this.logger.warn(`A player inside the lobby has joined for the second time: ${player.name}`);
+      this.UnexpectedAction.emit(new Error('A player inside the lobby has joined for the second time'));
       return false;
     }
   }
@@ -892,13 +890,13 @@ export class Lobby {
         this.host = null;
       }
       if (this.hostPending === player) {
-        this.logger.warn(`pending中にユーザーが離脱した pending host: ${player.name}`);
+        this.logger.warn(`A pending user has left: ${player.name}`);
         this.hostPending = null;
       }
       return true;
     } else {
-      this.logger.warn(`未参加のプレイヤーが退出した: ${player.name}`);
-      this.UnexpectedAction.emit(new Error('unexpected left'));
+      this.logger.warn(`A player outside the lobby has left: ${player.name}`);
+      this.UnexpectedAction.emit(new Error('A player outside the lobby has left'));
       return false;
     }
   }
@@ -906,7 +904,7 @@ export class Lobby {
   private setAsHost(player: Player): boolean {
     if (!this.players.has(player)) {
       this.transferHostTimeout.cancel();
-      this.logger.warn(`未参加のプレイヤーがホストになった: ${player.name}`);
+      this.logger.warn(`A player outside the lobby became a host: ${player.name}`);
       return false;
     }
 
@@ -914,8 +912,8 @@ export class Lobby {
       this.transferHostTimeout.cancel();
       this.hostPending = null;
     } else if (this.hostPending !== null) {
-      this.logger.warn(`pending中に別のユーザーがホストになった pending: ${this.hostPending.name}, host: ${player.name}`);
-    } // pending === null は有効
+      this.logger.warn(`Another player became host during host assignment. Pending: ${this.hostPending.name}, Host: ${player.name}`);
+    } // pending === null means Manual changes
 
     if (this.host) {
       this.host.removeRole(Roles.Host);
@@ -926,7 +924,7 @@ export class Lobby {
   }
 
   /**
-   * MpSettingsの結果を取り込む。join/left/hostの発生しない
+   * Import MpSettings result. no join/left/changehost occurences
    * @param result
    */
   private margeMpSettingsResult(result: MpSettingsResult): { playersIn: Player[], playersOut: Player[], hostChanged: boolean } {
@@ -971,12 +969,17 @@ export class Lobby {
 
   GetLobbyStatus(): string {
     const pc = this.CountPlayersStatus();
-    let s = `=== lobby status ===
-  lobby id : ${this.lobbyId}, name : ${this.lobbyName},  status : ${LobbyStatus[this.status]}
-  players : ${this.players.size}, inGame : ${pc.inGame} (playing : ${pc.playing})
-  refs : ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(',')}
-  timer : ${this.isStartTimerActive}, clearedhost : ${this.isClearedHost}
-  host : ${this.host ? this.host.name : 'null'}, pending : ${this.hostPending ? this.hostPending.name : 'null'}`
+    let s = `
+=== Lobby Status ===
+  Lobby ID: ${this.lobbyId}
+  Lobby name: ${this.lobbyName}
+  Lobby status: ${LobbyStatus[this.status]}
+  Player(s): ${this.players.size} (In-game: ${pc.inGame}, Playing: ${pc.playing})
+  Referee(s): ${Array.from(this.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(',')}
+  Timer: ${this.isStartTimerActive}
+  Cleared host: ${this.isClearedHost}
+  Host: ${this.host ? this.host.name : 'Null'}
+  Pending host: ${this.hostPending ? this.hostPending.name : 'Null'}`
       ;
 
     for (const p of this.plugins) {
@@ -1015,7 +1018,7 @@ export class Lobby {
     }
   }
 
-  // ircでログインしたユーザーに権限を与える
+  // Grant privileges to the owner
   private assignCreatorRole(): void {
     if (!this.ircClient.nick) {
       this.ircClient.once('registered', () => {
@@ -1026,7 +1029,7 @@ export class Lobby {
       c.setRole(Roles.Authorized);
       c.setRole(Roles.Referee);
       c.setRole(Roles.Creator);
-      this.logger.info(`assigned ${this.ircClient.nick} creators role`);
+      this.logger.info(`Assigned creators role to ${this.ircClient.nick}`);
     }
   }
 
@@ -1034,7 +1037,7 @@ export class Lobby {
     // ensure time is stop
     this.stopInfoMessageAnnouncement();
     if (this.option.info_message_announcement_interval_ms > 3 * 60 * 1000) {
-      this.logger.trace(`started InfoMessageAnnouncement. interval = ${this.option.info_message_announcement_interval_ms}`);
+      this.logger.trace(`Started info message announcement timer. Interval: ${this.option.info_message_announcement_interval_ms}`);
       this.infoMessageAnnouncementTimeId = setInterval(() => {
         this.showInfoMessage();
         if (this.status !== LobbyStatus.Entered) {
@@ -1046,7 +1049,7 @@ export class Lobby {
 
   private stopInfoMessageAnnouncement(): void {
     if (this.infoMessageAnnouncementTimeId !== null) {
-      this.logger.trace('stopped InfoMessageAnnouncement.');
+      this.logger.trace('Stopped the info message announcement.');
       clearInterval(this.infoMessageAnnouncementTimeId);
       this.infoMessageAnnouncementTimeId = null;
     }
