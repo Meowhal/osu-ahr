@@ -74,7 +74,7 @@ class WebApiClientClass implements IBeatmapFetcher {
     try {
       const p = this.getTokenPath(token.isGuest);
       await fs.mkdir(path.dirname(p), { recursive: true });
-      await fs.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
+      await fs.writeFile(p, JSON.stringify(token, null, 2), { encoding: 'utf8', flag: 'w' });
       this.logger.info(`Stored token to: ${p}`);
       return true;
     } catch (e: any) {
