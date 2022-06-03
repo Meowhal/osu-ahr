@@ -675,7 +675,7 @@ describe('Map Checker Tests', function () {
         allow_convert: true
       });
 
-      assert.equal(checker.getRegulationDescription(), 'Disabled (star rating <= 7.00, length <= 10:00, Mode: osu!)');
+      assert.equal(checker.getRegulationDescription(), 'Disabled (Star rating <= 7.00, Length <= 10:00, Mode: osu!)');
     });
 
     it('config', async () => {
@@ -710,33 +710,33 @@ describe('Map Checker Tests', function () {
 
       checker.option.gamemode = PlayMode.Osu;
       checker.option.star_max = 1;
-      assert.equal(checker.getRegulationDescription(), 'star rating <= 1.00, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), 'Star rating <= 1.00, Mode: osu!');
       checker.option.star_max = 0;
       checker.option.star_min = 1;
-      assert.equal(checker.getRegulationDescription(), '1.00 <= star rating, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1.00 <= Star rating, Mode: osu!');
       checker.option.star_max = 2;
       checker.option.star_min = 1;
-      assert.equal(checker.getRegulationDescription(), '1.00 <= star rating <= 2.00, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1.00 <= Star rating <= 2.00, Mode: osu!');
 
       checker.option.star_max = 0;
       checker.option.star_min = 0;
       checker.option.length_max = 60;
-      assert.equal(checker.getRegulationDescription(), 'length <= 1:00, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), 'Length <= 1:00, Mode: osu!');
       checker.option.length_max = 0;
       checker.option.length_min = 90;
-      assert.equal(checker.getRegulationDescription(), '1:30 <= length, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1:30 <= Length, Mode: osu!');
       checker.option.length_max = 120;
       checker.option.length_min = 30;
-      assert.equal(checker.getRegulationDescription(), '0:30 <= length <= 2:00, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '0:30 <= Length <= 2:00, Mode: osu!');
 
       checker.option.star_max = 2;
       checker.option.star_min = 1;
       checker.option.length_max = 120;
       checker.option.length_min = 30;
-      assert.equal(checker.getRegulationDescription(), '1.00 <= star rating <= 2.00, 0:30 <= length <= 2:00, Mode: osu!');
+      assert.equal(checker.getRegulationDescription(), '1.00 <= Star rating <= 2.00, 0:30 <= Length <= 2:00, Mode: osu!');
 
       checker.option.enabled = false;
-      assert.equal(checker.getRegulationDescription(), 'Disabled (1.00 <= star rating <= 2.00, 0:30 <= length <= 2:00, Mode: osu!)');
+      assert.equal(checker.getRegulationDescription(), 'Disabled (1.00 <= Star rating <= 2.00, 0:30 <= Length <= 2:00, Mode: osu!)');
     });
   });
 
