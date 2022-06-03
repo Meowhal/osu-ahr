@@ -7,7 +7,7 @@ const configLogger = getLogger('cfg');
 
 export const CONFIG_OPTION = {
   USE_ENV: false,
-  PRINT_LOADED_ENV_CONFIG: true,
+  PRINT_LOADED_ENV_CONFIG: false,
 };
 
 export interface IAhrConfig {
@@ -128,7 +128,11 @@ export function loadEnvConfigWithTypeHint(category: string, hints: ConfigTypeHin
   }
   if (CONFIG_OPTION.PRINT_LOADED_ENV_CONFIG) {
     for (const key in r) {
-      configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${r[key]}`);
+      if (key.toLocaleLowerCase().match(/(password)|(token)/)) {
+        configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${'*'.repeat(r[key]?.toString().length ?? 3)}`);
+      } else {
+        configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${r[key]}`);
+      }
     }
   }
   return r;
