@@ -331,7 +331,7 @@ export class HistoryRepository {
             }
             break;
           default:
-            this.logger.warn(`Received an unknown event type:\n${JSON.stringify(ev, null, 2)}`);
+            this.logger.warn(`Detected an unknown event type:\n${JSON.stringify(ev, null, 2)}`);
             break;
         }
       } else if (ev.detail.type === 'other' && ev.game) {
@@ -364,7 +364,7 @@ export class HistoryRepository {
         break;
       }
       if (ev.detail.type === 'match-created') {
-        this.logger.info(`The match is created. Found a total of ${result.length} players in ${loopCount} events.`);
+        this.logger.info(`Detected a match creation. Found a total of ${result.length} players in ${loopCount} events.`);
         break;
       }
       if (HistoryRepository.LOOP_LIMIT < loopCount) {
