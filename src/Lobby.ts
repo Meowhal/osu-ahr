@@ -325,7 +325,7 @@ export class Lobby {
       this.ircClient.say(this.channel, message);
       this.ircClient.emit('sentMessage', this.channel, message);
       this.SentMessage.emit({ message });
-      //this.chatlogger.trace(`bot:${message}`);
+      //this.chatlogger.trace(`Bot: ${message}`);
     }
   }
 
@@ -439,16 +439,16 @@ export class Lobby {
         }
         this.PlayerChated.emit({ player: p, message });
         if (IsStatResponse(message)) {
-          this.chatlogger.trace(`${p.name}:${message}`);
+          this.chatlogger.trace(`${p.name}: ${message}`);
         } else {
-          this.chatlogger.info(`${p.name}:${message}`);
+          this.chatlogger.info(`${p.name}: ${message}`);
         }
       }
     }
   }
 
   private handleAction(from: string, to: string, message: string): void {
-    this.chatlogger.info(`*${from}:${message}`);
+    this.chatlogger.info(`*${from}: ${message}`);
   }
 
   private handlePrivateMessage(from: string, message: string): void {
