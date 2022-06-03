@@ -7,6 +7,7 @@ export class DummyHistoryFecher implements IHistoryFetcher {
   users: User[];
   limit: number = 100;
   timestamp: number = Date.now();
+  thorwsError: boolean = false;
 
   constructor(creatorId: number) {
     this.match = {
@@ -24,6 +25,9 @@ export class DummyHistoryFecher implements IHistoryFetcher {
 
   fetchHistory(limit: number, before: number | null, after: number | null, matchId: number = 0): Promise<History> {
     const events = [];
+    if (this.thorwsError) {
+      return Promise.reject(new Error('Dummy history fetch error'));
+    }
 
     limit = Math.max(1, Math.min(this.limit, limit));
     if (after) {

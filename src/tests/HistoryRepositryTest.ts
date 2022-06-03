@@ -121,6 +121,13 @@ describe('History repositry Tests', () => {
       assert.equal(ge.detail.type, 'other');
       assert.equal(ge.game?.scores[0].user_id, 1);
     });
+    it('thorws error test', async function () {
+      const d = new DummyHistoryFetcher(1);
+      d.thorwsError = true;
+      await tu.assertReject(d.fetchHistory(10, null, null));
+      d.thorwsError = false;
+      await d.fetchHistory(10, null, null);
+    });
   });
 
   function buildJoinEventFetcher(count: number): DummyHistoryFetcher {
@@ -132,7 +139,7 @@ describe('History repositry Tests', () => {
   }
 
   describe('HistoryRepository tests with dummyfetcher', () => {
-    before(() => {
+    beforeEach(() => {
       HistoryRepository.COOL_TIME = 0;
     });
     it('basic updateToLatest test', async () => {
@@ -374,6 +381,13 @@ describe('History repositry Tests', () => {
       await hr.updateToLatest();
       assert.equal(b, 2);
     });
+    it('fetch error test', async function () {
+      const df = buildJoinEventFetcher(16);
+      HistoryRepository.COOL_TIME = 10;
+      HistoryRepository.RETRY_TIME_MS = 10;
+      const hr = new HistoryRepository(1, df);
+      df.thorwsError = true;
+      await hr.updateToLatest();
+    });
   });
-
 });
