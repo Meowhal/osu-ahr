@@ -12,7 +12,7 @@ async function trial() {
     //getTokenTrial();
     const client = WebApiClient_1.WebApiClient;
     const user = await client.lookupBeatmapset(2647589);
-    console.log(JSON.stringify(user));
+    console.log(JSON.stringify(user, null, 2));
 }
 exports.trial = trial;
 async function getGuestTokenTrial() {

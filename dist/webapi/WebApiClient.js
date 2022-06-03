@@ -56,7 +56,7 @@ class WebApiClientClass {
         try {
             const p = this.getTokenPath(token.isGuest);
             await fs_1.promises.mkdir(path_1.default.dirname(p), { recursive: true });
-            await fs_1.promises.writeFile(p, JSON.stringify(token), { encoding: 'utf8', flag: 'w' });
+            await fs_1.promises.writeFile(p, JSON.stringify(token, null, 2), { encoding: 'utf8', flag: 'w' });
             this.logger.info(`Stored token to: ${p}`);
             return true;
         }
@@ -79,7 +79,7 @@ class WebApiClientClass {
             const j = await fs_1.promises.readFile(p, 'utf8');
             const token = JSON.parse(j);
             if (!isExpired(token)) {
-                this.logger.info(`Loaded stored token from: ${p}`);
+                this.logger.info(`Loaded stored token from ${p}`);
                 return token;
             }
             this.deleteStoredToken(asGuest);
@@ -116,7 +116,7 @@ class WebApiClientClass {
             });
             response.data.isGuest = false;
             response.data.expires_in += Date.now() / 1000;
-            this.logger.info('Got authorized token.');
+            this.logger.info('Got an authorized token.');
             return response.data;
         }
         catch (e) {
@@ -141,9 +141,9 @@ class WebApiClientClass {
                     return;
                 }
                 res.end(`Ok: ${code}`);
-                this.logger.trace(`Got code! ${code}`);
+                this.logger.trace(`Got a code! ${code}`);
                 server.close(() => {
-                    this.logger.trace('Closed callback.');
+                    this.logger.trace('Closed the server.');
                 });
                 if (res.connection) {
                     res.connection.end();
@@ -154,12 +154,12 @@ class WebApiClientClass {
                 }
             });
             server.once('close', () => {
-                this.logger.trace('Detected close event.');
+                this.logger.trace('Detected a close event.');
                 if (code === null) {
                     reject('No code');
                 }
                 else {
-                    this.logger.info('Got authorized code.');
+                    this.logger.info('Got an authorized code.');
                     resoleve(code);
                 }
             });
@@ -208,7 +208,7 @@ class WebApiClientClass {
             catch (e) {
                 switch (e.response?.status) {
                     case 401:
-                        this.logger.info('@WebApiClient#accessApi\nFailed to access API, deleting current token...');
+                        this.logger.info('@WebApiClient#accessApi\nFailed to the access API, deleting current token...');
                         this.deleteStoredToken(this.option.asGuest);
                         this.token = undefined;
                         break;

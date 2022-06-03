@@ -26,7 +26,7 @@ async function GetHistryTrial() {
         .catch(err => {
         return err.response;
     });
-    console.log(JSON.stringify(response.data));
+    console.log(JSON.stringify(response.data, null, 2));
     fs_1.promises.writeFile('data/arc/history_76714773_joinleftsametime.json', JSON.stringify(response.data));
 }
 async function GetOrderTrial() {

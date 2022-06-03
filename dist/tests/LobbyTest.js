@@ -58,7 +58,7 @@ describe('LobbyTest', function () {
                 chai_1.assert.fail();
             }
             catch (e) {
-                chai_1.assert.equal(e.message, 'title is empty');
+                chai_1.assert.equal(e.message, 'The lobby title is empty');
             }
         });
         // ロビーを二回作成
@@ -71,7 +71,7 @@ describe('LobbyTest', function () {
                 chai_1.assert.fail();
             }
             catch (e) {
-                chai_1.assert.equal(e.message, 'A lobby has already been made.');
+                chai_1.assert.equal(e.message, 'A lobby has already been made');
             }
         });
         // 無効な状態でロビーを閉じる
@@ -83,7 +83,7 @@ describe('LobbyTest', function () {
                 chai_1.assert.fail();
             }
             catch (e) {
-                chai_1.assert.equal(e.message, 'No lobby to close.');
+                chai_1.assert.equal(e.message, 'No lobby to close');
             }
         });
     });

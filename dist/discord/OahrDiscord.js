@@ -8,15 +8,15 @@ const Loggers_1 = require("../Loggers");
 const logger = (0, Loggers_1.getLogger)('discord');
 const LOBBY_STAT = {
     match: {
-        text: 'match',
+        text: 'Match',
         color: 0x33ff33
     },
     idle: {
-        text: 'idle',
+        text: 'Idle',
         color: 0x00ccff
     },
     closed: {
-        text: 'closed',
+        text: 'Closed',
         color: 0x800000
     }
 };
@@ -55,7 +55,7 @@ class OahrDiscord extends OahrBase_1.OahrBase {
         const lobby = this.lobby;
         const lid = lobby.lobbyId ?? '';
         const name = lobby.lobbyName ?? '';
-        const host = lobby.host?.name ?? 'none';
+        const host = lobby.host?.name ?? 'None';
         const embed = new discord_js_1.MessageEmbed().setColor('BLURPLE').setTitle('Lobby Information').setURL(`https://osu.ppy.sh/community/matches/${lid}`);
         embed.addField('Lobby', `Name: \`${name}\`, ID: \`${lid}\`, Status: \`${Lobby_1.LobbyStatus[lobby.status]}\`, Host: \`${host}\`, Player(s): \`${lobby.players.size}\``);
         const refs = Array.from(lobby.playersMap.values()).filter(v => v.isReferee).map(v => v.name).join(',');
@@ -85,7 +85,7 @@ class OahrDiscord extends OahrBase_1.OahrBase {
         const stat = lobby.status === Lobby_1.LobbyStatus.Left ? LOBBY_STAT.closed : lobby.isMatching ? LOBBY_STAT.match : LOBBY_STAT.idle;
         const lid = lobby.lobbyId ?? '';
         const name = lobby.lobbyName ?? '';
-        const host = lobby.host?.name ?? 'none';
+        const host = lobby.host?.name ?? 'None';
         const embed = new discord_js_1.MessageEmbed().setColor(stat.color).setTitle(`#mp_${lid}`).setURL(`https://osu.ppy.sh/community/matches/${lid}`);
         embed.addField('Title', `\`${name}\``, true);
         embed.addField('Status', `\`${stat.text}\``, true);
