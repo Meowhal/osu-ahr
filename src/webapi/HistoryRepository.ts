@@ -306,7 +306,7 @@ export class HistoryRepository {
             if (ev.user_id !== 0 && !(ev.user_id in map)) {
               map[ev.user_id] = false;
               // -1、直前の試合開始ID、直前のhostchangeIDのいずれか
-              //this.logger.trace(`changed ${this.users[ev.user_id].username} ${hostAge}`);
+              //this.logger.trace(`The host has been changed. Player ${this.users[ev.user_id].username}, Host's age: ${hostAge}`);
               result.push({ age: hostAge, id: ev.user_id });
             }
             hostAge = Date.parse(ev.timestamp);
@@ -318,7 +318,7 @@ export class HistoryRepository {
             if (!(ev.user_id in map)) {
               const la = Date.parse(ev.timestamp);
               map[ev.user_id] = false;
-              //this.logger.trace(`joined ${this.users[ev.user_id].username} ${la}`);
+              //this.logger.trace(`A player has joined: ${this.users[ev.user_id].username}, Date(ms): ${la}`);
               result.push({ age: la, id: ev.user_id });
               unresolvedPlayers.delete(ev.user_id);
             }
@@ -331,7 +331,7 @@ export class HistoryRepository {
             }
             break;
           default:
-            this.logger.warn(`unknown event type! ${JSON.stringify(ev)}`);
+            this.logger.warn(`Detected an unknown event type:\n${JSON.stringify(ev, null, 2)}`);
             break;
         }
       } else if (ev.detail.type === 'other' && ev.game) {
@@ -353,26 +353,26 @@ export class HistoryRepository {
       //  ロビー作成イベントまで到達
       // ループリミットを超過
       if (result.length >= 16 && unresolvedPlayers.size === 0) {
-        this.logger.info(`found ${result.length} players in ${loopCount} events. full lobby`);
+        this.logger.info(`Found a total of ${result.length} players in ${loopCount} events. The lobby is full.`);
         if (result.length > 16) {
-          this.logger.warn('lots of players!!');
+          this.logger.warn('Found more than 16 players in the lobby. Lots of players!');
         }
         break;
       }
       if (HistoryRepository.ESC_CRITERIA <= gameCount && unresolvedPlayers.size === 0) {
-        this.logger.info(`found ${result.length} players in ${loopCount} events. estimated`);
+        this.logger.info(`Found an estimated total of ${result.length} players in ${loopCount} events.`);
         break;
       }
       if (ev.detail.type === 'match-created') {
-        this.logger.info(`found ${result.length} players in ${loopCount} events. reached begin of events`);
+        this.logger.info(`Detected a match creation. Found a total of ${result.length} players in ${loopCount} events.`);
         break;
       }
       if (HistoryRepository.LOOP_LIMIT < loopCount) {
-        this.logger.warn(`loop limit exceeded! ${HistoryRepository.LOOP_LIMIT}`);
+        this.logger.warn(`The loop limit has been exceeded! Loop limit: ${HistoryRepository.LOOP_LIMIT}`);
         break;
       }
       if (this.lobbyClosed) {
-        this.logger.warn('lobby was closed in action');
+        this.logger.warn('The lobby has been closed abruptly.');
         result.length = 0;
         break;
       }
