@@ -527,7 +527,7 @@ export class Lobby {
           this.mapId = c.params[0];
           this.mapTitle = c.params[1];
           const changer = this.host ? `by ${c.type === BanchoResponseType.BeatmapChanged ? this.host.name : 'Bot'}` : '';
-          this.logger.info(`Beatmap has been changed ${changer}:\nhttps://osu.ppy.sh/b/${this.mapId}\n${this.mapTitle}`);
+          this.logger.info(`Beatmap has been changed ${changer}:\n${this.mapTitle}\nhttps://osu.ppy.sh/b/${this.mapId}`);
         }
         break;
       case BanchoResponseType.Settings:
