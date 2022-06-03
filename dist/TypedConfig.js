@@ -10,7 +10,7 @@ const Loggers_1 = require("./Loggers");
 const configLogger = (0, Loggers_1.getLogger)('cfg');
 exports.CONFIG_OPTION = {
     USE_ENV: false,
-    PRINT_LOADED_ENV_CONFIG: true,
+    PRINT_LOADED_ENV_CONFIG: false,
 };
 function getIrcConfig() {
     const d = config_1.default.get('irc');
@@ -120,7 +120,12 @@ function loadEnvConfigWithTypeHint(category, hints, env) {
     }
     if (exports.CONFIG_OPTION.PRINT_LOADED_ENV_CONFIG) {
         for (const key in r) {
-            configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${r[key]}`);
+            if (key.toLocaleLowerCase().match(/(password)|(token)/)) {
+                configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${'*'.repeat(r[key]?.toString().length ?? 3)}`);
+            }
+            else {
+                configLogger.info(`Loaded environment key: ${genEnvKey(category, key)}=${r[key]}`);
+            }
         }
     }
     return r;
