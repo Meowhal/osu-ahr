@@ -201,6 +201,16 @@ class TestUtils {
       assert.equal(p.isHost, r.isHost);
     }
   }
+
+  async assertReject(p: Promise<any>, message?: string) {
+    let threw = false;
+    try {
+      await p;
+    } catch (e) {
+      threw = true;
+    }
+    assert.isTrue(threw, message ?? 'The promise was expected to be rejected, but was accepted');
+  }
 }
 
 const instance = new TestUtils();

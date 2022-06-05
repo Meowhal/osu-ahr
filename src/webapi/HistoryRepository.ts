@@ -115,9 +115,15 @@ export class HistoryRepository {
     await this.fetchTask;
     const p = this.fetch_(isRewind);
     if (HistoryRepository.COOL_TIME) {
-      this.fetchTask = p.catch((e) => { return { isRewind, count: 0, filled: false }; }).then(r => new Promise((resolve) => {
-        setTimeout(() => resolve(r), HistoryRepository.COOL_TIME);
-      }));
+      this.fetchTask = p
+        .catch((e) => {
+          // this.fetchTask is not allowed to be rejected, so catch it here.
+          // However, this.fetch itself is rejected.
+          return { isRewind, count: 0, filled: false };
+        })
+        .then(r => new Promise((resolve) => {
+          setTimeout(() => resolve(r), HistoryRepository.COOL_TIME);
+        }));
     } else {
       this.fetchTask = p;
     }
