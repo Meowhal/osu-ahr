@@ -69,7 +69,7 @@
     "gamemode": "osu",
     "num_violations_allowed": 3,
     "allow_convert": true,
-    "map_description": "[https://osu.ppy.sh/b/${map_id} ${title}] | Star Rating: ${star} | Duration: ${length} | Alternative:  [https://beatconnect.io/b/${beatmapset_id} (BeatConnect.io)] | [https://kitsu.moe/d/${beatmapset_id} (Kitsu.moe)]"
+    "map_description": "[https://osu.ppy.sh/b/${map_id} ${title}] | Star Rating: ${star} | Duration: ${length} | Status: ${status} | Alternative: [https://beatconnect.io/b/${beatmapset_id} (BeatConnect.io)] | [https://kitsu.moe/d/${beatmapset_id} (Kitsu.moe)]"
   },
   "MiscLoader": {},
   "MapRecaster": {},
