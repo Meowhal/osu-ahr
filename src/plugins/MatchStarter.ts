@@ -142,6 +142,9 @@ export class MatchStarter extends LobbyPlugin {
       if (count > 15) {
         this.lobby.DeferMessage('Match starts in 10 seconds', 'mp_start 10 sec', (count - 10) * 1000, true);
       }
+      if (35 < count) {
+        this.lobby.DeferMessage("Match starts in 30 seconds", "mp_start 30 sec", (count - 30) * 1000, true);
+      }
     }
   }
 
@@ -181,6 +184,7 @@ export class MatchStarter extends LobbyPlugin {
   private stopTimer(): void {
     this.lobby.CancelDeferredMessage('mp_start');
     this.lobby.CancelDeferredMessage('mp_start 10 sec');
+    this.lobby.CancelDeferredMessage("mp_start 30 sec");
     this.lobby.CancelDeferredMessage('match start vote');
 
     if (this.lobby.isStartTimerActive) {
