@@ -74,6 +74,11 @@ Discord
 
 # Recent Changes
 
+## 1.6.2
+
++ Add 30 seconds countdown mark for match starter
++ Add beatmap status information when the map pass the check
+
 ## 1.6.1
 
 + Improve texts and error messages
