@@ -130,7 +130,7 @@ class MatchStarter extends LobbyPlugin_1.LobbyPlugin {
             if (count > 15) {
                 this.lobby.DeferMessage('Match starts in 10 seconds', 'mp_start 10 sec', (count - 10) * 1000, true);
             }
-            if (35 < count) {
+            if (count > 35) {
                 this.lobby.DeferMessage("Match starts in 30 seconds", "mp_start 30 sec", (count - 30) * 1000, true);
             }
         }
